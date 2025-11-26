@@ -1,0 +1,9 @@
+<Solution>
+
+  <Folder Name="/src/">
+    <Project Path="src/Beatport2Rss.Application/Beatport2Rss.Application.csproj" />
+    <Project Path="src/Beatport2Rss.Domain/Beatport2Rss.Domain.csproj" />
+    <Project Path="src/Beatport2Rss.Infrastructure/Beatport2Rss.Infrastructure.csproj" />
+  </Folder>
+
+</Solution>
