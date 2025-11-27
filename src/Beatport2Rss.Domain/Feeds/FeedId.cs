@@ -19,5 +19,5 @@ public readonly record struct FeedId : IValueObject
         return new FeedId(value);
     }
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
 }

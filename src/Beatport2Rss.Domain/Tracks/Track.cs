@@ -38,40 +38,20 @@ public sealed class Track : IEntity<TrackId>
         string mixName,
         TimeSpan length,
         Uri sampleUri,
-        ReleaseId releaseId) =>
-        Create(id, beatportId, beatportSlug, number, artist, name, mixName, length, sampleUri, DateTimeOffset.UtcNow, releaseId);
-
-    public static Track Create(
-        TrackId id,
-        long beatportId,
-        string beatportSlug,
-        int number,
-        string artist,
-        string name,
-        string mixName,
-        TimeSpan length,
-        Uri sampleUri,
         DateTimeOffset createdDate,
         ReleaseId releaseId) =>
         new()
         {
             Id = id,
-
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
-
             Number = number,
-
             Artist = artist,
             Name = name,
             MixName = mixName,
-
             Length = length,
-
             SampleUri = sampleUri,
-
             CreatedDate = createdDate,
-            
             ReleaseId = releaseId,
         };
 }

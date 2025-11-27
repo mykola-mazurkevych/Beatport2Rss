@@ -44,20 +44,6 @@ public sealed class Release : IAggregateRoot<ReleaseId>
         string catalogNumber,
         Uri imageUri,
         DateOnly releaseDate,
-        int tracksCount) =>
-        Create(id, beatportId, beatportSlug, artist, name, label, catalogNumber, imageUri, releaseDate, tracksCount,
-            DateTimeOffset.UtcNow, ReleaseStatus.Created);
-
-    public static Release Create(
-        ReleaseId id,
-        long beatportId,
-        string beatportSlug,
-        string artist,
-        string name,
-        string label,
-        string catalogNumber,
-        Uri imageUri,
-        DateOnly releaseDate,
         int tracksCount,
         DateTimeOffset createdDate,
         ReleaseStatus status) =>

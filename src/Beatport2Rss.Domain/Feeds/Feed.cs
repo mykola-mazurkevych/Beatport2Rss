@@ -30,14 +30,6 @@ public sealed class Feed : IEntity<FeedId>
         FeedName name,
         string slug,
         bool isActive,
-        UserId userId) =>
-        Create(id, name, slug, isActive, DateTimeOffset.UtcNow, userId);
-
-    public static Feed Create(
-        FeedId id,
-        FeedName name,
-        string slug,
-        bool isActive,
         DateTimeOffset createdDate,
         UserId userId) =>
         new()

@@ -32,15 +32,6 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
     public static Subscription Create(
         SubscriptionId id,
         BeatportEntityType beatportType,
-        string beatportSlug,
-        long beatportId,
-        string name,
-        Uri imageUri) =>
-        Create(id, beatportType, beatportId, beatportSlug, name, imageUri, DateTimeOffset.UtcNow, pulledDate: null);
-
-    public static Subscription Create(
-        SubscriptionId id,
-        BeatportEntityType beatportType,
         long beatportId,
         string beatportSlug,
         string name,

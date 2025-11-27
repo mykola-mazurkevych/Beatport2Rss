@@ -20,20 +20,12 @@ public sealed class Token : IAggregateRoot<TokenId>
     public static Token Create(
         TokenId id,
         AccessToken accessToken,
-        DateTimeOffset expirationDate) =>
-        Create(id, accessToken, DateTimeOffset.UtcNow, expirationDate);
-
-    public static Token Create(
-        TokenId id,
-        AccessToken accessToken,
         DateTimeOffset createdDate,
         DateTimeOffset expirationDate) =>
         new()
         {
             Id = id,
-
             AccessToken = accessToken,
-
             CreatedDate = createdDate,
             ExpirationDate = expirationDate,
         };

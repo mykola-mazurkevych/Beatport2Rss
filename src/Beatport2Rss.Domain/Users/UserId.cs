@@ -19,5 +19,5 @@ public readonly record struct UserId : IValueObject
         return new UserId(value);
     }
 
-    public override string ToString() => Value.ToString();
+    public override string ToString() => Value.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
 }

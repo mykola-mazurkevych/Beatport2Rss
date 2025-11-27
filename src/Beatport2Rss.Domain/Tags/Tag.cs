@@ -22,13 +22,6 @@ public sealed class Tag : IEntity<TagId>
         TagId id,
         TagName name,
         string slug,
-        UserId userId) =>
-        Create(id, name, slug, DateTimeOffset.UtcNow, userId);
-
-    public static Tag Create(
-        TagId id,
-        TagName name,
-        string slug,
         DateTimeOffset createdDate,
         UserId userId) =>
         new()
