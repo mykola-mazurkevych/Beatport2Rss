@@ -12,45 +12,45 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Subscriptions));
 
-        builder.HasKey(s => s.Id);
+        builder.HasKey(subscription => subscription.Id);
 
-        builder.Property(s => s.Id)
+        builder.Property(subscription => subscription.Id)
             .HasConversion(
                 subscriptionId => subscriptionId.Value,
                 value => SubscriptionId.Create(value))
             .IsRequired();
 
-        builder.Property(s => s.BeatportType)
+        builder.Property(subscription => subscription.BeatportType)
             .HasConversion<EnumToStringConverter<BeatportEntityType>>()
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Property(s => s.BeatportId)
+        builder.Property(subscription => subscription.BeatportId)
             .IsRequired();
 
-        builder.Property(s => s.BeatportSlug)
+        builder.Property(subscription => subscription.BeatportSlug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(s => s.Name)
+        builder.Property(subscription => subscription.Name)
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(s => s.ImageUri)
+        builder.Property(subscription => subscription.ImageUri)
             .HasConversion(
                 uri => uri.ToString(),
-                value => new Uri(value))
+                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(s => s.CreatedDate)
+        builder.Property(subscription => subscription.CreatedDate)
             .IsRequired();
 
-        builder.Property(s => s.PulledDate);
+        builder.Property(subscription => subscription.PulledDate);
 
-        builder.HasIndex(s => new { s.BeatportId, s.BeatportType })
+        builder.HasIndex(subscription => new { subscription.BeatportId, subscription.BeatportType })
             .IsUnique();
 
-        builder.HasIndex(s => s.BeatportSlug);
+        builder.HasIndex(subscription => subscription.BeatportSlug);
     }
 }

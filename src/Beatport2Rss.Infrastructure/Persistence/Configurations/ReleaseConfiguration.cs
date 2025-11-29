@@ -12,62 +12,62 @@ public sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Releases));
 
-        builder.HasKey(r => r.Id);
+        builder.HasKey(release => release.Id);
 
-        builder.Property(r => r.Id)
+        builder.Property(release => release.Id)
             .HasConversion(
                 releaseId => releaseId.Value,
                 value => ReleaseId.Create(value))
             .IsRequired();
 
-        builder.Property(r => r.BeatportId)
+        builder.Property(release => release.BeatportId)
             .IsRequired();
 
-        builder.Property(r => r.BeatportSlug)
+        builder.Property(release => release.BeatportSlug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(r => r.Artist)
+        builder.Property(release => release.Artist)
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(r => r.Name)
+        builder.Property(release => release.Name)
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(r => r.Label)
+        builder.Property(release => release.Label)
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(r => r.CatalogNumber)
+        builder.Property(release => release.CatalogNumber)
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(r => r.ImageUri)
+        builder.Property(release => release.ImageUri)
             .HasConversion(
                 uri => uri.ToString(),
-                value => new Uri(value))
+                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(r => r.ReleaseDate)
+        builder.Property(release => release.ReleaseDate)
             .IsRequired();
 
-        builder.Property(r => r.TracksCount)
+        builder.Property(release => release.TracksCount)
             .IsRequired();
 
-        builder.Property(r => r.CreatedDate)
+        builder.Property(release => release.CreatedDate)
             .IsRequired();
 
-        builder.Property(r => r.Status)
+        builder.Property(release => release.Status)
             .HasConversion<EnumToStringConverter<ReleaseStatus>>()
             .HasMaxLength(50)
             .IsRequired();
 
-        builder.Navigation(r => r.Tracks)
+        builder.Navigation(release => release.Tracks)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasIndex(r => r.BeatportId)
+        builder.HasIndex(release => release.BeatportId)
             .IsUnique();
     }
 }

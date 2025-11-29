@@ -1,9 +1,12 @@
+using Beatport2Rss.Domain.Feeds;
+using Beatport2Rss.Domain.Subscriptions;
+
 namespace Beatport2Rss.Infrastructure.Persistence.Entities;
 
 public sealed class FeedSubscription
 {
-    public Guid FeedId { get; set; }
-    public int SubscriptionId { get; set; }
+    public FeedId FeedId { get; set; }
+    public SubscriptionId SubscriptionId { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
 }

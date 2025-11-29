@@ -12,61 +12,61 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Tracks));
 
-        builder.HasKey(t => t.Id);
+        builder.HasKey(track => track.Id);
 
-        builder.Property(t => t.Id)
+        builder.Property(track => track.Id)
             .HasConversion(
                 trackId => trackId.Value,
                 value => TrackId.Create(value))
             .IsRequired();
 
-        builder.Property(t => t.BeatportId)
+        builder.Property(track => track.BeatportId)
             .IsRequired();
 
-        builder.Property(t => t.BeatportSlug)
+        builder.Property(track => track.BeatportSlug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(t => t.Number)
+        builder.Property(track => track.Number)
             .IsRequired();
 
-        builder.Property(t => t.Artist)
+        builder.Property(track => track.Artist)
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(t => t.Name)
+        builder.Property(track => track.Name)
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(t => t.MixName)
+        builder.Property(track => track.MixName)
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(t => t.Length)
+        builder.Property(track => track.Length)
             .IsRequired();
 
-        builder.Property(t => t.SampleUri)
+        builder.Property(track => track.SampleUri)
             .HasConversion(
                 uri => uri.ToString(),
-                value => new Uri(value))
+                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(t => t.CreatedDate)
+        builder.Property(track => track.CreatedDate)
             .IsRequired();
 
-        builder.Property(t => t.ReleaseId)
+        builder.Property(track => track.ReleaseId)
             .HasConversion(
                 releaseId => releaseId.Value,
                 value => ReleaseId.Create(value))
             .IsRequired();
 
         builder.HasOne<Release>()
-            .WithMany(r => r.Tracks)
-            .HasForeignKey(t => t.ReleaseId)
+            .WithMany(release => release.Tracks)
+            .HasForeignKey(track => track.ReleaseId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(t => t.BeatportId)
+        builder.HasIndex(track => track.BeatportId)
             .IsUnique();
     }
 }

@@ -326,6 +326,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 
                     b.HasKey("FeedId", "SubscriptionId");
 
+                    b.HasIndex("SubscriptionId");
+
                     b.ToTable("FeedSubscriptions", (string)null);
                 });
 
@@ -343,6 +345,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("SubscriptionId", "TagId");
+
+                    b.HasIndex("TagId");
 
                     b.ToTable("SubscriptionTags", (string)null);
                 });
@@ -370,6 +374,36 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.HasOne("Beatport2Rss.Domain.Releases.Release", null)
                         .WithMany("Tracks")
                         .HasForeignKey("ReleaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Infrastructure.Persistence.Entities.FeedSubscription", b =>
+                {
+                    b.HasOne("Beatport2Rss.Domain.Feeds.Feed", null)
+                        .WithMany()
+                        .HasForeignKey("FeedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Beatport2Rss.Domain.Subscriptions.Subscription", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Infrastructure.Persistence.Entities.SubscriptionTag", b =>
+                {
+                    b.HasOne("Beatport2Rss.Domain.Subscriptions.Subscription", null)
+                        .WithMany()
+                        .HasForeignKey("SubscriptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Beatport2Rss.Domain.Tags.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

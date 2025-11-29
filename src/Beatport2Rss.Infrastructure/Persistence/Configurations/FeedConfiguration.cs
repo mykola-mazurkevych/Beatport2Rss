@@ -12,46 +12,46 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Feeds));
 
-        builder.HasKey(f => f.Id);
+        builder.HasKey(feed => feed.Id);
 
-        builder.Property(f => f.Id)
+        builder.Property(feed => feed.Id)
             .HasConversion(
                 feedId => feedId.Value,
                 value => FeedId.Create(value))
             .IsRequired();
-
-        builder.Property(f => f.Name)
+    
+        builder.Property(feed => feed.Name)
             .HasConversion(
-                name => name.Value,
+                feedName => feedName.Value,
                 value => FeedName.Create(value))
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(f => f.Slug)
+        builder.Property(feed => feed.Slug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(f => f.IsActive)
+        builder.Property(feed => feed.IsActive)
             .IsRequired();
 
-        builder.Property(f => f.CreatedDate)
+        builder.Property(feed => feed.CreatedDate)
             .IsRequired();
 
-        builder.Property(f => f.UserId)
+        builder.Property(feed => feed.UserId)
             .HasConversion(
                 userId => userId.Value,
                 value => UserId.Create(value))
             .IsRequired();
 
         builder.HasOne<User>()
-            .WithMany(u => u.Feeds)
-            .HasForeignKey(f => f.UserId)
+            .WithMany(user => user.Feeds)
+            .HasForeignKey(feed => feed.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(f => f.Slug)
+        builder.HasIndex(feed => feed.Slug)
             .IsUnique();
 
-        builder.HasIndex(f => new { f.UserId, f.Name })
+        builder.HasIndex(feed => new { feed.UserId, feed.Name })
             .IsUnique();
     }
 }

@@ -11,55 +11,55 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Users));
 
-        builder.HasKey(u => u.Id);
+        builder.HasKey(user => user.Id);
 
-        builder.Property(u => u.Id)
+        builder.Property(user => user.Id)
             .HasConversion(
                 userId => userId.Value,
                 value => UserId.Create(value))
             .IsRequired();
 
-        builder.Property(u => u.Username)
+        builder.Property(user => user.Username)
             .HasConversion(
                 username => username.Value,
                 value => Username.Create(value))
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(u => u.Slug)
+        builder.Property(user => user.Slug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(u => u.PasswordHash)
+        builder.Property(user => user.PasswordHash)
             .HasConversion(
                 passwordHash => passwordHash.Value,
                 value => PasswordHash.Create(value))
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.EmailAddress)
+        builder.Property(user => user.EmailAddress)
             .HasConversion(
-                email => email.Value,
+                emailAddress => emailAddress.Value,
                 value => EmailAddress.Create(value))
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.CreatedDate)
+        builder.Property(user => user.CreatedDate)
             .IsRequired();
 
-        builder.Navigation(u => u.Feeds)
+        builder.Navigation(user => user.Feeds)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.Navigation(u => u.Tags)
+        builder.Navigation(user => user.Tags)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.HasIndex(u => u.Username)
+        builder.HasIndex(user => user.Username)
             .IsUnique();
 
-        builder.HasIndex(u => u.Slug)
+        builder.HasIndex(user => user.Slug)
             .IsUnique();
 
-        builder.HasIndex(u => u.EmailAddress)
+        builder.HasIndex(user => user.EmailAddress)
             .IsUnique();
     }
 }

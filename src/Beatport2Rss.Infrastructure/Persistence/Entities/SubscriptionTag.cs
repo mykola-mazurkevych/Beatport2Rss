@@ -1,9 +1,12 @@
+using Beatport2Rss.Domain.Subscriptions;
+using Beatport2Rss.Domain.Tags;
+
 namespace Beatport2Rss.Infrastructure.Persistence.Entities;
 
 public sealed class SubscriptionTag
 {
-    public int SubscriptionId { get; set; }
-    public int TagId { get; set; }
+    public SubscriptionId SubscriptionId { get; set; }
+    public TagId TagId { get; set; }
 
     public DateTimeOffset CreatedDate { get; set; }
 }

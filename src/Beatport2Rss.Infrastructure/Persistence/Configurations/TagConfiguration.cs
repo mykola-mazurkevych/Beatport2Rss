@@ -12,43 +12,43 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Tags));
 
-        builder.HasKey(t => t.Id);
+        builder.HasKey(tag => tag.Id);
 
-        builder.Property(t => t.Id)
+        builder.Property(tag => tag.Id)
             .HasConversion(
                 tagId => tagId.Value,
                 value => TagId.Create(value))
             .IsRequired();
 
-        builder.Property(t => t.Name)
+        builder.Property(tag => tag.Name)
             .HasConversion(
                 name => name.Value,
                 value => TagName.Create(value))
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(t => t.Slug)
+        builder.Property(tag => tag.Slug)
             .HasMaxLength(250)
             .IsRequired();
 
-        builder.Property(t => t.CreatedDate)
+        builder.Property(tag => tag.CreatedDate)
             .IsRequired();
 
-        builder.Property(t => t.UserId)
+        builder.Property(tag => tag.UserId)
             .HasConversion(
                 userId => userId.Value,
                 value => UserId.Create(value))
             .IsRequired();
 
         builder.HasOne<User>()
-            .WithMany(u => u.Tags)
-            .HasForeignKey(t => t.UserId)
+            .WithMany(user => user.Tags)
+            .HasForeignKey(tag => tag.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(t => t.Slug)
+        builder.HasIndex(tag => tag.Slug)
             .IsUnique();
 
-        builder.HasIndex(t => new { t.UserId, t.Name })
+        builder.HasIndex(tag => new { tag.UserId, tag.Name })
             .IsUnique();
     }
 }

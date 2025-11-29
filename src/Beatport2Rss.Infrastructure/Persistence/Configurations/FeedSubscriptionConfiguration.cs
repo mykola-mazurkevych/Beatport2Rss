@@ -1,3 +1,5 @@
+using Beatport2Rss.Domain.Feeds;
+using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Infrastructure.Persistence.Entities;
 
 using Microsoft.EntityFrameworkCore;
@@ -11,16 +13,32 @@ public sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<Fee
     {
         builder.ToTable(nameof(Beatport2RssDbContext.FeedSubscriptions));
 
-        builder.HasKey(fs => new { fs.FeedId, fs.SubscriptionId });
+        builder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
 
-        builder.Property(fs => fs.FeedId)
+        builder.Property(feedSubscription => feedSubscription.FeedId)
+            .HasConversion(
+                feedId => feedId.Value,
+                value => FeedId.Create(value))
             .IsRequired();
 
-        builder.Property(fs => fs.SubscriptionId)
+        builder.Property(feedSubscription => feedSubscription.SubscriptionId)
+            .HasConversion(
+                subscriptionId => subscriptionId.Value,
+                value => SubscriptionId.Create(value))
             .IsRequired();
 
-        builder.Property(fs => fs.CreatedDate)
+        builder.Property(feedSubscription => feedSubscription.CreatedDate)
             .IsRequired()
             .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.HasOne<Feed>()
+            .WithMany()
+            .HasForeignKey(feedSubscription => feedSubscription.FeedId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne<Subscription>()
+            .WithMany()
+            .HasForeignKey(feedSubscription => feedSubscription.SubscriptionId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

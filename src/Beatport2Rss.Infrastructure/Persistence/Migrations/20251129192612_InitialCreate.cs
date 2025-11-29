@@ -14,19 +14,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "FeedSubscriptions",
-                columns: table => new
-                {
-                    FeedId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SubscriptionId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "GETUTCDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FeedSubscriptions", x => new { x.FeedId, x.SubscriptionId });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Releases",
                 columns: table => new
                 {
@@ -64,19 +51,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Subscriptions", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SubscriptionTags",
-                columns: table => new
-                {
-                    SubscriptionId = table.Column<int>(type: "int", nullable: false),
-                    TagId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "GETUTCDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SubscriptionTags", x => new { x.SubscriptionId, x.TagId });
                 });
 
             migrationBuilder.CreateTable(
@@ -179,6 +153,56 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "FeedSubscriptions",
+                columns: table => new
+                {
+                    FeedId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SubscriptionId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeedSubscriptions", x => new { x.FeedId, x.SubscriptionId });
+                    table.ForeignKey(
+                        name: "FK_FeedSubscriptions_Feeds_FeedId",
+                        column: x => x.FeedId,
+                        principalTable: "Feeds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FeedSubscriptions_Subscriptions_SubscriptionId",
+                        column: x => x.SubscriptionId,
+                        principalTable: "Subscriptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubscriptionTags",
+                columns: table => new
+                {
+                    SubscriptionId = table.Column<int>(type: "int", nullable: false),
+                    TagId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "GETUTCDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionTags", x => new { x.SubscriptionId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_SubscriptionTags_Subscriptions_SubscriptionId",
+                        column: x => x.SubscriptionId,
+                        principalTable: "Subscriptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SubscriptionTags_Tags_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tags",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Feeds_Slug",
                 table: "Feeds",
@@ -190,6 +214,11 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 table: "Feeds",
                 columns: new[] { "UserId", "Name" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FeedSubscriptions_SubscriptionId",
+                table: "FeedSubscriptions",
+                column: "SubscriptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Releases_BeatportId",
@@ -207,6 +236,11 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 name: "IX_Subscriptions_BeatportSlug",
                 table: "Subscriptions",
                 column: "BeatportSlug");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SubscriptionTags_TagId",
+                table: "SubscriptionTags",
+                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_Slug",
@@ -254,19 +288,10 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Feeds");
-
-            migrationBuilder.DropTable(
                 name: "FeedSubscriptions");
 
             migrationBuilder.DropTable(
-                name: "Subscriptions");
-
-            migrationBuilder.DropTable(
                 name: "SubscriptionTags");
-
-            migrationBuilder.DropTable(
-                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Tokens");
@@ -275,10 +300,19 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 name: "Tracks");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Feeds");
+
+            migrationBuilder.DropTable(
+                name: "Subscriptions");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Releases");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

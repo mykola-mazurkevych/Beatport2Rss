@@ -11,27 +11,27 @@ public sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Tokens));
 
-        builder.HasKey(t => t.Id);
+        builder.HasKey(token => token.Id);
 
-        builder.Property(t => t.Id)
+        builder.Property(token => token.Id)
             .HasConversion(
                 tokenId => tokenId.Value,
                 value => TokenId.Create(value))
             .IsRequired();
 
-        builder.Property(t => t.AccessToken)
+        builder.Property(token => token.AccessToken)
             .HasConversion(
                 accessToken => accessToken.Value,
                 value => AccessToken.Create(value))
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(t => t.CreatedDate)
+        builder.Property(token => token.CreatedDate)
             .IsRequired();
 
-        builder.Property(t => t.ExpirationDate)
+        builder.Property(token => token.ExpirationDate)
             .IsRequired();
 
-        builder.Ignore(t => t.IsExpired);
+        builder.Ignore(token => token.IsExpired);
     }
 }
