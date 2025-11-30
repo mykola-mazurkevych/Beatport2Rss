@@ -378,6 +378,5 @@ dotnet_naming_style.s_camelcase.capitalization = camel_case
 
 #### Code Analysis Rules ####
 [*.cs]
-
-# CA1062: Validate arguments of public methods
-dotnet_diagnostic.CA1062.severity = none
+dotnet_diagnostic.CA1062.severity = none # Validate arguments of public methods
+dotnet_diagnostic.CA2007.severity = none # Do not directly await a Task
