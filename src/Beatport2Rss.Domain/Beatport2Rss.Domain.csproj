@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <ItemGroup>
-    <ProjectReference Include="..\Beatport2Rss.SharedKernel\Beatport2Rss.SharedKernel.csproj" />
+    <PackageReference Include="Ardalis.GuardClauses" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Ardalis.GuardClauses" />
+    <ProjectReference Include="..\Beatport2Rss.SharedKernel\Beatport2Rss.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

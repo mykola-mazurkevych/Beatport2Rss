@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NoWarn>
+      CA1707; <!-- Identifiers should not contain underscores -->
+    </NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Beatport2Rss.Application\Beatport2Rss.Application.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Contracts\Beatport2Rss.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

@@ -39,7 +39,7 @@ public sealed class CreateUserCommandHandler(
     ICommandRepository<User, UserId> userCommandRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken)
+    public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
         var user = User.Create(
             UserId.Create(Guid.CreateVersion7()),
