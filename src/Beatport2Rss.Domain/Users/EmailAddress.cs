@@ -12,7 +12,7 @@ namespace Beatport2Rss.Domain.Users;
 
 public readonly record struct EmailAddress : IValueObject
 {
-    private const int MaxLength = 100;
+    public const int MaxLength = 100;
 
     private EmailAddress(string value) => Value = value;
 
@@ -37,6 +37,12 @@ public readonly record struct EmailAddress : IValueObject
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
     public bool Equals(EmailAddress other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+
+    public static bool operator ==(EmailAddress left, string? right) =>
+        right is not null && StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+
+    public static bool operator !=(EmailAddress left, string? right) =>
+        !(left == right);
 
     private static bool EmailAddressIsValid(string value)
     {

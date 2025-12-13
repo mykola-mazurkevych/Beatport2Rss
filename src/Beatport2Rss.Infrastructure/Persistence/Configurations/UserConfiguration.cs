@@ -23,7 +23,7 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(
                 username => username.Value,
                 value => Username.Create(value))
-            .HasMaxLength(200)
+            .HasMaxLength(Username.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.Slug)
@@ -34,14 +34,14 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(
                 passwordHash => passwordHash.Value,
                 value => PasswordHash.Create(value))
-            .HasMaxLength(100)
+            .HasMaxLength(PasswordHash.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.EmailAddress)
             .HasConversion(
                 emailAddress => emailAddress.Value,
                 value => EmailAddress.Create(value))
-            .HasMaxLength(100)
+            .HasMaxLength(EmailAddress.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.CreatedDate)

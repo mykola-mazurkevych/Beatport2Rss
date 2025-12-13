@@ -30,5 +30,6 @@ public static class ExceptionMessages
 
     public const string UserIdEmpty = "UserId cannot be empty.";
     public const string UsernameEmpty = "Username cannot be empty.";
+    public const string UsernameInvalidCharacters = "Username contains invalid characters.";
     public const string UsernameTooLong = "Username is too long.";
 }

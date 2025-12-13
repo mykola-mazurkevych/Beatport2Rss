@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Beatport2Rss.Contracts\Beatport2Rss.Contracts.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
   </ItemGroup>
 
