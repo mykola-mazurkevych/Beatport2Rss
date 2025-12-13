@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 using Beatport2Rss.SharedKernel;
 
-namespace Beatport2Rss.Contracts.Repositories;
+namespace Beatport2Rss.Contracts.Persistence.Repositories;
 
 public interface IQueryRepository<TEntity, in TId>
     where TEntity : class, IAggregateRoot<TId>

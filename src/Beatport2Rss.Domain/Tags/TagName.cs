@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 using Ardalis.GuardClauses;
 
 using Beatport2Rss.SharedKernel;
@@ -13,7 +15,7 @@ public readonly record struct TagName : IValueObject
 
     public string Value { get; }
 
-    public static TagName Create(string? value)
+    public static TagName Create([NotNull] string? value)
     {
         Guard.Against.NullOrWhiteSpace(value,
             exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.TagNameEmpty));

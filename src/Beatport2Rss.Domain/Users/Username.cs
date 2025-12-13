@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 using Ardalis.GuardClauses;
 
 using Beatport2Rss.SharedKernel;
@@ -13,7 +15,7 @@ public readonly record struct Username : IValueObject
 
     public string Value { get; }
 
-    public static Username Create(string? value)
+    public static Username Create([NotNull] string? value)
     {
         Guard.Against.NullOrWhiteSpace(value,
             exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.UsernameEmpty));

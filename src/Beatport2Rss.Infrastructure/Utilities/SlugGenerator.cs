@@ -6,7 +6,7 @@ using Slugify;
 
 namespace Beatport2Rss.Infrastructure.Utilities;
 
-public sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
+internal sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
 {
     private const string AlphaNumericChars = "abcdefghijklmnopqrstuvwxyz0123456789";
     private const int SuffixLength = 4;

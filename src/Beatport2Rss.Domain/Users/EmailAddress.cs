@@ -1,5 +1,6 @@
 #pragma warning disable CA1031 // Do not catch general exception types
 
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 
 using Ardalis.GuardClauses;
@@ -17,7 +18,7 @@ public readonly record struct EmailAddress : IValueObject
 
     public string Value { get; }
 
-    public static EmailAddress Create(string? value)
+    public static EmailAddress Create([NotNull] string? value)
     {
         Guard.Against.NullOrWhiteSpace(value,
             exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressEmpty));

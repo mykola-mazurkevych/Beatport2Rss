@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 
-public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Beatport2RssDbContext>
+internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<Beatport2RssDbContext>
 {
     public Beatport2RssDbContext CreateDbContext(string[] args)
     {

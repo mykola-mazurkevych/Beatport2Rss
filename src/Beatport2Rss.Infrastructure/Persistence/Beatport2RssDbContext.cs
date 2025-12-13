@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 
-public sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options)
+internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options)
     : DbContext(options)
 {
     public DbSet<User> Users => this.Set<User>();

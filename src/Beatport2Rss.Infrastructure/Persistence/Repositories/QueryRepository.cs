@@ -1,13 +1,12 @@
 using System.Linq.Expressions;
 
-using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.SharedKernel;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Infrastructure.Repositories;
+namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-public abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbContext)
+internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbContext)
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IValueObject
 {

@@ -382,4 +382,5 @@ dotnet_naming_style.s_camelcase.capitalization = camel_case
 #### Code Analysis Rules ####
 [*.cs]
 dotnet_diagnostic.CA1062.severity = none # Validate arguments of public methods
+dotnet_diagnostic.CA1812.severity = none # Avoid uninstantiated internal classes
 dotnet_diagnostic.CA2007.severity = none # Do not directly await a Task

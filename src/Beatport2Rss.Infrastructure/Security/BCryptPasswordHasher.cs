@@ -2,7 +2,7 @@ using Beatport2Rss.Contracts.Interfaces;
 
 namespace Beatport2Rss.Infrastructure.Security;
 
-public sealed class BcryptPasswordHasher : IPasswordHasher
+internal sealed class BCryptPasswordHasher : IPasswordHasher
 {
     public string Hash(string password) =>
         BCrypt.Net.BCrypt.HashPassword(password);
