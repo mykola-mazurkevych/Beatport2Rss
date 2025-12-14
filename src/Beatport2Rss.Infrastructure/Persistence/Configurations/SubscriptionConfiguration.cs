@@ -1,5 +1,6 @@
 using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Subscriptions;
+using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,9 +23,7 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
             .IsRequired();
 
         builder.Property(subscription => subscription.BeatportType)
-            .HasConversion<EnumToStringConverter<BeatportEntityType>>()
-            .HasMaxLength(50)
-            .IsRequired();
+            .IsEnum();
 
         builder.Property(subscription => subscription.BeatportId)
             .HasConversion(

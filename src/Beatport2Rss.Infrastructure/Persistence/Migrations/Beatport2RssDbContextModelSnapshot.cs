@@ -30,9 +30,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -42,6 +39,11 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -67,13 +69,13 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<long>("BeatportId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("int");
 
                     b.Property<string>("BeatportSlug")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("CatalogNumber")
                         .IsRequired()
@@ -122,13 +124,13 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<long>("BeatportId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("int");
 
                     b.Property<string>("BeatportSlug")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("BeatportType")
                         .IsRequired()
@@ -224,13 +226,13 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<long>("BeatportId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("int");
 
                     b.Property<string>("BeatportSlug")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset>("CreatedDate")
                         .HasColumnType("datetimeoffset");

@@ -1,6 +1,7 @@
 using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -35,8 +36,8 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
-        builder.Property(feed => feed.IsActive)
-            .IsRequired();
+        builder.Property(feed => feed.Status)
+            .IsEnum();
 
         builder.Property(feed => feed.CreatedDate)
             .IsRequired();

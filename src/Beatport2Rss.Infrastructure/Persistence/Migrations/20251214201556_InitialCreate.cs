@@ -18,8 +18,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
-                    BeatportId = table.Column<long>(type: "bigint", nullable: false),
-                    BeatportSlug = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    BeatportId = table.Column<int>(type: "int", nullable: false),
+                    BeatportSlug = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Artist = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Label = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
@@ -41,8 +41,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
                     BeatportType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    BeatportId = table.Column<long>(type: "bigint", nullable: false),
-                    BeatportSlug = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    BeatportId = table.Column<int>(type: "int", nullable: false),
+                    BeatportSlug = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     ImageUri = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -88,8 +88,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
-                    BeatportId = table.Column<long>(type: "bigint", nullable: false),
-                    BeatportSlug = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    BeatportId = table.Column<int>(type: "int", nullable: false),
+                    BeatportSlug = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Number = table.Column<int>(type: "int", nullable: false),
                     Artist = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
@@ -117,7 +117,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Slug = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

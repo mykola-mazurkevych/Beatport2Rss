@@ -18,7 +18,7 @@ public sealed class Feed : IEntity<FeedId>
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
 
-    public bool IsActive { get; private set; }
+    public FeedStatus Status { get; private set; }
 
     public DateTimeOffset CreatedDate { get; private set; }
 
@@ -30,7 +30,7 @@ public sealed class Feed : IEntity<FeedId>
         FeedId id,
         FeedName name,
         Slug slug,
-        bool isActive,
+        FeedStatus status,
         DateTimeOffset createdDate,
         UserId userId) =>
         new()
@@ -38,13 +38,13 @@ public sealed class Feed : IEntity<FeedId>
             Id = id,
             Name = name,
             Slug = slug,
-            IsActive = isActive,
+            Status = status,
             CreatedDate = createdDate,
             UserId = userId,
         };
 
-    public void Activate() => IsActive = true;
-    public void Deactivate() => IsActive = false;
+    public void Activate() => Status = FeedStatus.Active;
+    public void Deactivate() => Status = FeedStatus.Inactive;
 
     public void AddSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Add(subscriptionId);
     public void RemoveSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Remove(subscriptionId);

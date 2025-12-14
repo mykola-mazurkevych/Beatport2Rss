@@ -1,9 +1,9 @@
 using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Releases;
+using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
@@ -67,9 +67,7 @@ public sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
             .IsRequired();
 
         builder.Property(release => release.Status)
-            .HasConversion<EnumToStringConverter<ReleaseStatus>>()
-            .HasMaxLength(50)
-            .IsRequired();
+            .IsEnum();
 
         builder.Navigation(release => release.Tracks)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
