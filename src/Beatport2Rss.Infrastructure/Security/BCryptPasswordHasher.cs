@@ -1,12 +1,13 @@
 using Beatport2Rss.Contracts.Interfaces;
+using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Infrastructure.Security;
 
 internal sealed class BCryptPasswordHasher : IPasswordHasher
 {
-    public string Hash(string password) =>
-        BCrypt.Net.BCrypt.HashPassword(password);
+    public PasswordHash Hash(Password password) =>
+        PasswordHash.Create(BCrypt.Net.BCrypt.HashPassword(password.Value));
 
-    public bool Verify(string password, string hash) =>
-        BCrypt.Net.BCrypt.Verify(password, hash);
+    public bool Verify(Password password, PasswordHash hash) =>
+        BCrypt.Net.BCrypt.Verify(password.Value, hash.Value);
 }

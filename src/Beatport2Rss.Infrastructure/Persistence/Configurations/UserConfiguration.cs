@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Users;
 
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,10 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired();
 
         builder.Property(user => user.Slug)
-            .HasMaxLength(250)
+            .HasConversion(
+                slug => slug.Value,
+                value => Slug.Create(value))
+            .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.PasswordHash)

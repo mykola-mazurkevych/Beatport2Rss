@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
@@ -28,7 +29,10 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .IsRequired();
 
         builder.Property(feed => feed.Slug)
-            .HasMaxLength(250)
+            .HasConversion(
+                slug => slug.Value,
+                value => Slug.Create(value))
+            .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
         builder.Property(feed => feed.IsActive)

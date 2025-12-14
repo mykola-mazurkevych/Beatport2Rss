@@ -1,6 +1,8 @@
 using System.Security.Cryptography;
 
 using Beatport2Rss.Contracts.Interfaces;
+using Beatport2Rss.Domain.Common;
+using Beatport2Rss.Domain.Users;
 
 using Slugify;
 
@@ -9,21 +11,23 @@ namespace Beatport2Rss.Infrastructure.Utilities;
 internal sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
 {
     private const string AlphaNumericChars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    private const int SuffixLength = 4;
 
-    public string Generate(string inputString)
+    public Slug Generate(Username username) =>
+        Slug.Create(Generate(username.Value));
+
+    private string Generate(string inputString)
     {
         var slug = slugHelper.GenerateSlug(inputString);
         var suffix = GenerateSuffix();
 
-        return $"{slug}-{suffix}";
+        return $"{slug}{Slug.Delimiter}{suffix}";
     }
 
     private static string GenerateSuffix()
     {
-        var chars = new char[SuffixLength];
+        var chars = new char[Slug.SuffixLength];
 
-        for (var i = 0; i < SuffixLength; i++)
+        for (var i = 0; i < Slug.SuffixLength; i++)
         {
             chars[i] = AlphaNumericChars[RandomNumberGenerator.GetInt32(AlphaNumericChars.Length)];
         }

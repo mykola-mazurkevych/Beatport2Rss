@@ -1,4 +1,5 @@
-﻿using Beatport2Rss.SharedKernel;
+﻿using Beatport2Rss.Domain.Common;
+using Beatport2Rss.SharedKernel;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 
@@ -15,7 +16,7 @@ public sealed class Feed : IEntity<FeedId>
     public FeedId Id { get; private set; }
 
     public FeedName Name { get; private set; }
-    public string Slug { get; private set; } = null!;
+    public Slug Slug { get; private set; }
 
     public bool IsActive { get; private set; }
 
@@ -28,7 +29,7 @@ public sealed class Feed : IEntity<FeedId>
     public static Feed Create(
         FeedId id,
         FeedName name,
-        string slug,
+        Slug slug,
         bool isActive,
         DateTimeOffset createdDate,
         UserId userId) =>

@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.SharedKernel;
@@ -16,7 +17,7 @@ public sealed class User : IAggregateRoot<UserId>
     public UserId Id { get; private set; }
 
     public Username Username { get; private set; }
-    public string Slug { get; private set; } = null!;
+    public Slug Slug { get; private set; }
 
     public EmailAddress EmailAddress { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
@@ -29,7 +30,7 @@ public sealed class User : IAggregateRoot<UserId>
     public static User Create(
         UserId id,
         Username username,
-        string slug,
+        Slug slug,
         PasswordHash passwordHash,
         EmailAddress emailAddress,
         DateTimeOffset createdDate) =>

@@ -13,10 +13,18 @@ public static class ExceptionMessages
     public const string FeedNameEmpty = "FeedName cannot be empty.";
     public const string FeedNameTooLong = "FeedName is too long.";
 
+    public const string PasswordEmpty = "Password cannot be empty.";
+    public const string PasswordTooShort = "Password is too short.";
+    public const string PasswordTooLong = "Password is too long.";
+
     public const string PasswordHashEmpty = "Password hash cannot be empty.";
     public const string PasswordHashTooLong = "Password hash is too long.";
 
     public const string ReleaseIdInvalid = "ReleaseId must be positive.";
+
+    public const string SlugEmpty = "Slug cannot be empty.";
+    public const string SlugInvalid = "Slug is invalid.";
+    public const string SlugTooLong = "Slug is too long.";
 
     public const string SubscriptionIdInvalid = "SubscriptionId must be positive.";
 

@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.SharedKernel;
 using Beatport2Rss.Domain.Users;
 
@@ -12,7 +13,7 @@ public sealed class Tag : IEntity<TagId>
     public TagId Id { get; private set; }
 
     public TagName Name { get; private set; }
-    public string Slug { get; private set; } = null!;
+    public Slug Slug { get; private set; }
 
     public DateTimeOffset CreatedDate { get; private set; }
 
@@ -21,7 +22,7 @@ public sealed class Tag : IEntity<TagId>
     public static Tag Create(
         TagId id,
         TagName name,
-        string slug,
+        Slug slug,
         DateTimeOffset createdDate,
         UserId userId) =>
         new()

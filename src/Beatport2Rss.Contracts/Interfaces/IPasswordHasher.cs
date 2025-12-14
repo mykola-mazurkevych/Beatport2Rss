@@ -1,8 +1,10 @@
+using Beatport2Rss.Domain.Users;
+
 namespace Beatport2Rss.Contracts.Interfaces;
 
 public interface IPasswordHasher
 {
-    string Hash(string password);
+    PasswordHash Hash(Password password);
 
-    bool Verify(string password, string hash);
+    bool Verify(Password password, PasswordHash hash);
 }

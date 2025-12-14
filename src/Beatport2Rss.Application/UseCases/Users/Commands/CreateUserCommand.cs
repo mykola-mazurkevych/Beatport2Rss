@@ -30,22 +30,27 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 
         RuleFor(c => c.Password)
             .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(PasswordHash.PasswordMinLength).WithMessage("Password must be at least 8 characters long.");
+            .MinimumLength(Password.MinLength).WithMessage("Password must be at least 8 characters long.")
+            .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters.");
     }
 }
 
 public sealed class CreateUserCommandHandler(
+    IPasswordHasher passwordHasher,
     ISlugGenerator slugGenerator,
     ICommandRepository<User, UserId> userCommandRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
+        var username = Username.Create(command.Username);
+        var password = Password.Create(command.Password);
+
         var user = User.Create(
             UserId.Create(Guid.CreateVersion7()),
-            Username.Create(command.Username),
-            slugGenerator.Generate(command.Username),
-            PasswordHash.Create(command.Password),
+            username,
+            slugGenerator.Generate(username),
+            passwordHasher.Hash(password),
             EmailAddress.Create(command.EmailAddress),
             DateTimeOffset.UtcNow);
 

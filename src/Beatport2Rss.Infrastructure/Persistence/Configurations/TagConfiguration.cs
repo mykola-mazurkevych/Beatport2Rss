@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 
@@ -28,7 +29,10 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
             .IsRequired();
 
         builder.Property(tag => tag.Slug)
-            .HasMaxLength(250)
+            .HasConversion(
+                slug => slug.Value,
+                value => Slug.Create(value))
+            .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
         builder.Property(tag => tag.CreatedDate)

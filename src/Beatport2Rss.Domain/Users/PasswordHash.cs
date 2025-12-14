@@ -9,7 +9,6 @@ namespace Beatport2Rss.Domain.Users;
 
 public readonly record struct PasswordHash : IValueObject
 {
-    public const int PasswordMinLength = 8;
     public const int MaxLength = 500;
 
     private PasswordHash(string value) => Value = value;
