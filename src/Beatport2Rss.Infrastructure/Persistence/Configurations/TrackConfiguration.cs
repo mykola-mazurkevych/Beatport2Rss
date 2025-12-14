@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Tracks;
 
@@ -21,10 +22,16 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
             .IsRequired();
 
         builder.Property(track => track.BeatportId)
+            .HasConversion(
+                beatportId => beatportId.Value,
+                value => BeatportId.Create(value))
             .IsRequired();
 
         builder.Property(track => track.BeatportSlug)
-            .HasMaxLength(250)
+            .HasConversion(
+                beatportSlug => beatportSlug.Value,
+                value => BeatportSlug.Create(value))
+            .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
         builder.Property(track => track.Number)

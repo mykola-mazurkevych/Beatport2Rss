@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.SharedKernel;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
@@ -16,8 +17,8 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
     public SubscriptionId Id { get; private set; }
 
     public BeatportEntityType BeatportType { get; private set; }
-    public long BeatportId { get; private set; }
-    public string BeatportSlug { get; private set; } = null!;
+    public BeatportId BeatportId { get; private set; }
+    public BeatportSlug BeatportSlug { get; private set; }
 
     public string Name { get; private set; } = null!;
 
@@ -32,8 +33,8 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
     public static Subscription Create(
         SubscriptionId id,
         BeatportEntityType beatportType,
-        long beatportId,
-        string beatportSlug,
+        BeatportId beatportId,
+        BeatportSlug beatportSlug,
         string name,
         Uri imageUri,
         DateTimeOffset createdDate,

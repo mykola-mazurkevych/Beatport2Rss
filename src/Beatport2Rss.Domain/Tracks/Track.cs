@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.SharedKernel;
 using Beatport2Rss.Domain.Releases;
 
@@ -11,8 +12,8 @@ public sealed class Track : IEntity<TrackId>
 
     public TrackId Id { get; private set; }
 
-    public long BeatportId { get; private set; }
-    public string BeatportSlug { get; private set; } = null!;
+    public BeatportId BeatportId { get; private set; }
+    public BeatportSlug BeatportSlug { get; private set; }
 
     public int Number { get; private set; }
 
@@ -30,8 +31,8 @@ public sealed class Track : IEntity<TrackId>
 
     public static Track Create(
         TrackId id,
-        long beatportId,
-        string beatportSlug,
+        BeatportId beatportId,
+        BeatportSlug beatportSlug,
         int number,
         string artist,
         string name,

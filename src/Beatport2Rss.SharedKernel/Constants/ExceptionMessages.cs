@@ -5,6 +5,11 @@ public static class ExceptionMessages
     public const string AccessTokenEmpty = "AccessToken cannot be empty.";
     public const string AccessTokenTooLong = "AccessToken is too long.";
 
+    public const string BeatportIdInvalid = "BeatportId must be positive.";
+
+    public const string BeatportSlugEmpty = "BeatportSlug cannot be empty.";
+    public const string BeatportSlugTooLong = "BeatportSlug is too long.";
+
     public const string EmailAddressEmpty = "Email address cannot be empty.";
     public const string EmailAddressInvalid = "Email address is invalid.";
     public const string EmailAddressTooLong = "Email address is too long.";

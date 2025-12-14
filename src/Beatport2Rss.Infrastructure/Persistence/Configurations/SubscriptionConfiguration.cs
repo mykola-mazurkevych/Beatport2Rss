@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Subscriptions;
 
 using Microsoft.EntityFrameworkCore;
@@ -26,10 +27,16 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
             .IsRequired();
 
         builder.Property(subscription => subscription.BeatportId)
+            .HasConversion(
+                beatportId => beatportId.Value,
+                value => BeatportId.Create(value))
             .IsRequired();
 
         builder.Property(subscription => subscription.BeatportSlug)
-            .HasMaxLength(250)
+            .HasConversion(
+                beatportSlug => beatportSlug.Value,
+                value => BeatportSlug.Create(value))
+            .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
         builder.Property(subscription => subscription.Name)
