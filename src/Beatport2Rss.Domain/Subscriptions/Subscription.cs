@@ -53,7 +53,7 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
 
     public void MarkAsPulled(DateTimeOffset pulledDate) => PulledDate = pulledDate;
 
-    public void AddTag(TagId tagId) => _tagIds.Add(tagId);
-    public void RemoveTag(TagId tagId) => _tagIds.Remove(tagId);
-    public bool HasTag(TagId tagId) => _tagIds.Contains(tagId);
+    public void AddTag(Tag tag) => _tagIds.Add(tag.Id);
+    public void RemoveTag(Tag tag) => _tagIds.Remove(tag.Id);
+    public bool HasTag(Tag tag) => _tagIds.Contains(tag.Id);
 }

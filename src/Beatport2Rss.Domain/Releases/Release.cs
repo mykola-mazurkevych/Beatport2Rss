@@ -68,5 +68,5 @@ public sealed class Release : IAggregateRoot<ReleaseId>
 
     public void AddTrack(Track track) => _tracks.Add(track);
     public void RemoveTrack(Track track) => _tracks.Remove(track);
-    public Track? GetTrack(TrackId trackId) => _tracks.FirstOrDefault(t => t.Id.Equals(trackId));
+    public Track? GetTrack(TrackId trackId) => _tracks.SingleOrDefault(t => t.Id == trackId);
 }

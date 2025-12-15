@@ -38,7 +38,7 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 public sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     ISlugGenerator slugGenerator,
-    ICommandRepository<User, UserId> userCommandRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)

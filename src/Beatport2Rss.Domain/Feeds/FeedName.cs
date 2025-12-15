@@ -9,7 +9,7 @@ namespace Beatport2Rss.Domain.Feeds;
 
 public readonly record struct FeedName : IValueObject
 {
-    private const int MaxLength = 200;
+    public const int MaxLength = 200;
 
     private FeedName(string value) => Value = value;
 

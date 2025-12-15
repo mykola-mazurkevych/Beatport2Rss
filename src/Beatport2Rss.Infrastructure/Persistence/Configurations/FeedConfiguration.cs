@@ -26,7 +26,7 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .HasConversion(
                 feedName => feedName.Value,
                 value => FeedName.Create(value))
-            .HasMaxLength(200)
+            .HasMaxLength(FeedName.MaxLength)
             .IsRequired();
 
         builder.Property(feed => feed.Slug)

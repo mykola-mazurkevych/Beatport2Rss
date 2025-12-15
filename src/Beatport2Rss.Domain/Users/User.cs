@@ -43,4 +43,6 @@ public sealed class User : IAggregateRoot<UserId>
             EmailAddress = emailAddress,
             CreatedDate = createdDate,
         };
+    
+    public void AddFeed(Feed feed) => _feeds.Add(feed);
 }
