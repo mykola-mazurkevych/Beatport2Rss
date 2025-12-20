@@ -14,25 +14,35 @@ public readonly record struct CreateUserCommand(
 
 public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
+    private readonly IQueryRepository<User, UserId> _userQueryRepository;
+
     public CreateUserCommandValidator(IQueryRepository<User, UserId> userQueryRepository)
     {
+        _userQueryRepository = userQueryRepository;
+
         RuleFor(c => c.Username)
             .NotEmpty().WithMessage("Username is required.")
             .MaximumLength(Username.MaxLength).WithMessage($"Username must be at most {Username.MaxLength} characters.")
             .Matches(Username.RegexPattern).WithMessage("Username contains invalid characters.")
-            .MustAsync((username, cancellationToken) => userQueryRepository.NotExistsAsync(u => u.Username == username, cancellationToken)).WithMessage("Username is already taken.");
+            .MustAsync(UsernameNotTaken).WithMessage("Username is already taken.");
 
         RuleFor(c => c.EmailAddress)
             .NotEmpty().WithMessage("Email address is required.")
             .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters.")
             .EmailAddress().WithMessage("A valid email address is required.")
-            .MustAsync((emailAddress, cancellationToken) => userQueryRepository.NotExistsAsync(u => u.EmailAddress == emailAddress, cancellationToken)).WithMessage("Email address is already taken.");
+            .MustAsync(EmailAddressNotTaken).WithMessage("Email address is already taken.");
 
         RuleFor(c => c.Password)
             .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(Password.MinLength).WithMessage("Password must be at least 8 characters long.")
+            .MinimumLength(Password.MinLength).WithMessage($"Password must be at least {Password.MinLength} characters long.")
             .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters.");
     }
+
+    private Task<bool> UsernameNotTaken(string username, CancellationToken cancellationToken) =>
+        _userQueryRepository.NotExistsAsync(u => u.Username == username, cancellationToken);
+
+    private Task<bool> EmailAddressNotTaken(string emailAddress, CancellationToken cancellationToken) =>
+        _userQueryRepository.NotExistsAsync(u => u.EmailAddress == emailAddress, cancellationToken);
 }
 
 public sealed class CreateUserCommandHandler(

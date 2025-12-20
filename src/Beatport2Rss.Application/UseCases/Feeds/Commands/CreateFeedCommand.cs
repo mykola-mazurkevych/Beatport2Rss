@@ -14,34 +14,39 @@ public readonly record struct CreateFeedCommand(
 
 public sealed class CreateFeedCommandValidator : AbstractValidator<CreateFeedCommand>
 {
+    private readonly IQueryRepository<User, UserId> _userQueryRepository;
+
     public CreateFeedCommandValidator(IQueryRepository<User, UserId> userQueryRepository)
     {
+        _userQueryRepository = userQueryRepository;
+
         RuleFor(c => c.UserId)
             .NotEmpty().WithMessage("User ID is required.")
-            .MustAsync(async (_, id, validationContext, cancellationToken) =>
-            {
-                var userId = UserId.Create(id);
-                var userExists = await userQueryRepository.ExistsAsync(u => u.Id == userId, cancellationToken);
-                if (userExists)
-                {
-                    validationContext.RootContextData["User"] = await userQueryRepository.GetAsync(userId, cancellationToken);
-                }
-
-                return userExists;
-            })
-            .WithMessage("User does not exist.");
+            .MustAsync(UserExists).WithMessage("User does not exist.");
 
         RuleFor(c => c.Name)
             .NotEmpty().WithMessage("Feed name is required.")
             .MaximumLength(FeedName.MaxLength).WithMessage($"Feed name must be at most {FeedName.MaxLength} characters.")
-            .Must((_, name, validationContext) =>
-            {
-                var user = (User)validationContext.RootContextData["User"];
-                var feedName = FeedName.Create(name);
-                var feedExists = user.Feeds.Any(f => f.Name == feedName);
+            .Must(FeedNameNotTaken).WithMessage("Feed name already taken.");
+    }
 
-                return !feedExists;
-            }).WithMessage("Feed name contains invalid characters.");
+    private async Task<bool> UserExists(CreateFeedCommand command, Guid id, ValidationContext<CreateFeedCommand> validationContext, CancellationToken cancellationToken)
+    {
+        var userId = UserId.Create(id);
+        var user = await _userQueryRepository.GetAsync(userId, cancellationToken);
+
+        validationContext.RootContextData[nameof(User)] = user;
+
+        return user is not null;
+    }
+
+    private bool FeedNameNotTaken(CreateFeedCommand command, string name, ValidationContext<CreateFeedCommand> validationContext)
+    {
+        var user = (User)validationContext.RootContextData[nameof(User)];
+        var feedName = FeedName.Create(name);
+        var feedExists = user.Feeds.Any(f => f.Name == feedName);
+
+        return !feedExists;
     }
 }
 
@@ -66,7 +71,7 @@ public sealed class CreateFeedCommandHandler(
             DateTimeOffset.UtcNow,
             userId);
 
-        user.AddFeed(feed);
+        user!.AddFeed(feed);
         userCommandRepository.Update(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
