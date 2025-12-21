@@ -1,5 +1,6 @@
 using Beatport2Rss.Domain.Common;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -33,6 +34,13 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 value => Slug.Create(value))
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
+        
+        builder.Property(user => user.EmailAddress)
+            .HasConversion(
+                emailAddress => emailAddress.Value,
+                value => EmailAddress.Create(value))
+            .HasMaxLength(EmailAddress.MaxLength)
+            .IsRequired();
 
         builder.Property(user => user.PasswordHash)
             .HasConversion(
@@ -41,12 +49,8 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(PasswordHash.MaxLength)
             .IsRequired();
 
-        builder.Property(user => user.EmailAddress)
-            .HasConversion(
-                emailAddress => emailAddress.Value,
-                value => EmailAddress.Create(value))
-            .HasMaxLength(EmailAddress.MaxLength)
-            .IsRequired();
+        builder.Property(user => user.Status)
+            .IsEnum();
 
         builder.Property(user => user.CreatedDate)
             .IsRequired();

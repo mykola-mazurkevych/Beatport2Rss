@@ -60,8 +60,9 @@ public sealed class CreateUserCommandHandler(
             UserId.Create(Guid.CreateVersion7()),
             username,
             slugGenerator.Generate(username),
-            passwordHasher.Hash(password),
             EmailAddress.Create(command.EmailAddress),
+            passwordHasher.Hash(password),
+            UserStatus.Pending,
             DateTimeOffset.UtcNow);
 
         await userCommandRepository.AddAsync(user, cancellationToken);

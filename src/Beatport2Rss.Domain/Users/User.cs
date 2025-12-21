@@ -22,6 +22,8 @@ public sealed class User : IAggregateRoot<UserId>
     public EmailAddress EmailAddress { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
 
+    public UserStatus Status { get; private set; }
+
     public DateTimeOffset CreatedDate { get; private set; }
 
     public IReadOnlySet<Feed> Feeds => _feeds.AsReadOnly();
@@ -31,16 +33,18 @@ public sealed class User : IAggregateRoot<UserId>
         UserId id,
         Username username,
         Slug slug,
-        PasswordHash passwordHash,
         EmailAddress emailAddress,
+        PasswordHash passwordHash,
+        UserStatus status,
         DateTimeOffset createdDate) =>
         new()
         {
             Id = id,
             Username = username,
             Slug = slug,
-            PasswordHash = passwordHash,
             EmailAddress = emailAddress,
+            PasswordHash = passwordHash,
+            Status = status,
             CreatedDate = createdDate,
         };
     
