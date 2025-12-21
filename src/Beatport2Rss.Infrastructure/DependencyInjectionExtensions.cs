@@ -8,6 +8,8 @@ using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Security;
 using Beatport2Rss.Infrastructure.Utilities;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Beatport2Rss.Infrastructure;
@@ -16,15 +18,15 @@ public static class DependencyInjectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddInfrastructure() =>
+        public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .AddPersistence()
+                .AddPersistence(configuration)
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>();
 
-        private IServiceCollection AddPersistence() =>
+        private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>()
+                .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();

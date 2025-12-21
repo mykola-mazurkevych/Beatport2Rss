@@ -29,7 +29,7 @@ public sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<Fee
 
         builder.Property(feedSubscription => feedSubscription.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("current_timestamp");
 
         builder.HasOne<Feed>()
             .WithMany()

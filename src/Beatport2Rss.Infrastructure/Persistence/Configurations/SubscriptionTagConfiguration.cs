@@ -29,7 +29,7 @@ public sealed class SubscriptionTagConfiguration : IEntityTypeConfiguration<Subs
 
         builder.Property(subscriptionTag => subscriptionTag.CreatedDate)
             .IsRequired()
-            .HasDefaultValueSql("GETUTCDATE()");
+            .HasDefaultValueSql("current_timestamp");
 
         builder.HasOne<Subscription>()
             .WithMany()

@@ -18,7 +18,7 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<B
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<Beatport2RssDbContext>();
         var connectionString = configurationRoot.GetConnectionString(nameof(Beatport2RssDbContext));
 
-        dbContextOptionsBuilder.UseSqlServer(connectionString);
+        dbContextOptionsBuilder.UseNpgsql(connectionString);
 
         return new Beatport2RssDbContext(dbContextOptionsBuilder.Options);
     }
