@@ -6,6 +6,7 @@
     <Project Path="src/Beatport2Rss.Domain/Beatport2Rss.Domain.csproj" />
     <Project Path="src/Beatport2Rss.Infrastructure/Beatport2Rss.Infrastructure.csproj" />
     <Project Path="src/Beatport2Rss.SharedKernel/Beatport2Rss.SharedKernel.csproj" />
+    <Project Path="src/Beatport2Rss.WebApi/Beatport2Rss.WebApi.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Beatport2Rss.Application.UnitTests/Beatport2Rss.Application.UnitTests.csproj" />
