@@ -20,5 +20,13 @@ public readonly record struct ReleaseId : IValueObject
         return new ReleaseId(value);
     }
 
+    public bool Equals(ReleaseId other) => Value == other.Value;
+
+    public static bool operator ==(ReleaseId left, int right) => left.Value == right;
+    public static bool operator !=(ReleaseId left, int right) => left.Value != right;
+    public static bool operator ==(int left, ReleaseId right) => left == right.Value;
+    public static bool operator !=(int left, ReleaseId right) => left != right.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

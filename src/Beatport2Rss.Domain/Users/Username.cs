@@ -32,20 +32,17 @@ public readonly partial record struct Username : IValueObject
         return new Username(value);
     }
 
-    public override string ToString() => Value;
-
-    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
-
     public bool Equals(Username other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
-    public static bool operator ==(Username left, string? right) =>
-        right is not null && StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(Username left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator !=(Username left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(string? left, Username right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+    public static bool operator !=(string? left, Username right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static bool operator !=(Username left, string? right) =>
-        !(left == right);
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+    public override string ToString() => Value;
 
-    private static bool IsValid(string value) =>
-        UsernameRegex().IsMatch(value);
+    private static bool IsValid(string value) => UsernameRegex().IsMatch(value);
 
     [GeneratedRegex(RegexPattern, RegexOptions.None)]
     private static partial Regex UsernameRegex();

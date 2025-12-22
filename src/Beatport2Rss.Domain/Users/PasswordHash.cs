@@ -26,9 +26,13 @@ public readonly record struct PasswordHash : IValueObject
         return new PasswordHash(value);
     }
 
-    public override string ToString() => Value;
+    public bool Equals(PasswordHash other) => StringComparer.Ordinal.Equals(Value, other.Value);
+
+    public static bool operator ==(PasswordHash left, string? right) => StringComparer.Ordinal.Equals(left.Value, right);
+    public static bool operator !=(PasswordHash left, string? right) => !StringComparer.Ordinal.Equals(left.Value, right);
+    public static bool operator ==(string? left, PasswordHash right) => StringComparer.Ordinal.Equals(left, right.Value);
+    public static bool operator !=(string? left, PasswordHash right) => !StringComparer.Ordinal.Equals(left, right.Value);
 
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
-
-    public bool Equals(PasswordHash other) => StringComparer.Ordinal.Equals(Value, other.Value);
+    public override string ToString() => Value;
 }

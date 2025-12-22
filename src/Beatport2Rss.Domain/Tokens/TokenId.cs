@@ -20,5 +20,13 @@ public readonly record struct TokenId : IValueObject
         return new TokenId(value);
     }
 
+    public bool Equals(TokenId other) => Value == other.Value;
+
+    public static bool operator ==(TokenId left, int right) => left.Value == right;
+    public static bool operator !=(TokenId left, int right) => left.Value != right;
+    public static bool operator ==(int left, TokenId right) => left == right.Value;
+    public static bool operator !=(int left, TokenId right) => left != right.Value; 
+
+    public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

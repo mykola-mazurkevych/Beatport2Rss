@@ -33,18 +33,15 @@ public readonly record struct EmailAddress : IValueObject
         return new EmailAddress(value);
     }
 
-    public override string ToString() => Value;
-
-    public override int GetHashCode() =>
-        StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
-
     public bool Equals(EmailAddress other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
-    public static bool operator ==(EmailAddress left, string? right) =>
-        right is not null && StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(EmailAddress left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator !=(EmailAddress left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(string? left, EmailAddress right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+    public static bool operator !=(string? left, EmailAddress right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static bool operator !=(EmailAddress left, string? right) =>
-        !(left == right);
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+    public override string ToString() => Value;
 
     private static bool EmailAddressIsValid(string value)
     {

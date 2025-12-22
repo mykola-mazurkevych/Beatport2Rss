@@ -20,5 +20,13 @@ public readonly record struct FeedId : IValueObject
         return new FeedId(value);
     }
 
-    public override string ToString() => Value.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
+    public bool Equals(FeedId other) => Value == other.Value;
+
+    public static bool operator ==(FeedId left, Guid right) => left.Value == right;
+    public static bool operator !=(FeedId left, Guid right) => left.Value != right;
+    public static bool operator ==(Guid left, FeedId right) => left == right.Value;
+    public static bool operator !=(Guid left, FeedId right) => left != right.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
+    public override string ToString() => Value.ToString();
 }

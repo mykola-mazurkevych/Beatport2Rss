@@ -26,9 +26,13 @@ public readonly record struct AccessToken : IValueObject
         return new AccessToken(value);
     }
 
-    public override string ToString() => Value;
+    public bool Equals(AccessToken other) => StringComparer.Ordinal.Equals(Value, other.Value);
+
+    public static bool operator ==(AccessToken left, string? right) => StringComparer.Ordinal.Equals(left.Value, right);
+    public static bool operator !=(AccessToken left, string? right) => !StringComparer.Ordinal.Equals(left.Value, right);
+    public static bool operator ==(string? left, AccessToken right) => StringComparer.Ordinal.Equals(left, right.Value);
+    public static bool operator !=(string? left, AccessToken right) => !StringComparer.Ordinal.Equals(left, right.Value);
 
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
-
-    public bool Equals(AccessToken other) => StringComparer.Ordinal.Equals(Value, other.Value);
+    public override string ToString() => Value;
 }

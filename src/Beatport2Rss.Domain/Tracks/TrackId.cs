@@ -20,5 +20,13 @@ public readonly record struct TrackId : IValueObject
         return new TrackId(value);
     }
 
+    public bool Equals(TrackId other) => Value == other.Value;
+
+    public static bool operator ==(TrackId left, int right) => left.Value == right;
+    public static bool operator !=(TrackId left, int right) => left.Value != right;
+    public static bool operator ==(int left, TrackId right) => left == right.Value;
+    public static bool operator !=(int left, TrackId right) => left != right.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }

@@ -26,9 +26,13 @@ public readonly record struct TagName : IValueObject
         return new TagName(value);
     }
 
-    public override string ToString() => Value;
+    public bool Equals(TagName other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+
+    public static bool operator ==(TagName left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator !=(TagName left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(string? left, TagName right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+    public static bool operator !=(string? left, TagName right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
-
-    public bool Equals(TagName other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+    public override string ToString() => Value;
 }

@@ -20,5 +20,13 @@ public readonly record struct TagId : IValueObject
         return new TagId(value);
     }
 
+    public bool Equals(TagId other) => Value == other.Value;
+
+    public static bool operator ==(TagId left, int right) => left.Value == right;
+    public static bool operator !=(TagId left, int right) => left.Value != right;
+    public static bool operator ==(int left, TagId right) => left == right.Value;
+    public static bool operator !=(int left, TagId right) => left != right.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
