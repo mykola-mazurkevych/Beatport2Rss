@@ -5,8 +5,7 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Infrastructure.Security;
-using Beatport2Rss.Infrastructure.Utilities;
+using Beatport2Rss.Infrastructure.Services;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,9 +22,13 @@ public static class DependencyInjectionExtensions
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
                 .AddPersistence(configuration)
+                .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
+                .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
+                .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>()
-                .AddSingleton<ISlugGenerator, SlugGenerator>();
+                .AddTransient<IUserExistenceChecker, UserService>()
+                .AddTransient<IUsernameAvailabilityChecker, UserService>();
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

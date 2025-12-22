@@ -1,7 +1,7 @@
 using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Domain.Users;
 
-namespace Beatport2Rss.Infrastructure.Security;
+namespace Beatport2Rss.Infrastructure.Services;
 
 internal sealed class BCryptPasswordHasher : IPasswordHasher
 {

@@ -7,7 +7,7 @@ using Beatport2Rss.Domain.Users;
 
 using Slugify;
 
-namespace Beatport2Rss.Infrastructure.Utilities;
+namespace Beatport2Rss.Infrastructure.Services;
 
 internal sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
 {

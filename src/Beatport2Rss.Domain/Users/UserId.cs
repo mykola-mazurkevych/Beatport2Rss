@@ -20,5 +20,9 @@ public readonly record struct UserId : IValueObject
         return new UserId(value);
     }
 
+    public static bool operator ==(UserId left, Guid right) => left.Value == right;
+    public static bool operator !=(UserId left, Guid right) => left.Value != right;
+
+    public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString("D", System.Globalization.CultureInfo.InvariantCulture);
 }

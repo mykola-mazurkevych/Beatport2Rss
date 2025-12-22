@@ -26,6 +26,12 @@ public readonly record struct FeedName : IValueObject
         return new FeedName(value);
     }
 
+    public static bool operator ==(FeedName left, string? right) =>
+        right is not null && StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+
+    public static bool operator !=(FeedName left, string? right) =>
+        !(left == right);
+
     public override string ToString() => Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);

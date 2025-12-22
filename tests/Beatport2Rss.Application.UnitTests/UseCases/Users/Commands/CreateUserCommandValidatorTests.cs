@@ -1,6 +1,4 @@
-using System.Linq.Expressions;
-
-using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Domain.Users;
 
@@ -12,26 +10,31 @@ namespace Beatport2Rss.Application.UnitTests.UseCases.Users.Commands;
 
 public sealed class CreateUserCommandValidatorTests
 {
-    private readonly Mock<IQueryRepository<User, UserId>> _userQueryRepositoryMock;
+    private readonly Mock<IEmailAddressAvailabilityChecker> _emailAddressAvailabilityCheckerMock;
+    private readonly Mock<IUsernameAvailabilityChecker> _usernameAvailabilityCheckerMock;
     private readonly CreateUserCommandValidator _validator;
 
     public CreateUserCommandValidatorTests()
     {
-        _userQueryRepositoryMock = new Mock<IQueryRepository<User, UserId>>();
-        _validator = new CreateUserCommandValidator(_userQueryRepositoryMock.Object);
+        _emailAddressAvailabilityCheckerMock = new Mock<IEmailAddressAvailabilityChecker>();
+        _usernameAvailabilityCheckerMock = new Mock<IUsernameAvailabilityChecker>();
+        _validator = new CreateUserCommandValidator(_emailAddressAvailabilityCheckerMock.Object, _usernameAvailabilityCheckerMock.Object);
     }
 
     [Fact]
     public async Task Validate_ValidCommand_ShouldPass()
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var command = new CreateUserCommand(
             Username: "validuser",
             EmailAddress: "user@example.com",
             Password: "validpassword123");
+
+        _emailAddressAvailabilityCheckerMock
+            .Setup(r => r.IsAvailableAsync("user@example.com", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+        _usernameAvailabilityCheckerMock
+            .Setup(r => r.IsAvailableAsync("validuser", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         var result = await _validator.ValidateAsync(command);
 
@@ -60,10 +63,6 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_UsernameTooLong_ShouldFail()
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var longUsername = new string('a', Username.MaxLength + 1);
         var command = new CreateUserCommand(
             Username: longUsername,
@@ -83,10 +82,6 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("user.name!")]
     public async Task Validate_UsernameContainsInvalidCharacters_ShouldFail(string username)
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var command = new CreateUserCommand(
             Username: username,
             EmailAddress: "user@example.com",
@@ -102,33 +97,14 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_UsernameAlreadyTaken_ShouldFail()
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(u => u.Username == "existinguser", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
         var command = new CreateUserCommand(
             Username: "existinguser",
             EmailAddress: "user@example.com",
             Password: "validpassword123");
 
-        var result = await _validator.ValidateAsync(command);
-
-        Assert.False(result.IsValid);
-        var usernameError = Assert.Single(result.Errors, e => e.PropertyName == nameof(CreateUserCommand.Username));
-        Assert.Equal("Username is already taken.", usernameError.ErrorMessage);
-    }
-
-    [Fact]
-    public async Task Validate_UsernameAlreadyTaken_DifferentUsername_ShouldFail()
-    {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(u => u.Username == "takenuser", It.IsAny<CancellationToken>()))
+        _usernameAvailabilityCheckerMock
+            .Setup(r => r.IsAvailableAsync("existinguser", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
-        var command = new CreateUserCommand(
-            Username: "takenuser",
-            EmailAddress: "newuser@example.com",
-            Password: "validpassword123");
 
         var result = await _validator.ValidateAsync(command);
 
@@ -158,10 +134,6 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_EmailAddressTooLong_ShouldFail()
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var longEmail = new string('a', EmailAddress.MaxLength - 10) + "@example.com";
         var command = new CreateUserCommand(
             Username: "validuser",
@@ -182,10 +154,6 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("user.example.com")]
     public async Task Validate_EmailAddressInvalidFormat_ShouldFail(string emailAddress)
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
         var command = new CreateUserCommand(
             Username: "validuser",
             EmailAddress: emailAddress,
@@ -201,33 +169,14 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_EmailAddressAlreadyTaken_ShouldFail()
     {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(u => u.EmailAddress == "existing@example.com", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
-
         var command = new CreateUserCommand(
             Username: "validuser",
             EmailAddress: "existing@example.com",
             Password: "validpassword123");
-
-        var result = await _validator.ValidateAsync(command);
-
-        Assert.False(result.IsValid);
-        var emailError = Assert.Single(result.Errors, e => e.PropertyName == nameof(CreateUserCommand.EmailAddress));
-        Assert.Equal("Email address is already taken.", emailError.ErrorMessage);
-    }
-
-    [Fact]
-    public async Task Validate_EmailAddressAlreadyTaken_DifferentEmail_ShouldFail()
-    {
-        _userQueryRepositoryMock
-            .Setup(r => r.NotExistsAsync(u => u.EmailAddress == "taken@example.com", It.IsAny<CancellationToken>()))
+        
+        _emailAddressAvailabilityCheckerMock
+            .Setup(r => r.IsAvailableAsync("existing@example.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-
-        var command = new CreateUserCommand(
-            Username: "newuser",
-            EmailAddress: "taken@example.com",
-            Password: "validpassword123");
 
         var result = await _validator.ValidateAsync(command);
 

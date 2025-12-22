@@ -35,7 +35,8 @@ public readonly record struct EmailAddress : IValueObject
 
     public override string ToString() => Value;
 
-    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
+    public override int GetHashCode() =>
+        StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
 
     public bool Equals(EmailAddress other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 

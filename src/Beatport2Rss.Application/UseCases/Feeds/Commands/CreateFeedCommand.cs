@@ -14,39 +14,18 @@ public readonly record struct CreateFeedCommand(
 
 public sealed class CreateFeedCommandValidator : AbstractValidator<CreateFeedCommand>
 {
-    private readonly IQueryRepository<User, UserId> _userQueryRepository;
-
-    public CreateFeedCommandValidator(IQueryRepository<User, UserId> userQueryRepository)
+    public CreateFeedCommandValidator(
+        IFeedNameAvailabilityChecker feedNameAvailabilityChecker,
+        IUserExistenceChecker userExistenceChecker)
     {
-        _userQueryRepository = userQueryRepository;
-
         RuleFor(c => c.UserId)
             .NotEmpty().WithMessage("User ID is required.")
-            .MustAsync(UserExists).WithMessage("User does not exist.");
+            .MustAsync(userExistenceChecker.ExistsAsync).WithMessage("User does not exist.");
 
         RuleFor(c => c.Name)
             .NotEmpty().WithMessage("Feed name is required.")
             .MaximumLength(FeedName.MaxLength).WithMessage($"Feed name must be at most {FeedName.MaxLength} characters.")
-            .Must(FeedNameNotTaken).WithMessage("Feed name already taken.");
-    }
-
-    private async Task<bool> UserExists(CreateFeedCommand command, Guid id, ValidationContext<CreateFeedCommand> validationContext, CancellationToken cancellationToken)
-    {
-        var userId = UserId.Create(id);
-        var user = await _userQueryRepository.GetAsync(userId, cancellationToken);
-
-        validationContext.RootContextData[nameof(User)] = user;
-
-        return user is not null;
-    }
-
-    private bool FeedNameNotTaken(CreateFeedCommand command, string name, ValidationContext<CreateFeedCommand> validationContext)
-    {
-        var user = (User)validationContext.RootContextData[nameof(User)];
-        var feedName = FeedName.Create(name);
-        var feedExists = user.Feeds.Any(f => f.Name == feedName);
-
-        return !feedExists;
+            .MustAsync((c, name, cancellationToken) => feedNameAvailabilityChecker.IsAvailableAsync(c.UserId, name, cancellationToken)).WithMessage("Feed name already taken.");
     }
 }
 
