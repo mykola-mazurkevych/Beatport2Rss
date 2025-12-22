@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Slugify;
+
 namespace Beatport2Rss.Infrastructure;
 
 public static class DependencyInjectionExtensions
@@ -22,6 +24,7 @@ public static class DependencyInjectionExtensions
             services
                 .AddPersistence(configuration)
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
+                .AddSingleton<ISlugHelper, SlugHelper>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>();
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
