@@ -1,7 +1,0 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
-  </ItemGroup>
-
-</Project>

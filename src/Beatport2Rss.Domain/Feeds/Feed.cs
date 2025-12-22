@@ -1,5 +1,5 @@
-﻿using Beatport2Rss.Domain.Common;
-using Beatport2Rss.SharedKernel;
+﻿using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 

@@ -1,4 +1,4 @@
-using Beatport2Rss.Contracts.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 using Microsoft.EntityFrameworkCore;
 

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.UseCases.Users.Commands;
-using Beatport2Rss.Contracts.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
 
 using Moq;

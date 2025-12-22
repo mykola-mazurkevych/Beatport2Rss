@@ -1,6 +1,6 @@
-using Beatport2Rss.SharedKernel;
+using Beatport2Rss.Domain.Common.Interfaces;
 
-namespace Beatport2Rss.Contracts.Persistence.Repositories;
+namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface ICommandRepository<in TEntity, TId>
     where TEntity : class, IAggregateRoot<TId>

@@ -1,4 +1,4 @@
-using Beatport2Rss.Contracts.Persistence;
+using Beatport2Rss.Application.Interfaces.Persistence;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 

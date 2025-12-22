@@ -1,4 +1,4 @@
-using Beatport2Rss.Contracts.Interfaces;
+using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Infrastructure.Security;

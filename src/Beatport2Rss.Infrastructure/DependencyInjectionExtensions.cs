@@ -1,8 +1,8 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
-using Beatport2Rss.Contracts.Interfaces;
-using Beatport2Rss.Contracts.Persistence;
-using Beatport2Rss.Contracts.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Persistence;
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Security;

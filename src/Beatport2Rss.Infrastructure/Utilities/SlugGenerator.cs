@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 
-using Beatport2Rss.Contracts.Interfaces;
-using Beatport2Rss.Domain.Common;
+using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 

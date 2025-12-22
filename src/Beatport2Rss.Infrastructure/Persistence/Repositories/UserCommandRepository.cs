@@ -1,4 +1,4 @@
-using Beatport2Rss.Contracts.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 

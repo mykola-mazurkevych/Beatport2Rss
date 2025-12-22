@@ -1,4 +1,4 @@
-namespace Beatport2Rss.SharedKernel.Constants;
+namespace Beatport2Rss.Domain.Common.Constants;
 
 public static class ExceptionMessages
 {

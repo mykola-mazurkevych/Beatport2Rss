@@ -2,10 +2,10 @@ using System.Globalization;
 
 using Ardalis.GuardClauses;
 
-using Beatport2Rss.SharedKernel;
-using Beatport2Rss.SharedKernel.Constants;
+using Beatport2Rss.Domain.Common.Constants;
+using Beatport2Rss.Domain.Common.Exceptions;
 
-namespace Beatport2Rss.Domain.Common;
+namespace Beatport2Rss.Domain.Common.ValueObjects;
 
 public readonly record struct BeatportId
 {

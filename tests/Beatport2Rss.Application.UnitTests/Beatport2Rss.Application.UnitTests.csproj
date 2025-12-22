@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Beatport2Rss.Application\Beatport2Rss.Application.csproj" />
-    <ProjectReference Include="..\..\src\Beatport2Rss.Contracts\Beatport2Rss.Contracts.csproj" />
     <ProjectReference Include="..\..\src\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
   </ItemGroup>
 

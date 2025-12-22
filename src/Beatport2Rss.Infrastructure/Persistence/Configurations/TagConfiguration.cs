@@ -1,4 +1,4 @@
-using Beatport2Rss.Domain.Common;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 

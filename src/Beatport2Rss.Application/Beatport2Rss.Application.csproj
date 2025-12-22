@@ -5,7 +5,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Beatport2Rss.Contracts\Beatport2Rss.Contracts.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-namespace Beatport2Rss.SharedKernel;
+namespace Beatport2Rss.Domain.Common.Exceptions;
 
 public sealed class InvalidValueObjectValueException : Exception
 {

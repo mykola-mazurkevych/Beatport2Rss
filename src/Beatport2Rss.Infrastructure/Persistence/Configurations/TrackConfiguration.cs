@@ -1,4 +1,4 @@
-using Beatport2Rss.Domain.Common;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Tracks;
 

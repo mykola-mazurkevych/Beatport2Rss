@@ -1,8 +1,8 @@
-using Beatport2Rss.Domain.Common;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
-namespace Beatport2Rss.Contracts.Interfaces;
+namespace Beatport2Rss.Application.Interfaces.Services;
 
 public interface ISlugGenerator
 {

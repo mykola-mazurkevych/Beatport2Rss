@@ -1,5 +1,5 @@
-using Beatport2Rss.Contracts.Persistence.Repositories;
-using Beatport2Rss.SharedKernel;
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Domain.Common.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 

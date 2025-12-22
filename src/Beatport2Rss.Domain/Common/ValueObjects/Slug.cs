@@ -2,10 +2,11 @@ using System.Diagnostics.CodeAnalysis;
 
 using Ardalis.GuardClauses;
 
-using Beatport2Rss.SharedKernel;
-using Beatport2Rss.SharedKernel.Constants;
+using Beatport2Rss.Domain.Common.Constants;
+using Beatport2Rss.Domain.Common.Exceptions;
+using Beatport2Rss.Domain.Common.Interfaces;
 
-namespace Beatport2Rss.Domain.Common;
+namespace Beatport2Rss.Domain.Common.ValueObjects;
 
 public readonly record struct Slug : IValueObject
 {
