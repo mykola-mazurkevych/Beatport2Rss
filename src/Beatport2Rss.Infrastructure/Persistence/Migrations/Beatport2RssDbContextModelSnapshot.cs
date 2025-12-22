@@ -197,8 +197,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Domain.Tokens.Token", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AccessToken")
                         .IsRequired()

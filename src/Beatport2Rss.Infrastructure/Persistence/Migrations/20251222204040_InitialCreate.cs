@@ -56,7 +56,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                 name: "Tokens",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AccessToken = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ExpirationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -75,6 +75,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     Slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     EmailAddress = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     PasswordHash = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Status = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>

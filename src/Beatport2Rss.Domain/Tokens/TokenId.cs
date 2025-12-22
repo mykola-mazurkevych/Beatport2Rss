@@ -8,13 +8,13 @@ namespace Beatport2Rss.Domain.Tokens;
 
 public readonly record struct TokenId : IValueObject
 {
-    private TokenId(int value) => Value = value;
+    private TokenId(Guid value) => Value = value;
 
-    public int Value { get; }
+    public Guid Value { get; }
 
-    public static TokenId Create(int value)
+    public static TokenId Create(Guid value)
     {
-        Guard.Against.NegativeOrZero(value,
+        Guard.Against.Default(value,
             exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.TokenIdInvalid));
 
         return new TokenId(value);
@@ -22,11 +22,11 @@ public readonly record struct TokenId : IValueObject
 
     public bool Equals(TokenId other) => Value == other.Value;
 
-    public static bool operator ==(TokenId left, int right) => left.Value == right;
-    public static bool operator !=(TokenId left, int right) => left.Value != right;
-    public static bool operator ==(int left, TokenId right) => left == right.Value;
-    public static bool operator !=(int left, TokenId right) => left != right.Value; 
+    public static bool operator ==(TokenId left, Guid right) => left.Value == right;
+    public static bool operator !=(TokenId left, Guid right) => left.Value != right;
+    public static bool operator ==(Guid left, TokenId right) => left == right.Value;
+    public static bool operator !=(Guid left, TokenId right) => left != right.Value; 
 
     public override int GetHashCode() => Value.GetHashCode();
-    public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    public override string ToString() => Value.ToString();
 }

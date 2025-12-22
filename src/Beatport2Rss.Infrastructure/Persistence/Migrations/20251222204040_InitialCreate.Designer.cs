@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(Beatport2RssDbContext))]
-    [Migration("20251221115608_InitialCreate")]
+    [Migration("20251222204040_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -200,8 +200,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Domain.Tokens.Token", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AccessToken")
                         .IsRequired()
@@ -296,6 +296,11 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Username")
                         .IsRequired()

@@ -37,7 +37,7 @@ public static class ExceptionMessages
     public const string TagNameEmpty = "TagName cannot be empty.";
     public const string TagNameTooLong = "TagName is too long.";
 
-    public const string TokenIdInvalid = "TokenId must be positive.";
+    public const string TokenIdInvalid = "TokenId cannot be empty.";
 
     public const string TrackIdInvalid = "TrackId must be positive.";
 
