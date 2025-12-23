@@ -27,8 +27,7 @@ public static class DependencyInjectionExtensions
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>()
-                .AddTransient<IUserExistenceChecker, UserService>()
-                .AddTransient<IUsernameAvailabilityChecker, UserService>();
+                .AddTransient<IUserExistenceChecker, UserService>();
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

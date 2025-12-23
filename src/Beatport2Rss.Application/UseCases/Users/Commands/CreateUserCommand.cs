@@ -8,23 +8,13 @@ using FluentValidation;
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
 public readonly record struct CreateUserCommand(
-    string? Username,
     string? EmailAddress,
     string? Password);
 
 public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
-    public CreateUserCommandValidator(
-        IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
-        IUsernameAvailabilityChecker usernameAvailabilityChecker)
+    public CreateUserCommandValidator(IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker)
     {
-        RuleFor(c => c.Username)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Username is required.")
-            .MaximumLength(Username.MaxLength).WithMessage($"Username must be at most {Username.MaxLength} characters.")
-            .Matches(Username.RegexPattern).WithMessage("Username contains invalid characters.")
-            .MustAsync(usernameAvailabilityChecker.IsAvailableAsync).WithMessage("Username is already taken.");
-
         RuleFor(c => c.EmailAddress)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email address is required.")
@@ -42,21 +32,17 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 
 public sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
-    ISlugGenerator slugGenerator,
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
-        var username = Username.Create(command.Username);
-        var password = Password.Create(command.Password);
-
         var user = User.Create(
             UserId.Create(Guid.CreateVersion7()),
-            username,
-            slugGenerator.Generate(username),
             EmailAddress.Create(command.EmailAddress),
-            passwordHasher.Hash(password),
+            passwordHasher.Hash(Password.Create(command.Password)),
+            null,
+            null,
             UserStatus.Pending,
             DateTimeOffset.UtcNow);
 

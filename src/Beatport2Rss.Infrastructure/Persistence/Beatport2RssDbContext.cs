@@ -50,7 +50,6 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
         configurationBuilder.Properties<TrackId>().HaveConversion<TrackIdValueConverter>();
         configurationBuilder.Properties<Uri>().HaveConversion<UriValueConverter>();
         configurationBuilder.Properties<UserId>().HaveConversion<UserIdValueConverter>();
-        configurationBuilder.Properties<Username>().HaveConversion<UsernameValueConverter>();
 
         base.ConfigureConventions(configurationBuilder);
     }

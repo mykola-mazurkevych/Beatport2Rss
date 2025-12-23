@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
-using Beatport2Rss.Domain.Users;
 
 using Slugify;
 
@@ -15,9 +14,6 @@ internal sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
 
     public Slug Generate(FeedName feedName) =>
         Slug.Create(Generate(feedName.Value));
-
-    public Slug Generate(Username username) =>
-        Slug.Create(Generate(username.Value));
 
     private string Generate(string inputString)
     {

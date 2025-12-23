@@ -1,5 +1,4 @@
 using Beatport2Rss.Domain.Common.Interfaces;
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
 
@@ -7,6 +6,8 @@ namespace Beatport2Rss.Domain.Users;
 
 public sealed class User : IAggregateRoot<UserId>
 {
+    public const int NameLength = 100;
+ 
     private readonly HashSet<Feed> _feeds = [];
     private readonly HashSet<Tag> _tags = [];
 
@@ -16,11 +17,11 @@ public sealed class User : IAggregateRoot<UserId>
 
     public UserId Id { get; private set; }
 
-    public Username Username { get; private set; }
-    public Slug Slug { get; private set; }
-
     public EmailAddress EmailAddress { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
+
+    public string? FirstName { get; private set; }
+    public string? LastName { get; private set; }
 
     public UserStatus Status { get; private set; }
 
@@ -31,19 +32,19 @@ public sealed class User : IAggregateRoot<UserId>
 
     public static User Create(
         UserId id,
-        Username username,
-        Slug slug,
         EmailAddress emailAddress,
         PasswordHash passwordHash,
+        string? firstName,
+        string? lastName,
         UserStatus status,
         DateTimeOffset createdDate) =>
         new()
         {
             Id = id,
-            Username = username,
-            Slug = slug,
             EmailAddress = emailAddress,
             PasswordHash = passwordHash,
+            FirstName = firstName,
+            LastName = lastName,
             Status = status,
             CreatedDate = createdDate,
         };

@@ -1,4 +1,3 @@
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
@@ -18,14 +17,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.Id)
             .IsRequired();
 
-        builder.Property(user => user.Username)
-            .HasMaxLength(Username.MaxLength)
-            .IsRequired();
-
-        builder.Property(user => user.Slug)
-            .HasMaxLength(Slug.MaxLength)
-            .IsRequired();
-        
         builder.Property(user => user.EmailAddress)
             .HasMaxLength(EmailAddress.MaxLength)
             .IsRequired();
@@ -33,6 +24,14 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.PasswordHash)
             .HasMaxLength(PasswordHash.MaxLength)
             .IsRequired();
+
+        builder.Property(user => user.FirstName)
+            .HasMaxLength(User.NameLength)
+            .IsRequired(false);
+        
+        builder.Property(user => user.LastName)
+            .HasMaxLength(User.NameLength)
+            .IsRequired(false);
 
         builder.Property(user => user.Status)
             .IsEnum();
@@ -45,12 +44,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Navigation(user => user.Tags)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.HasIndex(user => user.Username)
-            .IsUnique();
-
-        builder.HasIndex(user => user.Slug)
-            .IsUnique();
 
         builder.HasIndex(user => user.EmailAddress)
             .IsUnique();
