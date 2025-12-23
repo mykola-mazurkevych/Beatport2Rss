@@ -19,18 +19,21 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
         IUsernameAvailabilityChecker usernameAvailabilityChecker)
     {
         RuleFor(c => c.Username)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Username is required.")
             .MaximumLength(Username.MaxLength).WithMessage($"Username must be at most {Username.MaxLength} characters.")
             .Matches(Username.RegexPattern).WithMessage("Username contains invalid characters.")
             .MustAsync(usernameAvailabilityChecker.IsAvailableAsync).WithMessage("Username is already taken.");
 
         RuleFor(c => c.EmailAddress)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email address is required.")
             .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters.")
             .EmailAddress().WithMessage("A valid email address is required.")
             .MustAsync(emailAddressAvailabilityChecker.IsAvailableAsync).WithMessage("Email address is already taken.");
 
         RuleFor(c => c.Password)
+            .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(Password.MinLength).WithMessage($"Password must be at least {Password.MinLength} characters long.")
             .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters.");
