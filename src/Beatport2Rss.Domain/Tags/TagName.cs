@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Tags;
 
@@ -16,15 +16,10 @@ public readonly record struct TagName : IValueObject
 
     public string Value { get; }
 
-    public static TagName Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.TagNameEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.TagNameTooLong));
-
-        return new TagName(value);
-    }
+    public static TagName Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.TagNameEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.TagNameTooLong)));
 
     public bool Equals(TagName other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 

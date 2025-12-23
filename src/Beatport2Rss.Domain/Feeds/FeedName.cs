@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Feeds;
 
@@ -16,15 +16,10 @@ public readonly record struct FeedName : IValueObject
 
     public string Value { get; }
 
-    public static FeedName Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.FeedNameEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.FeedNameTooLong));
-
-        return new FeedName(value);
-    }
+    public static FeedName Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.FeedNameEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.FeedNameTooLong)));
 
     public bool Equals(FeedName other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 

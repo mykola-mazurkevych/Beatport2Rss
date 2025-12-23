@@ -1,10 +1,10 @@
 using System.Globalization;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Subscriptions;
 
@@ -14,13 +14,8 @@ public readonly record struct SubscriptionId : IValueObject
 
     public int Value { get; }
 
-    public static SubscriptionId Create(int value)
-    {
-        Guard.Against.NegativeOrZero(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.SubscriptionIdInvalid));
-
-        return new SubscriptionId(value);
-    }
+    public static SubscriptionId Create(int value) =>
+        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SubscriptionIdInvalid)));
 
     public bool Equals(SubscriptionId other) => Value == other.Value;
 

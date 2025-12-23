@@ -11,14 +11,14 @@
       "beatport2rss.domain": {
         "type": "Project",
         "dependencies": {
-          "Ardalis.GuardClauses": "[5.0.0, )"
+          "Light.GuardClauses": "[14.0.0, )"
         }
       },
-      "Ardalis.GuardClauses": {
+      "Light.GuardClauses": {
         "type": "CentralTransitive",
-        "requested": "[5.0.0, )",
-        "resolved": "5.0.0",
-        "contentHash": "jVPRvLw0xIUFto2cMrKgRYADWIHbEEfzZHGiU/swwNgl1zo28Q1zfSa3VUC3C0s9DyhFDPSaF4dEDQRyTZUcyQ=="
+        "requested": "[14.0.0, )",
+        "resolved": "14.0.0",
+        "contentHash": "UTNv86j5+Aw2TFjzBhrKy0rwGhk4sSUyt10AOPQkIRgq59eHvAW1SmjEzAcqBeQmpH2iGX9k/hFDGOnGJ8FR7w=="
       }
     }
   }

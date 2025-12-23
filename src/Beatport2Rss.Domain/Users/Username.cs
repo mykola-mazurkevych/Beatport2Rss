@@ -1,11 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
@@ -18,19 +18,11 @@ public readonly partial record struct Username : IValueObject
 
     public string Value { get; }
 
-    public static Username Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.UsernameEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.UsernameTooLong));
-        Guard.Against.InvalidInput(value,
-            nameof(value),
-            IsValid,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.UsernameInvalidCharacters));
-
-        return new Username(value);
-    }
+    public static Username Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.UsernameEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.UsernameTooLong))
+            .MustMatch(UsernameRegex(), (_, _) => new InvalidValueObjectValueException(ExceptionMessages.UsernameInvalidCharacters)));
 
     public bool Equals(Username other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
@@ -41,8 +33,6 @@ public readonly partial record struct Username : IValueObject
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
-
-    private static bool IsValid(string value) => UsernameRegex().IsMatch(value);
 
     [GeneratedRegex(RegexPattern, RegexOptions.None)]
     private static partial Regex UsernameRegex();

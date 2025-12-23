@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
@@ -17,17 +17,11 @@ public readonly record struct Password : IValueObject
 
     public string Value { get; }
 
-    public static Password Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.PasswordEmpty));
-        Guard.Against.StringTooShort(value, MinLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooShort));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooLong));
-
-        return new Password(value);
-    }
+    public static Password Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.PasswordEmpty))
+            .MustBeLongerThanOrEqualTo(MinLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooShort))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooLong)));
 
     public bool Equals(Password other) => StringComparer.Ordinal.Equals(Value, other.Value);
 

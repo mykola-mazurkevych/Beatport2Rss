@@ -1,8 +1,8 @@
-﻿using Ardalis.GuardClauses;
-
-using Beatport2Rss.Domain.Common.Constants;
+﻿using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Feeds;
 
@@ -12,13 +12,8 @@ public readonly record struct FeedId : IValueObject
 
     public Guid Value { get; }
 
-    public static FeedId Create(Guid value)
-    {
-        Guard.Against.Default(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.FeedIdEmpty));
-
-        return new FeedId(value);
-    }
+    public static FeedId Create(Guid value) =>
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.FeedIdEmpty)));
 
     public bool Equals(FeedId other) => Value == other.Value;
 

@@ -1,8 +1,8 @@
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Tokens;
 
@@ -12,13 +12,8 @@ public readonly record struct TokenId : IValueObject
 
     public Guid Value { get; }
 
-    public static TokenId Create(Guid value)
-    {
-        Guard.Against.Default(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.TokenIdInvalid));
-
-        return new TokenId(value);
-    }
+    public static TokenId Create(Guid value) =>
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.TokenIdInvalid)));
 
     public bool Equals(TokenId other) => Value == other.Value;
 

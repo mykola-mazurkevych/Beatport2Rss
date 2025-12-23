@@ -1,10 +1,10 @@
 using System.Globalization;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Releases;
 
@@ -14,13 +14,8 @@ public readonly record struct ReleaseId : IValueObject
 
     public int Value { get; }
 
-    public static ReleaseId Create(int value)
-    {
-        Guard.Against.NegativeOrZero(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.ReleaseIdInvalid));
-
-        return new ReleaseId(value);
-    }
+    public static ReleaseId Create(int value) =>
+        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.ReleaseIdInvalid)));
 
     public bool Equals(ReleaseId other) => Value == other.Value;
 

@@ -1,7 +1,7 @@
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
@@ -13,16 +13,10 @@ public readonly record struct BeatportSlug
 
     public string Value { get; }
 
-    public static BeatportSlug Create(string value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugEmpty));
-        Guard.Against.StringTooLong(value,
-            MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugTooLong));
-
-        return new BeatportSlug(value);
-    }
+    public static BeatportSlug Create(string value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugTooLong)));
 
     public bool Equals(BeatportSlug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 

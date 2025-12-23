@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
@@ -16,15 +16,10 @@ public readonly record struct PasswordHash : IValueObject
 
     public string Value { get; }
 
-    public static PasswordHash Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.PasswordHashEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.PasswordHashTooLong));
-
-        return new PasswordHash(value);
-    }
+    public static PasswordHash Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.PasswordHashEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.PasswordHashTooLong)));
 
     public bool Equals(PasswordHash other) => StringComparer.Ordinal.Equals(Value, other.Value);
 

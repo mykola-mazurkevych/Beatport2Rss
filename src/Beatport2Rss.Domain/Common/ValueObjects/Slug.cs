@@ -1,14 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
-
-using Ardalis.GuardClauses;
+using System.Text.RegularExpressions;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
 
+using Light.GuardClauses;
+
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
-public readonly record struct Slug : IValueObject
+public readonly partial record struct Slug : IValueObject
 {
     public const char Delimiter = '-';
     public const int SuffixLength = 4;
@@ -18,20 +19,11 @@ public readonly record struct Slug : IValueObject
 
     public string Value { get; }
 
-    public static Slug Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.SlugEmpty));
-        Guard.Against.InvalidInput(value,
-            nameof(value),
-            predicate: SlugIsValid,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.SlugInvalid));
-        Guard.Against.StringTooLong(value,
-            MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong));
-
-        return new Slug(value);
-    }
+    public static Slug Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.SlugEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong))
+            .MustMatch(SlugRegex(), (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugInvalid)));
 
     public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
@@ -45,8 +37,6 @@ public readonly record struct Slug : IValueObject
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
 
-    private static bool SlugIsValid(string value) =>
-        value.Contains(Delimiter, StringComparison.OrdinalIgnoreCase) &&
-        value.Split(Delimiter).Length == 2 &&
-        value.Split(Delimiter)[1].Length == SuffixLength;
+    [GeneratedRegex("^[^-]+-[^-]{4}$", RegexOptions.IgnoreCase)]
+    private static partial Regex SlugRegex();
 }

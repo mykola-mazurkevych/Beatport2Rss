@@ -1,9 +1,9 @@
 using System.Globalization;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
@@ -13,13 +13,8 @@ public readonly record struct BeatportId
 
     public int Value { get; }
 
-    public static BeatportId Create(int value)
-    {
-        Guard.Against.NegativeOrZero(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.BeatportIdInvalid));
-
-        return new BeatportId(value);
-    }
+    public static BeatportId Create(int value) =>
+        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.BeatportIdInvalid)));
 
     public bool Equals(BeatportId other) => Value == other.Value;
 

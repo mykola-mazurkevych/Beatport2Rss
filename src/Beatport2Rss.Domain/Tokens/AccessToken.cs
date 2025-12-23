@@ -1,10 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Ardalis.GuardClauses;
-
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Tokens;
 
@@ -16,15 +16,10 @@ public readonly record struct AccessToken : IValueObject
 
     public string Value { get; }
 
-    public static AccessToken Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.AccessTokenEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.AccessTokenTooLong));
-
-        return new AccessToken(value);
-    }
+    public static AccessToken Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.AccessTokenEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.AccessTokenTooLong)));
 
     public bool Equals(AccessToken other) => StringComparer.Ordinal.Equals(Value, other.Value);
 

@@ -1,13 +1,10 @@
-#pragma warning disable CA1031 // Do not catch general exception types
-
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Mail;
-
-using Ardalis.GuardClauses;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
@@ -19,19 +16,11 @@ public readonly record struct EmailAddress : IValueObject
 
     public string Value { get; }
 
-    public static EmailAddress Create([NotNull] string? value)
-    {
-        Guard.Against.NullOrWhiteSpace(value,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressEmpty));
-        Guard.Against.StringTooLong(value, MaxLength,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressTooLong));
-        Guard.Against.InvalidInput(value,
-            nameof(value),
-            predicate: EmailAddressIsValid,
-            exceptionCreator: () => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressInvalid));
-
-        return new EmailAddress(value);
-    }
+    public static EmailAddress Create([NotNull] string? value) =>
+        new(value
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressEmpty))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressTooLong))
+            .MustBeEmailAddress(_ => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressInvalid)));
 
     public bool Equals(EmailAddress other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
@@ -44,22 +33,4 @@ public readonly record struct EmailAddress : IValueObject
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
-
-    private static bool EmailAddressIsValid(string value)
-    {
-        bool isValid;
-
-        try
-        {
-            var mailAddress = new MailAddress(value);
-
-            isValid = string.Equals(mailAddress.Address, value, StringComparison.OrdinalIgnoreCase);
-        }
-        catch
-        {
-            isValid = false;
-        }
-
-        return isValid;
-    }
 }
