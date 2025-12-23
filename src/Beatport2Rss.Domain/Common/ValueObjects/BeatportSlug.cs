@@ -24,9 +24,15 @@ public readonly record struct BeatportSlug
         return new BeatportSlug(value);
     }
 
-    public override string ToString() => Value;
+    public bool Equals(BeatportSlug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+
+    public static bool operator ==(BeatportSlug left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator !=(BeatportSlug left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(string? left, BeatportSlug right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+    public static bool operator !=(string? left, BeatportSlug right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+
+    public static implicit operator string(BeatportSlug value) => value.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
-
-    public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+    public override string ToString() => Value;
 }

@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Subscriptions;
@@ -8,6 +9,7 @@ using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.Entities;
+using Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +31,29 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Track> Tracks => this.Set<Track>();
 
     public DbSet<Token> Tokens => this.Set<Token>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<AccessToken>().HaveConversion<AccessTokenValueConverter>();
+        configurationBuilder.Properties<BeatportId>().HaveConversion<BeatportIdValueConverter>();
+        configurationBuilder.Properties<BeatportSlug>().HaveConversion<BeatportSlugValueConverter>();
+        configurationBuilder.Properties<EmailAddress>().HaveConversion<EmailAddressValueConverter>();
+        configurationBuilder.Properties<FeedId>().HaveConversion<FeedIdValueConverter>();
+        configurationBuilder.Properties<FeedName>().HaveConversion<FeedNameValueConverter>();
+        configurationBuilder.Properties<PasswordHash>().HaveConversion<PasswordHashValueConverter>();
+        configurationBuilder.Properties<ReleaseId>().HaveConversion<ReleaseIdValueConverter>();
+        configurationBuilder.Properties<Slug>().HaveConversion<SlugValueConverter>();
+        configurationBuilder.Properties<SubscriptionId>().HaveConversion<SubscriptionIdValueConverter>();
+        configurationBuilder.Properties<TagId>().HaveConversion<TagIdValueConverter>();
+        configurationBuilder.Properties<TagName>().HaveConversion<TagNameValueConverter>();
+        configurationBuilder.Properties<TokenId>().HaveConversion<TokenIdValueConverter>();
+        configurationBuilder.Properties<TrackId>().HaveConversion<TrackIdValueConverter>();
+        configurationBuilder.Properties<Uri>().HaveConversion<UriValueConverter>();
+        configurationBuilder.Properties<UserId>().HaveConversion<UserIdValueConverter>();
+        configurationBuilder.Properties<Username>().HaveConversion<UsernameValueConverter>();
+
+        base.ConfigureConventions(configurationBuilder);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

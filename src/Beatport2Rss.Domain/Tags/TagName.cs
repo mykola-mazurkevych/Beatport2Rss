@@ -10,7 +10,7 @@ namespace Beatport2Rss.Domain.Tags;
 
 public readonly record struct TagName : IValueObject
 {
-    private const int MaxLength = 200;
+    public const int MaxLength = 200;
 
     private TagName(string value) => Value = value;
 
@@ -32,6 +32,8 @@ public readonly record struct TagName : IValueObject
     public static bool operator !=(TagName left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
     public static bool operator ==(string? left, TagName right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
     public static bool operator !=(string? left, TagName right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+
+    public static implicit operator string(TagName value) => value.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;

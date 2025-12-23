@@ -16,15 +16,9 @@ public sealed class SubscriptionTagConfiguration : IEntityTypeConfiguration<Subs
         builder.HasKey(subscriptionTag => new { subscriptionTag.SubscriptionId, subscriptionTag.TagId });
 
         builder.Property(subscriptionTag => subscriptionTag.SubscriptionId)
-            .HasConversion(
-                subscriptionId => subscriptionId.Value,
-                value => SubscriptionId.Create(value))
             .IsRequired();
 
         builder.Property(subscriptionTag => subscriptionTag.TagId)
-            .HasConversion(
-                tagId => tagId.Value,
-                value => TagId.Create(value))
             .IsRequired();
 
         builder.Property(subscriptionTag => subscriptionTag.CreatedDate)

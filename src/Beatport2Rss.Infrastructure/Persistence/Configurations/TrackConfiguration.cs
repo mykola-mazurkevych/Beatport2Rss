@@ -16,21 +16,12 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
         builder.HasKey(track => track.Id);
 
         builder.Property(track => track.Id)
-            .HasConversion(
-                trackId => trackId.Value,
-                value => TrackId.Create(value))
             .IsRequired();
 
         builder.Property(track => track.BeatportId)
-            .HasConversion(
-                beatportId => beatportId.Value,
-                value => BeatportId.Create(value))
             .IsRequired();
 
         builder.Property(track => track.BeatportSlug)
-            .HasConversion(
-                beatportSlug => beatportSlug.Value,
-                value => BeatportSlug.Create(value))
             .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
@@ -53,9 +44,6 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
             .IsRequired();
 
         builder.Property(track => track.SampleUri)
-            .HasConversion(
-                uri => uri.ToString(),
-                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 
@@ -63,9 +51,6 @@ public sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
             .IsRequired();
 
         builder.Property(track => track.ReleaseId)
-            .HasConversion(
-                releaseId => releaseId.Value,
-                value => ReleaseId.Create(value))
             .IsRequired();
 
         builder.HasOne<Release>()

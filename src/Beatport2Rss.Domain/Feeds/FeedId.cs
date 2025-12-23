@@ -27,6 +27,10 @@ public readonly record struct FeedId : IValueObject
     public static bool operator ==(Guid left, FeedId right) => left == right.Value;
     public static bool operator !=(Guid left, FeedId right) => left != right.Value;
 
+    public static implicit operator Guid(FeedId value) => value.Value;
+
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();
+
+    public Guid ToGuid() => Value;
 }

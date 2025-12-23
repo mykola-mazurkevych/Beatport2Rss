@@ -16,21 +16,12 @@ public sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
         builder.HasKey(release => release.Id);
 
         builder.Property(release => release.Id)
-            .HasConversion(
-                releaseId => releaseId.Value,
-                value => ReleaseId.Create(value))
             .IsRequired();
 
         builder.Property(release => release.BeatportId)
-            .HasConversion(
-                beatportId => beatportId.Value,
-                value => BeatportId.Create(value))
             .IsRequired();
 
         builder.Property(release => release.BeatportSlug)
-            .HasConversion(
-                beatportSlug => beatportSlug.Value,
-                value => BeatportSlug.Create(value))
             .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
@@ -51,9 +42,6 @@ public sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
             .IsRequired();
 
         builder.Property(release => release.ImageUri)
-            .HasConversion(
-                uri => uri.ToString(),
-                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 

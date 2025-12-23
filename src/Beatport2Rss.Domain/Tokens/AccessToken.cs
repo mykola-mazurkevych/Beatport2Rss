@@ -10,7 +10,7 @@ namespace Beatport2Rss.Domain.Tokens;
 
 public readonly record struct AccessToken : IValueObject
 {
-    private const int MaxLength = 100;
+    public const int MaxLength = 100;
 
     private AccessToken(string value) => Value = value;
 
@@ -32,6 +32,8 @@ public readonly record struct AccessToken : IValueObject
     public static bool operator !=(AccessToken left, string? right) => !StringComparer.Ordinal.Equals(left.Value, right);
     public static bool operator ==(string? left, AccessToken right) => StringComparer.Ordinal.Equals(left, right.Value);
     public static bool operator !=(string? left, AccessToken right) => !StringComparer.Ordinal.Equals(left, right.Value);
+
+    public static implicit operator string(AccessToken value) => value.Value;
 
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
     public override string ToString() => Value;

@@ -16,22 +16,13 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.HasKey(tag => tag.Id);
 
         builder.Property(tag => tag.Id)
-            .HasConversion(
-                tagId => tagId.Value,
-                value => TagId.Create(value))
             .IsRequired();
 
         builder.Property(tag => tag.Name)
-            .HasConversion(
-                name => name.Value,
-                value => TagName.Create(value))
-            .HasMaxLength(200)
+            .HasMaxLength(TagName.MaxLength)
             .IsRequired();
 
         builder.Property(tag => tag.Slug)
-            .HasConversion(
-                slug => slug.Value,
-                value => Slug.Create(value))
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
@@ -39,9 +30,6 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
             .IsRequired();
 
         builder.Property(tag => tag.UserId)
-            .HasConversion(
-                userId => userId.Value,
-                value => UserId.Create(value))
             .IsRequired();
 
         builder.HasOne<User>()

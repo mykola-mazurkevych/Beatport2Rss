@@ -16,24 +16,15 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.HasKey(subscription => subscription.Id);
 
         builder.Property(subscription => subscription.Id)
-            .HasConversion(
-                subscriptionId => subscriptionId.Value,
-                value => SubscriptionId.Create(value))
             .IsRequired();
 
         builder.Property(subscription => subscription.BeatportType)
             .IsEnum();
 
         builder.Property(subscription => subscription.BeatportId)
-            .HasConversion(
-                beatportId => beatportId.Value,
-                value => BeatportId.Create(value))
             .IsRequired();
 
         builder.Property(subscription => subscription.BeatportSlug)
-            .HasConversion(
-                beatportSlug => beatportSlug.Value,
-                value => BeatportSlug.Create(value))
             .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
@@ -42,9 +33,6 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
             .IsRequired();
 
         builder.Property(subscription => subscription.ImageUri)
-            .HasConversion(
-                uri => uri.ToString(),
-                uriString => new Uri(uriString))
             .HasMaxLength(500)
             .IsRequired();
 

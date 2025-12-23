@@ -33,11 +33,17 @@ public readonly record struct Slug : IValueObject
         return new Slug(value);
     }
 
-    public override string ToString() => Value;
+    public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+
+    public static bool operator ==(Slug left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator !=(Slug left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
+    public static bool operator ==(string? left, Slug right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+    public static bool operator !=(string? left, Slug right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
+
+    public static implicit operator string(Slug value) => value.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
-
-    public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+    public override string ToString() => Value;
 
     private static bool SlugIsValid(string value) =>
         value.Contains(Delimiter, StringComparison.OrdinalIgnoreCase) &&

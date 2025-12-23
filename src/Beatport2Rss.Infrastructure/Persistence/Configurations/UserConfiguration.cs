@@ -16,36 +16,21 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(user => user.Id);
 
         builder.Property(user => user.Id)
-            .HasConversion(
-                userId => userId.Value,
-                value => UserId.Create(value))
             .IsRequired();
 
         builder.Property(user => user.Username)
-            .HasConversion(
-                username => username.Value,
-                value => Username.Create(value))
             .HasMaxLength(Username.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.Slug)
-            .HasConversion(
-                slug => slug.Value,
-                value => Slug.Create(value))
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
         
         builder.Property(user => user.EmailAddress)
-            .HasConversion(
-                emailAddress => emailAddress.Value,
-                value => EmailAddress.Create(value))
             .HasMaxLength(EmailAddress.MaxLength)
             .IsRequired();
 
         builder.Property(user => user.PasswordHash)
-            .HasConversion(
-                passwordHash => passwordHash.Value,
-                value => PasswordHash.Create(value))
             .HasMaxLength(PasswordHash.MaxLength)
             .IsRequired();
 

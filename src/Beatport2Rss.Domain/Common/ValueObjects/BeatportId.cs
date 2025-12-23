@@ -21,7 +21,17 @@ public readonly record struct BeatportId
         return new BeatportId(value);
     }
 
-    public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
+    public bool Equals(BeatportId other) => Value == other.Value;
+
+    public static bool operator ==(BeatportId left, int right) => left.Value == right;
+    public static bool operator !=(BeatportId left, int right) => left.Value != right;
+    public static bool operator ==(int left, BeatportId right) => left == right.Value;
+    public static bool operator !=(int left, BeatportId right) => left != right.Value;
+
+    public static implicit operator int(BeatportId value) => value.Value;
 
     public override int GetHashCode() => Value.GetHashCode();
+    public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
+
+    public int ToInt32() => Value;
 }

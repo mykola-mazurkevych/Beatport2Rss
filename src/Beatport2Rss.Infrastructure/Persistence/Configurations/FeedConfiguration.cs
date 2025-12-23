@@ -17,22 +17,13 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
         builder.HasKey(feed => feed.Id);
 
         builder.Property(feed => feed.Id)
-            .HasConversion(
-                feedId => feedId.Value,
-                value => FeedId.Create(value))
             .IsRequired();
     
         builder.Property(feed => feed.Name)
-            .HasConversion(
-                feedName => feedName.Value,
-                value => FeedName.Create(value))
             .HasMaxLength(FeedName.MaxLength)
             .IsRequired();
 
         builder.Property(feed => feed.Slug)
-            .HasConversion(
-                slug => slug.Value,
-                value => Slug.Create(value))
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
@@ -43,9 +34,6 @@ public sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .IsRequired();
 
         builder.Property(feed => feed.UserId)
-            .HasConversion(
-                userId => userId.Value,
-                value => UserId.Create(value))
             .IsRequired();
 
         builder.HasOne<User>()

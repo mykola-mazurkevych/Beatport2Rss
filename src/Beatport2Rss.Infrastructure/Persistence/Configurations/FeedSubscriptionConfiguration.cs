@@ -16,15 +16,9 @@ public sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<Fee
         builder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
 
         builder.Property(feedSubscription => feedSubscription.FeedId)
-            .HasConversion(
-                feedId => feedId.Value,
-                value => FeedId.Create(value))
             .IsRequired();
 
         builder.Property(feedSubscription => feedSubscription.SubscriptionId)
-            .HasConversion(
-                subscriptionId => subscriptionId.Value,
-                value => SubscriptionId.Create(value))
             .IsRequired();
 
         builder.Property(feedSubscription => feedSubscription.CreatedDate)

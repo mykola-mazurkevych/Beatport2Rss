@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Ardalis.GuardClauses;
 
 using Beatport2Rss.Domain.Common.Constants;
@@ -27,6 +29,10 @@ public readonly record struct TrackId : IValueObject
     public static bool operator ==(int left, TrackId right) => left == right.Value;
     public static bool operator !=(int left, TrackId right) => left != right.Value;
 
+    public static implicit operator int(TrackId value) => value.Value;
+
     public override int GetHashCode() => Value.GetHashCode();
-    public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
+
+    public int ToInt32() => Value;
 }

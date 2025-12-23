@@ -14,16 +14,10 @@ public sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
         builder.HasKey(token => token.Id);
 
         builder.Property(token => token.Id)
-            .HasConversion(
-                tokenId => tokenId.Value,
-                value => TokenId.Create(value))
             .IsRequired();
 
         builder.Property(token => token.AccessToken)
-            .HasConversion(
-                accessToken => accessToken.Value,
-                value => AccessToken.Create(value))
-            .HasMaxLength(100)
+            .HasMaxLength(AccessToken.MaxLength)
             .IsRequired();
 
         builder.Property(token => token.CreatedDate)
