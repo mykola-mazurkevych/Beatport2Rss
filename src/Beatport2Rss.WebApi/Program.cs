@@ -1,6 +1,9 @@
+using Beatport2Rss.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.AddInfrastructure();
 
 var app = builder.Build();
 

@@ -1,4 +1,5 @@
 #pragma warning disable CA1034 // Nested types should not be visible
+#pragma warning disable CA1708 // Identifiers should differ by more than case
 
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
@@ -7,19 +8,31 @@ using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services;
 
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Slugify;
 
+using Wolverine;
+
 namespace Beatport2Rss.Infrastructure;
 
 public static class DependencyInjectionExtensions
 {
+    extension(WebApplicationBuilder builder)
+    {
+        public void AddInfrastructure()
+        {
+            builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
+            builder.Services.AddServices(builder.Configuration);
+        }
+    }
+
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
+        private void AddServices(IConfiguration configuration) =>
             services
                 .AddPersistence(configuration)
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()

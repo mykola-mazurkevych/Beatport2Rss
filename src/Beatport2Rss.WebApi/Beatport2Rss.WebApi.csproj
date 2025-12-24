@@ -4,4 +4,8 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Beatport2Rss.Infrastructure\Beatport2Rss.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
