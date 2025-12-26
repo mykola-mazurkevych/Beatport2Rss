@@ -27,6 +27,9 @@ public static class ExceptionMessages
 
     public const string ReleaseIdInvalid = "ReleaseId must be positive.";
 
+    public const string SessionIdEmpty = "SessionId cannot be empty.";
+    public const string RefreshTokenHashEmpty = "Refresh token hash cannot be empty.";
+
     public const string SlugEmpty = "Slug cannot be empty.";
     public const string SlugInvalid = "Slug is invalid.";
     public const string SlugTooLong = "Slug is too long.";
