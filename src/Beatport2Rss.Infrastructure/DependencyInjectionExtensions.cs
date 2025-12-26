@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Slugify;
 
 using Wolverine;
+using Wolverine.FluentValidation;
 
 namespace Beatport2Rss.Infrastructure;
 
@@ -25,7 +26,11 @@ public static class DependencyInjectionExtensions
     {
         public void AddInfrastructure()
         {
-            builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
+            builder.Host.UseWolverine(w =>
+            {
+                w.UseFluentValidation();
+                w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly);
+            });
             builder.Services.AddServices(builder.Configuration);
         }
     }

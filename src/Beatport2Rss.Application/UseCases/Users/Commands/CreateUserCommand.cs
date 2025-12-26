@@ -1,6 +1,7 @@
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Users;
 
 using FluentValidation;
@@ -13,14 +14,13 @@ public readonly record struct CreateUserCommand(
 
 public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
-    public CreateUserCommandValidator(IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker)
+    public CreateUserCommandValidator()
     {
         RuleFor(c => c.EmailAddress)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email address is required.")
             .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters.")
-            .EmailAddress().WithMessage("A valid email address is required.")
-            .MustAsync(emailAddressAvailabilityChecker.IsAvailableAsync).WithMessage("Email address is already taken.");
+            .EmailAddress().WithMessage("A valid email address is required.");
 
         RuleFor(c => c.Password)
             .Cascade(CascadeMode.Stop)
@@ -31,16 +31,28 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 }
 
 public sealed class CreateUserCommandHandler(
+    IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
+        var emailAddress = EmailAddress.Create(command.EmailAddress);
+
+        if (!await emailAddressAvailabilityChecker.IsAvailableAsync(emailAddress, cancellationToken))
+        {
+            throw new EmailAddressAlreadyTakenException($"Email address {emailAddress} is already taken.");
+        }
+
+        var userId = UserId.Create(Guid.CreateVersion7());
+        var password = Password.Create(command.Password);
+        var passwordHash = passwordHasher.Hash(password);
+
         var user = User.Create(
-            UserId.Create(Guid.CreateVersion7()),
-            EmailAddress.Create(command.EmailAddress),
-            passwordHasher.Hash(Password.Create(command.Password)),
+            userId,
+            emailAddress,
+            passwordHash,
             null,
             null,
             UserStatus.Pending,
