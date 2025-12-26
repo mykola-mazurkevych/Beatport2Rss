@@ -11,7 +11,7 @@ namespace Beatport2Rss.WebApi.Middlewares;
 
 internal static class ExceptionsHandlingMiddleware
 {
-    extension(WebApplication app)
+    extension(IApplicationBuilder app)
     {
         public IApplicationBuilder AddExceptionsHandlingMiddleware() => app.Use(HandleAsync);
 
@@ -27,7 +27,8 @@ internal static class ExceptionsHandlingMiddleware
                 {
                     Title = exception.Title,
                     Status = HttpStatusCode.Conflict,
-                    Detail = exception.Detail
+                    Detail = exception.Detail,
+                    TraceId = context.TraceIdentifier
                 };
 
                 context.Response.StatusCode = (int)HttpStatusCode.Conflict;
@@ -40,6 +41,7 @@ internal static class ExceptionsHandlingMiddleware
                     Title = "One or more validation errors occurred",
                     Status = HttpStatusCode.BadRequest,
                     Detail = "The request contains invalid data.",
+                    TraceId = context.TraceIdentifier,
                     Errors = exception.Errors
                         .GroupBy(f => f.PropertyName)
                         .ToDictionary(
@@ -57,7 +59,8 @@ internal static class ExceptionsHandlingMiddleware
                 {
                     Title = "Internal server error",
                     Status = HttpStatusCode.InternalServerError,
-                    Detail = exception.Message
+                    Detail = exception.Message,
+                    TraceId = context.TraceIdentifier,
                 };
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

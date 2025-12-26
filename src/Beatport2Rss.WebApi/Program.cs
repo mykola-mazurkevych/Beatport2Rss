@@ -2,6 +2,7 @@ using Asp.Versioning;
 
 using Beatport2Rss.Infrastructure;
 using Beatport2Rss.WebApi;
+using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints;
 using Beatport2Rss.WebApi.Middlewares;
 
@@ -14,7 +15,7 @@ builder.Services
         o.DefaultApiVersion = ApiVersionsContainer.Default;
         o.AssumeDefaultVersionWhenUnspecified = true;
         o.ReportApiVersions = true;
-        o.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+        o.ApiVersionReader = new HeaderApiVersionReader(ResponseHeaderNames.ApiVersion);
     });
 builder.AddInfrastructure();
 
@@ -25,9 +26,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
-
-app.AddExceptionsHandlingMiddleware();
+app.UseHttpsRedirection()
+    .AddTraceIdHandlingMiddleware()
+    .AddExceptionsHandlingMiddleware();
 
 var v1Builder = app
     .NewVersionedApi("Beatport2Rss API V1")
