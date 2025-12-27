@@ -27,6 +27,7 @@ public sealed class Session : IAggregateRoot<SessionId>
     public static Session Create(
         SessionId id,
         UserId userId,
+        DateTimeOffset createdAt,
         RefreshTokenHash refreshTokenHash,
         DateTimeOffset refreshTokenExpiresAt,
         string? userAgent,
@@ -35,7 +36,7 @@ public sealed class Session : IAggregateRoot<SessionId>
         {
             Id = id,
             UserId = userId,
-            CreatedAt = DateTimeOffset.UtcNow,
+            CreatedAt = createdAt,
             RefreshTokenHash = refreshTokenHash,
             RefreshTokenExpiresAt = refreshTokenExpiresAt,
             UserAgent = userAgent,

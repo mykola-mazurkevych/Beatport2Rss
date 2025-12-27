@@ -39,6 +39,7 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 }
 
 public sealed class CreateUserCommandHandler(
+    IClock clock,
     IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
@@ -64,7 +65,7 @@ public sealed class CreateUserCommandHandler(
             command.FirstName,
             command.LastName,
             UserStatus.Pending,
-            DateTimeOffset.UtcNow);
+            clock.UtcNow);
 
         await userCommandRepository.AddAsync(user, cancellationToken);
 

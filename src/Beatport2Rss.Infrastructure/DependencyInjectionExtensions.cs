@@ -40,6 +40,7 @@ public static class DependencyInjectionExtensions
         private void AddServices(IConfiguration configuration) =>
             services
                 .AddPersistence(configuration)
+                .AddTransient<IClock, Clock>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()

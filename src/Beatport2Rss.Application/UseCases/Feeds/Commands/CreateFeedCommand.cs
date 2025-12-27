@@ -30,6 +30,7 @@ public sealed class CreateFeedCommandValidator : AbstractValidator<CreateFeedCom
 }
 
 public sealed class CreateFeedCommandHandler(
+    IClock clock,
     ISlugGenerator slugGenerator,
     IUserCommandRepository userCommandRepository,
     IUserQueryRepository userQueryRepository,
@@ -47,7 +48,7 @@ public sealed class CreateFeedCommandHandler(
             feedName,
             slugGenerator.Generate(feedName),
             FeedStatus.Active,
-            DateTimeOffset.UtcNow,
+            clock.UtcNow,
             userId);
 
         user!.AddFeed(feed);
