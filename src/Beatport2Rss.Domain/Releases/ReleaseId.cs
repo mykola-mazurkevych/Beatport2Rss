@@ -24,7 +24,7 @@ public readonly record struct ReleaseId : IValueObject
     public static bool operator ==(int left, ReleaseId right) => left == right.Value;
     public static bool operator !=(int left, ReleaseId right) => left != right.Value;
 
-    public static implicit operator int(ReleaseId value) => value.Value;
+    public static implicit operator int(ReleaseId releaseId) => releaseId.Value;
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);

@@ -32,7 +32,7 @@ public readonly partial record struct Slug : IValueObject
     public static bool operator ==(string? left, Slug right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
     public static bool operator !=(string? left, Slug right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static implicit operator string(Slug value) => value.Value;
+    public static implicit operator string(Slug slug) => slug.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;

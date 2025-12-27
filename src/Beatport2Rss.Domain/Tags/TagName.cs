@@ -28,7 +28,7 @@ public readonly record struct TagName : IValueObject
     public static bool operator ==(string? left, TagName right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
     public static bool operator !=(string? left, TagName right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static implicit operator string(TagName value) => value.Value;
+    public static implicit operator string(TagName tagName) => tagName.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;

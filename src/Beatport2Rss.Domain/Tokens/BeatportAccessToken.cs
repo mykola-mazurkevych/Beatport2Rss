@@ -28,7 +28,7 @@ public readonly record struct BeatportAccessToken : IValueObject
     public static bool operator ==(string? left, BeatportAccessToken right) => StringComparer.Ordinal.Equals(left, right.Value);
     public static bool operator !=(string? left, BeatportAccessToken right) => !StringComparer.Ordinal.Equals(left, right.Value);
 
-    public static implicit operator string(BeatportAccessToken value) => value.Value;
+    public static implicit operator string(BeatportAccessToken beatportAccessToken) => beatportAccessToken.Value;
 
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
     public override string ToString() => Value;

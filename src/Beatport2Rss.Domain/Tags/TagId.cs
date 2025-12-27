@@ -24,7 +24,7 @@ public readonly record struct TagId : IValueObject
     public static bool operator ==(int left, TagId right) => left == right.Value;
     public static bool operator !=(int left, TagId right) => left != right.Value;
 
-    public static implicit operator int(TagId value) => value.Value;
+    public static implicit operator int(TagId tagId) => tagId.Value;
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);

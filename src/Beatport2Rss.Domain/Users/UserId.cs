@@ -22,7 +22,7 @@ public readonly record struct UserId : IValueObject
     public static bool operator ==(Guid left, UserId right) => left == right.Value;
     public static bool operator !=(Guid left, UserId right) => left != right.Value;
 
-    public static implicit operator Guid(UserId value) => value.Value;
+    public static implicit operator Guid(UserId userId) => userId.Value;
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();

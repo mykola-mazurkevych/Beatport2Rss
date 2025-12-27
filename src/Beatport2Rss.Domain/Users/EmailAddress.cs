@@ -29,7 +29,7 @@ public readonly record struct EmailAddress : IValueObject
     public static bool operator ==(string? left, EmailAddress right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
     public static bool operator !=(string? left, EmailAddress right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static implicit operator string(EmailAddress value) => value.Value;
+    public static implicit operator string(EmailAddress emailAddress) => emailAddress.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;

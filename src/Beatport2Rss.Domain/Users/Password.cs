@@ -30,7 +30,7 @@ public readonly record struct Password : IValueObject
     public static bool operator ==(string? left, Password right) => StringComparer.Ordinal.Equals(left, right.Value);
     public static bool operator !=(string? left, Password right) => !StringComparer.Ordinal.Equals(left, right.Value);
 
-    public static implicit operator string(Password value) => value.Value;
+    public static implicit operator string(Password password) => password.Value;
     
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
     public override string ToString() => Value;

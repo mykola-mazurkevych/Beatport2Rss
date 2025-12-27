@@ -28,7 +28,7 @@ public readonly record struct PasswordHash : IValueObject
     public static bool operator ==(string? left, PasswordHash right) => StringComparer.Ordinal.Equals(left, right.Value);
     public static bool operator !=(string? left, PasswordHash right) => !StringComparer.Ordinal.Equals(left, right.Value);
 
-    public static implicit operator string(PasswordHash value) => value.Value;
+    public static implicit operator string(PasswordHash passwordHash) => passwordHash.Value;
 
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);
     public override string ToString() => Value;

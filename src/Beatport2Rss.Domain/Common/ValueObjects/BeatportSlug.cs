@@ -1,11 +1,12 @@
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
+using Beatport2Rss.Domain.Common.Interfaces;
 
 using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
-public readonly record struct BeatportSlug
+public readonly record struct BeatportSlug : IValueObject
 {
     public const int MaxLength = 200;
 
@@ -25,7 +26,7 @@ public readonly record struct BeatportSlug
     public static bool operator ==(string? left, BeatportSlug right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
     public static bool operator !=(string? left, BeatportSlug right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
 
-    public static implicit operator string(BeatportSlug value) => value.Value;
+    public static implicit operator string(BeatportSlug beatportSlug) => beatportSlug.Value;
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
