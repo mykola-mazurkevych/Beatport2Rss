@@ -32,7 +32,7 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.Properties<AccessToken>().HaveConversion<AccessTokenValueConverter>();
+        configurationBuilder.Properties<BeatportAccessToken>().HaveConversion<BeatportAccessTokenValueConverter>();
         configurationBuilder.Properties<BeatportId>().HaveConversion<BeatportIdValueConverter>();
         configurationBuilder.Properties<BeatportSlug>().HaveConversion<BeatportSlugValueConverter>();
         configurationBuilder.Properties<EmailAddress>().HaveConversion<EmailAddressValueConverter>();

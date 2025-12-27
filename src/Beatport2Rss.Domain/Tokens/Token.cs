@@ -10,7 +10,7 @@ public sealed class Token : IAggregateRoot<TokenId>
 
     public TokenId Id { get; private set; }
 
-    public AccessToken AccessToken { get; private set; }
+    public BeatportAccessToken AccessToken { get; private set; }
 
     public DateTimeOffset CreatedDate { get; private set; }
     public DateTimeOffset ExpirationDate { get; private set; }
@@ -19,7 +19,7 @@ public sealed class Token : IAggregateRoot<TokenId>
 
     public static Token Create(
         TokenId id,
-        AccessToken accessToken,
+        BeatportAccessToken accessToken,
         DateTimeOffset createdDate,
         DateTimeOffset expirationDate) =>
         new()

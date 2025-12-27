@@ -13,7 +13,7 @@ public readonly record struct TokenId : IValueObject
     public Guid Value { get; }
 
     public static TokenId Create(Guid value) =>
-        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.TokenIdInvalid)));
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.TokenIdEmpty)));
 
     public bool Equals(TokenId other) => Value == other.Value;
 

@@ -17,7 +17,7 @@ public sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
             .IsRequired();
 
         builder.Property(token => token.AccessToken)
-            .HasMaxLength(AccessToken.MaxLength)
+            .HasMaxLength(BeatportAccessToken.MaxLength)
             .IsRequired();
 
         builder.Property(token => token.CreatedDate)
