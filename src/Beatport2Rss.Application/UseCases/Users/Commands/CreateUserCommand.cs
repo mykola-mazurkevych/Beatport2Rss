@@ -10,7 +10,9 @@ namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
 public readonly record struct CreateUserCommand(
     string? EmailAddress,
-    string? Password);
+    string? Password,
+    string? FirstName,
+    string? LastName);
 
 public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
 {
@@ -19,14 +21,20 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
         RuleFor(c => c.EmailAddress)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Email address is required.")
-            .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters.")
+            .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters long.")
             .EmailAddress().WithMessage("A valid email address is required.");
 
         RuleFor(c => c.Password)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Password is required.")
             .MinimumLength(Password.MinLength).WithMessage($"Password must be at least {Password.MinLength} characters long.")
-            .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters.");
+            .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters long.");
+
+        RuleFor(c => c.FirstName)
+            .MaximumLength(User.NameLength).WithMessage($"First name must be at most {User.NameLength} characters long.");
+        
+        RuleFor(c => c.LastName)
+            .MaximumLength(User.NameLength).WithMessage($"Last name must be at most {User.NameLength} characters long.");
     }
 }
 
@@ -53,8 +61,8 @@ public sealed class CreateUserCommandHandler(
             userId,
             emailAddress,
             passwordHash,
-            null,
-            null,
+            command.FirstName,
+            command.LastName,
             UserStatus.Pending,
             DateTimeOffset.UtcNow);
 

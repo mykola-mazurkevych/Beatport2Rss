@@ -7,28 +7,25 @@ using Wolverine;
 
 namespace Beatport2Rss.WebApi.Endpoints;
 
-internal static class UserEndpoints
+internal static class UserEndpointsBuilder
 {
-    extension(IEndpointRouteBuilder builder)
+    extension(IEndpointRouteBuilder routeBuilder)
     {
-        public RouteHandlerBuilder MapUserEndpoints() =>
-            builder
-                .MapGroup("/users")
-                .WithName("Users")
-                .MapEndpoints();
-    }
+        public IEndpointRouteBuilder BuildUserEndpoints()
+        {
+            var groupBuilder = routeBuilder.MapGroup("/users").WithName("Users");
 
-    extension(RouteGroupBuilder builder)
-    {
-        private RouteHandlerBuilder MapEndpoints() =>
-            builder
+            groupBuilder
                 .MapPost("", CreateUserAsync)
-                .WithName("Create a user")
+                .WithName("Create a user.")
                 .AllowAnonymous()
                 .Produces(StatusCodes.Status201Created)
                 .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
                 .Produces<ConflictResponse>(StatusCodes.Status409Conflict)
                 .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+
+            return routeBuilder;
+        }
     }
 
     private static async Task<IResult> CreateUserAsync(

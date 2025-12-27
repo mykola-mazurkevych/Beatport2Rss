@@ -35,6 +35,7 @@ var v1Builder = app
     .HasApiVersion(ApiVersionsContainer.V1);
 
 v1Builder.MapGet("", () => "Hello, Beatport2Rss!");
-v1Builder.MapUserEndpoints();
+v1Builder
+    .BuildUserEndpoints();
 
 app.Run();
