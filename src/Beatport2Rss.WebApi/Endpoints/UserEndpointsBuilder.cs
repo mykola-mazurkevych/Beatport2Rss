@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.UseCases.Users.Commands;
+using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Responses;
 
 using Microsoft.AspNetCore.Mvc;
@@ -17,7 +18,8 @@ internal static class UserEndpointsBuilder
 
             groupBuilder
                 .MapPost("", CreateUserAsync)
-                .WithName("Create a user.")
+                .WithName(UserEndpointNames.Create)
+                .WithDescription("Create a user.")
                 .AllowAnonymous()
                 .Produces(StatusCodes.Status201Created)
                 .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
