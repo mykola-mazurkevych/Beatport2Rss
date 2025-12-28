@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
+using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Requests.Sessions;
 using Beatport2Rss.WebApi.Responses;
 
@@ -18,10 +19,10 @@ internal static class SessionEndpointsBuilder
 
             groupBuilder
                 .MapPost("", CreateSessionAsync)
-                .WithName("CreateSession")
+                .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
                 .AllowAnonymous()
-                .Produces(StatusCodes.Status201Created)
+                .Produces<SessionCreatedResult>(StatusCodes.Status201Created)
                 .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
                 .Produces<UnauthorizedResponse>(StatusCodes.Status401Unauthorized)
                 .Produces<ForbiddenResponse>(StatusCodes.Status403Forbidden)
@@ -29,7 +30,7 @@ internal static class SessionEndpointsBuilder
 
             groupBuilder
                 .MapGet("/current", GetSessionAsync)
-                .WithName("GetSession")
+                .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status200OK)
@@ -39,7 +40,7 @@ internal static class SessionEndpointsBuilder
 
             groupBuilder
                 .MapDelete("/current", DeleteSessionAsync)
-                .WithName("DeleteSession")
+                .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
@@ -49,7 +50,7 @@ internal static class SessionEndpointsBuilder
             
             groupBuilder
                 .MapPatch("/current", UpdateSessionAsync)
-                .WithName("UpdateSession")
+                .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status200OK)
@@ -61,7 +62,7 @@ internal static class SessionEndpointsBuilder
             
             groupBuilder
                 .MapDelete("", DeleteSessionsAsync)
-                .WithName("DeleteSessions")
+                .WithName(SessionEndpointNames.DeleteAll)
                 .WithDescription("Delete all user sessions (log out from all devices).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
@@ -87,7 +88,7 @@ internal static class SessionEndpointsBuilder
 
             var result = await bus.InvokeAsync<SessionCreatedResult>(command, cancellationToken);
 
-            return Results.CreatedAtRoute("GetSession", result);
+            return Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result);
         }
 
         private static IResult DeleteSessionAsync(HttpContext context) => throw new NotImplementedException();

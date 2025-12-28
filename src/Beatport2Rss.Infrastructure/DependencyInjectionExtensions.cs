@@ -1,9 +1,13 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
+using System.Reflection;
+using System.Text.Json.Serialization;
+
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services;
@@ -31,12 +35,21 @@ public static class DependencyInjectionExtensions
                 w.UseFluentValidation();
                 w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly);
             });
-            builder.Services.AddServices(builder.Configuration);
+
+            builder.Services
+                .ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .ConfigureOptions(builder.Configuration)
+                .AddServices(builder.Configuration);
         }
     }
 
     extension(IServiceCollection services)
     {
+        private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
+            services
+                .Configure<JwtOptions>(o => configuration.GetSection("Jwt").Bind(o))
+                .Configure<RefreshTokenOptions>(o => configuration.GetSection("RefreshToken").Bind(o));
+
         private void AddServices(IConfiguration configuration) =>
             services
                 .AddPersistence(configuration)
