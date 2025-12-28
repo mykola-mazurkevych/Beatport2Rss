@@ -41,7 +41,7 @@ public sealed class CreateSessionCommandValidator : AbstractValidator<CreateSess
     }
 }
 
-public readonly record struct SessionCreatedResult(
+public readonly record struct CreateSessionResult(
     string AccessToken,
     AccessTokenType TokenType,
     int ExpiresIn,
@@ -56,7 +56,7 @@ public sealed class CreateSessionCommandHandler(
     IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<SessionCreatedResult> HandleAsync(CreateSessionCommand command, CancellationToken cancellationToken = default)
+    public async Task<CreateSessionResult> HandleAsync(CreateSessionCommand command, CancellationToken cancellationToken = default)
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
@@ -91,7 +91,7 @@ public sealed class CreateSessionCommandHandler(
 
         (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
 
-        var result = new SessionCreatedResult(
+        var result = new CreateSessionResult(
             accessToken.Value,
             accessToken.Type,
             expiresIn,

@@ -1,21 +1,26 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
-using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.Options;
+using Beatport2Rss.Application.UseCases.Sessions.Interfaces;
+using Beatport2Rss.Application.UseCases.Users.Interfaces;
+using Beatport2Rss.Infrastructure.Middlewares;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
@@ -32,6 +37,9 @@ public static class DependencyInjectionExtensions
         {
             builder.Host.UseWolverine(w =>
             {
+                w.Policies.ForMessagesOfType<INeedSessionRequest>().AddMiddleware<SessionLookupMiddleware>();
+                w.Policies.ForMessagesOfType<INeedUserRequest>().AddMiddleware<UserLookupMiddleware>();
+
                 w.UseFluentValidation();
                 w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly);
             });
@@ -39,6 +47,7 @@ public static class DependencyInjectionExtensions
             builder.Services
                 .ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()))
                 .ConfigureOptions(builder.Configuration)
+                .AddJwtAuthentication(builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddServices(builder.Configuration);
         }
     }
@@ -47,8 +56,37 @@ public static class DependencyInjectionExtensions
     {
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<JwtOptions>(o => configuration.GetSection("Jwt").Bind(o))
-                .Configure<RefreshTokenOptions>(o => configuration.GetSection("RefreshToken").Bind(o));
+                .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
+                .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
+
+        private IServiceCollection AddJwtAuthentication(JwtOptions jwtOptions)
+        {
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(o =>
+                {
+                    // TODO: log context.Exception.Message
+                    o.Events.OnAuthenticationFailed = _ => Task.CompletedTask;
+
+                    // TODO: make sure the session exists
+                    o.Events.OnTokenValidated = _ => Task.CompletedTask;
+
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtOptions.Audience,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
+                    };
+                });
+
+            services.AddAuthorization();
+
+            return services;
+        }
 
         private void AddServices(IConfiguration configuration) =>
             services
@@ -68,6 +106,7 @@ public static class DependencyInjectionExtensions
                 .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
+                .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
     }

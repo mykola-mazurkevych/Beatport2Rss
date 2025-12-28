@@ -1,5 +1,7 @@
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
+using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
 using Beatport2Rss.WebApi.Responses;
 
@@ -22,7 +24,7 @@ internal static class SessionEndpointsBuilder
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
                 .AllowAnonymous()
-                .Produces<SessionCreatedResult>(StatusCodes.Status201Created)
+                .Produces<CreateSessionResult>(StatusCodes.Status201Created)
                 .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
                 .Produces<UnauthorizedResponse>(StatusCodes.Status401Unauthorized)
                 .Produces<ForbiddenResponse>(StatusCodes.Status403Forbidden)
@@ -34,7 +36,7 @@ internal static class SessionEndpointsBuilder
                 .WithDescription("Get current session.")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status401Unauthorized)
+                .Produces<UnauthorizedResponse>(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
 
@@ -47,7 +49,7 @@ internal static class SessionEndpointsBuilder
                 .Produces(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
-            
+
             groupBuilder
                 .MapPatch("/current", UpdateSessionAsync)
                 .WithName(SessionEndpointNames.UpdateCurrent)
@@ -59,7 +61,7 @@ internal static class SessionEndpointsBuilder
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status422UnprocessableEntity)
                 .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
-            
+
             groupBuilder
                 .MapDelete("", DeleteSessionsAsync)
                 .WithName(SessionEndpointNames.DeleteAll)
@@ -86,14 +88,28 @@ internal static class SessionEndpointsBuilder
                 context.Request.Headers.UserAgent,
                 context.Connection.RemoteIpAddress?.ToString());
 
-            var result = await bus.InvokeAsync<SessionCreatedResult>(command, cancellationToken);
+            var result = await bus.InvokeAsync<CreateSessionResult>(command, cancellationToken);
 
             return Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result);
         }
 
         private static IResult DeleteSessionAsync(HttpContext context) => throw new NotImplementedException();
         private static IResult DeleteSessionsAsync(HttpContext context) => throw new NotImplementedException();
-        private static IResult GetSessionAsync(HttpContext context) => throw new NotImplementedException();
+
+        private static async Task<IResult> GetSessionAsync(
+            [FromServices] IMessageBus bus,
+            HttpContext context,
+            CancellationToken cancellationToken)
+        {
+            var query = new GetSessionQuery(
+                context.User.SessionId,
+                context.User.Id);
+
+            var result = await bus.InvokeAsync<GetSessionResult>(query, cancellationToken);
+
+            return Results.Ok(result);
+        }
+
         private static IResult UpdateSessionAsync(HttpContext context) => throw new NotImplementedException();
     }
 }

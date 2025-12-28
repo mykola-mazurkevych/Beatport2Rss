@@ -42,10 +42,9 @@ internal sealed class JwtService(
             _jwtOptions.Issuer,
             _jwtOptions.Audience,
             claims,
-            issuedAt.DateTime,
-            issuedAt.AddSeconds(_jwtOptions.ExpiresIn).DateTime,
-            credentials
-        );
+            issuedAt.UtcDateTime,
+            issuedAt.AddSeconds(_jwtOptions.ExpiresIn).UtcDateTime,
+            credentials);
         var token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
         var accessToken = AccessToken.Bearer(token);
 

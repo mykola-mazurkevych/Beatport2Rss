@@ -6,6 +6,8 @@ using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints;
 using Beatport2Rss.WebApi.Middlewares;
 
+using Microsoft.AspNetCore.HttpOverrides;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
@@ -21,14 +23,19 @@ builder.AddInfrastructure();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection()
     .AddTraceIdHandlingMiddleware()
     .AddExceptionsHandlingMiddleware();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
 
 var v1Builder = app
     .NewVersionedApi("Beatport2Rss API V1")

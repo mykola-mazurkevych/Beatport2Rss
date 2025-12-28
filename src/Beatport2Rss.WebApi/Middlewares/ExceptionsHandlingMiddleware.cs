@@ -71,9 +71,9 @@ internal static class ExceptionsHandlingMiddleware
             {
                 var response = new InternalServerErrorResponse
                 {
-                    Title = "Internal server error",
+                    Title = $"Internal server error ({exception.GetType().Name})",
                     Status = HttpStatusCode.InternalServerError,
-                    Detail = exception.Message,
+                    Detail = exception.StackTrace,
                     TraceId = context.TraceIdentifier,
                 };
 
