@@ -34,6 +34,20 @@ internal static class ExceptionsHandlingMiddleware
                 context.Response.StatusCode = (int)HttpStatusCode.Conflict;
                 await context.Response.WriteAsJsonAsync(response);
             }
+            catch(InactiveUserException exception)
+            {
+                var response = new ForbiddenResponse { Error = exception.Message };
+
+                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                await context.Response.WriteAsJsonAsync(response);
+            }
+            catch(InvalidCredentialsException exception)
+            {
+                var response = new UnauthorizedResponse { Error = exception.Message };
+
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                await context.Response.WriteAsJsonAsync(response);
+            }
             catch (ValidationException exception)
             {
                 var response = new BadRequestResponse

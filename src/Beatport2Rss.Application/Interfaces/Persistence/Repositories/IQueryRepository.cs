@@ -9,6 +9,7 @@ public interface IQueryRepository<TEntity, in TId>
     where TId : struct, IValueObject
 {
     Task<TEntity?> GetAsync(TId id, CancellationToken cancellationToken = default);
+    Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
     Task<bool> NotExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);

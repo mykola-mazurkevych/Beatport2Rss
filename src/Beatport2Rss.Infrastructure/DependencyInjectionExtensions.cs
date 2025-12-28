@@ -40,10 +40,12 @@ public static class DependencyInjectionExtensions
         private void AddServices(IConfiguration configuration) =>
             services
                 .AddPersistence(configuration)
+                .AddTransient<IAccessTokenService, JwtService>()
                 .AddTransient<IClock, Clock>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
+                .AddTransient<IRefreshTokenService, RefreshTokenService>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>()
                 .AddTransient<IUserExistenceChecker, UserService>();
@@ -52,6 +54,7 @@ public static class DependencyInjectionExtensions
             services
                 .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
     }

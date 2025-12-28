@@ -17,7 +17,10 @@ internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbCo
     protected abstract IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query);
 
     public Task<TEntity?> GetAsync(TId id, CancellationToken cancellationToken = default) =>
-        ApplyIncludes(_dbSet).SingleOrDefaultAsync(entity => entity.Id.Equals(id), cancellationToken);
+        GetAsync(entity => entity.Id.Equals(id), cancellationToken);
+
+    public Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        ApplyIncludes(_dbSet).SingleOrDefaultAsync(predicate, cancellationToken);
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
         _dbSet.AnyAsync(predicate, cancellationToken);
