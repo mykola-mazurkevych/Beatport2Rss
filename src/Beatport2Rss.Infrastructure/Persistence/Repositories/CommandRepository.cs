@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext dbContext)
-    : ICommandRepository<TEntity, TId>
+internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext dbContext) :
+    ICommandRepository<TEntity, TId>
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IValueObject
 {

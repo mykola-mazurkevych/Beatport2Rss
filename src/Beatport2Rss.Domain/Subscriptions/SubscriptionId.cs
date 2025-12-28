@@ -25,6 +25,7 @@ public readonly record struct SubscriptionId : IValueObject
     public static bool operator !=(int left, SubscriptionId right) => left != right.Value;
 
     public static implicit operator int(SubscriptionId subscriptionId) => subscriptionId.Value;
+    public static implicit operator string(SubscriptionId subscriptionId) => subscriptionId.ToString();
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);

@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Tags;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Entities;
 
-public sealed class SubscriptionTag
+internal sealed class SubscriptionTag
 {
     public SubscriptionId SubscriptionId { get; set; }
     public TagId TagId { get; set; }

@@ -23,6 +23,7 @@ public readonly record struct TokenId : IValueObject
     public static bool operator !=(Guid left, TokenId right) => left != right.Value;
 
     public static implicit operator Guid(TokenId tokenId) => tokenId.Value;
+    public static implicit operator string(TokenId tokenId) => tokenId.ToString();
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();

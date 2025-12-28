@@ -23,6 +23,7 @@ public readonly record struct SessionId : IValueObject
     public static bool operator !=(Guid left, SessionId right) => left != right.Value;
 
     public static implicit operator Guid(SessionId sessionId) => sessionId.Value;
+    public static implicit operator string(SessionId sessionId) => sessionId.ToString();
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();

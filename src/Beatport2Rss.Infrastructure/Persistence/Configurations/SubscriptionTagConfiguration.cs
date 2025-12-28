@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-public sealed class SubscriptionTagConfiguration : IEntityTypeConfiguration<SubscriptionTag>
+internal sealed class SubscriptionTagConfiguration : IEntityTypeConfiguration<SubscriptionTag>
 {
     public void Configure(EntityTypeBuilder<SubscriptionTag> builder)
     {

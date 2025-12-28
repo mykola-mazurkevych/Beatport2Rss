@@ -16,8 +16,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 
-internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options)
-    : DbContext(options)
+internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options) :
+    DbContext(options)
 {
     public DbSet<Feed> Feeds => this.Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => this.Set<FeedSubscription>();

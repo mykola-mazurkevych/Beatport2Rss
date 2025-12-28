@@ -4,4 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
-internal sealed class SubscriptionIdValueConverter() : ValueConverter<SubscriptionId, int>(subscriptionId => subscriptionId.Value, value => SubscriptionId.Create(value));
+internal sealed class SubscriptionIdValueConverter() :
+    ValueConverter<SubscriptionId, int>(
+        subscriptionId => subscriptionId.Value,
+        value => SubscriptionId.Create(value));

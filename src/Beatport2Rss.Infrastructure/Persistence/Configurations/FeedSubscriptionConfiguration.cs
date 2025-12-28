@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-public sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<FeedSubscription>
+internal sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<FeedSubscription>
 {
     public void Configure(EntityTypeBuilder<FeedSubscription> builder)
     {

@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Subscriptions;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Entities;
 
-public sealed class FeedSubscription
+internal sealed class FeedSubscription
 {
     public FeedId FeedId { get; set; }
     public SubscriptionId SubscriptionId { get; set; }

@@ -7,8 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbContext)
-    : IQueryRepository<TEntity, TId>
+internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbContext) :
+    IQueryRepository<TEntity, TId>
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IValueObject
 {

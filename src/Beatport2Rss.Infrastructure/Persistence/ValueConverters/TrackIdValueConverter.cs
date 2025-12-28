@@ -4,4 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
-internal sealed class TrackIdValueConverter() : ValueConverter<TrackId, int>(trackId => trackId.Value, value => TrackId.Create(value));
+internal sealed class TrackIdValueConverter() :
+    ValueConverter<TrackId, int>(
+        trackId => trackId.Value,
+        value => TrackId.Create(value));

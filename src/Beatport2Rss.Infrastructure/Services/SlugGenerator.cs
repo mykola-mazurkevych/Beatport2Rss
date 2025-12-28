@@ -8,7 +8,8 @@ using Slugify;
 
 namespace Beatport2Rss.Infrastructure.Services;
 
-internal sealed class SlugGenerator(ISlugHelper slugHelper) : ISlugGenerator
+internal sealed class SlugGenerator(ISlugHelper slugHelper) :
+    ISlugGenerator
 {
     private const string AlphaNumericChars = "abcdefghijklmnopqrstuvwxyz0123456789";
 

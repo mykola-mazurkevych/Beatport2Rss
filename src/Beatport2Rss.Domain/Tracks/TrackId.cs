@@ -25,6 +25,7 @@ public readonly record struct TrackId : IValueObject
     public static bool operator !=(int left, TrackId right) => left != right.Value;
 
     public static implicit operator int(TrackId trackId) => trackId.Value;
+    public static implicit operator string(TrackId trackId) => trackId.ToString();
 
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);

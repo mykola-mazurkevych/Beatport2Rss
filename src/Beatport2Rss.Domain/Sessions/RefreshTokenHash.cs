@@ -27,6 +27,7 @@ public readonly record struct RefreshTokenHash : IValueObject
     public static bool operator !=(byte[] left, RefreshTokenHash right) => !left.SequenceEqual(right.Value);
 
     public static implicit operator byte[](RefreshTokenHash refreshTokenHash) => refreshTokenHash.Value;
+    public static implicit operator string(RefreshTokenHash refreshTokenHash) => refreshTokenHash.ToString();
 
     public override int GetHashCode() => GetHashCodeInternal();
     public override string ToString() => Convert.ToBase64String(Value);
