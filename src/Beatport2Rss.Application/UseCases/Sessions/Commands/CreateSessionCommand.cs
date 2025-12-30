@@ -19,6 +19,12 @@ public readonly record struct CreateSessionCommand(
     string? UserAgent,
     string? IpAddress);
 
+public readonly record struct CreateSessionResult(
+    string AccessToken,
+    AccessTokenType TokenType,
+    int ExpiresIn,
+    string RefreshToken);
+
 public sealed class CreateSessionCommandValidator : AbstractValidator<CreateSessionCommand>
 {
     public CreateSessionCommandValidator()
@@ -43,12 +49,6 @@ public sealed class CreateSessionCommandValidator : AbstractValidator<CreateSess
             .MaximumLength(Session.IpAddressMaxLength).WithMessage($"IP address must be at most {Session.IpAddressMaxLength} characters long.");
     }
 }
-
-public readonly record struct CreateSessionResult(
-    string AccessToken,
-    AccessTokenType TokenType,
-    int ExpiresIn,
-    string RefreshToken);
 
 public sealed class CreateSessionCommandHandler(
     IValidator<CreateSessionCommand> validator,

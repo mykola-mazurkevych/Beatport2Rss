@@ -4,7 +4,6 @@ using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Types;
 using Beatport2Rss.Domain.Sessions;
-using Beatport2Rss.Domain.Users;
 
 using FluentValidation;
 
@@ -12,21 +11,7 @@ using OneOf;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Queries;
 
-public readonly record struct GetSessionQuery(
-    Guid UserId,
-    Guid SessionId);
-
-public sealed class GetSessionQueryValidator : AbstractValidator<GetSessionQuery>
-{
-    public GetSessionQueryValidator()
-    {
-        RuleFor(c => c.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-        
-        RuleFor(c => c.SessionId)
-            .NotEmpty().WithMessage("Session ID is required.");
-    }
-}
+public readonly record struct GetSessionQuery(Guid SessionId);
 
 public readonly record struct GetSessionResult(
     Guid SessionId,
@@ -36,6 +21,15 @@ public readonly record struct GetSessionResult(
     string? LastName,
     string? UserAgent,
     string? IpAddress);
+
+public sealed class GetSessionQueryValidator : AbstractValidator<GetSessionQuery>
+{
+    public GetSessionQueryValidator()
+    {
+        RuleFor(c => c.SessionId)
+            .NotEmpty().WithMessage("Session ID is required.");
+    }
+}
 
 public sealed class GetSessionQueryHandler(
     IValidator<GetSessionQuery> validator,
@@ -52,13 +46,6 @@ public sealed class GetSessionQueryHandler(
             return new ValidationFailed(validationResult.GetErrors());
         }
 
-        var userId = UserId.Create(query.UserId);
-        var user = await userQueryRepository.GetAsync(userId, cancellationToken);
-        if (user is null)
-        {
-            return new Unprocessable("User not found.");
-        }
-
         var sessionId = SessionId.Create(query.SessionId);
         var session = await sessionQueryRepository.GetAsync(sessionId, cancellationToken);
         if (session is null)
@@ -66,7 +53,14 @@ public sealed class GetSessionQueryHandler(
             return new NotFound("Session not found.");
         }
 
-        var result = new GetSessionResult(session.Id,
+        var user = await userQueryRepository.GetAsync(session.UserId, cancellationToken);
+        if (user is null)
+        {
+            return new Unprocessable("User not found.");
+        }
+
+        var result = new GetSessionResult(
+            session.Id,
             session.CreatedAt,
             user.EmailAddress,
             user.FirstName,

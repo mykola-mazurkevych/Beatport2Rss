@@ -56,9 +56,7 @@ internal static class SessionEndpointsBuilder
                     "/current",
                     async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new GetSessionQuery(
-                            context.User.Id,
-                            context.User.SessionId);
+                        var query = new GetSessionQuery(context.User.SessionId);
                         var result = await bus.InvokeAsync<OneOf<Success<GetSessionResult>, ValidationFailed, NotFound, Unprocessable>>(query, cancellationToken);
 
                         return result.Match<IResult>(
@@ -78,14 +76,26 @@ internal static class SessionEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapDelete("/current", DeleteSessionAsync)
+                .MapDelete(
+                    "/current",
+                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSessionCommand(context.User.SessionId);
+                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed, NotFound>>(command, cancellationToken);
+
+                        return result.Match<IResult>(
+                            _ => Results.NoContent(),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
+                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail));
+                    })
                 .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapPatch("/current", UpdateSessionAsync)
@@ -113,7 +123,6 @@ internal static class SessionEndpointsBuilder
             return routeBuilder;
         }
 
-        private static IResult DeleteSessionAsync(HttpContext context) => throw new NotImplementedException();
         private static IResult DeleteSessionsAsync(HttpContext context) => throw new NotImplementedException();
         private static IResult UpdateSessionAsync(HttpContext context) => throw new NotImplementedException();
     }
