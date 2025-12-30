@@ -45,6 +45,8 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Navigation(user => user.Tags)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.Ignore(user => user.IsActive);
+
         builder.HasIndex(user => user.EmailAddress)
             .IsUnique();
     }

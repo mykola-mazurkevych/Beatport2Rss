@@ -2,10 +2,6 @@
 
 namespace Beatport2Rss.Application.Types;
 
-public readonly record struct Success;
-
-public readonly record struct Success<TValue>(in TValue Value);
-
 public readonly record struct EmailAddressAlreadyTaken
 {
     public EmailAddressAlreadyTaken(string emailAddress)
@@ -29,6 +25,12 @@ public readonly record struct InvalidCredentials
 public readonly record struct None;
 
 public readonly record struct NotFound(string Detail);
+
+public readonly record struct Success;
+
+public readonly record struct Success<TValue>(in TValue Value);
+
+public readonly record struct Unauthorized(string Detail);
 
 public readonly record struct Unprocessable(string Detail);
 

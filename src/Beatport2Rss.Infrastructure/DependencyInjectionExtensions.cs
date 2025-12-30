@@ -57,11 +57,8 @@ public static class DependencyInjectionExtensions
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(o =>
                 {
-                    // TODO: log context.Exception.Message
-                    o.Events.OnAuthenticationFailed = _ => Task.CompletedTask;
-
-                    // TODO: make sure the session exists
-                    o.Events.OnTokenValidated = _ => Task.CompletedTask;
+                    o.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
+                    o.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
 
                     o.TokenValidationParameters = new TokenValidationParameters
                     {

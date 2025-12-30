@@ -79,12 +79,13 @@ public sealed class CreateSessionCommandHandler(
             return new InvalidCredentials();
         }
 
-        if (user.Status != UserStatus.Active)
+        if (!user.IsActive)
         {
             return new InactiveUser();
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
         (RefreshToken refreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
 
@@ -98,10 +99,7 @@ public sealed class CreateSessionCommandHandler(
             command.IpAddress);
 
         await sessionCommandRepository.AddAsync(session, cancellationToken);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
+        await unitOfWork.SaveChangesAsync(cancellationToken);        
 
         var result = new CreateSessionResult(
             accessToken.Value,

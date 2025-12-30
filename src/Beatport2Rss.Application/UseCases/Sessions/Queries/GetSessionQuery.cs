@@ -36,7 +36,7 @@ public sealed class GetSessionQueryHandler(
     ISessionQueryRepository sessionQueryRepository,
     IUserQueryRepository userQueryRepository)
 {
-    public async Task<OneOf<Success<GetSessionResult>, ValidationFailed, NotFound, Unprocessable>> HandleAsync(
+    public async Task<OneOf<Success<GetSessionResult>, ValidationFailed, InactiveUser>> HandleAsync(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -47,16 +47,12 @@ public sealed class GetSessionQueryHandler(
         }
 
         var sessionId = SessionId.Create(query.SessionId);
-        var session = await sessionQueryRepository.GetAsync(sessionId, cancellationToken);
-        if (session is null)
-        {
-            return new NotFound("Session not found.");
-        }
+        var session = (await sessionQueryRepository.GetAsync(sessionId, cancellationToken))!;
+        var user = (await userQueryRepository.GetAsync(session.UserId, cancellationToken))!;
 
-        var user = await userQueryRepository.GetAsync(session.UserId, cancellationToken);
-        if (user is null)
+        if (!user.IsActive)
         {
-            return new Unprocessable("User not found.");
+            return new InactiveUser();
         }
 
         var result = new GetSessionResult(

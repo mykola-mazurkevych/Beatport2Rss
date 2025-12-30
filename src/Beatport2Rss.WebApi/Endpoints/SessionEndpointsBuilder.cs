@@ -3,8 +3,8 @@ using System.Net.Mime;
 using Beatport2Rss.Application.Types;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
+using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants;
-using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
 using Microsoft.AspNetCore.Mvc;
@@ -57,13 +57,12 @@ internal static class SessionEndpointsBuilder
                     async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetSessionQuery(context.User.SessionId);
-                        var result = await bus.InvokeAsync<OneOf<Success<GetSessionResult>, ValidationFailed, NotFound, Unprocessable>>(query, cancellationToken);
+                        var result = await bus.InvokeAsync<OneOf<Success<GetSessionResult>, ValidationFailed, InactiveUser>>(query, cancellationToken);
 
                         return result.Match<IResult>(
                             success => Results.Ok(success.Value),
                             validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail),
-                            unprocessable => ProblemDetailsBuilder.UnprocessableEntity(context, unprocessable.Detail));
+                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
@@ -71,8 +70,7 @@ internal static class SessionEndpointsBuilder
                 .Produces<GetSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
@@ -81,12 +79,11 @@ internal static class SessionEndpointsBuilder
                     async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
-                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed, NotFound>>(command, cancellationToken);
+                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed>>(command, cancellationToken);
 
                         return result.Match<IResult>(
                             _ => Results.NoContent(),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail));
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors));
                     })
                 .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
@@ -94,19 +91,32 @@ internal static class SessionEndpointsBuilder
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPatch("/current", UpdateSessionAsync)
+                .MapPatch(
+                    "/current",
+                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateSessionCommand(
+                            context.User.SessionId,
+                            request.RefreshToken);
+                        var result = await bus.InvokeAsync<OneOf<Success<UpdateSessionResult>, ValidationFailed, Unauthorized, InactiveUser>>(command, cancellationToken);
+
+                        return result.Match<IResult>(
+                            success => Results.Ok(success.Value),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
+                            unauthorized => ProblemDetailsBuilder.Unauthorized(context, unauthorized.Detail),
+                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
+                    })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
                 .RequireAuthorization()
-                .Produces(StatusCodes.Status200OK)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-                .Produces(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status422UnprocessableEntity)
+                .Accepts<UpdateSessionRequest>(MediaTypeNames.Application.Json)
+                .Produces<UpdateSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
@@ -124,6 +134,5 @@ internal static class SessionEndpointsBuilder
         }
 
         private static IResult DeleteSessionsAsync(HttpContext context) => throw new NotImplementedException();
-        private static IResult UpdateSessionAsync(HttpContext context) => throw new NotImplementedException();
     }
 }

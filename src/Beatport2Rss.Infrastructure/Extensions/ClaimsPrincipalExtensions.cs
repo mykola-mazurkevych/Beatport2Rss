@@ -1,9 +1,11 @@
+#pragma warning disable CA1034 // Nested types should not be visible
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace Beatport2Rss.WebApi.Extensions;
+namespace Beatport2Rss.Infrastructure.Extensions;
 
-internal static class ClaimsPrincipalExtensions
+public static class ClaimsPrincipalExtensions
 {
     extension(ClaimsPrincipal user)
     {

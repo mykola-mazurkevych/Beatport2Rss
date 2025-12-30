@@ -27,7 +27,7 @@ public sealed class DeleteSessionCommandHandler(
     ISessionCommandRepository sessionCommandRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<OneOf<Success, ValidationFailed, NotFound>> HandleAsync(
+    public async Task<OneOf<Success, ValidationFailed>> HandleAsync(
         DeleteSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -38,14 +38,9 @@ public sealed class DeleteSessionCommandHandler(
         }
 
         var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionQueryRepository.GetAsync(sessionId, cancellationToken);
-        if (session is null)
-        {
-            return new NotFound("Session not found.");
-        }
+        var session = (await sessionQueryRepository.GetAsync(sessionId, cancellationToken))!;
 
         sessionCommandRepository.Delete(session);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new Success();
