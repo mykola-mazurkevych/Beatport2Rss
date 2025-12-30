@@ -1,8 +1,13 @@
+using System.Net.Mime;
+
+using Beatport2Rss.Application.Types;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Responses;
 
 using Microsoft.AspNetCore.Mvc;
+
+using OneOf;
 
 using Wolverine;
 
@@ -21,22 +26,31 @@ internal static class UserEndpointsBuilder
                 .WithName(UserEndpointNames.Create)
                 .WithDescription("Create a user.")
                 .AllowAnonymous()
+                .Accepts<CreateUserCommand>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
-                .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
-                .Produces<ConflictResponse>(StatusCodes.Status409Conflict)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ConflictResponse>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;
         }
     }
 
-    private static async Task<IResult> CreateUserAsync(
+    private static Task<IResult> CreateUserAsync(
         [FromBody] CreateUserCommand command,
         [FromServices] IMessageBus bus,
-        CancellationToken cancellationToken)
-    {
-        await bus.InvokeAsync(command, cancellationToken);
+        CancellationToken cancellationToken) =>
+        bus.InvokeAsync<OneOf<Created, ValidationError, EmailAddressAlreadyTaken>>(command, cancellationToken)
+            .ContinueWith(t =>
+                    t.Result.Match(
+                        _ => Results.StatusCode(StatusCodes.Status201Created),
+                        CreateBadRequest,
+                        CreateConflict),
+                TaskScheduler.Current);
 
-        return Results.StatusCode(StatusCodes.Status201Created);
-    }
+    private static IResult CreateBadRequest(ValidationError r) =>
+        Results.BadRequest(new BadRequestResponse { Title = "One or more validation errors occurred", Detail = "The request contains invalid data.", Errors = r.Errors });
+
+    private static IResult CreateConflict(EmailAddressAlreadyTaken r) =>
+        Results.Conflict(new ConflictResponse { Title = "Email taken", Detail = r.Message });
 }

@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddOpenApi()
+    ////.AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(o =>
     {
         o.DefaultApiVersion = ApiVersionsContainer.Default;

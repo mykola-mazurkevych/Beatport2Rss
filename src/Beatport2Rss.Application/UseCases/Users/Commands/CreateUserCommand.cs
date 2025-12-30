@@ -1,10 +1,13 @@
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Types;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Users;
 
 using FluentValidation;
+
+using OneOf;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
@@ -39,19 +42,26 @@ public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCom
 }
 
 public sealed class CreateUserCommandHandler(
+    IValidator<CreateUserCommand> validator,
     IClock clock,
     IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Created, ValidationError, EmailAddressAlreadyTaken>> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
     {
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationError(validationResult);
+        }
+
         var emailAddress = EmailAddress.Create(command.EmailAddress);
 
         if (!await emailAddressAvailabilityChecker.IsAvailableAsync(emailAddress, cancellationToken))
         {
-            throw new EmailAddressAlreadyTakenException($"Email address {emailAddress} is already taken.");
+            return new EmailAddressAlreadyTaken(emailAddress);
         }
 
         var userId = UserId.Create(Guid.CreateVersion7());
@@ -70,5 +80,7 @@ public sealed class CreateUserCommandHandler(
         await userCommandRepository.AddAsync(user, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new Created();
     }
 }

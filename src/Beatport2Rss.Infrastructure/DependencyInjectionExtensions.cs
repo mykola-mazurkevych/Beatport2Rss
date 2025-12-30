@@ -8,12 +8,13 @@ using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.Options;
-using Beatport2Rss.Application.UseCases.Sessions.Interfaces;
-using Beatport2Rss.Application.UseCases.Users.Interfaces;
-using Beatport2Rss.Infrastructure.Middlewares;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services;
+
+using FluentValidation;
+
+using JasperFx.Core.IoC;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -25,7 +26,6 @@ using Microsoft.IdentityModel.Tokens;
 using Slugify;
 
 using Wolverine;
-using Wolverine.FluentValidation;
 
 namespace Beatport2Rss.Infrastructure;
 
@@ -35,15 +35,7 @@ public static class DependencyInjectionExtensions
     {
         public void AddInfrastructure()
         {
-            builder.Host.UseWolverine(w =>
-            {
-                w.Policies.ForMessagesOfType<INeedSessionRequest>().AddMiddleware<SessionLookupMiddleware>();
-                w.Policies.ForMessagesOfType<INeedUserRequest>().AddMiddleware<UserLookupMiddleware>();
-
-                w.UseFluentValidation();
-                w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly);
-            });
-
+            builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
             builder.Services
                 .ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()))
                 .ConfigureOptions(builder.Configuration)
@@ -90,16 +82,24 @@ public static class DependencyInjectionExtensions
 
         private void AddServices(IConfiguration configuration) =>
             services
+                .AddValidators()
                 .AddPersistence(configuration)
-                .AddTransient<IAccessTokenService, JwtService>()
-                .AddTransient<IClock, Clock>()
+                .AddSingleton<IAccessTokenService, JwtService>()
+                .AddSingleton<IClock, Clock>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
-                .AddTransient<IRefreshTokenService, RefreshTokenService>()
+                .AddSingleton<IRefreshTokenService, RefreshTokenService>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>()
                 .AddTransient<IUserExistenceChecker, UserService>();
+
+        private IServiceCollection AddValidators() =>
+            services.Scan(s =>
+            {
+                s.Assembly(typeof(IUnitOfWork).Assembly);
+                s.ConnectImplementationsToTypesClosing(typeof(IValidator<>), ServiceLifetime.Transient);
+            });
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
