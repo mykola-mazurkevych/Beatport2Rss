@@ -3,7 +3,6 @@ using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
-using Beatport2Rss.WebApi.Responses;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,10 +24,10 @@ internal static class SessionEndpointsBuilder
                 .WithDescription("Create a user session (log in).")
                 .AllowAnonymous()
                 .Produces<CreateSessionResult>(StatusCodes.Status201Created)
-                .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
-                .Produces<UnauthorizedResponse>(StatusCodes.Status401Unauthorized)
-                .Produces<ForbiddenResponse>(StatusCodes.Status403Forbidden)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
                 .MapGet("/current", GetSessionAsync)
@@ -36,9 +35,9 @@ internal static class SessionEndpointsBuilder
                 .WithDescription("Get current session.")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status200OK)
-                .Produces<UnauthorizedResponse>(StatusCodes.Status401Unauthorized)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
                 .MapDelete("/current", DeleteSessionAsync)
@@ -48,7 +47,7 @@ internal static class SessionEndpointsBuilder
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
                 .MapPatch("/current", UpdateSessionAsync)
@@ -56,11 +55,11 @@ internal static class SessionEndpointsBuilder
                 .WithDescription("Update current user session (refresh access token).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status200OK)
-                .Produces<BadRequestResponse>(StatusCodes.Status400BadRequest)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
                 .Produces(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status422UnprocessableEntity)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
                 .MapDelete("", DeleteSessionsAsync)
@@ -71,7 +70,7 @@ internal static class SessionEndpointsBuilder
                 .Produces(StatusCodes.Status401Unauthorized)
                 .Produces(StatusCodes.Status404NotFound)
                 .Produces(StatusCodes.Status422UnprocessableEntity)
-                .Produces<InternalServerErrorResponse>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             return routeBuilder;
         }

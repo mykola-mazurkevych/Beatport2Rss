@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddOpenApi()
-    ////.AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier)
+    .AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(o =>
     {
         o.DefaultApiVersion = ApiVersionsContainer.Default;
@@ -29,9 +29,9 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = Forward
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection()
-    .AddTraceIdHandlingMiddleware()
-    .AddExceptionsHandlingMiddleware();
+app.UseExceptionHandler()
+    .UseHttpsRedirection()
+    .AddTraceIdHandlingMiddleware();
 
 if (app.Environment.IsDevelopment())
 {
