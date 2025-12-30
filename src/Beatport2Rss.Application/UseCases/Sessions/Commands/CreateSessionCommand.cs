@@ -1,10 +1,13 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services;
-using Beatport2Rss.Domain.Common.Exceptions;
+using Beatport2Rss.Application.Types;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
+
+using OneOf;
 
 using FluentValidation;
 
@@ -48,6 +51,7 @@ public readonly record struct CreateSessionResult(
     string RefreshToken);
 
 public sealed class CreateSessionCommandHandler(
+    IValidator<CreateSessionCommand> validator,
     IAccessTokenService accessTokenService,
     IClock clock,
     IRefreshTokenService refreshTokenService,
@@ -56,20 +60,28 @@ public sealed class CreateSessionCommandHandler(
     IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<CreateSessionResult> HandleAsync(CreateSessionCommand command, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success<CreateSessionResult>, ValidationFailed, InvalidCredentials, InactiveUser>> HandleAsync(
+        CreateSessionCommand command,
+        CancellationToken cancellationToken = default)
     {
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationFailed(validationResult.GetErrors());
+        }
+
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
         var user = await userQueryRepository.GetAsync(u => u.EmailAddress == emailAddress, cancellationToken);
 
         if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
         {
-            throw new InvalidCredentialsException();
+            return new InvalidCredentials();
         }
 
         if (user.Status != UserStatus.Active)
         {
-            throw new InactiveUserException();
+            return new InactiveUser();
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());
@@ -97,6 +109,6 @@ public sealed class CreateSessionCommandHandler(
             expiresIn,
             refreshToken);
 
-        return result;
+        return new Success<CreateSessionResult>(result);
     }
 }

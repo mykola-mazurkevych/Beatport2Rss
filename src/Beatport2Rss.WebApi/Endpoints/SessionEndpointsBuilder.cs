@@ -1,3 +1,6 @@
+using System.Net.Mime;
+
+using Beatport2Rss.Application.Types;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.WebApi.Constants;
@@ -5,6 +8,8 @@ using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
 using Microsoft.AspNetCore.Mvc;
+
+using OneOf;
 
 using Wolverine;
 
@@ -19,25 +24,58 @@ internal static class SessionEndpointsBuilder
             var groupBuilder = routeBuilder.MapGroup("/sessions").WithName("Sessions");
 
             groupBuilder
-                .MapPost("", CreateSessionAsync)
+                .MapPost(
+                    "",
+                    async ([FromBody] CreateSessionRequest request, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new CreateSessionCommand(
+                            request.EmailAddress,
+                            request.Password,
+                            context.Request.Headers.UserAgent,
+                            context.Connection.RemoteIpAddress?.ToString());
+                        var result = await bus.InvokeAsync<OneOf<Success<CreateSessionResult>, ValidationFailed, InvalidCredentials, InactiveUser>>(command, cancellationToken);
+
+                        return result.Match<IResult>(
+                            success => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: success.Value),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
+                            invalidCredentials => ProblemDetailsBuilder.Unauthorized(context, invalidCredentials.Detail),
+                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
+                    })
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
                 .AllowAnonymous()
-                .Produces<CreateSessionResult>(StatusCodes.Status201Created)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest)
-                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
-                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+                .Accepts<CreateSessionRequest>(MediaTypeNames.Application.Json)
+                .Produces<CreateSessionResult>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapGet("/current", GetSessionAsync)
+                .MapGet(
+                    "/current",
+                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetSessionQuery(
+                            context.User.Id,
+                            context.User.SessionId);
+                        var result = await bus.InvokeAsync<OneOf<Success<GetSessionResult>, ValidationFailed, NotFound, Unprocessable>>(query, cancellationToken);
+
+                        return result.Match<IResult>(
+                            success => Results.Ok(success.Value),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
+                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail),
+                            unprocessable => ProblemDetailsBuilder.UnprocessableEntity(context, unprocessable.Detail));
+                    })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
                 .RequireAuthorization()
-                .Produces(StatusCodes.Status200OK)
-                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+                .Produces<GetSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapDelete("/current", DeleteSessionAsync)
@@ -75,40 +113,8 @@ internal static class SessionEndpointsBuilder
             return routeBuilder;
         }
 
-        private static async Task<IResult> CreateSessionAsync(
-            [FromBody] CreateSessionRequest request,
-            [FromServices] IMessageBus bus,
-            HttpContext context,
-            CancellationToken cancellationToken)
-        {
-            var command = new CreateSessionCommand(
-                request.EmailAddress,
-                request.Password,
-                context.Request.Headers.UserAgent,
-                context.Connection.RemoteIpAddress?.ToString());
-
-            var result = await bus.InvokeAsync<CreateSessionResult>(command, cancellationToken);
-
-            return Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result);
-        }
-
         private static IResult DeleteSessionAsync(HttpContext context) => throw new NotImplementedException();
         private static IResult DeleteSessionsAsync(HttpContext context) => throw new NotImplementedException();
-
-        private static async Task<IResult> GetSessionAsync(
-            [FromServices] IMessageBus bus,
-            HttpContext context,
-            CancellationToken cancellationToken)
-        {
-            var query = new GetSessionQuery(
-                context.User.SessionId,
-                context.User.Id);
-
-            var result = await bus.InvokeAsync<GetSessionResult>(query, cancellationToken);
-
-            return Results.Ok(result);
-        }
-
         private static IResult UpdateSessionAsync(HttpContext context) => throw new NotImplementedException();
     }
 }
