@@ -8,6 +8,10 @@ using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services;
 
+using FluentValidation;
+
+using JasperFx.Core.IoC;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,7 +20,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Slugify;
 
 using Wolverine;
-using Wolverine.FluentValidation;
 
 namespace Beatport2Rss.Infrastructure;
 
@@ -26,11 +29,7 @@ public static class DependencyInjectionExtensions
     {
         public void AddInfrastructure()
         {
-            builder.Host.UseWolverine(w =>
-            {
-                w.UseFluentValidation();
-                w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly);
-            });
+            builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
             builder.Services.AddServices(builder.Configuration);
         }
     }
@@ -39,14 +38,22 @@ public static class DependencyInjectionExtensions
     {
         private void AddServices(IConfiguration configuration) =>
             services
+                .AddValidators()
                 .AddPersistence(configuration)
-                .AddTransient<IClock, Clock>()
+                .AddSingleton<IClock, Clock>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>()
                 .AddTransient<IUserExistenceChecker, UserService>();
+
+        private IServiceCollection AddValidators() =>
+            services.Scan(s =>
+            {
+                s.Assembly(typeof(IUnitOfWork).Assembly);
+                s.ConnectImplementationsToTypesClosing(typeof(IValidator<>), ServiceLifetime.Transient);
+            });
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

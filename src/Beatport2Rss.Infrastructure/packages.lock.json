@@ -85,16 +85,6 @@
           "Newtonsoft.Json": "13.0.3"
         }
       },
-      "WolverineFx.FluentValidation": {
-        "type": "Direct",
-        "requested": "[5.9.2, )",
-        "resolved": "5.9.2",
-        "contentHash": "vpbcrur4SB2qJy+kN9l3Hio3wla7BQJXkfNcrU/9KAGLuwiBOLGq1g1p6lxvlIdtHYriNJ0MMUbCWkX+58QPGw==",
-        "dependencies": {
-          "FluentValidation": "12.0.0",
-          "WolverineFx": "5.9.2"
-        }
-      },
       "FastExpressionCompiler": {
         "type": "Transitive",
         "resolved": "5.3.0",
@@ -487,7 +477,8 @@
         "type": "Project",
         "dependencies": {
           "Beatport2Rss.Domain": "[1.0.0, )",
-          "FluentValidation": "[12.1.1, )"
+          "FluentValidation": "[12.1.1, )",
+          "OneOf": "[3.0.271, )"
         }
       },
       "beatport2rss.domain": {
@@ -507,6 +498,12 @@
         "requested": "[14.0.0, )",
         "resolved": "14.0.0",
         "contentHash": "UTNv86j5+Aw2TFjzBhrKy0rwGhk4sSUyt10AOPQkIRgq59eHvAW1SmjEzAcqBeQmpH2iGX9k/hFDGOnGJ8FR7w=="
+      },
+      "OneOf": {
+        "type": "CentralTransitive",
+        "requested": "[3.0.271, )",
+        "resolved": "3.0.271",
+        "contentHash": "pqpqeK8xQGggExhr4tesVgJkjdn+9HQAO0QgrYV2hFjE3y90okzk1kQMntMiUOGfV7FrCUfKPaVvPBD4IANqKg=="
       }
     }
   }
