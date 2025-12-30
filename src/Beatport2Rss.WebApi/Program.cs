@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddOpenApi()
-    ////.AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier)
+    .AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(o =>
     {
         o.DefaultApiVersion = ApiVersionsContainer.Default;
@@ -27,9 +27,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection()
-    .AddTraceIdHandlingMiddleware()
-    .AddExceptionsHandlingMiddleware();
+app.UseExceptionHandler()
+    .UseHttpsRedirection()
+    .AddTraceIdHandlingMiddleware();
 
 var v1Builder = app
     .NewVersionedApi("Beatport2Rss API V1")
