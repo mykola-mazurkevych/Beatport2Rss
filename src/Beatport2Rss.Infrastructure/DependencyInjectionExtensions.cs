@@ -1,12 +1,21 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Interfaces.Services.Checkers;
+using Beatport2Rss.Application.Interfaces.Services.Misc;
+using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Infrastructure.Services;
+using Beatport2Rss.Infrastructure.Services.Checkers;
+using Beatport2Rss.Infrastructure.Services.Health;
+using Beatport2Rss.Infrastructure.Services.Misc;
+using Beatport2Rss.Infrastructure.Services.Security;
 
 using FluentValidation;
 
@@ -30,6 +39,13 @@ public static class DependencyInjectionExtensions
         public void AddInfrastructure()
         {
             builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
+
+            builder.Services.ConfigureHttpJsonOptions(o =>
+            {
+                o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                o.SerializerOptions.WriteIndented = true;
+                o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
             builder.Services.AddServices(builder.Configuration);
         }
     }
@@ -38,23 +54,33 @@ public static class DependencyInjectionExtensions
     {
         private void AddServices(IConfiguration configuration) =>
             services
-                .AddValidators()
                 .AddPersistence(configuration)
-                .AddSingleton<IClock, Clock>()
-                .AddTransient<IDatabaseHealthService, DatabaseHealthService>()
-                .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
-                .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
-                .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
-                .AddSingleton<ISlugGenerator, SlugGenerator>()
-                .AddSingleton<ISlugHelper, SlugHelper>()
-                .AddTransient<IUserExistenceChecker, UserService>();
+                .AddCheckers()
+                .AddHealthServices()
+                .AddMiscServices()
+                .AddSecurityServices()
+                .AddValidators();
 
-        private IServiceCollection AddValidators() =>
-            services.Scan(s =>
-            {
-                s.Assembly(typeof(IUnitOfWork).Assembly);
-                s.ConnectImplementationsToTypesClosing(typeof(IValidator<>), ServiceLifetime.Transient);
-            });
+        private IServiceCollection AddCheckers() =>
+            services
+                .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>()
+                .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
+                .AddTransient<IUserExistenceChecker, UserChecker>();
+
+        private IServiceCollection AddHealthServices()
+        {
+            services
+                .AddHealthChecks()
+                .AddCheck<DatabaseHealthCheck>(HealthCheckNames.Database);
+
+            return services;
+        }
+
+        private IServiceCollection AddMiscServices() =>
+            services
+                .AddSingleton<IClock, Clock>()
+                .AddSingleton<ISlugGenerator, SlugGenerator>()
+                .AddSingleton<ISlugHelper, SlugHelper>();
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
@@ -62,5 +88,17 @@ public static class DependencyInjectionExtensions
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
+
+        private IServiceCollection AddSecurityServices() =>
+            services
+                .AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+
+        private void AddValidators() =>
+            services
+                .Scan(s =>
+                {
+                    s.Assembly(typeof(IUnitOfWork).Assembly);
+                    s.ConnectImplementationsToTypesClosing(typeof(IValidator<>), ServiceLifetime.Transient);
+                });
     }
 }

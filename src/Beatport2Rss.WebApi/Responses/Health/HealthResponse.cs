@@ -1,6 +1,15 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+
 namespace Beatport2Rss.WebApi.Responses.Health;
 
-public readonly record struct HealthResponse(bool DatabaseIsHealthy)
+internal readonly record struct HealthResponse
 {
-    public bool IsHealthy => DatabaseIsHealthy;
+    public required HealthStatus Status { get; init; }
+
+    public required HealthDetailsResponse Details { get; init; }
+}
+
+internal readonly record struct HealthDetailsResponse
+{
+    public required HealthStatus DatabaseStatus { get; init; }
 }

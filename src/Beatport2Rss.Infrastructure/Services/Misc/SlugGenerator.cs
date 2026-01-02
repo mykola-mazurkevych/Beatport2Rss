@@ -1,12 +1,12 @@
 using System.Security.Cryptography;
 
-using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 
 using Slugify;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Misc;
 
 internal sealed class SlugGenerator(ISlugHelper slugHelper) :
     ISlugGenerator

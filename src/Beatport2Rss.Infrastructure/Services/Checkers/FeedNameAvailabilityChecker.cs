@@ -1,9 +1,9 @@
-using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Checkers;
 
 internal sealed class FeedNameAvailabilityChecker(Beatport2RssDbContext dbContext) :
     IFeedNameAvailabilityChecker

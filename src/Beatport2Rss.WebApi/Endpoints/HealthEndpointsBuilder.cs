@@ -1,10 +1,10 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Interfaces.Services;
-using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.WebApi.Responses.Health;
 
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Beatport2Rss.WebApi.Endpoints;
 
@@ -14,24 +14,30 @@ internal static class HealthEndpointsBuilder
     {
         public IEndpointRouteBuilder BuildHealthEndpoints()
         {
-            var groupBuilder = routeBuilder.MapGroup("/health/current").WithName("Health");
+            routeBuilder.MapHealthChecks("/health/current", new HealthCheckOptions
+            {
+                ResponseWriter = async (context, report) =>
+                {
+                    context.Response.ContentType = MediaTypeNames.Application.Json;
 
-            groupBuilder.MapGet(
-                    "",
-                    async ([FromServices] IDatabaseHealthService databaseHealthService, CancellationToken cancellationToken) =>
+                    var response = new HealthResponse
                     {
-                        var response = new HealthResponse(await databaseHealthService.IsHealthyAsync(cancellationToken));
+                        Status = report.Status,
+                        Details = new HealthDetailsResponse
+                        {
+                            DatabaseStatus = report.Entries[HealthCheckNames.Database].Status
+                        }
+                    };
 
-                        return response.IsHealthy
-                            ? Results.Ok(response)
-                            : Results.Json(response, statusCode: StatusCodes.Status503ServiceUnavailable);
-                    })
-                .WithName(HealthEndpointNames.Get)
-                .WithDescription("Get API health.")
-                .AllowAnonymous()
-                .Produces<HealthResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json)
-                .Produces<HealthResponse>(StatusCodes.Status503ServiceUnavailable, MediaTypeNames.Application.Json);
+                    await context.Response.WriteAsJsonAsync(response);
+                },
+                ResultStatusCodes = new Dictionary<HealthStatus, int>
+                {
+                    { HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable },
+                    { HealthStatus.Degraded, StatusCodes.Status503ServiceUnavailable },
+                    { HealthStatus.Healthy, StatusCodes.Status200OK },
+                }
+            });
 
             return routeBuilder;
         }

@@ -1,12 +1,12 @@
-using Beatport2Rss.Application.Interfaces.Services;
+using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Checkers;
 
-internal sealed class UserService(Beatport2RssDbContext dbContext) :
+internal sealed class UserChecker(Beatport2RssDbContext dbContext) :
     IEmailAddressAvailabilityChecker,
     IUserExistenceChecker
 {
