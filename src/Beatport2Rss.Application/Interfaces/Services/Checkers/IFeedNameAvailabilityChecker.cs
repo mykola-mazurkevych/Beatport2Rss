@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Application.Interfaces.Services;
+namespace Beatport2Rss.Application.Interfaces.Services.Checkers;
 
 public interface IFeedNameAvailabilityChecker
 {

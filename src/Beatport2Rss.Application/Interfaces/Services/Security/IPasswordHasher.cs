@@ -1,6 +1,6 @@
 using Beatport2Rss.Domain.Users;
 
-namespace Beatport2Rss.Application.Interfaces.Services;
+namespace Beatport2Rss.Application.Interfaces.Services.Security;
 
 public interface IPasswordHasher
 {
