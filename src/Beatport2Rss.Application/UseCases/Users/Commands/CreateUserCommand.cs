@@ -17,7 +17,8 @@ public readonly record struct CreateUserCommand(
     string? FirstName,
     string? LastName);
 
-public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public sealed class CreateUserCommandValidator :
+    AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
     {

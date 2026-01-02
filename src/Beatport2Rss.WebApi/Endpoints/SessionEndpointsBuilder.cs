@@ -120,19 +120,27 @@ internal static class SessionEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             groupBuilder
-                .MapDelete("", DeleteSessionsAsync)
+                .MapDelete(
+                    "",
+                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSessionsCommand(context.User.Id);
+                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed>>(command, cancellationToken);
+
+                        return result.Match<IResult>(
+                            _ => Results.NoContent(),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors)
+                        );
+                    })
                 .WithName(SessionEndpointNames.DeleteAll)
                 .WithDescription("Delete all user sessions (log out from all devices).")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces(StatusCodes.Status401Unauthorized)
-                .Produces(StatusCodes.Status404NotFound)
-                .Produces(StatusCodes.Status422UnprocessableEntity)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
 
             return routeBuilder;
         }
-
-        private static IResult DeleteSessionsAsync(HttpContext context) => throw new NotImplementedException();
     }
 }

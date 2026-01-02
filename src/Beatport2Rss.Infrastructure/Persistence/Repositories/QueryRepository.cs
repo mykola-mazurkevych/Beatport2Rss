@@ -12,7 +12,7 @@ internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbCo
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IValueObject
 {
-    private readonly DbSet<TEntity> _dbSet = dbContext.Set<TEntity>();
+    protected DbSet<TEntity> DbSet => dbContext.Set<TEntity>();
 
     protected abstract IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query);
 
@@ -20,12 +20,12 @@ internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbCo
         GetAsync(entity => entity.Id.Equals(id), cancellationToken);
 
     public Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        ApplyIncludes(_dbSet).SingleOrDefaultAsync(predicate, cancellationToken);
+        ApplyIncludes(DbSet).SingleOrDefaultAsync(predicate, cancellationToken);
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        _dbSet.AnyAsync(predicate, cancellationToken);
+        DbSet.AnyAsync(predicate, cancellationToken);
 
     public Task<bool> NotExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        _dbSet.AnyAsync(predicate, cancellationToken)
+        DbSet.AnyAsync(predicate, cancellationToken)
             .ContinueWith(t => !t.Result, TaskScheduler.Current);
 }

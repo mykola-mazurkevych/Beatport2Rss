@@ -12,7 +12,8 @@ public readonly record struct CreateFeedCommand(
     Guid UserId,
     string? Name);
 
-public sealed class CreateFeedCommandValidator : AbstractValidator<CreateFeedCommand>
+public sealed class CreateFeedCommandValidator :
+    AbstractValidator<CreateFeedCommand>
 {
     public CreateFeedCommandValidator(
         IFeedNameAvailabilityChecker feedNameAvailabilityChecker,

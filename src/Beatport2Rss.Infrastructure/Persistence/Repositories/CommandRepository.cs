@@ -20,4 +20,7 @@ internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext db
 
     public void Delete(TEntity entity) =>
         _dbSet.Remove(entity);
+
+    public void DeleteRange(IEnumerable<TEntity> entities) =>
+        _dbSet.RemoveRange(entities);
 }

@@ -25,7 +25,8 @@ public readonly record struct CreateSessionResult(
     int ExpiresIn,
     string RefreshToken);
 
-public sealed class CreateSessionCommandValidator : AbstractValidator<CreateSessionCommand>
+public sealed class CreateSessionCommandValidator :
+    AbstractValidator<CreateSessionCommand>
 {
     public CreateSessionCommandValidator()
     {

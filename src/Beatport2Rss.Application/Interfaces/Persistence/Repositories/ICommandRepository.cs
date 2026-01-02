@@ -11,4 +11,5 @@ public interface ICommandRepository<in TEntity, TId>
     void Update(TEntity entity);
     
     void Delete(TEntity entity);
+    void DeleteRange(IEnumerable<TEntity> entities);
 }

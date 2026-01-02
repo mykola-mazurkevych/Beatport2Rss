@@ -12,7 +12,8 @@ namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
 public readonly record struct DeleteSessionCommand(Guid SessionId);
 
-public sealed class DeleteSessionCommandValidator : AbstractValidator<DeleteSessionCommand>
+public sealed class DeleteSessionCommandValidator :
+    AbstractValidator<DeleteSessionCommand>
 {
     public DeleteSessionCommandValidator()
     {

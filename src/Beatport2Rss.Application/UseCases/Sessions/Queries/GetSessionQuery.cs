@@ -22,7 +22,8 @@ public readonly record struct GetSessionResult(
     string? UserAgent,
     string? IpAddress);
 
-public sealed class GetSessionQueryValidator : AbstractValidator<GetSessionQuery>
+public sealed class GetSessionQueryValidator :
+    AbstractValidator<GetSessionQuery>
 {
     public GetSessionQueryValidator()
     {
