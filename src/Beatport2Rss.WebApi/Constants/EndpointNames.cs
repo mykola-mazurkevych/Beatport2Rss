@@ -1,5 +1,10 @@
 namespace Beatport2Rss.WebApi.Constants;
 
+internal static class HealthEndpointNames
+{
+    public const string Get = "GetHealth";
+}
+
 internal static class SessionEndpointNames
 {
     public const string Create = "CreateSession";

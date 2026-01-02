@@ -83,6 +83,7 @@ public static class DependencyInjectionExtensions
                 .AddPersistence(configuration)
                 .AddSingleton<IAccessTokenService, JwtService>()
                 .AddSingleton<IClock, Clock>()
+                .AddTransient<IDatabaseHealthService, DatabaseHealthService>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()

@@ -44,6 +44,7 @@ var v1Builder = app
 
 v1Builder.MapGet("", () => "Hello, Beatport2Rss!");
 v1Builder
+    .BuildHealthEndpoints()
     .BuildSessionEndpoints()
     .BuildUserEndpoints();
 
