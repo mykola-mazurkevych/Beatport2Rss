@@ -40,27 +40,24 @@ public static class DependencyInjectionExtensions
         {
             builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
 
-            builder.Services.ConfigureHttpJsonOptions(o =>
-            {
-                o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                o.SerializerOptions.WriteIndented = true;
-                o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
-            builder.Services.AddServices(builder.Configuration);
+            builder.Services
+                .ConfigureHttpJsonOptions(o =>
+                {
+                    o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    o.SerializerOptions.WriteIndented = true;
+                    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                })
+                .AddCheckers()
+                .AddHealthServices()
+                .AddMiscServices()
+                .AddPersistence(builder.Configuration)
+                .AddSecurityServices()
+                .AddValidators();
         }
     }
 
     extension(IServiceCollection services)
     {
-        private void AddServices(IConfiguration configuration) =>
-            services
-                .AddPersistence(configuration)
-                .AddCheckers()
-                .AddHealthServices()
-                .AddMiscServices()
-                .AddSecurityServices()
-                .AddValidators();
-
         private IServiceCollection AddCheckers() =>
             services
                 .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>()

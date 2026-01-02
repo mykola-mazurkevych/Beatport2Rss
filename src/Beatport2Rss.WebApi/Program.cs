@@ -29,7 +29,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler()
     .UseHttpsRedirection()
-    .AddTraceIdHandlingMiddleware();
+    .UseTraceIdMiddleware()
+    .UseHealthCheckMiddleware();
 
 var v1Builder = app
     .NewVersionedApi("Beatport2Rss API V1")
@@ -37,7 +38,6 @@ var v1Builder = app
 
 v1Builder.MapGet("", () => "Hello, Beatport2Rss!");
 v1Builder
-    .BuildHealthEndpoints()
     .BuildUserEndpoints();
 
 app.Run();
