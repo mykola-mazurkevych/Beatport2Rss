@@ -41,6 +41,7 @@ public static class DependencyInjectionExtensions
                 .AddValidators()
                 .AddPersistence(configuration)
                 .AddSingleton<IClock, Clock>()
+                .AddTransient<IDatabaseHealthService, DatabaseHealthService>()
                 .AddTransient<IEmailAddressAvailabilityChecker, UserService>()
                 .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
