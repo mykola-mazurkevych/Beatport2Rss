@@ -1,7 +1,6 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -10,11 +9,9 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Options;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Infrastructure.Services;
 using Beatport2Rss.Infrastructure.Services.Checkers;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
@@ -24,12 +21,10 @@ using FluentValidation;
 
 using JasperFx.Core.IoC;
 
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
@@ -48,58 +43,21 @@ public static class DependencyInjectionExtensions
             builder.Services
                 .ConfigureHttpJsonOptions(o =>
                 {
-                 o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     o.SerializerOptions.WriteIndented = true;
                     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
-                .ConfigureOptions(builder.Configuration)
-                .AddJwtAuthentication(builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
-                .AddServices(builder.Configuration);
+                .AddCheckers()
+                .AddHealthServices()
+                .AddMiscServices()
+                .AddPersistence(builder.Configuration)
+                .AddSecurityServices()
+                .AddValidators();
         }
     }
 
     extension(IServiceCollection services)
     {
-        private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
-            services
-                .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
-                .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
-
-        private IServiceCollection AddJwtAuthentication(JwtOptions jwtOptions)
-        {
-            services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(o =>
-                {
-                    o.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
-                    o.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
-
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = jwtOptions.Issuer,
-                        ValidateAudience = true,
-                        ValidAudience = jwtOptions.Audience,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
-                    };
-                });
-
-            services.AddAuthorization();
-
-            return services;
-        }
-
-        private void AddServices(IConfiguration configuration) =>
-            services
-                .AddPersistence(configuration)
-                .AddCheckers()
-                .AddHealthServices()
-                .AddMiscServices()
-                .AddSecurityServices()
-                .AddValidators();
-
         private IServiceCollection AddCheckers() =>
             services
                 .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>()

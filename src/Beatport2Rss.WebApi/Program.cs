@@ -29,14 +29,15 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = Forward
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseExceptionHandler()
-    .UseHttpsRedirection()
-    .AddTraceIdHandlingMiddleware();
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseExceptionHandler()
+    .UseHttpsRedirection()
+    .UseTraceIdMiddleware()
+    .UseHealthCheckMiddleware();
 
 var v1Builder = app
     .NewVersionedApi("Beatport2Rss API V1")
@@ -44,7 +45,6 @@ var v1Builder = app
 
 v1Builder.MapGet("", () => "Hello, Beatport2Rss!");
 v1Builder
-    .BuildHealthEndpoints()
     .BuildSessionEndpoints()
     .BuildUserEndpoints();
 
