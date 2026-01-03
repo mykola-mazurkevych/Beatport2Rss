@@ -6,7 +6,8 @@ internal static class TraceIdMiddleware
 {
     extension(IApplicationBuilder app)
     {
-        public IApplicationBuilder UseTraceIdMiddleware() => app.Use(HandleAsync);
+        public IApplicationBuilder UseTraceIdMiddleware() =>
+            app.Use(HandleAsync);
 
         private static async Task HandleAsync(HttpContext context, Func<Task> next)
         {

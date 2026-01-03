@@ -1,9 +1,4 @@
-namespace Beatport2Rss.WebApi.Constants;
-
-internal static class HealthEndpointNames
-{
-    public const string Get = "GetHealth";
-}
+namespace Beatport2Rss.WebApi.Constants.Endpoints;
 
 internal static class SessionEndpointNames
 {
@@ -12,9 +7,4 @@ internal static class SessionEndpointNames
     public const string DeleteCurrent = "DeleteCurrentSession";
     public const string GetCurrent = "GetCurrentSession";
     public const string UpdateCurrent = "UpdateCurrentSession";
-}
-
-internal static class UserEndpointNames
-{
-    public const string Create = "CreateUser";
 }

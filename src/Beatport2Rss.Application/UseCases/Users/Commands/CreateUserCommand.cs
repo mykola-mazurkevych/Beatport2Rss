@@ -4,7 +4,7 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Types;
+using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Users;
 
 using FluentValidation;

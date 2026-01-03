@@ -1,10 +1,10 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Types;
+using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
 using Microsoft.AspNetCore.Mvc;
