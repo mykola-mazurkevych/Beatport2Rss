@@ -1,6 +1,4 @@
-namespace Beatport2Rss.Application.Types;
-
-public readonly record struct Created;
+namespace Beatport2Rss.Application.Results;
 
 public readonly record struct EmailAddressAlreadyTaken
 {
@@ -11,7 +9,3 @@ public readonly record struct EmailAddressAlreadyTaken
 
     public string Detail { get; }
 }
-
-public readonly record struct None;
-
-public readonly record struct ValidationFailed(IDictionary<string, string[]> Errors);

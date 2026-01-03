@@ -1,8 +1,8 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Types;
+using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Users.Commands;
-using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.WebApi.Constants.Endpoints;
 
 using Microsoft.AspNetCore.Mvc;
 

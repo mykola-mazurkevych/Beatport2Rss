@@ -12,7 +12,10 @@ internal static class HealthCheckMiddleware
 {
     extension(IApplicationBuilder app)
     {
-        public IApplicationBuilder UseHealthCheckMiddleware() => app.UseHealthChecks("/health", new HealthCheckOptions { ResponseWriter = WriteResponseAsync, ResultStatusCodes = ResultStatusCodes });
+        public IApplicationBuilder UseHealthCheckMiddleware() =>
+            app.UseHealthChecks(
+                "/health",
+                new HealthCheckOptions { ResponseWriter = WriteResponseAsync, ResultStatusCodes = ResultStatusCodes });
 
         private static async Task WriteResponseAsync(HttpContext context, HealthReport report)
         {
@@ -31,10 +34,11 @@ internal static class HealthCheckMiddleware
         }
     }
 
-    private static IDictionary<HealthStatus, int> ResultStatusCodes => new Dictionary<HealthStatus, int>
-    {
-        { HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable },
-        { HealthStatus.Degraded, StatusCodes.Status503ServiceUnavailable },
-        { HealthStatus.Healthy, StatusCodes.Status200OK },
-    };
+    private static IDictionary<HealthStatus, int> ResultStatusCodes =>
+        new Dictionary<HealthStatus, int>
+        {
+            { HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable },
+            { HealthStatus.Degraded, StatusCodes.Status503ServiceUnavailable },
+            { HealthStatus.Healthy, StatusCodes.Status200OK },
+        };
 }
