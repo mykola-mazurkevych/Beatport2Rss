@@ -1,6 +1,5 @@
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Feeds;
@@ -35,14 +34,13 @@ public sealed class CreateFeedCommandValidator :
 public sealed class CreateFeedCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
-    IUserCommandRepository userCommandRepository,
-    IUserQueryRepository userQueryRepository,
+    IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(CreateFeedCommand command, CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(command.UserId);
-        var user = await userQueryRepository.GetAsync(userId, cancellationToken);
+        var user = await userRepository.LoadAsync(userId, cancellationToken);
 
         var feedName = FeedName.Create(command.Name);
 
@@ -54,8 +52,8 @@ public sealed class CreateFeedCommandHandler(
             clock.UtcNow,
             userId);
 
-        user!.AddFeed(feed);
-        userCommandRepository.Update(user);
+        user.AddFeed(feed);
+        userRepository.Update(user);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }

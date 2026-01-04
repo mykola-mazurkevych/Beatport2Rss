@@ -49,7 +49,7 @@ public sealed class CreateUserCommandHandler(
     IClock clock,
     IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
-    IUserCommandRepository userCommandRepository,
+    IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task<OneOf<Success, ValidationFailed, EmailAddressAlreadyTaken>> HandleAsync(
@@ -82,7 +82,7 @@ public sealed class CreateUserCommandHandler(
             UserStatus.Pending,
             clock.UtcNow);
 
-        await userCommandRepository.AddAsync(user, cancellationToken);
+        await userRepository.AddAsync(user, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -59,8 +59,8 @@ public sealed class CreateSessionCommandHandler(
     IClock clock,
     IRefreshTokenService refreshTokenService,
     IPasswordHasher passwordHasher,
-    ISessionCommandRepository sessionCommandRepository,
-    IUserQueryRepository userQueryRepository,
+    ISessionCommandRepository sessionRepository,
+    IUserQueryRepository userRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task<OneOf<Success<CreateSessionResult>, ValidationFailed, InvalidCredentials, InactiveUser>> HandleAsync(
@@ -75,7 +75,7 @@ public sealed class CreateSessionCommandHandler(
 
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
-        var user = await userQueryRepository.GetAsync(u => u.EmailAddress == emailAddress, cancellationToken);
+        var user = await userRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
 
         if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
         {
@@ -101,7 +101,7 @@ public sealed class CreateSessionCommandHandler(
             command.UserAgent,
             command.IpAddress);
 
-        await sessionCommandRepository.AddAsync(session, cancellationToken);
+        await sessionRepository.AddAsync(session, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);        
 
         var result = new CreateSessionResult(

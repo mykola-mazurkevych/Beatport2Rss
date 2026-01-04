@@ -43,9 +43,8 @@ public sealed class UpdateSessionCommandHandler(
     IClock clock,
     IAccessTokenService accessTokenService,
     IRefreshTokenService refreshTokenService,
-    ISessionCommandRepository sessionCommandRepository,
-    ISessionQueryRepository sessionQueryRepository,
-    IUserQueryRepository userQueryRepository,
+    ISessionCommandRepository sessionRepository,
+    IUserQueryRepository userRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task<OneOf<Success<UpdateSessionResult>, ValidationFailed, Unauthorized, InactiveUser>> HandleAsync(
@@ -59,8 +58,8 @@ public sealed class UpdateSessionCommandHandler(
         }
 
         var sessionId = SessionId.Create(command.SessionId);
-        var session = (await sessionQueryRepository.GetAsync(sessionId, cancellationToken))!;
-        var user = (await userQueryRepository.GetAsync(session.UserId, cancellationToken))!;
+        var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
+        var user = await userRepository.LoadAsync(session.UserId, cancellationToken);
 
         if (!user.IsActive)
         {
@@ -72,7 +71,7 @@ public sealed class UpdateSessionCommandHandler(
 
         if (session.RefreshTokenExpiresAt < clock.UtcNow || refreshTokenHash != session.RefreshTokenHash)
         {
-            sessionCommandRepository.Delete(session);
+            sessionRepository.Delete(session);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new Unauthorized("Refresh token is not valid.");
@@ -83,7 +82,7 @@ public sealed class UpdateSessionCommandHandler(
 
         session.Refresh(refreshTokenService.Hash(newRefreshToken), expiresAt);
 
-        sessionCommandRepository.Update(session);
+        sessionRepository.Update(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var result = new UpdateSessionResult(

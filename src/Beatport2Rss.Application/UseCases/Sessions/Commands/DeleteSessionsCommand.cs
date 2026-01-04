@@ -24,8 +24,7 @@ public sealed class DeleteSessionsCommandValidator :
 
 public sealed class DeleteSessionsCommandHandler(
     IValidator<DeleteSessionsCommand> validator,
-    ISessionCommandRepository sessionCommandRepository,
-    ISessionQueryRepository sessionQueryRepository,
+    ISessionCommandRepository sessionRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task<OneOf<Success, ValidationFailed>> HandleAsync(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
@@ -37,9 +36,9 @@ public sealed class DeleteSessionsCommandHandler(
         }
 
         var userId = UserId.Create(command.UserId);
-        var sessions = await sessionQueryRepository.GetSessionsAsync(userId, cancellationToken);
+        var sessions = await sessionRepository.FindAllAsync(s => s.UserId == userId, cancellationToken);
 
-        sessionCommandRepository.DeleteRange(sessions);
+        sessionRepository.DeleteRange(sessions);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new Success();

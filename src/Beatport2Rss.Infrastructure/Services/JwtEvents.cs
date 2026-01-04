@@ -17,7 +17,7 @@ internal static class JwtEvents
         var sessionQueryRepository = context.HttpContext.RequestServices.GetRequiredService<ISessionQueryRepository>();
 
         var sessionId = SessionId.Create(context.Principal!.SessionId);
-        var session = await sessionQueryRepository.GetAsync(sessionId);
+        var session = await sessionQueryRepository.FindAsync(sessionId);
         if (session is null)
         {
             context.Fail("Session is not valid");

@@ -12,20 +12,26 @@ internal abstract class QueryRepository<TEntity, TId>(Beatport2RssDbContext dbCo
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IValueObject
 {
-    protected DbSet<TEntity> DbSet => dbContext.Set<TEntity>();
+    private IQueryable<TEntity> Entities => ApplyIncludes(dbContext.Set<TEntity>()).AsNoTracking();
 
-    protected abstract IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> query);
+    protected virtual IQueryable<TEntity> ApplyIncludes(IQueryable<TEntity> entities) => entities;
 
-    public Task<TEntity?> GetAsync(TId id, CancellationToken cancellationToken = default) =>
-        GetAsync(entity => entity.Id.Equals(id), cancellationToken);
+    public Task<TEntity> LoadAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        Entities.SingleAsync(predicate, cancellationToken);
 
-    public Task<TEntity?> GetAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        ApplyIncludes(DbSet).SingleOrDefaultAsync(predicate, cancellationToken);
+    public Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        Entities.SingleOrDefaultAsync(predicate, cancellationToken);
+
+    public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        var entities = await Entities.Where(predicate).ToListAsync(cancellationToken);
+
+        return entities.AsEnumerable();
+    }
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        DbSet.AnyAsync(predicate, cancellationToken);
+        Entities.AnyAsync(predicate, cancellationToken);
 
-    public Task<bool> NotExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        DbSet.AnyAsync(predicate, cancellationToken)
-            .ContinueWith(t => !t.Result, TaskScheduler.Current);
+    public async Task<bool> NotExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        !(await ExistsAsync(predicate, cancellationToken));
 }

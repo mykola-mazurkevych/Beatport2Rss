@@ -32,8 +32,8 @@ public sealed class GetSessionQueryValidator :
 
 public sealed class GetSessionQueryHandler(
     IValidator<GetSessionQuery> validator,
-    ISessionQueryRepository sessionQueryRepository,
-    IUserQueryRepository userQueryRepository)
+    ISessionQueryRepository sessionRepository,
+    IUserQueryRepository userRepository)
 {
     public async Task<OneOf<Success<GetSessionResult>, ValidationFailed, InactiveUser>> HandleAsync(
         GetSessionQuery query,
@@ -46,8 +46,8 @@ public sealed class GetSessionQueryHandler(
         }
 
         var sessionId = SessionId.Create(query.SessionId);
-        var session = (await sessionQueryRepository.GetAsync(sessionId, cancellationToken))!;
-        var user = (await userQueryRepository.GetAsync(session.UserId, cancellationToken))!;
+        var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
+        var user = await userRepository.LoadAsync(session.UserId, cancellationToken);
 
         if (!user.IsActive)
         {
