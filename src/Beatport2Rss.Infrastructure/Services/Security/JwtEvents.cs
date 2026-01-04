@@ -5,7 +5,7 @@ using Beatport2Rss.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Security;
 
 internal static class JwtEvents
 {

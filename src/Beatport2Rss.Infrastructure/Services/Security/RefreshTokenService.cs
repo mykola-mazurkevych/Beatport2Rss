@@ -9,7 +9,7 @@ using Beatport2Rss.Domain.Sessions;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Security;
 
 internal sealed class RefreshTokenService(
     IClock clock,

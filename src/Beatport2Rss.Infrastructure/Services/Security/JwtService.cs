@@ -13,7 +13,7 @@ using Beatport2Rss.Domain.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Beatport2Rss.Infrastructure.Services;
+namespace Beatport2Rss.Infrastructure.Services.Security;
 
 internal sealed class JwtService(
     IClock clock,
