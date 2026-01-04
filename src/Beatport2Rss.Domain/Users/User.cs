@@ -30,6 +30,8 @@ public sealed class User : IAggregateRoot<UserId>
     public IReadOnlySet<Feed> Feeds => _feeds.AsReadOnly();
     public IReadOnlySet<Tag> Tags => _tags.AsReadOnly();
 
+    public bool IsActive => Status == UserStatus.Active;
+
     public static User Create(
         UserId id,
         EmailAddress emailAddress,

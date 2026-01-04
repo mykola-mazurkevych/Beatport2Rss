@@ -19,7 +19,8 @@ public readonly record struct CreateUserCommand(
     string? FirstName,
     string? LastName);
 
-public sealed class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+public sealed class CreateUserCommandValidator :
+    AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
     {
@@ -51,7 +52,9 @@ public sealed class CreateUserCommandHandler(
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<OneOf<Created, ValidationFailed, EmailAddressAlreadyTaken>> HandleAsync(CreateUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success, ValidationFailed, EmailAddressAlreadyTaken>> HandleAsync(
+        CreateUserCommand command,
+        CancellationToken cancellationToken = default)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
         if (!validationResult.IsValid)
@@ -83,6 +86,6 @@ public sealed class CreateUserCommandHandler(
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new Created();
+        return new Success();
     }
 }
