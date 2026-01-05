@@ -2,7 +2,7 @@ using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
 
-namespace Beatport2Rss.Application.Interfaces.Services;
+namespace Beatport2Rss.Application.Interfaces.Services.Security;
 
 public interface IAccessTokenService
 {

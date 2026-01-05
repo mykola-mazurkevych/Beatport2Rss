@@ -25,7 +25,7 @@ public sealed class GetSessionQueryValidator :
 {
     public GetSessionQueryValidator()
     {
-        RuleFor(c => c.SessionId)
+        RuleFor(q => q.SessionId)
             .NotEmpty().WithMessage("Session ID is required.");
     }
 }

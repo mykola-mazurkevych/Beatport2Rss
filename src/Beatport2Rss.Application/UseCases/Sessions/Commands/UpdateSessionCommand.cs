@@ -1,8 +1,8 @@
 using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
+using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
