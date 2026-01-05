@@ -101,7 +101,7 @@ public sealed class CreateSessionCommandHandler(
             command.IpAddress);
 
         await sessionRepository.AddAsync(session, cancellationToken);
-        await unitOfWork.SaveChangesAsync(cancellationToken);        
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var result = new CreateSessionResult(
             accessToken.Value,

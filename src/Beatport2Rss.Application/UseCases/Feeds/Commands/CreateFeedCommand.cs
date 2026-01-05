@@ -1,11 +1,14 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
+using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
 using FluentValidation;
+
+using OneOf;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
@@ -16,45 +19,60 @@ public readonly record struct CreateFeedCommand(
 public sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
 {
-    public CreateFeedCommandValidator(
-        IFeedNameAvailabilityChecker feedNameAvailabilityChecker,
-        IUserExistenceChecker userExistenceChecker)
+    public CreateFeedCommandValidator()
     {
         RuleFor(c => c.UserId)
-            .NotEmpty().WithMessage("User ID is required.")
-            .MustAsync(userExistenceChecker.ExistsAsync).WithMessage("User does not exist.");
+            .NotEmpty().WithMessage("User ID is required.");
 
         RuleFor(c => c.Name)
             .NotEmpty().WithMessage("Feed name is required.")
-            .MaximumLength(FeedName.MaxLength).WithMessage($"Feed name must be at most {FeedName.MaxLength} characters.")
-            .MustAsync((c, name, cancellationToken) => feedNameAvailabilityChecker.IsAvailableAsync(c.UserId, name, cancellationToken)).WithMessage("Feed name already taken.");
+            .MaximumLength(FeedName.MaxLength).WithMessage($"Feed name must be at most {FeedName.MaxLength} characters.");
     }
 }
 
 public sealed class CreateFeedCommandHandler(
+    IValidator<CreateFeedCommand> validator,
     IClock clock,
     ISlugGenerator slugGenerator,
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task HandleAsync(CreateFeedCommand command, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success<Guid>, ValidationFailed, InactiveUser, Conflict>> HandleAsync(CreateFeedCommand command, CancellationToken cancellationToken = default)
     {
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationFailed(validationResult.GetErrors());
+        }
+
         var userId = UserId.Create(command.UserId);
         var user = await userRepository.LoadAsync(userId, cancellationToken);
 
+        if (!user.IsActive)
+        {
+            return new InactiveUser();
+        }
+
+        var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
+        var slug = slugGenerator.Generate(feedName);
+
+        if (user.Feeds.Any(f => f.Name == feedName))
+        {
+            return new Conflict("Feed name is already taken.");
+        }
 
         var feed = Feed.Create(
-            FeedId.Create(Guid.CreateVersion7()),
+            feedId,
             feedName,
-            slugGenerator.Generate(feedName),
+            slug,
             FeedStatus.Active,
-            clock.UtcNow,
-            userId);
+            clock.UtcNow);
 
         user.AddFeed(feed);
         userRepository.Update(user);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return new Success<Guid>(feedId);
     }
 }

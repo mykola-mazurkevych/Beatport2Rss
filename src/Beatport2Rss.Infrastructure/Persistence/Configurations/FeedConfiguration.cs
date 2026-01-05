@@ -33,18 +33,15 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
         builder.Property(feed => feed.CreatedDate)
             .IsRequired();
 
-        builder.Property(feed => feed.UserId)
-            .IsRequired();
-
         builder.HasOne<User>()
             .WithMany(user => user.Feeds)
-            .HasForeignKey(feed => feed.UserId)
+            .HasForeignKey()
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(feed => feed.Slug)
             .IsUnique();
 
-        builder.HasIndex(feed => new { feed.UserId, feed.Name })
+        builder.HasIndex("UserId", "Name")
             .IsUnique();
     }
 }
