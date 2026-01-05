@@ -25,7 +25,7 @@ internal static class UserEndpointsBuilder
                     "",
                     async ([FromBody] CreateUserCommand command, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var result = await bus.InvokeAsync<OneOf<Created, ValidationFailed, EmailAddressAlreadyTaken>>(command, cancellationToken);
+                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed, EmailAddressAlreadyTaken>>(command, cancellationToken);
 
                         return result.Match<IResult>(
                             _ => Results.StatusCode(StatusCodes.Status201Created),
