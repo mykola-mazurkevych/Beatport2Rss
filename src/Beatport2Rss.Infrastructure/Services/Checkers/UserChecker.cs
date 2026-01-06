@@ -7,12 +7,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Beatport2Rss.Infrastructure.Services.Checkers;
 
 internal sealed class UserChecker(Beatport2RssDbContext dbContext) :
-    IEmailAddressAvailabilityChecker,
-    IUserExistenceChecker
+    IEmailAddressAvailabilityChecker
 {
     Task<bool> IEmailAddressAvailabilityChecker.IsAvailableAsync(EmailAddress emailAddress, CancellationToken cancellationToken) =>
         dbContext.Users.AllAsync(u => u.EmailAddress != emailAddress, cancellationToken);
-
-    Task<bool> IUserExistenceChecker.ExistsAsync(Guid userId, CancellationToken cancellationToken) =>
-        dbContext.Users.AnyAsync(u => u.Id == userId, cancellationToken);
 }

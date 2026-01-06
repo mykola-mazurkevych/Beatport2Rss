@@ -14,6 +14,8 @@ internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext db
 {
     private readonly DbSet<TEntity> _dbSet = dbContext.Set<TEntity>();
 
+    protected IQueryable<TEntity> Entities => _dbSet;
+
     public Task<TEntity> LoadAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
         _dbSet.SingleAsync(predicate, cancellationToken);
 

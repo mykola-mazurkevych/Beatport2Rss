@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
@@ -67,9 +66,7 @@ public static class DependencyInjectionExtensions
     {
         private IServiceCollection AddCheckers() =>
             services
-                .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>()
-                .AddTransient<IFeedNameAvailabilityChecker, FeedNameAvailabilityChecker>()
-                .AddTransient<IUserExistenceChecker, UserChecker>();
+                .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>();
 
         private IServiceCollection AddHealthServices()
         {

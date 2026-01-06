@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
@@ -9,7 +8,7 @@ using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
-public readonly partial record struct Slug : IValueObject
+public readonly record struct Slug : IValueObject
 {
     public const char Delimiter = '-';
     public const int SuffixLength = 4;
@@ -22,8 +21,7 @@ public readonly partial record struct Slug : IValueObject
     public static Slug Create([NotNull] string? value) =>
         new(value
             .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.SlugEmpty))
-            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong))
-            .MustMatch(SlugRegex(), (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugInvalid)));
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong)));
 
     public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 
@@ -36,7 +34,4 @@ public readonly partial record struct Slug : IValueObject
 
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
-
-    [GeneratedRegex("^[^-]+-[^-]{4}$", RegexOptions.IgnoreCase)]
-    private static partial Regex SlugRegex();
 }
