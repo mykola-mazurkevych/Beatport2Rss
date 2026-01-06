@@ -7,7 +7,7 @@ namespace Beatport2Rss.Domain.Users;
 public sealed class User : IAggregateRoot<UserId>
 {
     public const int NameLength = 100;
- 
+
     private readonly HashSet<Feed> _feeds = [];
     private readonly HashSet<Tag> _tags = [];
 
@@ -30,6 +30,11 @@ public sealed class User : IAggregateRoot<UserId>
     public IReadOnlySet<Feed> Feeds => _feeds.AsReadOnly();
     public IReadOnlySet<Tag> Tags => _tags.AsReadOnly();
 
+    public string? FullName =>
+        string.IsNullOrWhiteSpace(FirstName) && string.IsNullOrWhiteSpace(LastName)
+            ? null
+            : $"{FirstName} {LastName}".Trim();
+
     public bool IsActive => Status == UserStatus.Active;
 
     public static User Create(
@@ -50,6 +55,6 @@ public sealed class User : IAggregateRoot<UserId>
             Status = status,
             CreatedDate = createdDate,
         };
-    
+
     public void AddFeed(Feed feed) => _feeds.Add(feed);
 }

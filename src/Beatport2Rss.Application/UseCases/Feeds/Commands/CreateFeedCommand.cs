@@ -37,7 +37,9 @@ public sealed class CreateFeedCommandHandler(
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task<OneOf<Success<Guid>, ValidationFailed, InactiveUser, Conflict>> HandleAsync(CreateFeedCommand command, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success<string>, ValidationFailed, InactiveUser, Conflict>> HandleAsync(
+        CreateFeedCommand command,
+        CancellationToken cancellationToken = default)
     {
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
         if (!validationResult.IsValid)
@@ -73,6 +75,6 @@ public sealed class CreateFeedCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new Success<Guid>(feedId);
+        return new Success<string>(slug);
     }
 }

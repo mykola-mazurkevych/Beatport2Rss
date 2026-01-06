@@ -2,6 +2,7 @@ using System.Net.Mime;
 
 using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
+using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Requests.Feeds;
@@ -30,7 +31,7 @@ internal static class FeedEndpointsBuilder
                         var command = new CreateFeedCommand(
                             context.User.Id,
                             request.Name);
-                        var result = await bus.InvokeAsync<OneOf<Success<Guid>, ValidationFailed, InactiveUser, Conflict>>(command, cancellationToken);
+                        var result = await bus.InvokeAsync<OneOf<Success<string>, ValidationFailed, InactiveUser, Conflict>>(command, cancellationToken);
 
                         return result.Match<IResult>(
                             success => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { feedId = success.Value }),
@@ -47,6 +48,31 @@ internal static class FeedEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapGet(
+                    "/{slug}",
+                    async ([FromRoute] string slug, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetFeedBySlugQuery(
+                            context.User.Id,
+                            slug);
+                        var result = await bus.InvokeAsync<OneOf<Success<GetFeedBySlugResult>, ValidationFailed, InactiveUser, NotFound>>(query, cancellationToken);
+
+                        return result.Match<IResult>(
+                            success => Results.Ok(success.Value),
+                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
+                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail),
+                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail));
+                    })
+                .WithName(FeedEndpointNames.Get)
+                .WithDescription("Get a feed by slug.")
+                .RequireAuthorization()
+                .Produces<GetFeedBySlugResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;
