@@ -46,7 +46,7 @@ public sealed class CreateFeedCommandHandler(
         }
 
         var userId = UserId.Create(command.UserId);
-        var user = await userRepository.LoadAsync(userId, cancellationToken);
+        var user = await userRepository.LoadWithFeedsAsync(userId, cancellationToken);
 
         if (!user.IsActive)
         {
