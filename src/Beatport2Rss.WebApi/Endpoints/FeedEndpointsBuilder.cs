@@ -33,14 +33,14 @@ internal static class FeedEndpointsBuilder
                         var result = await bus.InvokeAsync<OneOf<Success<Guid>, ValidationFailed, InactiveUser, Conflict>>(command, cancellationToken);
 
                         return result.Match<IResult>(
-                            success => Results.CreatedAtRoute(FeedEndpointNames.Get, value: success.Value),
+                            success => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { feedId = success.Value }),
                             validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
                             inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail),
                             conflict => ProblemDetailsBuilder.Conflict(context, conflict.Detail));
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a feed.")
-                .AllowAnonymous()
+                .RequireAuthorization()
                 .Accepts<CreateFeedRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)

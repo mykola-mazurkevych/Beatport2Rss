@@ -10,6 +10,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
 internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
 {
+    private const string UserIdPropertyName = "UserId";
+
     public void Configure(EntityTypeBuilder<Feed> builder)
     {
         builder.ToTable(nameof(Beatport2RssDbContext.Feeds));
@@ -33,15 +35,18 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
         builder.Property(feed => feed.CreatedDate)
             .IsRequired();
 
+        builder.Property(UserIdPropertyName)
+            .IsRequired();
+
         builder.HasOne<User>()
             .WithMany(user => user.Feeds)
-            .HasForeignKey()
+            .HasForeignKey(UserIdPropertyName)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(feed => feed.Slug)
             .IsUnique();
 
-        builder.HasIndex("UserId", "Name")
+        builder.HasIndex(UserIdPropertyName, nameof(Feed.Name))
             .IsUnique();
     }
 }
