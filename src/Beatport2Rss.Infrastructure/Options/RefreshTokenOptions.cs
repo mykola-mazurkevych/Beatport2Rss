@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Application.Options;
+namespace Beatport2Rss.Infrastructure.Options;
 
 public sealed record RefreshTokenOptions
 {

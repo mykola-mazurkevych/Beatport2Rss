@@ -3,8 +3,8 @@ using System.Text;
 
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Options;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.Infrastructure.Options;
 
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
