@@ -1,17 +1,14 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Requests.Feeds;
 
+using Mediator;
+
 using Microsoft.AspNetCore.Mvc;
-
-using OneOf;
-
-using Wolverine;
 
 namespace Beatport2Rss.WebApi.Endpoints;
 
@@ -26,18 +23,13 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateFeedRequest request, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var command = new CreateFeedCommand(
-                            context.User.Id,
-                            request.Name);
-                        var result = await bus.InvokeAsync<OneOf<Success<string>, ValidationFailed, InactiveUser, Conflict>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
-                            success => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { feedId = success.Value }),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail),
-                            conflict => ProblemDetailsBuilder.Conflict(context, conflict.Detail));
+                        var command = new CreateFeedCommand(context.User.Id, request.Name);
+                        var response = await mediator.Send(command, cancellationToken);
+                        return response.MatchFirst(
+                            slug => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = slug.Value }),
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a feed.")
@@ -53,18 +45,13 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/{slug}",
-                    async ([FromRoute] string slug, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new GetFeedBySlugQuery(
-                            context.User.Id,
-                            slug);
-                        var result = await bus.InvokeAsync<OneOf<Success<GetFeedBySlugResult>, ValidationFailed, InactiveUser, NotFound>>(query, cancellationToken);
-
-                        return result.Match<IResult>(
-                            success => Results.Ok(success.Value),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail),
-                            notFound => ProblemDetailsBuilder.NotFound(context, notFound.Detail));
+                        var query = new GetFeedBySlugQuery(context.User.Id, slug);
+                        var response = await mediator.Send(query, cancellationToken);
+                        return response.MatchFirst(
+                            Results.Ok,
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")

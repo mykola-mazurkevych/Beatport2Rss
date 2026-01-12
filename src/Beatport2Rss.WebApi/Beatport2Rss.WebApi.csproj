@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Beatport2Rss.Infrastructure\Beatport2Rss.Infrastructure.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Application\Beatport2Rss.Application.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Infrastructure\Beatport2Rss.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,11 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.WebApi.Constants.Endpoints;
 
+using Mediator;
+
 using Microsoft.AspNetCore.Mvc;
-
-using OneOf;
-
-using Wolverine;
 
 namespace Beatport2Rss.WebApi.Endpoints;
 
@@ -23,14 +20,12 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateUserCommand command, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateUserCommand command, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed, EmailAddressAlreadyTaken>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.MatchFirst(
                             _ => Results.StatusCode(StatusCodes.Status201Created),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            emailAddressAlreadyTaken => ProblemDetailsBuilder.Conflict(context, emailAddressAlreadyTaken.Detail));
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(UserEndpointNames.Create)
                 .WithDescription("Create a user.")

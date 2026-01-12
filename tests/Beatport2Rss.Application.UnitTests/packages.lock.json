@@ -59,6 +59,11 @@
         "resolved": "18.0.1",
         "contentHash": "O+utSr97NAJowIQT/OVp3Lh9QgW/wALVTP4RG1m2AfFP4IyJmJz0ZBmFJUsRQiAPgq6IRC0t8AAzsiPIsaUDEA=="
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "cjWrLkJXK0rs4zofsK4bSdg+jhDLTaxrkXu4gS6Y7MAlCvRyNNgwY/lJi5RDlQOnSZweHqoyvgvbdvQsRIW+hg=="
+      },
       "Microsoft.Testing.Extensions.Telemetry": {
         "type": "Transitive",
         "resolved": "1.9.1",
@@ -189,8 +194,10 @@
         "type": "Project",
         "dependencies": {
           "Beatport2Rss.Domain": "[1.0.0, )",
+          "ErrorOr": "[2.0.1, )",
           "FluentValidation": "[12.1.1, )",
-          "OneOf": "[3.0.271, )"
+          "FluentValidation.DependencyInjectionExtensions": "[12.1.1, )",
+          "Mediator.Abstractions": "[3.0.1, )"
         }
       },
       "beatport2rss.domain": {
@@ -199,11 +206,27 @@
           "Light.GuardClauses": "[14.0.0, )"
         }
       },
+      "ErrorOr": {
+        "type": "CentralTransitive",
+        "requested": "[2.0.1, )",
+        "resolved": "2.0.1",
+        "contentHash": "aje9lUVEAsusPFmaRcVM5EUqWBofd7hYtb9N8+ycgPYrtOzyFajMpzRgIO4uuiCllNLBc3x48+cpA+4v4koUDQ=="
+      },
       "FluentValidation": {
         "type": "CentralTransitive",
         "requested": "[12.1.1, )",
         "resolved": "12.1.1",
         "contentHash": "EPpkIe1yh1a0OXyC100oOA8WMbZvqUu5plwhvYcb7oSELfyUZzfxV48BLhvs3kKo4NwG7MGLNgy1RJiYtT8Dpw=="
+      },
+      "FluentValidation.DependencyInjectionExtensions": {
+        "type": "CentralTransitive",
+        "requested": "[12.1.1, )",
+        "resolved": "12.1.1",
+        "contentHash": "D0VXh4dtjjX2aQizuaa0g6R8X3U1JaVqJPfGCvLwZX9t/O2h7tkpbitbadQMfwcgSPdDbI2vDxuwRMv/Uf9dHA==",
+        "dependencies": {
+          "FluentValidation": "12.1.1",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "2.1.0"
+        }
       },
       "Light.GuardClauses": {
         "type": "CentralTransitive",
@@ -211,11 +234,14 @@
         "resolved": "14.0.0",
         "contentHash": "UTNv86j5+Aw2TFjzBhrKy0rwGhk4sSUyt10AOPQkIRgq59eHvAW1SmjEzAcqBeQmpH2iGX9k/hFDGOnGJ8FR7w=="
       },
-      "OneOf": {
+      "Mediator.Abstractions": {
         "type": "CentralTransitive",
-        "requested": "[3.0.271, )",
-        "resolved": "3.0.271",
-        "contentHash": "pqpqeK8xQGggExhr4tesVgJkjdn+9HQAO0QgrYV2hFjE3y90okzk1kQMntMiUOGfV7FrCUfKPaVvPBD4IANqKg=="
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "WLWp7S7pt818wsK2IiFwGwvUhwq0E/7F0LkglDQKx+4rSzRWVKD3CHtaCi1fpeURH+v44ZPxaRVBCNV7uWOBYQ==",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "8.0.0"
+        }
       }
     }
   }

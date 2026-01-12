@@ -1,16 +1,18 @@
-using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Sessions;
+
+using ErrorOr;
 
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
-public readonly record struct DeleteSessionCommand(Guid SessionId);
+public readonly record struct DeleteSessionCommand(Guid SessionId) :
+    ICommand<ErrorOr<Success>>, IValidate;
 
 public sealed class DeleteSessionCommandValidator :
     AbstractValidator<DeleteSessionCommand>
@@ -23,20 +25,14 @@ public sealed class DeleteSessionCommandValidator :
 }
 
 public sealed class DeleteSessionCommandHandler(
-    IValidator<DeleteSessionCommand> validator,
     ISessionCommandRepository sessionRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<DeleteSessionCommand, ErrorOr<Success>>
 {
-    public async Task<OneOf<Success, ValidationFailed>> HandleAsync(
+    public async ValueTask<ErrorOr<Success>> Handle(
         DeleteSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var sessionId = SessionId.Create(command.SessionId);
         var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
 

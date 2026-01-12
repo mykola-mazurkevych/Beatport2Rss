@@ -1,16 +1,30 @@
 using System.Net;
 
 using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.WebApi.Extensions;
+
+using ErrorOr;
 
 namespace Beatport2Rss.WebApi;
 
-// TODO: think about one generic method
 internal static class ProblemDetailsBuilder
 {
-    public static IResult BadRequest(HttpContext context, IDictionary<string, string[]> errors) =>
+    public static IResult Build(HttpContext context, Error error) =>
+        error.Type switch
+        {
+            ErrorType.Failure or ErrorType.Unexpected => InternalServerError(context, error.Description),
+            ErrorType.Validation => BadRequest(context, error.Description, error.GetErrors()),
+            ErrorType.Conflict => Conflict(context, error.Description),
+            ErrorType.NotFound => NotFound(context, error.Description),
+            ErrorType.Unauthorized => Unauthorized(context, error.Description),
+            ErrorType.Forbidden => Forbidden(context, error.Description),
+            _ => InternalServerError(context, error.Description),
+        };
+
+    public static IResult BadRequest(HttpContext context, string detail, IDictionary<string, string[]> errors) =>
         Results.ValidationProblem(
             errors: errors,
-            detail: "One or more validation errors occured.",
+            detail: detail,
             instance: context.Request.Path,
             statusCode: (int)HttpStatusCode.BadRequest,
             title: "Bad Request",
@@ -53,12 +67,12 @@ internal static class ProblemDetailsBuilder
             type: "https://datatracker.ietf.org/doc/html/rfc9110#status.409",
             extensions: new Dictionary<string, object?> { { ResponseExtensionNames.TraceId, context.TraceIdentifier } });
 
-    public static IResult UnprocessableEntity(HttpContext context, string detail) =>
+    public static IResult InternalServerError(HttpContext context, string detail) =>
         Results.Problem(
             detail: detail,
             instance: context.Request.Path,
-            statusCode: (int)HttpStatusCode.UnprocessableEntity,
-            title: "Unprocessable Entity",
-            type: "https://datatracker.ietf.org/doc/html/rfc9110#status.422",
+            statusCode: (int)HttpStatusCode.InternalServerError,
+            title: "Internal Server Error",
+            type: "https://datatracker.ietf.org/doc/html/rfc9110#status.500",
             extensions: new Dictionary<string, object?> { { ResponseExtensionNames.TraceId, context.TraceIdentifier } });
 }

@@ -1,15 +1,16 @@
-using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Users;
+
+using ErrorOr;
 
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
@@ -17,7 +18,8 @@ public readonly record struct CreateUserCommand(
     string? EmailAddress,
     string? Password,
     string? FirstName,
-    string? LastName);
+    string? LastName) :
+    ICommand<ErrorOr<Success>>, IValidate;
 
 public sealed class CreateUserCommandValidator :
     AbstractValidator<CreateUserCommand>
@@ -45,28 +47,24 @@ public sealed class CreateUserCommandValidator :
 }
 
 public sealed class CreateUserCommandHandler(
-    IValidator<CreateUserCommand> validator,
     IClock clock,
     IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
     IUserCommandRepository userRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<CreateUserCommand, ErrorOr<Success>>
 {
-    public async Task<OneOf<Success, ValidationFailed, EmailAddressAlreadyTaken>> HandleAsync(
+    public async ValueTask<ErrorOr<Success>> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var emailAddress = EmailAddress.Create(command.EmailAddress);
 
         if (!await emailAddressAvailabilityChecker.IsAvailableAsync(emailAddress, cancellationToken))
         {
-            return new EmailAddressAlreadyTaken(emailAddress);
+            return Error.Conflict(
+                code: "EmailAddress.AlreadyTaken",
+                description: $"Email address {emailAddress} already taken.");
         }
 
         var userId = UserId.Create(Guid.CreateVersion7());
@@ -83,7 +81,6 @@ public sealed class CreateUserCommandHandler(
             clock.UtcNow);
 
         await userRepository.AddAsync(user, cancellationToken);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new Success();

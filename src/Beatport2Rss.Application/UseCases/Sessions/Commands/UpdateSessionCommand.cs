@@ -1,21 +1,23 @@
-using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 
+using ErrorOr;
+
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
 public readonly record struct UpdateSessionCommand(
     Guid SessionId,
-    string RefreshToken);
+    string RefreshToken) :
+    ICommand<ErrorOr<UpdateSessionResult>>, IValidate;
 
 public readonly record struct UpdateSessionResult(
     string AccessToken,
@@ -39,32 +41,21 @@ public sealed class UpdateSessionCommandValidator :
 }
 
 public sealed class UpdateSessionCommandHandler(
-    IValidator<UpdateSessionCommand> validator,
     IClock clock,
     IAccessTokenService accessTokenService,
     IRefreshTokenService refreshTokenService,
     ISessionCommandRepository sessionRepository,
     IUserQueryRepository userRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<UpdateSessionCommand, ErrorOr<UpdateSessionResult>>
 {
-    public async Task<OneOf<Success<UpdateSessionResult>, ValidationFailed, Unauthorized, InactiveUser>> HandleAsync(
+    public async ValueTask<ErrorOr<UpdateSessionResult>> Handle(
         UpdateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var sessionId = SessionId.Create(command.SessionId);
         var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
         var user = await userRepository.LoadAsync(session.UserId, cancellationToken);
-
-        if (!user.IsActive)
-        {
-            return new InactiveUser();
-        }
 
         var refreshToken = RefreshToken.Create(command.RefreshToken);
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
@@ -74,7 +65,9 @@ public sealed class UpdateSessionCommandHandler(
             sessionRepository.Delete(session);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return new Unauthorized("Refresh token is not valid.");
+            return Error.Unauthorized(
+                code: "Session.RefreshToken.Invalid",
+                description: "The provided refresh token is invalid or has expired.");
         }
 
         (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
@@ -91,6 +84,6 @@ public sealed class UpdateSessionCommandHandler(
             expiresIn,
             newRefreshToken);
 
-        return new Success<UpdateSessionResult>(result);
+        return result;
     }
 }

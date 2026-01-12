@@ -1,17 +1,14 @@
 using System.Net.Mime;
 
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
+using Mediator;
+
 using Microsoft.AspNetCore.Mvc;
-
-using OneOf;
-
-using Wolverine;
 
 namespace Beatport2Rss.WebApi.Endpoints;
 
@@ -26,20 +23,17 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateSessionRequest request, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
                             request.EmailAddress,
                             request.Password,
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
-                        var result = await bus.InvokeAsync<OneOf<Success<CreateSessionResult>, ValidationFailed, InvalidCredentials, InactiveUser>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
-                            success => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: success.Value),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            invalidCredentials => ProblemDetailsBuilder.Unauthorized(context, invalidCredentials.Detail),
-                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
+                        var response = await mediator.Send(command, cancellationToken);
+                        return response.MatchFirst(
+                            createSessionResult => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: createSessionResult),
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
@@ -54,15 +48,13 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/current",
-                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetSessionQuery(context.User.SessionId);
-                        var result = await bus.InvokeAsync<OneOf<Success<GetSessionResult>, ValidationFailed, InactiveUser>>(query, cancellationToken);
-
-                        return result.Match<IResult>(
-                            success => Results.Ok(success.Value),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
+                        var response = await mediator.Send(query, cancellationToken);
+                        return response.MatchFirst(
+                            Results.Ok,
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
@@ -76,14 +68,13 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/current",
-                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
-                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
+                        var response = await mediator.Send(command, cancellationToken);
+                        return response.MatchFirst(
                             _ => Results.NoContent(),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors));
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
@@ -96,18 +87,15 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPatch(
                     "/current",
-                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
                             request.RefreshToken);
-                        var result = await bus.InvokeAsync<OneOf<Success<UpdateSessionResult>, ValidationFailed, Unauthorized, InactiveUser>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
-                            success => Results.Ok(success.Value),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors),
-                            unauthorized => ProblemDetailsBuilder.Unauthorized(context, unauthorized.Detail),
-                            inactiveUser => ProblemDetailsBuilder.Forbidden(context, inactiveUser.Detail));
+                        var response = await mediator.Send(command, cancellationToken);
+                        return response.MatchFirst(
+                            Results.Ok,
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
@@ -122,15 +110,13 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "",
-                    async ([FromServices] IMessageBus bus, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionsCommand(context.User.Id);
-                        var result = await bus.InvokeAsync<OneOf<Success, ValidationFailed>>(command, cancellationToken);
-
-                        return result.Match<IResult>(
+                        var response = await mediator.Send(command, cancellationToken);
+                        return response.MatchFirst(
                             _ => Results.NoContent(),
-                            validationFailed => ProblemDetailsBuilder.BadRequest(context, validationFailed.Errors)
-                        );
+                            e => ProblemDetailsBuilder.Build(context, e));
                     })
                 .WithName(SessionEndpointNames.DeleteAll)
                 .WithDescription("Delete all user sessions (log out from all devices).")
