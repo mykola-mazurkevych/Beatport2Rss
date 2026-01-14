@@ -1,12 +1,12 @@
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -17,7 +17,7 @@ namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 public readonly record struct UpdateSessionCommand(
     Guid SessionId,
     string RefreshToken) :
-    ICommand<ErrorOr<UpdateSessionResult>>, IValidate;
+    ICommand<Result<UpdateSessionResult>>;
 
 public readonly record struct UpdateSessionResult(
     string AccessToken,
@@ -47,9 +47,9 @@ public sealed class UpdateSessionCommandHandler(
     ISessionCommandRepository sessionRepository,
     IUserQueryRepository userRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<UpdateSessionCommand, ErrorOr<UpdateSessionResult>>
+    ICommandHandler<UpdateSessionCommand, Result<UpdateSessionResult>>
 {
-    public async ValueTask<ErrorOr<UpdateSessionResult>> Handle(
+    public async ValueTask<Result<UpdateSessionResult>> Handle(
         UpdateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -65,9 +65,7 @@ public sealed class UpdateSessionCommandHandler(
             sessionRepository.Delete(session);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return Error.Unauthorized(
-                code: "Session.RefreshToken.Invalid",
-                description: "The provided refresh token is invalid or has expired.");
+            return Result.Unauthorized("The provided refresh token is invalid or has expired.");
         }
 
         (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);

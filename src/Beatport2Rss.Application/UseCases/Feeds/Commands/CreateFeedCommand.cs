@@ -5,8 +5,9 @@ using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -17,7 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 public readonly record struct CreateFeedCommand(
     Guid UserId,
     string? Name) :
-    ICommand<ErrorOr<Slug>>, IValidate, IHaveUserId;
+    ICommand<Result<Slug>>, IRequireActiveUser;
 
 public sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
@@ -38,9 +39,9 @@ public sealed class CreateFeedCommandHandler(
     ISlugGenerator slugGenerator,
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<CreateFeedCommand, ErrorOr<Slug>>
+    ICommandHandler<CreateFeedCommand, Result<Slug>>
 {
-    public async ValueTask<ErrorOr<Slug>> Handle(
+    public async ValueTask<Result<Slug>> Handle(
         CreateFeedCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -53,9 +54,7 @@ public sealed class CreateFeedCommandHandler(
 
         if (user.Feeds.Any(f => f.Name == feedName))
         {
-            return Error.Conflict(
-                "Feed.NameTaken",
-                "Feed name is already taken.");
+            return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }
 
         var feed = Feed.Create(

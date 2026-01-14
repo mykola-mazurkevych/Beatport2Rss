@@ -4,6 +4,7 @@ using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants.Endpoints;
+using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Feeds;
 
 using Mediator;
@@ -26,10 +27,8 @@ internal static class FeedEndpointsBuilder
                     async ([FromBody] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateFeedCommand(context.User.Id, request.Name);
-                        var response = await mediator.Send(command, cancellationToken);
-                        return response.MatchFirst(
-                            slug => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = slug.Value }),
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToIResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a feed.")
@@ -48,10 +47,8 @@ internal static class FeedEndpointsBuilder
                     async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetFeedBySlugQuery(context.User.Id, slug);
-                        var response = await mediator.Send(query, cancellationToken);
-                        return response.MatchFirst(
-                            Results.Ok,
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToIResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")

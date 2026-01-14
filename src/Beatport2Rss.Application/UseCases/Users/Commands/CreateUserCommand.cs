@@ -1,12 +1,12 @@
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -19,7 +19,7 @@ public readonly record struct CreateUserCommand(
     string? Password,
     string? FirstName,
     string? LastName) :
-    ICommand<ErrorOr<Success>>, IValidate;
+    ICommand<Result>;
 
 public sealed class CreateUserCommandValidator :
     AbstractValidator<CreateUserCommand>
@@ -52,9 +52,9 @@ public sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<CreateUserCommand, ErrorOr<Success>>
+    ICommandHandler<CreateUserCommand, Result>
 {
-    public async ValueTask<ErrorOr<Success>> Handle(
+    public async ValueTask<Result> Handle(
         CreateUserCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -62,9 +62,7 @@ public sealed class CreateUserCommandHandler(
 
         if (!await emailAddressAvailabilityChecker.IsAvailableAsync(emailAddress, cancellationToken))
         {
-            return Error.Conflict(
-                code: "EmailAddress.AlreadyTaken",
-                description: $"Email address {emailAddress} already taken.");
+            return Result.Conflict($"Email address {emailAddress} already taken.");
         }
 
         var userId = UserId.Create(Guid.CreateVersion7());
@@ -83,6 +81,6 @@ public sealed class CreateUserCommandHandler(
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new Success();
+        return Result.Ok();
     }
 }

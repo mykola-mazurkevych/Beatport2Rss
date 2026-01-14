@@ -3,8 +3,9 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -15,7 +16,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 public readonly record struct GetFeedBySlugQuery(
     Guid UserId,
     string? Slug) :
-    IQuery<ErrorOr<GetFeedBySlugResult>>, IValidate, IHaveUserId;
+    IQuery<Result<GetFeedBySlugResult>>, IRequireActiveUser;
 
 public readonly record struct GetFeedBySlugResult(
     string Name,
@@ -40,9 +41,9 @@ public sealed class GetFeedBySlugQueryValidator :
 
 public sealed class GetFeedBySlugQueryHandler(
     IUserQueryRepository userRepository) :
-    IQueryHandler<GetFeedBySlugQuery, ErrorOr<GetFeedBySlugResult>>
+    IQueryHandler<GetFeedBySlugQuery, Result<GetFeedBySlugResult>>
 {
-    public async ValueTask<ErrorOr<GetFeedBySlugResult>> Handle(
+    public async ValueTask<Result<GetFeedBySlugResult>> Handle(
         GetFeedBySlugQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -54,9 +55,7 @@ public sealed class GetFeedBySlugQueryHandler(
 
         if (feed is null)
         {
-            return Error.NotFound(
-                "Feed.NotFound",
-                "Feed with the specified slug was not found.");
+            return Result.NotFound($"Feed with the slug '{slug}' was not found.");
         }
 
         var result = new GetFeedBySlugResult(

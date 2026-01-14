@@ -1,4 +1,3 @@
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
@@ -6,8 +5,9 @@ using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -20,7 +20,7 @@ public readonly record struct CreateSessionCommand(
     string? Password,
     string? UserAgent,
     string? IpAddress) :
-    ICommand<ErrorOr<CreateSessionResult>>, IValidate;
+    ICommand<Result<CreateSessionResult>>;
 
 public readonly record struct CreateSessionResult(
     string AccessToken,
@@ -62,9 +62,9 @@ public sealed class CreateSessionCommandHandler(
     ISessionCommandRepository sessionRepository,
     IUserQueryRepository userRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<CreateSessionCommand, ErrorOr<CreateSessionResult>>
+    ICommandHandler<CreateSessionCommand, Result<CreateSessionResult>>
 {
-    public async ValueTask<ErrorOr<CreateSessionResult>> Handle(
+    public async ValueTask<Result<CreateSessionResult>> Handle(
         CreateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -74,9 +74,7 @@ public sealed class CreateSessionCommandHandler(
 
         if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
         {
-            return Error.Unauthorized(
-                code: "Authentication.Failed",
-                description: "The provided email address or password is incorrect.");
+            return Result.Unauthorized("The provided email address or password is incorrect.");
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());

@@ -16,17 +16,31 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddApplication() =>
             services
-                .AddValidatorsFromAssembly(Assembly.GetExecutingAssembly())
+                .AddValidators()
+                ////.AddValidatorsFromAssembly(typeof(ValidationBehavior<,>).Assembly)
                 .AddMediator(o =>
                 {
                     o.GenerateTypesAsInternal = true;
                     o.ServiceLifetime = ServiceLifetime.Transient;
-                    ////o.Assemblies = [Assembly.GetExecutingAssembly()];
                     o.PipelineBehaviors =
                     [
                         typeof(ValidationBehavior<,>),
                         typeof(ForbiddenBehavior<,>),
                     ];
                 });
+
+        public IServiceCollection AddValidators()
+        {
+            var types = Assembly.GetExecutingAssembly()
+            .GetTypes()
+            .Where(t =>
+                t is { IsAbstract: false, BaseType.IsGenericType: true } &&
+                t.BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>))
+            .ToList();
+
+            types.ForEach(t => services.AddTransient(typeof(IValidator), t));
+
+            return services;
+        }
     }
 }

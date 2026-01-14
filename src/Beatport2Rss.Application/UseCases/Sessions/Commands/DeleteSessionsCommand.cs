@@ -1,9 +1,8 @@
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -12,7 +11,7 @@ using Mediator;
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
 public readonly record struct DeleteSessionsCommand(Guid UserId) :
-    ICommand<ErrorOr<Success>>, IValidate;
+    ICommand<Result>;
 
 public sealed class DeleteSessionsCommandValidator :
     AbstractValidator<DeleteSessionsCommand>
@@ -27,9 +26,9 @@ public sealed class DeleteSessionsCommandValidator :
 public sealed class DeleteSessionsCommandHandler(
     ISessionCommandRepository sessionRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<DeleteSessionsCommand, ErrorOr<Success>>
+    ICommandHandler<DeleteSessionsCommand, Result>
 {
-    public async ValueTask<ErrorOr<Success>> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
+    public async ValueTask<Result> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(command.UserId);
         var sessions = await sessionRepository.FindAllAsync(s => s.UserId == userId, cancellationToken);
@@ -37,6 +36,6 @@ public sealed class DeleteSessionsCommandHandler(
         sessionRepository.DeleteRange(sessions);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new Success();
+        return Result.Ok();
     }
 }

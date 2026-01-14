@@ -1,29 +1,27 @@
 using System.Net;
 
+using Beatport2Rss.SharedKernel.Errors;
 using Beatport2Rss.WebApi.Constants;
-using Beatport2Rss.WebApi.Extensions;
 
-using ErrorOr;
+using FluentResults;
 
 namespace Beatport2Rss.WebApi;
 
 internal static class ProblemDetailsBuilder
 {
-    public static IResult Build(HttpContext context, Error error) =>
-        error.Type switch
+    public static IResult Build(HttpContext context, IEnumerable<IError> errors) =>
+        errors.Single() switch
         {
-            ErrorType.Failure or ErrorType.Unexpected => InternalServerError(context, error.Description),
-            ErrorType.Validation => BadRequest(context, error.Description, error.GetErrors()),
-            ErrorType.Conflict => Conflict(context, error.Description),
-            ErrorType.NotFound => NotFound(context, error.Description),
-            ErrorType.Unauthorized => Unauthorized(context, error.Description),
-            ErrorType.Forbidden => Forbidden(context, error.Description),
-            _ => InternalServerError(context, error.Description),
+            ConflictError conflict => Conflict(context, conflict.Message),
+            ForbiddenError forbidden => Forbidden(context, forbidden.Message),
+            NotFoundError notFound => NotFound(context, notFound.Message),
+            ValidationError validation => BadRequest(context, validation.Message, validation.Metadata),
+            _ => InternalServerError(context, "asd")
         };
 
-    public static IResult BadRequest(HttpContext context, string detail, IDictionary<string, string[]> errors) =>
+    public static IResult BadRequest(HttpContext context, string detail, Dictionary<string, object> errors) =>
         Results.ValidationProblem(
-            errors: errors,
+            errors: errors.ToDictionary(kvp => kvp.Key, kvp => (string[])kvp.Value),
             detail: detail,
             instance: context.Request.Path,
             statusCode: (int)HttpStatusCode.BadRequest,

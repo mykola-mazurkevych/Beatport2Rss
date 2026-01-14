@@ -1,8 +1,7 @@
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Sessions;
 
-using ErrorOr;
+using FluentResults;
 
 using FluentValidation;
 
@@ -11,7 +10,7 @@ using Mediator;
 namespace Beatport2Rss.Application.UseCases.Sessions.Queries;
 
 public readonly record struct GetSessionQuery(Guid SessionId) :
-    IQuery<ErrorOr<GetSessionResult>>, IValidate;
+    IQuery<Result<GetSessionResult>>;
 
 public readonly record struct GetSessionResult(
     Guid SessionId,
@@ -35,9 +34,9 @@ public sealed class GetSessionQueryValidator :
 public sealed class GetSessionQueryHandler(
     ISessionQueryRepository sessionRepository,
     IUserQueryRepository userRepository) :
-    IQueryHandler<GetSessionQuery, ErrorOr<GetSessionResult>>
+    IQueryHandler<GetSessionQuery, Result<GetSessionResult>>
 {
-    public async ValueTask<ErrorOr<GetSessionResult>> Handle(
+    public async ValueTask<Result<GetSessionResult>> Handle(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {

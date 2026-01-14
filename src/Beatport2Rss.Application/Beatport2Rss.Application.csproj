@@ -11,9 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErrorOr" />
+    <PackageReference Include="FluentResults" />
     <PackageReference Include="FluentValidation" />
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Mediator.Abstractions" />
     <PackageReference Include="Mediator.SourceGenerator">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.SharedKernel\Beatport2Rss.SharedKernel.csproj" />
   </ItemGroup>
 
 </Project>

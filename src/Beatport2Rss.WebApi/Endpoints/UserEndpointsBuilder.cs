@@ -2,6 +2,7 @@ using System.Net.Mime;
 
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.WebApi.Constants.Endpoints;
+using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
 
@@ -23,9 +24,7 @@ internal static class UserEndpointsBuilder
                     async ([FromBody] CreateUserCommand command, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.MatchFirst(
-                            _ => Results.StatusCode(StatusCodes.Status201Created),
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        return result.ToIResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })
                 .WithName(UserEndpointNames.Create)
                 .WithDescription("Create a user.")

@@ -4,6 +4,7 @@ using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Constants.Endpoints;
+using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
 using Mediator;
@@ -30,10 +31,8 @@ internal static class SessionEndpointsBuilder
                             request.Password,
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
-                        var response = await mediator.Send(command, cancellationToken);
-                        return response.MatchFirst(
-                            createSessionResult => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: createSessionResult),
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToIResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
                     })
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
@@ -51,10 +50,8 @@ internal static class SessionEndpointsBuilder
                     async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetSessionQuery(context.User.SessionId);
-                        var response = await mediator.Send(query, cancellationToken);
-                        return response.MatchFirst(
-                            Results.Ok,
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToIResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
@@ -71,10 +68,8 @@ internal static class SessionEndpointsBuilder
                     async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
-                        var response = await mediator.Send(command, cancellationToken);
-                        return response.MatchFirst(
-                            _ => Results.NoContent(),
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToIResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
@@ -92,10 +87,8 @@ internal static class SessionEndpointsBuilder
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
                             request.RefreshToken);
-                        var response = await mediator.Send(command, cancellationToken);
-                        return response.MatchFirst(
-                            Results.Ok,
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToIResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
@@ -113,10 +106,8 @@ internal static class SessionEndpointsBuilder
                     async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionsCommand(context.User.Id);
-                        var response = await mediator.Send(command, cancellationToken);
-                        return response.MatchFirst(
-                            _ => Results.NoContent(),
-                            e => ProblemDetailsBuilder.Build(context, e));
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToIResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteAll)
                 .WithDescription("Delete all user sessions (log out from all devices).")
