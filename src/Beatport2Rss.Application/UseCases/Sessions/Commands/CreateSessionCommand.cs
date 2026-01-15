@@ -1,16 +1,17 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
 
-using OneOf;
+using FluentResults;
 
 using FluentValidation;
+
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
@@ -18,7 +19,8 @@ public readonly record struct CreateSessionCommand(
     string? EmailAddress,
     string? Password,
     string? UserAgent,
-    string? IpAddress);
+    string? IpAddress) :
+    ICommand<Result<CreateSessionResult>>;
 
 public readonly record struct CreateSessionResult(
     string AccessToken,
@@ -53,37 +55,26 @@ public sealed class CreateSessionCommandValidator :
 }
 
 public sealed class CreateSessionCommandHandler(
-    IValidator<CreateSessionCommand> validator,
     IAccessTokenService accessTokenService,
     IClock clock,
     IRefreshTokenService refreshTokenService,
     IPasswordHasher passwordHasher,
     ISessionCommandRepository sessionRepository,
     IUserQueryRepository userRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<CreateSessionCommand, Result<CreateSessionResult>>
 {
-    public async Task<OneOf<Success<CreateSessionResult>, ValidationFailed, InvalidCredentials, InactiveUser>> HandleAsync(
+    public async ValueTask<Result<CreateSessionResult>> Handle(
         CreateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
         var user = await userRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
 
         if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
         {
-            return new InvalidCredentials();
-        }
-
-        if (!user.IsActive)
-        {
-            return new InactiveUser();
+            return Result.Unauthorized("The provided email address or password is incorrect.");
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());
@@ -109,6 +100,6 @@ public sealed class CreateSessionCommandHandler(
             expiresIn,
             refreshToken);
 
-        return new Success<CreateSessionResult>(result);
+        return result;
     }
 }

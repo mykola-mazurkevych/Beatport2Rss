@@ -1,15 +1,16 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Sessions;
+
+using FluentResults;
 
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Queries;
 
-public readonly record struct GetSessionQuery(Guid SessionId);
+public readonly record struct GetSessionQuery(Guid SessionId) :
+    IQuery<Result<GetSessionResult>>;
 
 public readonly record struct GetSessionResult(
     Guid SessionId,
@@ -31,28 +32,17 @@ public sealed class GetSessionQueryValidator :
 }
 
 public sealed class GetSessionQueryHandler(
-    IValidator<GetSessionQuery> validator,
     ISessionQueryRepository sessionRepository,
-    IUserQueryRepository userRepository)
+    IUserQueryRepository userRepository) :
+    IQueryHandler<GetSessionQuery, Result<GetSessionResult>>
 {
-    public async Task<OneOf<Success<GetSessionResult>, ValidationFailed, InactiveUser>> HandleAsync(
+    public async ValueTask<Result<GetSessionResult>> Handle(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(query, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var sessionId = SessionId.Create(query.SessionId);
         var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
         var user = await userRepository.LoadAsync(session.UserId, cancellationToken);
-
-        if (!user.IsActive)
-        {
-            return new InactiveUser();
-        }
 
         var result = new GetSessionResult(
             session.Id,
@@ -63,6 +53,6 @@ public sealed class GetSessionQueryHandler(
             session.UserAgent,
             session.IpAddress);
 
-        return new Success<GetSessionResult>(result);
+        return result;
     }
 }

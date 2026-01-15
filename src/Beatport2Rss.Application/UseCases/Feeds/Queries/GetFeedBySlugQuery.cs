@@ -1,19 +1,22 @@
-using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Results;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
+
+using FluentResults;
 
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
 public readonly record struct GetFeedBySlugQuery(
     Guid UserId,
-    string? Slug);
+    string? Slug) :
+    IQuery<Result<GetFeedBySlugResult>>, IRequireActiveUser;
 
 public readonly record struct GetFeedBySlugResult(
     string Name,
@@ -37,33 +40,22 @@ public sealed class GetFeedBySlugQueryValidator :
 }
 
 public sealed class GetFeedBySlugQueryHandler(
-    IValidator<GetFeedBySlugQuery> validator,
-    IUserQueryRepository userRepository)
+    IUserQueryRepository userRepository) :
+    IQueryHandler<GetFeedBySlugQuery, Result<GetFeedBySlugResult>>
 {
-    public async Task<OneOf<Success<GetFeedBySlugResult>, ValidationFailed, InactiveUser, NotFound>> HandleAsync(
+    public async ValueTask<Result<GetFeedBySlugResult>> Handle(
         GetFeedBySlugQuery query,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(query, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var userId = UserId.Create(query.UserId);
         var user = await userRepository.LoadAsync(userId, cancellationToken);
-
-        if (!user.IsActive)
-        {
-            return new InactiveUser();
-        }
 
         var slug = Slug.Create(query.Slug);
         var feed = user.Feeds.SingleOrDefault(f => f.Slug == slug);
 
         if (feed is null)
         {
-            return new NotFound();
+            return Result.NotFound($"Feed with the slug '{slug}' was not found.");
         }
 
         var result = new GetFeedBySlugResult(
@@ -73,6 +65,6 @@ public sealed class GetFeedBySlugQueryHandler(
             feed.Status,
             feed.CreatedDate);
 
-        return new Success<GetFeedBySlugResult>(result);
+        return result;
     }
 }

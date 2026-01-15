@@ -19,12 +19,7 @@ using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
 using Beatport2Rss.Infrastructure.Services.Security;
 
-using FluentValidation;
-
-using JasperFx.Core.IoC;
-
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,34 +27,27 @@ using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
-using Wolverine;
-
 namespace Beatport2Rss.Infrastructure;
 
-public static class DependencyInjectionExtensions
+public static class ServiceCollectionExtensions
 {
-    extension(WebApplicationBuilder builder)
+    extension(IServiceCollection services)
     {
-        public void AddInfrastructure()
-        {
-            builder.Host.UseWolverine(w => w.Discovery.IncludeAssembly(typeof(IUnitOfWork).Assembly));
-
-            builder.Services
+        public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
+            services
                 .ConfigureHttpJsonOptions(o =>
                 {
                     o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     o.SerializerOptions.WriteIndented = true;
                     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
-                .ConfigureOptions(builder.Configuration)
+                .ConfigureOptions(configuration)
                 .AddCheckers()
                 .AddHealthServices()
-                .AddJwtAuthentication(builder.Configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
+                .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
-                .AddPersistence(builder.Configuration)
-                .AddSecurityServices()
-                .AddValidators();
-        }
+                .AddPersistence(configuration)
+                .AddSecurityServices();
     }
 
     extension(IServiceCollection services)
@@ -123,14 +111,6 @@ public static class DependencyInjectionExtensions
                 .AddSingleton<IAccessTokenService, JwtService>()
                 .AddSingleton<IPasswordHasher, BCryptPasswordHasher>()
                 .AddSingleton<IRefreshTokenService, RefreshTokenService>();
-
-        private void AddValidators() =>
-            services
-                .Scan(s =>
-                {
-                    s.Assembly(typeof(IUnitOfWork).Assembly);
-                    s.ConnectImplementationsToTypesClosing(typeof(IValidator<>), ServiceLifetime.Transient);
-                });
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services

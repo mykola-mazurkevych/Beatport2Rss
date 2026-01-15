@@ -1,5 +1,6 @@
 using Asp.Versioning;
 
+using Beatport2Rss.Application;
 using Beatport2Rss.Infrastructure;
 using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
@@ -12,6 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddOpenApi()
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration)
     .AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(o =>
     {
@@ -20,7 +23,6 @@ builder.Services
         o.ReportApiVersions = true;
         o.ApiVersionReader = new HeaderApiVersionReader(ResponseHeaderNames.ApiVersion);
     });
-builder.AddInfrastructure();
 
 var app = builder.Build();
 

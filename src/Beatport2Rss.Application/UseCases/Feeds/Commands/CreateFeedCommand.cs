@@ -1,20 +1,24 @@
-using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
-using Beatport2Rss.Application.Results;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Extensions;
+
+using FluentResults;
 
 using FluentValidation;
 
-using OneOf;
+using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
 public readonly record struct CreateFeedCommand(
     Guid UserId,
-    string? Name);
+    string? Name) :
+    ICommand<Result<Slug>>, IRequireActiveUser;
 
 public sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
@@ -31,29 +35,18 @@ public sealed class CreateFeedCommandValidator :
 }
 
 public sealed class CreateFeedCommandHandler(
-    IValidator<CreateFeedCommand> validator,
     IClock clock,
     ISlugGenerator slugGenerator,
     IUserCommandRepository userRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<CreateFeedCommand, Result<Slug>>
 {
-    public async Task<OneOf<Success<string>, ValidationFailed, InactiveUser, Conflict>> HandleAsync(
+    public async ValueTask<Result<Slug>> Handle(
         CreateFeedCommand command,
         CancellationToken cancellationToken = default)
     {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-        {
-            return new ValidationFailed(validationResult.GetErrors());
-        }
-
         var userId = UserId.Create(command.UserId);
         var user = await userRepository.LoadWithFeedsAsync(userId, cancellationToken);
-
-        if (!user.IsActive)
-        {
-            return new InactiveUser();
-        }
 
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
@@ -61,7 +54,7 @@ public sealed class CreateFeedCommandHandler(
 
         if (user.Feeds.Any(f => f.Name == feedName))
         {
-            return new Conflict("Feed name is already taken.");
+            return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }
 
         var feed = Feed.Create(
@@ -75,6 +68,6 @@ public sealed class CreateFeedCommandHandler(
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new Success<string>(slug);
+        return slug;
     }
 }
