@@ -71,4 +71,9 @@ public sealed class User : IAggregateRoot<UserId>
 
         _feeds.Add(feed);
     }
+
+    public void RemoveFeed(Feed feed)
+    {
+        _feeds.RemoveWhere(f => f.Id == feed.Id);
+    }
 }

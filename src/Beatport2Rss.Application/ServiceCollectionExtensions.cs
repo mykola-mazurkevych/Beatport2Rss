@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
                     o.PipelineBehaviors =
                     [
                         typeof(ValidationBehavior<,>),
-                        typeof(ForbiddenBehavior<,>),
+                        typeof(UserValidationBehavior<,>),
                     ];
                 });
 
