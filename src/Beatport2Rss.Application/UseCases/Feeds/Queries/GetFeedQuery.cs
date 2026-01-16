@@ -13,22 +13,22 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
-public readonly record struct GetFeedBySlugQuery(
+public readonly record struct GetFeedQuery(
     Guid UserId,
     string? Slug) :
-    IQuery<Result<GetFeedBySlugResult>>, IRequireActiveUser;
+    IQuery<Result<GetFeedResult>>, IRequireActiveUser;
 
-public readonly record struct GetFeedBySlugResult(
+public readonly record struct GetFeedResult(
     string Name,
     string? Owner,
     string Slug,
     FeedStatus Status,
     DateTimeOffset CreatedAt);
 
-internal sealed class GetFeedBySlugQueryValidator :
-    AbstractValidator<GetFeedBySlugQuery>
+internal sealed class GetFeedQueryValidator :
+    AbstractValidator<GetFeedQuery>
 {
-    public GetFeedBySlugQueryValidator()
+    public GetFeedQueryValidator()
     {
         RuleFor(q => q.UserId)
             .NotEmpty().WithMessage("User ID is required.");
@@ -39,12 +39,12 @@ internal sealed class GetFeedBySlugQueryValidator :
     }
 }
 
-internal sealed class GetFeedBySlugQueryHandler(
+internal sealed class GetFeedQueryHandler(
     IUserQueryRepository userRepository) :
-    IQueryHandler<GetFeedBySlugQuery, Result<GetFeedBySlugResult>>
+    IQueryHandler<GetFeedQuery, Result<GetFeedResult>>
 {
-    public async ValueTask<Result<GetFeedBySlugResult>> Handle(
-        GetFeedBySlugQuery query,
+    public async ValueTask<Result<GetFeedResult>> Handle(
+        GetFeedQuery query,
         CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(query.UserId);
@@ -58,7 +58,7 @@ internal sealed class GetFeedBySlugQueryHandler(
             return Result.NotFound($"Feed with the slug '{slug}' was not found.");
         }
 
-        var result = new GetFeedBySlugResult(
+        var result = new GetFeedResult(
             feed.Name,
             user.FullName,
             feed.Slug.Value,

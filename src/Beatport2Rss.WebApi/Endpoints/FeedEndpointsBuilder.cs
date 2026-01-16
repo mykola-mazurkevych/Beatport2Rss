@@ -48,7 +48,7 @@ internal static class FeedEndpointsBuilder
                     "/{slug}",
                     async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new GetFeedBySlugQuery(
+                        var query = new GetFeedQuery(
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
@@ -57,7 +57,7 @@ internal static class FeedEndpointsBuilder
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")
                 .RequireAuthorization()
-                .Produces<GetFeedBySlugResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<GetFeedResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
