@@ -21,7 +21,7 @@ public readonly record struct CreateUserCommand(
     string? LastName) :
     ICommand<Result>;
 
-public sealed class CreateUserCommandValidator :
+internal sealed class CreateUserCommandValidator :
     AbstractValidator<CreateUserCommand>
 {
     public CreateUserCommandValidator()
@@ -46,7 +46,7 @@ public sealed class CreateUserCommandValidator :
     }
 }
 
-public sealed class CreateUserCommandHandler(
+internal sealed class CreateUserCommandHandler(
     IClock clock,
     IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,

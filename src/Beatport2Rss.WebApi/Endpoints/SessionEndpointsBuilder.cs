@@ -24,11 +24,11 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
-                            request.EmailAddress,
-                            request.Password,
+                            body.EmailAddress,
+                            body.Password,
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
                         var result = await mediator.Send(command, cancellationToken);
@@ -37,7 +37,7 @@ internal static class SessionEndpointsBuilder
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
                 .AllowAnonymous()
-                .Accepts<CreateSessionRequest>(MediaTypeNames.Application.Json)
+                .Accepts<CreateSessionRequestBody>(MediaTypeNames.Application.Json)
                 .Produces<CreateSessionResult>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -82,18 +82,18 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPatch(
                     "/current",
-                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] UpdateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
-                            request.RefreshToken);
+                            body.RefreshToken);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToIResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
                 .RequireAuthorization()
-                .Accepts<UpdateSessionRequest>(MediaTypeNames.Application.Json)
+                .Accepts<UpdateSessionRequestBody>(MediaTypeNames.Application.Json)
                 .Produces<UpdateSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)

@@ -24,16 +24,18 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateFeedRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var command = new CreateFeedCommand(context.User.Id, request.Name);
+                        var command = new CreateFeedCommand(
+                            context.User.Id,
+                            body.Name);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToIResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a feed.")
                 .RequireAuthorization()
-                .Accepts<CreateFeedRequest>(MediaTypeNames.Application.Json)
+                .Accepts<CreateFeedRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -46,7 +48,9 @@ internal static class FeedEndpointsBuilder
                     "/{slug}",
                     async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new GetFeedBySlugQuery(context.User.Id, slug);
+                        var query = new GetFeedBySlugQuery(
+                            context.User.Id,
+                            slug);
                         var result = await mediator.Send(query, cancellationToken);
                         return result.ToIResult(() => Results.Ok(result.Value), context);
                     })

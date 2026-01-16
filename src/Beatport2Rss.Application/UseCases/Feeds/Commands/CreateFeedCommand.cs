@@ -20,7 +20,7 @@ public readonly record struct CreateFeedCommand(
     string? Name) :
     ICommand<Result<Slug>>, IRequireActiveUser;
 
-public sealed class CreateFeedCommandValidator :
+internal sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
 {
     public CreateFeedCommandValidator()
@@ -34,7 +34,7 @@ public sealed class CreateFeedCommandValidator :
     }
 }
 
-public sealed class CreateFeedCommandHandler(
+internal sealed class CreateFeedCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
     IUserCommandRepository userRepository,

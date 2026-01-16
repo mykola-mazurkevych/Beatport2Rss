@@ -3,6 +3,7 @@ using System.Net.Mime;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
+using Beatport2Rss.WebApi.Requests.Users;
 
 using Mediator;
 
@@ -21,8 +22,13 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateUserCommand command, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateUserRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
+                        var command = new CreateUserCommand(
+                            body.EmailAddress,
+                            body.Password,
+                            body.FirstName,
+                            body.LastName);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToIResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })

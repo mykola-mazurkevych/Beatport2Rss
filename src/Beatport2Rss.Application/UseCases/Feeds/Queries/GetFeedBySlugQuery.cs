@@ -25,7 +25,7 @@ public readonly record struct GetFeedBySlugResult(
     FeedStatus Status,
     DateTimeOffset CreatedAt);
 
-public sealed class GetFeedBySlugQueryValidator :
+internal sealed class GetFeedBySlugQueryValidator :
     AbstractValidator<GetFeedBySlugQuery>
 {
     public GetFeedBySlugQueryValidator()
@@ -39,7 +39,7 @@ public sealed class GetFeedBySlugQueryValidator :
     }
 }
 
-public sealed class GetFeedBySlugQueryHandler(
+internal sealed class GetFeedBySlugQueryHandler(
     IUserQueryRepository userRepository) :
     IQueryHandler<GetFeedBySlugQuery, Result<GetFeedBySlugResult>>
 {

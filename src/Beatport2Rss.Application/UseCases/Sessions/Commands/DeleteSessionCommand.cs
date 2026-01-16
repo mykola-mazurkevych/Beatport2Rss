@@ -13,7 +13,7 @@ namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 public readonly record struct DeleteSessionCommand(Guid SessionId) :
     ICommand<Result>;
 
-public sealed class DeleteSessionCommandValidator :
+internal sealed class DeleteSessionCommandValidator :
     AbstractValidator<DeleteSessionCommand>
 {
     public DeleteSessionCommandValidator()
@@ -23,7 +23,7 @@ public sealed class DeleteSessionCommandValidator :
     }
 }
 
-public sealed class DeleteSessionCommandHandler(
+internal sealed class DeleteSessionCommandHandler(
     ISessionCommandRepository sessionRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteSessionCommand, Result>

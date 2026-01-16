@@ -29,14 +29,14 @@ public static class ServiceCollectionExtensions
                     ];
                 });
 
-        public IServiceCollection AddValidators()
+        private IServiceCollection AddValidators()
         {
             var types = Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t =>
-                t is { IsAbstract: false, BaseType.IsGenericType: true } &&
-                t.BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>))
-            .ToList();
+                .GetTypes()
+                .Where(t =>
+                    t is { IsAbstract: false, BaseType.IsGenericType: true } &&
+                    t.BaseType.GetGenericTypeDefinition() == typeof(AbstractValidator<>))
+                .ToList();
 
             types.ForEach(t => services.AddTransient(typeof(IValidator), t));
 

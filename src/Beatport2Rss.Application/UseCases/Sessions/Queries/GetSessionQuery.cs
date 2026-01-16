@@ -21,7 +21,7 @@ public readonly record struct GetSessionResult(
     string? UserAgent,
     string? IpAddress);
 
-public sealed class GetSessionQueryValidator :
+internal sealed class GetSessionQueryValidator :
     AbstractValidator<GetSessionQuery>
 {
     public GetSessionQueryValidator()
@@ -31,7 +31,7 @@ public sealed class GetSessionQueryValidator :
     }
 }
 
-public sealed class GetSessionQueryHandler(
+internal sealed class GetSessionQueryHandler(
     ISessionQueryRepository sessionRepository,
     IUserQueryRepository userRepository) :
     IQueryHandler<GetSessionQuery, Result<GetSessionResult>>

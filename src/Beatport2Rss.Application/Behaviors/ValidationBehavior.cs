@@ -3,7 +3,6 @@ using Beatport2Rss.Application.Extensions;
 using FluentResults;
 
 using FluentValidation;
-using FluentValidation.Results;
 
 using Mediator;
 
@@ -41,18 +40,5 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         return validationResult.Errors.Count == 0
             ? Result.Ok()
             : Result.Validation("One or more validation errors occured.", validationResult.Errors.ToMetadata());
-    }
-}
-
-file static class ValidationFailureExtensions
-{
-    extension(List<ValidationFailure> failures)
-    {
-        public Dictionary<string, object> ToMetadata() =>
-            failures
-                .GroupBy(f => f.PropertyName)
-                .ToDictionary(
-                    g => g.Key,
-                    object (g) => g.Select(f => f.ErrorMessage).Distinct(StringComparer.OrdinalIgnoreCase).ToArray());
     }
 }
