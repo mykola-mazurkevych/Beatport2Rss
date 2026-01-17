@@ -32,7 +32,7 @@ internal static class SessionEndpointsBuilder
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
                     })
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a user session (log in).")
@@ -51,7 +51,7 @@ internal static class SessionEndpointsBuilder
                     {
                         var query = new GetSessionQuery(context.User.SessionId);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToIResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
@@ -69,7 +69,7 @@ internal static class SessionEndpointsBuilder
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(Results.NoContent, context);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user session (log out).")
@@ -88,7 +88,7 @@ internal static class SessionEndpointsBuilder
                             context.User.SessionId,
                             body.RefreshToken);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session (refresh access token).")
@@ -107,7 +107,7 @@ internal static class SessionEndpointsBuilder
                     {
                         var command = new DeleteSessionsCommand(context.User.Id);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(Results.NoContent, context);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteAll)
                 .WithDescription("Delete all user sessions (log out from all devices).")

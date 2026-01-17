@@ -2,5 +2,5 @@ using FluentResults;
 
 namespace Beatport2Rss.SharedKernel.Errors;
 
-public sealed class Unauthorized(string message) 
+public sealed class UnauthorizedError(string message) 
     : Error(message);

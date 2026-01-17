@@ -21,6 +21,6 @@ internal static class ResultExtensions
             Result.Fail(new ValidationError(message).WithMetadata(metadata));
 
         public static Result Unauthorized(string message) =>
-            Result.Fail(new Unauthorized(message));
+            Result.Fail(new UnauthorizedError(message));
     }
 }

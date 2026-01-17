@@ -30,7 +30,7 @@ internal static class UserEndpointsBuilder
                             body.FirstName,
                             body.LastName);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
+                        return result.ToAspNetCoreResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })
                 .WithName(UserEndpointNames.Create)
                 .WithDescription("Create a user.")

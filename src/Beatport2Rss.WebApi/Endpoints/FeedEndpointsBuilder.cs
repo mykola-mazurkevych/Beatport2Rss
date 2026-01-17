@@ -30,7 +30,7 @@ internal static class FeedEndpointsBuilder
                             context.User.Id,
                             body.Name);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToIResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
+                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a feed.")
@@ -52,7 +52,7 @@ internal static class FeedEndpointsBuilder
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToIResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")
@@ -73,7 +73,7 @@ internal static class FeedEndpointsBuilder
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToIResult(Results.NoContent, context);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(FeedEndpointNames.Delete)
                 .WithDescription("Delete a feed by slug.")

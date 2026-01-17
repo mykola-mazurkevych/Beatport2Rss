@@ -6,21 +6,23 @@ internal static class ResultExtensions
 {
     extension(Result result)
     {
-        public IResult ToIResult(Func<IResult> onSuccess, HttpContext context) =>
+        public IResult ToAspNetCoreResult(Func<IResult> onSuccess, HttpContext context) =>
             result switch
             {
                 { IsSuccess: true } or { IsFailed: false } => onSuccess(),
-                { IsFailed: true } or { IsSuccess: false } => ProblemDetailsBuilder.Build(context, result.Errors)
+                { IsFailed: true } or { IsSuccess: false } => result.Error.ToProblemDetails(context),
             };
+
+        private IError Error => result.Errors.Single();
     }
 
     extension<T>(Result<T> result)
     {
-        public IResult ToIResult(Func<IResult> onSuccess, HttpContext context) =>
+        public IResult ToAspNetCoreResult(Func<IResult> onSuccess, HttpContext context) =>
             result switch
             {
                 { IsSuccess: true } or { IsFailed: false } => onSuccess(),
-                { IsFailed: true } or { IsSuccess: false } => ProblemDetailsBuilder.Build(context, result.Errors)
+                { IsFailed: true } or { IsSuccess: false } => result.Error.ToProblemDetails(context),
             };
     }
 }
