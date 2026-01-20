@@ -24,5 +24,7 @@ internal static class ResultExtensions
                 { IsSuccess: true } or { IsFailed: false } => onSuccess(),
                 { IsFailed: true } or { IsSuccess: false } => result.Error.ToProblemDetails(context),
             };
+
+        private IError Error => result.Errors.Single();
     }
 }

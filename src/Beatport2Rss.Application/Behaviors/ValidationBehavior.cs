@@ -37,7 +37,7 @@ public sealed class ValidationBehavior<TMessage, TResponse>(IEnumerable<IValidat
         var context = new ValidationContext<TMessage>(message);
         var validationResult = await validator.ValidateAsync(context, cancellationToken);
 
-        return validationResult.Errors.Count == 0
+        return validationResult.IsValid
             ? Result.Ok()
             : Result.Validation("One or more validation errors occured.", validationResult.Errors.ToMetadata());
     }

@@ -9,6 +9,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Beatport2Rss.Application.UnitTests/Beatport2Rss.Application.UnitTests.csproj" />
+    <Project Path="tests/Beatport2Rss.ArchitectureTests/Beatport2Rss.ArchitectureTests.csproj" />
   </Folder>
 
 </Solution>
