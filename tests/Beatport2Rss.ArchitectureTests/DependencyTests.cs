@@ -1,10 +1,8 @@
-using Beatport2Rss.ArchitectureTests.Base;
-
 using NetArchTest.Rules;
 
 namespace Beatport2Rss.ArchitectureTests;
 
-public sealed class LayersTest : ArchitectureTest
+public sealed class DependencyTests : Base.Tests
 {
     [Fact]
     public void Domain_ShouldNotHaveDependencyOn_Application()

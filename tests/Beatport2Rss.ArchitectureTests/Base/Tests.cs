@@ -2,7 +2,7 @@
 
 namespace Beatport2Rss.ArchitectureTests.Base;
 
-public abstract class ArchitectureTest
+public abstract class Tests
 {
     protected static readonly Assembly ApplicationAssembly = typeof(Application.ServiceCollectionExtensions).Assembly;
     protected static readonly Assembly DomainAssembly = typeof(Domain.Common.Interfaces.IAggregateRoot<>).Assembly; // TODO: change;
