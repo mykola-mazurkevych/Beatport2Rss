@@ -71,12 +71,12 @@ internal sealed class CreateUserCommandHandler(
 
         var user = User.Create(
             userId,
+            clock.UtcNow,
             emailAddress,
             passwordHash,
             command.FirstName,
             command.LastName,
-            UserStatus.Pending,
-            clock.UtcNow);
+            UserStatus.Pending);
 
         await userRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

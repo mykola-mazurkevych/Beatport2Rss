@@ -12,25 +12,25 @@ public sealed class Tag : IEntity<TagId>
 
     public TagId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public TagName Name { get; private set; }
     public Slug Slug { get; private set; }
-
-    public DateTimeOffset CreatedDate { get; private set; }
 
     public UserId UserId { get; private set; }
 
     public static Tag Create(
         TagId id,
+        DateTimeOffset createdAt,
         TagName name,
         Slug slug,
-        DateTimeOffset createdDate,
         UserId userId) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             Name = name,
             Slug = slug,
-            CreatedDate = createdDate,
             UserId = userId,
         };
 }

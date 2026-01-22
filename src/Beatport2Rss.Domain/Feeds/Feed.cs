@@ -14,28 +14,28 @@ public sealed class Feed : IEntity<FeedId>
 
     public FeedId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
 
     public FeedStatus Status { get; private set; }
 
-    public DateTimeOffset CreatedDate { get; private set; }
-
     public IReadOnlySet<SubscriptionId> SubscriptionIds => _subscriptionIds.AsReadOnly();
 
     public static Feed Create(
         FeedId id,
+        DateTimeOffset createdAt,
         FeedName name,
         Slug slug,
-        FeedStatus status,
-        DateTimeOffset createdDate) =>
+        FeedStatus status) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             Name = name,
             Slug = slug,
             Status = status,
-            CreatedDate = createdDate,
         };
 
     public void Activate() => Status = FeedStatus.Active;

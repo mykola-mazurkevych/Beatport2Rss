@@ -18,6 +18,9 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.Property(subscription => subscription.Id)
             .IsRequired();
 
+        builder.Property(subscription => subscription.CreatedAt)
+            .IsRequired();
+
         builder.Property(subscription => subscription.BeatportType)
             .IsEnum();
 
@@ -36,10 +39,7 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(subscription => subscription.CreatedDate)
-            .IsRequired();
-
-        builder.Property(subscription => subscription.PulledDate);
+        builder.Property(subscription => subscription.RefreshedAt);
 
         builder.HasIndex(subscription => new { subscription.BeatportId, subscription.BeatportType })
             .IsUnique();

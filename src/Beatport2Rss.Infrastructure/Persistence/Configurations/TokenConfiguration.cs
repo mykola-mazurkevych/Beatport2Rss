@@ -16,14 +16,14 @@ internal sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
         builder.Property(token => token.Id)
             .IsRequired();
 
+        builder.Property(token => token.CreatedAt)
+            .IsRequired();
+
         builder.Property(token => token.AccessToken)
             .HasMaxLength(BeatportAccessToken.MaxLength)
             .IsRequired();
 
-        builder.Property(token => token.CreatedDate)
-            .IsRequired();
-
-        builder.Property(token => token.ExpirationDate)
+        builder.Property(token => token.ExpiresAt)
             .IsRequired();
 
         builder.Ignore(token => token.IsExpired);

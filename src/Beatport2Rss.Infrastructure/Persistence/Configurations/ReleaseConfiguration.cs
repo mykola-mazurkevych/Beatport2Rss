@@ -18,6 +18,9 @@ internal sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
         builder.Property(release => release.Id)
             .IsRequired();
 
+        builder.Property(release => release.CreatedAt)
+            .IsRequired();
+
         builder.Property(release => release.BeatportId)
             .IsRequired();
 
@@ -49,9 +52,6 @@ internal sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
             .IsRequired();
 
         builder.Property(release => release.TracksCount)
-            .IsRequired();
-
-        builder.Property(release => release.CreatedDate)
             .IsRequired();
 
         builder.Property(release => release.Status)

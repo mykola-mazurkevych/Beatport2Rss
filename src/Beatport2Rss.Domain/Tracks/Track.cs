@@ -12,6 +12,8 @@ public sealed class Track : IEntity<TrackId>
 
     public TrackId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
 
@@ -25,12 +27,12 @@ public sealed class Track : IEntity<TrackId>
 
     public Uri SampleUri { get; private set; } = null!;
 
-    public DateTimeOffset CreatedDate { get; private set; }
-
     public ReleaseId ReleaseId { get; private set; }
 
     public static Track Create(
         TrackId id,
+        DateTimeOffset createdAt,
+        ReleaseId releaseId,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         int number,
@@ -38,12 +40,12 @@ public sealed class Track : IEntity<TrackId>
         string name,
         string mixName,
         TimeSpan length,
-        Uri sampleUri,
-        DateTimeOffset createdDate,
-        ReleaseId releaseId) =>
+        Uri sampleUri) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
+            ReleaseId = releaseId,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             Number = number,
@@ -52,7 +54,5 @@ public sealed class Track : IEntity<TrackId>
             MixName = mixName,
             Length = length,
             SampleUri = sampleUri,
-            CreatedDate = createdDate,
-            ReleaseId = releaseId,
         };
 }

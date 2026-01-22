@@ -14,12 +14,12 @@ internal sealed class SessionConfiguration : IEntityTypeConfiguration<Session>
 
         builder.HasKey(session => session.Id);
 
+        builder.Property(session => session.CreatedAt)
+            .IsRequired();
+
         builder.Property(session => session.UserId)
             .IsRequired();
 
-        builder.Property(session => session.CreatedAt)
-            .IsRequired();
-        
         builder.Property(session => session.RefreshTokenHash)
             .HasColumnType("bytea")
             .IsRequired();

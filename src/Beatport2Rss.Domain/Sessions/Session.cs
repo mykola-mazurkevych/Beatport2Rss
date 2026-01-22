@@ -14,10 +14,10 @@ public sealed class Session : IAggregateRoot<SessionId>
 
     public SessionId Id { get; private set; }
 
-    public UserId UserId { get; private set; }
-
     public DateTimeOffset CreatedAt { get; private set; }
     
+    public UserId UserId { get; private set; }
+
     public RefreshTokenHash RefreshTokenHash { get; private set; }
     public DateTimeOffset RefreshTokenExpiresAt { get; private set; }
 
@@ -26,8 +26,8 @@ public sealed class Session : IAggregateRoot<SessionId>
 
     public static Session Create(
         SessionId id,
-        UserId userId,
         DateTimeOffset createdAt,
+        UserId userId,
         RefreshTokenHash refreshTokenHash,
         DateTimeOffset refreshTokenExpiresAt,
         string? userAgent,
@@ -35,8 +35,8 @@ public sealed class Session : IAggregateRoot<SessionId>
         new()
         {
             Id = id,
-            UserId = userId,
             CreatedAt = createdAt,
+            UserId = userId,
             RefreshTokenHash = refreshTokenHash,
             RefreshTokenExpiresAt = refreshTokenExpiresAt,
             UserAgent = userAgent,

@@ -18,6 +18,8 @@ public sealed class User : IAggregateRoot<UserId>
 
     public UserId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public EmailAddress EmailAddress { get; private set; }
     public PasswordHash PasswordHash { get; private set; }
 
@@ -25,8 +27,6 @@ public sealed class User : IAggregateRoot<UserId>
     public string? LastName { get; private set; }
 
     public UserStatus Status { get; private set; }
-
-    public DateTimeOffset CreatedDate { get; private set; }
 
     public IReadOnlySet<Feed> Feeds => _feeds.AsReadOnly();
     public IReadOnlySet<Tag> Tags => _tags.AsReadOnly();
@@ -40,21 +40,21 @@ public sealed class User : IAggregateRoot<UserId>
 
     public static User Create(
         UserId id,
+        DateTimeOffset createdAt,
         EmailAddress emailAddress,
         PasswordHash passwordHash,
         string? firstName,
         string? lastName,
-        UserStatus status,
-        DateTimeOffset createdDate) =>
+        UserStatus status) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             EmailAddress = emailAddress,
             PasswordHash = passwordHash,
             FirstName = firstName,
             LastName = lastName,
             Status = status,
-            CreatedDate = createdDate,
         };
 
     public void AddFeed(Feed feed)

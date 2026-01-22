@@ -63,7 +63,7 @@ internal sealed class GetFeedQueryHandler(
             user.FullName,
             feed.Slug.Value,
             feed.Status,
-            feed.CreatedDate);
+            feed.CreatedAt);
 
         return result;
     }

@@ -84,8 +84,8 @@ internal sealed class CreateSessionCommandHandler(
 
         var session = Session.Create(
             sessionId,
-            user.Id,
             clock.UtcNow,
+            user.Id,
             refreshTokenHash,
             expiresAt,
             command.UserAgent,

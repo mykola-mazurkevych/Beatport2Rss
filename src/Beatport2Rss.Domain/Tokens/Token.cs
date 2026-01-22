@@ -10,23 +10,24 @@ public sealed class Token : IAggregateRoot<TokenId>
 
     public TokenId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public BeatportAccessToken AccessToken { get; private set; }
 
-    public DateTimeOffset CreatedDate { get; private set; }
-    public DateTimeOffset ExpirationDate { get; private set; }
+    public DateTimeOffset ExpiresAt { get; private set; }
 
-    public bool IsExpired => DateTimeOffset.UtcNow >= ExpirationDate;
+    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
 
     public static Token Create(
         TokenId id,
+        DateTimeOffset createdAt,
         BeatportAccessToken accessToken,
-        DateTimeOffset createdDate,
-        DateTimeOffset expirationDate) =>
+        DateTimeOffset expiresAt) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             AccessToken = accessToken,
-            CreatedDate = createdDate,
-            ExpirationDate = expirationDate,
+            ExpiresAt = expiresAt,
         };
 }

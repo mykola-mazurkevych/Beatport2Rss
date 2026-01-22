@@ -17,6 +17,9 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.Id)
             .IsRequired();
 
+        builder.Property(user => user.CreatedAt)
+            .IsRequired();
+
         builder.Property(user => user.EmailAddress)
             .HasMaxLength(EmailAddress.MaxLength)
             .IsRequired();
@@ -28,16 +31,13 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.FirstName)
             .HasMaxLength(User.NameLength)
             .IsRequired(false);
-        
+
         builder.Property(user => user.LastName)
             .HasMaxLength(User.NameLength)
             .IsRequired(false);
 
         builder.Property(user => user.Status)
             .IsEnum();
-
-        builder.Property(user => user.CreatedDate)
-            .IsRequired();
 
         builder.Navigation(user => user.Feeds)
             .UsePropertyAccessMode(PropertyAccessMode.Field);

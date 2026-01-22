@@ -18,15 +18,15 @@ internal sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.Property(tag => tag.Id)
             .IsRequired();
 
+        builder.Property(tag => tag.CreatedAt)
+            .IsRequired();
+
         builder.Property(tag => tag.Name)
             .HasMaxLength(TagName.MaxLength)
             .IsRequired();
 
         builder.Property(tag => tag.Slug)
             .HasMaxLength(Slug.MaxLength)
-            .IsRequired();
-
-        builder.Property(tag => tag.CreatedDate)
             .IsRequired();
 
         builder.Property(tag => tag.UserId)

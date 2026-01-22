@@ -20,7 +20,10 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
 
         builder.Property(feed => feed.Id)
             .IsRequired();
-    
+
+        builder.Property(feed => feed.CreatedAt)
+            .IsRequired();
+
         builder.Property(feed => feed.Name)
             .HasMaxLength(FeedName.MaxLength)
             .IsRequired();
@@ -31,9 +34,6 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
 
         builder.Property(feed => feed.Status)
             .IsEnum();
-
-        builder.Property(feed => feed.CreatedDate)
-            .IsRequired();
 
         builder.Property(UserIdPropertyName)
             .IsRequired();

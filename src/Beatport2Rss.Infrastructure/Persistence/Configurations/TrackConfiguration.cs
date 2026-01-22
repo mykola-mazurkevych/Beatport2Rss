@@ -18,6 +18,9 @@ internal sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
         builder.Property(track => track.Id)
             .IsRequired();
 
+        builder.Property(track => track.CreatedAt)
+            .IsRequired();
+
         builder.Property(track => track.BeatportId)
             .IsRequired();
 
@@ -47,8 +50,7 @@ internal sealed class TrackConfiguration : IEntityTypeConfiguration<Track>
             .HasMaxLength(500)
             .IsRequired();
 
-        builder.Property(track => track.CreatedDate)
-            .IsRequired();
+
 
         builder.Property(track => track.ReleaseId)
             .IsRequired();

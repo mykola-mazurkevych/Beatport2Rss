@@ -21,9 +21,8 @@ internal sealed class SubscriptionTagConfiguration : IEntityTypeConfiguration<Su
         builder.Property(subscriptionTag => subscriptionTag.TagId)
             .IsRequired();
 
-        builder.Property(subscriptionTag => subscriptionTag.CreatedDate)
-            .IsRequired()
-            .HasDefaultValueSql("current_timestamp");
+        builder.Property(subscriptionTag => subscriptionTag.CreatedAt)
+            .IsRequired();
 
         builder.HasOne<Subscription>()
             .WithMany()

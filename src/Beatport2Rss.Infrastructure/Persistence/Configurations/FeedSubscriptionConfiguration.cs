@@ -21,9 +21,8 @@ internal sealed class FeedSubscriptionConfiguration : IEntityTypeConfiguration<F
         builder.Property(feedSubscription => feedSubscription.SubscriptionId)
             .IsRequired();
 
-        builder.Property(feedSubscription => feedSubscription.CreatedDate)
-            .IsRequired()
-            .HasDefaultValueSql("current_timestamp");
+        builder.Property(feedSubscription => feedSubscription.CreatedAt)
+            .IsRequired();
 
         builder.HasOne<Feed>()
             .WithMany()

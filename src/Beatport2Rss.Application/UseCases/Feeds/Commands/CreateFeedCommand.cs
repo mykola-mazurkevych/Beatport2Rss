@@ -59,12 +59,13 @@ internal sealed class CreateFeedCommandHandler(
 
         var feed = Feed.Create(
             feedId,
+            clock.UtcNow,
             feedName,
             slug,
-            FeedStatus.Active,
-            clock.UtcNow);
+            FeedStatus.Active);
 
         user.AddFeed(feed);
+
         userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

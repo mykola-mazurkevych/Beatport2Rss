@@ -8,5 +8,5 @@ internal sealed class SubscriptionTag
     public SubscriptionId SubscriptionId { get; set; }
     public TagId TagId { get; set; }
 
-    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }

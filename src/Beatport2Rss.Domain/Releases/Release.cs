@@ -14,6 +14,8 @@ public sealed class Release : IAggregateRoot<ReleaseId>
 
     public ReleaseId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
 
@@ -29,14 +31,13 @@ public sealed class Release : IAggregateRoot<ReleaseId>
 
     public int TracksCount { get; private set; }
 
-    public DateTimeOffset CreatedDate { get; private set; }
-
     public ReleaseStatus Status { get; private set; }
 
     public IReadOnlySet<Track> Tracks => _tracks.AsReadOnly();
 
     public static Release Create(
         ReleaseId id,
+        DateTimeOffset createdAt,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         string artist,
@@ -46,11 +47,11 @@ public sealed class Release : IAggregateRoot<ReleaseId>
         Uri imageUri,
         DateOnly releaseDate,
         int tracksCount,
-        DateTimeOffset createdDate,
         ReleaseStatus status) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             Artist = artist,
@@ -60,7 +61,6 @@ public sealed class Release : IAggregateRoot<ReleaseId>
             ImageUri = imageUri,
             ReleaseDate = releaseDate,
             TracksCount = tracksCount,
-            CreatedDate = createdDate,
             Status = status,
         };
 

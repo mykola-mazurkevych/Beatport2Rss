@@ -16,6 +16,8 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
 
     public SubscriptionId Id { get; private set; }
 
+    public DateTimeOffset CreatedAt { get; private set; }
+
     public BeatportEntityType BeatportType { get; private set; }
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
@@ -24,34 +26,33 @@ public sealed class Subscription : IAggregateRoot<SubscriptionId>
 
     public Uri ImageUri { get; private set; } = null!;
 
-    public DateTimeOffset CreatedDate { get; private set; }
-    public DateTimeOffset? PulledDate { get; private set; }
+    public DateTimeOffset? RefreshedAt { get; private set; }
 
     public IReadOnlySet<FeedId> FeedIds => _feedIds.AsReadOnly();
     public IReadOnlySet<TagId> TagIds => _tagIds.AsReadOnly();
 
     public static Subscription Create(
         SubscriptionId id,
+        DateTimeOffset createdAt,
         BeatportEntityType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         string name,
         Uri imageUri,
-        DateTimeOffset createdDate,
-        DateTimeOffset? pulledDate) =>
+        DateTimeOffset? refreshedAt) =>
         new()
         {
             Id = id,
+            CreatedAt = createdAt,
             BeatportType = beatportType,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             Name = name,
             ImageUri = imageUri,
-            CreatedDate = createdDate,
-            PulledDate = pulledDate,
+            RefreshedAt = refreshedAt,
         };
 
-    public void MarkAsPulled(DateTimeOffset pulledDate) => PulledDate = pulledDate;
+    public void MarkAsPulled(DateTimeOffset pulledDate) => RefreshedAt = pulledDate;
 
     public void AddTag(Tag tag) => _tagIds.Add(tag.Id);
     public void RemoveTag(Tag tag) => _tagIds.Remove(tag.Id);

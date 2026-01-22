@@ -8,5 +8,5 @@ internal sealed class FeedSubscription
     public FeedId FeedId { get; set; }
     public SubscriptionId SubscriptionId { get; set; }
 
-    public DateTimeOffset CreatedDate { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
