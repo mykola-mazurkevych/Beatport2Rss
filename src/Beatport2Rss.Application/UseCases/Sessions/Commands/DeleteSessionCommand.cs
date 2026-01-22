@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Sessions;
@@ -33,7 +34,12 @@ internal sealed class DeleteSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
+        var session = await sessionRepository.FindAsync(sessionId, cancellationToken);
+
+        if (session is null)
+        {
+            return Result.NotFound("Session not found.");
+        }
 
         sessionRepository.Delete(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);

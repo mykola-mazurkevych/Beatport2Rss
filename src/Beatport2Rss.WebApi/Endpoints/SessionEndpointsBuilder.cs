@@ -63,23 +63,6 @@ internal static class SessionEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapDelete(
-                    "/current",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var command = new DeleteSessionCommand(context.User.SessionId);
-                        var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(Results.NoContent, context);
-                    })
-                .WithName(SessionEndpointNames.DeleteCurrent)
-                .WithDescription("Delete current user session (log out).")
-                .RequireAuthorization()
-                .Produces(StatusCodes.Status204NoContent)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
-
-            groupBuilder
                 .MapPatch(
                     "/current",
                     async ([FromBody] UpdateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
@@ -98,7 +81,43 @@ internal static class SessionEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "/current",
+                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSessionCommand(context.User.SessionId);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SessionEndpointNames.DeleteCurrent)
+                .WithDescription("Delete current user session (log out).")
+                .RequireAuthorization()
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "/{id:guid}",
+                    async ([FromRoute] Guid id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSessionCommand(id);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SessionEndpointNames.DeleteById)
+                .WithDescription("Delete a user session.")
+                .RequireAuthorization()
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapDelete(
@@ -114,8 +133,8 @@ internal static class SessionEndpointsBuilder
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized)
-                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError);
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;
         }
