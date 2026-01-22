@@ -2,5 +2,5 @@
 
 namespace Beatport2Rss.SharedKernel.Errors;
 
-public sealed class NotFoundError(string message) 
-    : Error(message);
+public sealed class NotFoundError(string message) :
+    Error(message);
