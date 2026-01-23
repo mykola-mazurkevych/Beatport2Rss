@@ -21,6 +21,8 @@ internal static class SessionEndpointsBuilder
         {
             var groupBuilder = routeBuilder.MapGroup("/sessions").WithName("Sessions");
 
+            //// groupBuilder.MapGet("", ...); // Get sessions for curent user. Think if it's needed to see all sessions (for admin?)
+
             groupBuilder
                 .MapPost(
                     "",
@@ -63,7 +65,7 @@ internal static class SessionEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPatch(
+                .MapPut(
                     "/current",
                     async ([FromBody] UpdateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {

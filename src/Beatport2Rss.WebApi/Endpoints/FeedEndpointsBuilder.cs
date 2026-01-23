@@ -21,6 +21,8 @@ internal static class FeedEndpointsBuilder
         {
             var groupBuilder = routeBuilder.MapGroup("/feeds").WithName("Feeds");
 
+            //// groupBuilder.MapGet("", ...); // Get feeds
+
             groupBuilder
                 .MapPost(
                     "",
@@ -63,6 +65,8 @@ internal static class FeedEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            //// groupBuilder.MapPut("/slug", ...); // Update feed
 
             groupBuilder
                 .MapDelete(
