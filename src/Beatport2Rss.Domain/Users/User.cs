@@ -1,4 +1,3 @@
-using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
@@ -57,23 +56,9 @@ public sealed class User : IAggregateRoot<UserId>
             Status = status,
         };
 
-    public void AddFeed(Feed feed)
-    {
-        if (_feeds.Any(f => f.Slug == feed.Slug))
-        {
-            throw new FeedSlugIsTakenException(feed.Slug);
-        }
-
-        if (_feeds.Any(f => f.Name == feed.Name))
-        {
-            throw new FeedNameIsTakenException(feed.Name);
-        }
-
+    public void AddFeed(Feed feed) =>
         _feeds.Add(feed);
-    }
 
-    public void RemoveFeed(Feed feed)
-    {
+    public void RemoveFeed(Feed feed) =>
         _feeds.RemoveWhere(f => f.Id == feed.Id);
-    }
 }

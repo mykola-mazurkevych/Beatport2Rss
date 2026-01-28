@@ -7,14 +7,12 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Infrastructure.Services.Checkers;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
 using Beatport2Rss.Infrastructure.Services.Security;
@@ -42,7 +40,6 @@ public static class ServiceCollectionExtensions
                     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .ConfigureOptions(configuration)
-                .AddCheckers()
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
@@ -52,10 +49,6 @@ public static class ServiceCollectionExtensions
 
     extension(IServiceCollection services)
     {
-        private IServiceCollection AddCheckers() =>
-            services
-                .AddTransient<IEmailAddressAvailabilityChecker, UserChecker>();
-
         private IServiceCollection AddHealthServices()
         {
             services
