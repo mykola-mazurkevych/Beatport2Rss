@@ -62,6 +62,9 @@
           "FluentResults": "[4.0.0, )"
         }
       },
+      "beatport2rss.sourcegenerator": {
+        "type": "Project"
+      },
       "Light.GuardClauses": {
         "type": "CentralTransitive",
         "requested": "[14.0.0, )",

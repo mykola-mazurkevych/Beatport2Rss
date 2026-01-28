@@ -200,6 +200,7 @@
         "dependencies": {
           "Beatport2Rss.Domain": "[1.0.0, )",
           "Beatport2Rss.SharedKernel": "[1.0.0, )",
+          "Beatport2Rss.SourceGenerator": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
           "Mediator.Abstractions": "[3.0.1, )"
@@ -216,6 +217,9 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )"
         }
+      },
+      "beatport2rss.sourcegenerator": {
+        "type": "Project"
       },
       "FluentResults": {
         "type": "CentralTransitive",
