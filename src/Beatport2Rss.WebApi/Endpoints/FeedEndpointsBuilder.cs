@@ -69,6 +69,29 @@ internal static class FeedEndpointsBuilder
             //// groupBuilder.MapPut("/slug", ...); // Update feed
 
             groupBuilder
+                .MapPut(
+                    "/{slug}/status",
+                    async ([FromRoute] string slug, [FromBody] UpdateFeedStatusRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateFeedStatusCommand(
+                            context.User.Id,
+                            slug,
+                            body.IsActive);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(FeedEndpointNames.UpdateStatus)
+                .WithDescription("Update status of a feed by slug.")
+                .RequireAuthorization()
+                .Accepts<UpdateFeedStatusRequestBody>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
                 .MapDelete(
                     "/{slug}",
                     async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
@@ -83,6 +106,7 @@ internal static class FeedEndpointsBuilder
                 .WithDescription("Delete a feed by slug.")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)

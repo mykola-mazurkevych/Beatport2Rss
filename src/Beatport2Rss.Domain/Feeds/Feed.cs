@@ -38,10 +38,10 @@ public sealed class Feed : IEntity<FeedId>
             Status = status,
         };
 
-    public void Activate() => Status = FeedStatus.Active;
-    public void Deactivate() => Status = FeedStatus.Inactive;
+    internal void UpdateStatus(FeedStatus status) =>
+        Status = status;
 
-    public void AddSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Add(subscriptionId);
-    public void RemoveSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Remove(subscriptionId);
-    public bool HasSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Contains(subscriptionId);
+    internal void AddSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Add(subscriptionId);
+    internal void RemoveSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Remove(subscriptionId);
+    internal bool HasSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Contains(subscriptionId);
 }

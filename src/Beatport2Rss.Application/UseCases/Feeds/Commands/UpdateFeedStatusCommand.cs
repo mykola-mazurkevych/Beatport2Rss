@@ -13,15 +13,16 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public readonly record struct DeleteFeedCommand(
+public readonly record struct UpdateFeedStatusCommand(
     Guid UserId,
-    string? Slug) :
+    string? Slug,
+    bool IsActive) :
     ICommand<Result>, IRequireActiveUser;
 
-internal sealed class DeleteFeedCommandValidator :
-    AbstractValidator<DeleteFeedCommand>
+internal sealed class UpdateFeedStatusCommandValidator :
+    AbstractValidator<UpdateFeedStatusCommand>
 {
-    public DeleteFeedCommandValidator()
+    public UpdateFeedStatusCommandValidator()
     {
         RuleFor(c => c.UserId)
             .NotEmpty().WithMessage("User ID is required.");
@@ -32,13 +33,13 @@ internal sealed class DeleteFeedCommandValidator :
     }
 }
 
-internal sealed class DeleteFeedCommandHandler(
+internal sealed class UpdateFeedStatusCommandHandler(
     IUserCommandRepository userRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<DeleteFeedCommand, Result>
+    ICommandHandler<UpdateFeedStatusCommand, Result>
 {
     public async ValueTask<Result> Handle(
-        DeleteFeedCommand command,
+        UpdateFeedStatusCommand command,
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(command.UserId);
@@ -51,8 +52,9 @@ internal sealed class DeleteFeedCommandHandler(
             return Result.NotFound($"Feed with slug '{slug}' was not found.");
         }
 
-        user.RemoveFeed(slug);
+        user.UpdateFeedStatus(slug, command.IsActive);
 
+        userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
