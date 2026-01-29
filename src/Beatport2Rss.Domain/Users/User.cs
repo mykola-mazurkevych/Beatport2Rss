@@ -59,6 +59,7 @@ public sealed class User : IAggregateRoot<UserId>
 
     public bool HasFeed(Slug slug) =>
         _feeds.Any(f => f.Slug == slug);
+
     public void AddFeed(Feed feed) =>
         _feeds.Add(feed);
 

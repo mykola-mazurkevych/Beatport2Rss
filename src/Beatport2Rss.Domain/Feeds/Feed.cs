@@ -37,6 +37,9 @@ public sealed class Feed : IEntity<FeedId>
             Slug = slug,
             Status = status,
         };
+    
+    internal void UpdateName(FeedName name) =>
+        Name = name;
 
     internal void UpdateStatus(FeedStatus status) =>
         Status = status;
