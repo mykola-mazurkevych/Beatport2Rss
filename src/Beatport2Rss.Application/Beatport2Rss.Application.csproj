@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
     <ProjectReference Include="..\Beatport2Rss.SharedKernel\Beatport2Rss.SharedKernel.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.SourceGenerator\Beatport2Rss.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
