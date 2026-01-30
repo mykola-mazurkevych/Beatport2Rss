@@ -19,6 +19,7 @@ internal static class UserValidationBehaviorsSourceOutput
             .Union(
             [
                 "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
+                "Beatport2Rss.Application.ReadModels.Feeds",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

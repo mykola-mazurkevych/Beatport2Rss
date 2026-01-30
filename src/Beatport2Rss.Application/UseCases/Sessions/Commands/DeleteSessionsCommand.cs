@@ -24,16 +24,16 @@ internal sealed class DeleteSessionsCommandValidator :
 }
 
 internal sealed class DeleteSessionsCommandHandler(
-    ISessionCommandRepository sessionRepository,
+    ISessionCommandRepository sessionCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteSessionsCommand, Result>
 {
     public async ValueTask<Result> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(command.UserId);
-        var sessions = await sessionRepository.FindAllAsync(s => s.UserId == userId, cancellationToken);
+        var sessions = await sessionCommandRepository.FindAllAsync(s => s.UserId == userId, cancellationToken);
 
-        sessionRepository.DeleteRange(sessions);
+        sessionCommandRepository.DeleteRange(sessions);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

@@ -1,5 +1,6 @@
 using System.Net.Mime;
 
+using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
@@ -51,14 +52,16 @@ internal static class SessionEndpointsBuilder
                     "/current",
                     async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new GetSessionQuery(context.User.SessionId);
+                        var query = new GetSessionQuery(
+                            context.User.Id,
+                            context.User.SessionId);
                         var result = await mediator.Send(query, cancellationToken);
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session.")
                 .RequireAuthorization()
-                .Produces<GetSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<SessionDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

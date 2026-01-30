@@ -1,5 +1,5 @@
-using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
 
@@ -57,23 +57,21 @@ public sealed class User : IAggregateRoot<UserId>
             Status = status,
         };
 
-    public void AddFeed(Feed feed)
-    {
-        if (_feeds.Any(f => f.Slug == feed.Slug))
-        {
-            throw new FeedSlugIsTakenException(feed.Slug);
-        }
+    public void UpdateStatus(bool isActive) =>
+        Status = isActive ? UserStatus.Active : UserStatus.Inactive;
 
-        if (_feeds.Any(f => f.Name == feed.Name))
-        {
-            throw new FeedNameIsTakenException(feed.Name);
-        }
+    public bool HasFeed(FeedName name) =>
+        _feeds.Any(f => f.Name == name);
 
+    public bool HasFeed(Slug slug) =>
+        _feeds.Any(f => f.Slug == slug);
+
+    public void AddFeed(Feed feed) =>
         _feeds.Add(feed);
-    }
 
-    public void RemoveFeed(Feed feed)
-    {
-        _feeds.RemoveWhere(f => f.Id == feed.Id);
-    }
+    public void RemoveFeed(Slug slug) =>
+        _feeds.RemoveWhere(f => f.Slug == slug);
+    
+    public void UpdateFeedStatus(Slug slug, bool isActive) =>
+        _feeds.Single(f => f.Slug == slug).UpdateStatus(isActive ? FeedStatus.Active : FeedStatus.Inactive);
 }

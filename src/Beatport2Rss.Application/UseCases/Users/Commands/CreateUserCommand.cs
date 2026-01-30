@@ -1,7 +1,6 @@
 using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Checkers;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Domain.Users;
@@ -48,9 +47,8 @@ internal sealed class CreateUserCommandValidator :
 
 internal sealed class CreateUserCommandHandler(
     IClock clock,
-    IEmailAddressAvailabilityChecker emailAddressAvailabilityChecker,
     IPasswordHasher passwordHasher,
-    IUserCommandRepository userRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateUserCommand, Result>
 {
@@ -60,7 +58,9 @@ internal sealed class CreateUserCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
 
-        if (!await emailAddressAvailabilityChecker.IsAvailableAsync(emailAddress, cancellationToken))
+        var existingUser = await userCommandRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
+
+        if (existingUser is not null)
         {
             return Result.Conflict($"Email address {emailAddress} already taken.");
         }
@@ -78,7 +78,7 @@ internal sealed class CreateUserCommandHandler(
             command.LastName,
             UserStatus.Pending);
 
-        await userRepository.AddAsync(user, cancellationToken);
+        await userCommandRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

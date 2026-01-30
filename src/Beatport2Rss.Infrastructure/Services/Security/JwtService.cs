@@ -5,9 +5,9 @@ using System.Text;
 
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
-using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Options;
 
 using Microsoft.Extensions.Options;
@@ -22,16 +22,16 @@ internal sealed class JwtService(
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public (AccessToken AccessToken, int ExpiresIn) Generate(User user, SessionId sessionId)
+    public (AccessToken AccessToken, int ExpiresIn) Generate(UserAuthDetailsReadModel userAuthDetails, SessionId sessionId)
     {
         var issuedAt = clock.UtcNow;
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.GivenName, user.FirstName ?? string.Empty),
-            new(JwtRegisteredClaimNames.FamilyName, user.LastName ?? string.Empty),
-            new(JwtRegisteredClaimNames.Email, user.EmailAddress),
+            new(JwtRegisteredClaimNames.Sub, userAuthDetails.Id),
+            new(JwtRegisteredClaimNames.GivenName, userAuthDetails.FirstName ?? string.Empty),
+            new(JwtRegisteredClaimNames.FamilyName, userAuthDetails.LastName ?? string.Empty),
+            new(JwtRegisteredClaimNames.Email, userAuthDetails.EmailAddress),
             new(JwtRegisteredClaimNames.Sid, sessionId),
             new(JwtRegisteredClaimNames.Iat, issuedAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
         };

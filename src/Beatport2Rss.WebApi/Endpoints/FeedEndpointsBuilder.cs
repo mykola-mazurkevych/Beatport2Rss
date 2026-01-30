@@ -1,5 +1,6 @@
 using System.Net.Mime;
 
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
@@ -59,7 +60,7 @@ internal static class FeedEndpointsBuilder
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")
                 .RequireAuthorization()
-                .Produces<GetFeedResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<FeedDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -67,6 +68,29 @@ internal static class FeedEndpointsBuilder
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             //// groupBuilder.MapPut("/slug", ...); // Update feed
+
+            groupBuilder
+                .MapPut(
+                    "/{slug}/status",
+                    async ([FromRoute] string slug, [FromBody] UpdateFeedStatusRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateFeedStatusCommand(
+                            context.User.Id,
+                            slug,
+                            body.IsActive);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(FeedEndpointNames.UpdateStatus)
+                .WithDescription("Update status of a feed by slug.")
+                .RequireAuthorization()
+                .Accepts<UpdateFeedStatusRequestBody>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapDelete(
@@ -83,6 +107,7 @@ internal static class FeedEndpointsBuilder
                 .WithDescription("Delete a feed by slug.")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)

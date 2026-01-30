@@ -15,7 +15,8 @@ file static class ErrorMessages
     public const string Forbidden = "The user is not active to perform this action.";
 }
 
-internal abstract class UserValidationBehavior<TMessage, TResult>(IUserQueryRepository userRepository)
+internal abstract class UserValidationBehavior<TMessage, TResult>(
+    IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
     where TResult : Result
 {
@@ -25,18 +26,20 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(IUserQueryRepo
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var user = await userRepository.FindAsync(userId, cancellationToken);
+        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
 
-        return user switch
+        return userStatus switch
         {
-            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
-            { IsActive: false } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
-            _ => await next(message, cancellationToken)
+            null or { Status: UserStatus.Deleted } => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
+            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
+            { Status: UserStatus.Active } => await next(message, cancellationToken),
+            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
         };
     }
 }
 
-internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(IUserQueryRepository userRepository)
+internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
+    IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
     where TResult : Result<TResponse>
 {
@@ -46,13 +49,14 @@ internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(IUs
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var user = await userRepository.FindAsync(userId, cancellationToken);
+        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
 
-        return user switch
+        return userStatus switch
         {
-            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
-            { IsActive: false } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
-            _ => await next(message, cancellationToken)
+            null or { Status: UserStatus.Deleted } => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
+            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
+            { Status: UserStatus.Active } => await next(message, cancellationToken),
+            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
         };
     }
 }

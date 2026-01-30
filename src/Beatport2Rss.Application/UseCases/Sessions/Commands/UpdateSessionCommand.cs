@@ -44,8 +44,8 @@ internal sealed class UpdateSessionCommandHandler(
     IClock clock,
     IAccessTokenService accessTokenService,
     IRefreshTokenService refreshTokenService,
-    ISessionCommandRepository sessionRepository,
-    IUserQueryRepository userRepository,
+    ISessionCommandRepository sessionCommandRepository,
+    IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<UpdateSessionCommand, Result<UpdateSessionResult>>
 {
@@ -54,26 +54,26 @@ internal sealed class UpdateSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionRepository.LoadAsync(sessionId, cancellationToken);
-        var user = await userRepository.LoadAsync(session.UserId, cancellationToken);
+        var session = await sessionCommandRepository.LoadAsync(sessionId, cancellationToken);
+        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(session.UserId, cancellationToken);
 
         var refreshToken = RefreshToken.Create(command.RefreshToken);
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
 
         if (session.RefreshTokenExpiresAt < clock.UtcNow || refreshTokenHash != session.RefreshTokenHash)
         {
-            sessionRepository.Delete(session);
+            sessionCommandRepository.Delete(session);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Unauthorized("The provided refresh token is invalid or has expired.");
         }
 
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, sessionId);
         (RefreshToken newRefreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
 
         session.Refresh(refreshTokenService.Hash(newRefreshToken), expiresAt);
 
-        sessionRepository.Update(session);
+        sessionCommandRepository.Update(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var result = new UpdateSessionResult(
