@@ -1,8 +1,7 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
@@ -16,14 +15,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 public readonly record struct GetFeedQuery(
     Guid UserId,
     string? Slug) :
-    IQuery<Result<GetFeedResult>>, IRequireActiveUser;
-
-public readonly record struct GetFeedResult(
-    string Name,
-    string? Owner,
-    string Slug,
-    FeedStatus Status,
-    DateTimeOffset CreatedAt);
+    IQuery<Result<FeedDetailsReadModel>>, IRequireActiveUser;
 
 internal sealed class GetFeedQueryValidator :
     AbstractValidator<GetFeedQuery>
@@ -40,31 +32,18 @@ internal sealed class GetFeedQueryValidator :
 }
 
 internal sealed class GetFeedQueryHandler(
-    IUserQueryRepository userRepository) :
-    IQueryHandler<GetFeedQuery, Result<GetFeedResult>>
+    IFeedQueryRepository feedQueryRepository) :
+    IQueryHandler<GetFeedQuery, Result<FeedDetailsReadModel>>
 {
-    public async ValueTask<Result<GetFeedResult>> Handle(
+    public async ValueTask<Result<FeedDetailsReadModel>> Handle(
         GetFeedQuery query,
         CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(query.UserId);
-        var user = await userRepository.LoadAsync(userId, cancellationToken);
-
         var slug = Slug.Create(query.Slug);
-        var feed = user.Feeds.SingleOrDefault(f => f.Slug == slug);
 
-        if (feed is null)
-        {
-            return Result.NotFound($"Feed with the slug '{slug}' was not found.");
-        }
+        var feedDetailsQueryModel = await feedQueryRepository.LoadFeedDetailsQueryModelAsync(userId, slug, cancellationToken);
 
-        var result = new GetFeedResult(
-            feed.Name,
-            user.FullName,
-            feed.Slug.Value,
-            feed.Status,
-            feed.CreatedAt);
-
-        return result;
+        return feedDetailsQueryModel;
     }
 }

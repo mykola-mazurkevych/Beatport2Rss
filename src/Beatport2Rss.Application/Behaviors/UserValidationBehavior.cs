@@ -9,7 +9,9 @@ using Mediator;
 
 namespace Beatport2Rss.Application.Behaviors;
 
-public sealed class UserValidationBehavior<TMessage, TResponse>(IUserQueryRepository userRepository) :
+// TODO: split into two behaviors to check if user exists and if it's active
+public sealed class UserValidationBehavior<TMessage, TResponse>(
+    IUserQueryRepository userQueryRepository) :
     IPipelineBehavior<TMessage, TResponse>
     where TMessage : IMessage, IRequireActiveUser
     where TResponse : Result
@@ -20,13 +22,14 @@ public sealed class UserValidationBehavior<TMessage, TResponse>(IUserQueryReposi
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var user = await userRepository.FindAsync(userId, cancellationToken);
+        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
 
-        return user switch
+        return userStatus switch
         {
-            null => (TResponse)Result.Unauthorized("The user is not authorized to perform this action."),
-            { IsActive: false } => (TResponse)Result.Forbidden("The user is not active to perform this action."),
-            _ => await next(message, cancellationToken)
+            null or { Status: UserStatus.Deleted } => (TResponse)Result.Unauthorized("The user is not authorized to perform this action."),
+            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResponse)Result.Forbidden("The user is not active to perform this action."),
+            { Status: UserStatus.Active } => await next(message, cancellationToken),
+            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
         };
     }
 }

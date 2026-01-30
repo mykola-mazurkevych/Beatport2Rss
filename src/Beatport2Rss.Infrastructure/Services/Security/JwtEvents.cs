@@ -1,5 +1,6 @@
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Extensions;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,11 +17,12 @@ internal static class JwtEvents
     {
         var sessionQueryRepository = context.HttpContext.RequestServices.GetRequiredService<ISessionQueryRepository>();
 
+        var userId = UserId.Create(context.Principal!.Id);
         var sessionId = SessionId.Create(context.Principal!.SessionId);
-        var session = await sessionQueryRepository.FindAsync(sessionId);
-        if (session is null)
+        var exists = await sessionQueryRepository.ExistsAsync(userId, sessionId);
+        if (!exists)
         {
-            context.Fail("Session is not valid");
+            context.Fail("Session is not valid.");
         }
     }
 }

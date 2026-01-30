@@ -1,5 +1,6 @@
 using System.Net.Mime;
 
+using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
@@ -57,7 +58,7 @@ internal static class UserEndpointsBuilder
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user.")
                 .RequireAuthorization()
-                .Produces<GetUserResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<UserDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

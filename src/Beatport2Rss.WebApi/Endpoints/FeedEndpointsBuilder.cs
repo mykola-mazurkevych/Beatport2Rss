@@ -1,5 +1,6 @@
 using System.Net.Mime;
 
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
@@ -59,7 +60,7 @@ internal static class FeedEndpointsBuilder
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get a feed by slug.")
                 .RequireAuthorization()
-                .Produces<GetFeedResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<FeedDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

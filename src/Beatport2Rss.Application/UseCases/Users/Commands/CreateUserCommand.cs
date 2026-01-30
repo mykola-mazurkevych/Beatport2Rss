@@ -48,7 +48,7 @@ internal sealed class CreateUserCommandValidator :
 internal sealed class CreateUserCommandHandler(
     IClock clock,
     IPasswordHasher passwordHasher,
-    IUserCommandRepository userRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateUserCommand, Result>
 {
@@ -58,7 +58,7 @@ internal sealed class CreateUserCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
 
-        var existingUser = await userRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
+        var existingUser = await userCommandRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
 
         if (existingUser is not null)
         {
@@ -78,7 +78,7 @@ internal sealed class CreateUserCommandHandler(
             command.LastName,
             UserStatus.Pending);
 
-        await userRepository.AddAsync(user, cancellationToken);
+        await userCommandRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

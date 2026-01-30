@@ -59,8 +59,8 @@ internal sealed class CreateSessionCommandHandler(
     IClock clock,
     IRefreshTokenService refreshTokenService,
     IPasswordHasher passwordHasher,
-    ISessionCommandRepository sessionRepository,
-    IUserQueryRepository userRepository,
+    ISessionCommandRepository sessionCommandRepository,
+    IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateSessionCommand, Result<CreateSessionResult>>
 {
@@ -70,28 +70,28 @@ internal sealed class CreateSessionCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
-        var user = await userRepository.FindAsync(u => u.EmailAddress == emailAddress, cancellationToken);
+        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(emailAddress, cancellationToken);
 
-        if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
+        if (userAuthDetails is null || !passwordHasher.Verify(password, userAuthDetails.PasswordHash))
         {
             return Result.Unauthorized("The provided email address or password is incorrect.");
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, sessionId);
         (RefreshToken refreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
 
         var session = Session.Create(
             sessionId,
             clock.UtcNow,
-            user.Id,
+            userAuthDetails.Id,
             refreshTokenHash,
             expiresAt,
             command.UserAgent,
             command.IpAddress);
 
-        await sessionRepository.AddAsync(session, cancellationToken);
+        await sessionCommandRepository.AddAsync(session, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var result = new CreateSessionResult(

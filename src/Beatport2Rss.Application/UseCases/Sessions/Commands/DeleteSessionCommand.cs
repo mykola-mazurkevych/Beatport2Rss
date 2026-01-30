@@ -25,7 +25,7 @@ internal sealed class DeleteSessionCommandValidator :
 }
 
 internal sealed class DeleteSessionCommandHandler(
-    ISessionCommandRepository sessionRepository,
+    ISessionCommandRepository sessionCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteSessionCommand, Result>
 {
@@ -34,14 +34,14 @@ internal sealed class DeleteSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionRepository.FindAsync(sessionId, cancellationToken);
+        var session = await sessionCommandRepository.FindAsync(sessionId, cancellationToken);
 
         if (session is null)
         {
             return Result.NotFound("Session not found.");
         }
 
-        sessionRepository.Delete(session);
+        sessionCommandRepository.Delete(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

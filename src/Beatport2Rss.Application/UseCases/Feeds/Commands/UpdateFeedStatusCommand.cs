@@ -34,7 +34,7 @@ internal sealed class UpdateFeedStatusCommandValidator :
 }
 
 internal sealed class UpdateFeedStatusCommandHandler(
-    IUserCommandRepository userRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<UpdateFeedStatusCommand, Result>
 {
@@ -43,10 +43,11 @@ internal sealed class UpdateFeedStatusCommandHandler(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(command.UserId);
-        var user = await userRepository.LoadWithFeedsAsync(userId, cancellationToken);
+        var user = await userCommandRepository.LoadWithFeedsAsync(userId, cancellationToken);
 
         var slug = Slug.Create(command.Slug);
 
+        // TODO: Move to behavior
         if (!user.HasFeed(slug))
         {
             return Result.NotFound($"Feed with slug '{slug}' was not found.");
@@ -54,7 +55,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
 
         user.UpdateFeedStatus(slug, command.IsActive);
 
-        userRepository.Update(user);
+        userCommandRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

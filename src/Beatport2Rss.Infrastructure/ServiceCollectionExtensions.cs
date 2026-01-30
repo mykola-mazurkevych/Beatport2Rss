@@ -94,6 +94,7 @@ public static class ServiceCollectionExtensions
             services
                 .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()

@@ -1,10 +1,10 @@
+using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
-using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Application.Interfaces.Services.Security;
 
 public interface IAccessTokenService
 {
-    (AccessToken AccessToken, int ExpiresIn) Generate(User user, SessionId sessionId);
+    (AccessToken AccessToken, int ExpiresIn) Generate(UserAuthDetailsReadModel userAuthDetails, SessionId sessionId);
 }

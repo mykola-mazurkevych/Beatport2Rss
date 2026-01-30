@@ -57,6 +57,9 @@ public sealed class User : IAggregateRoot<UserId>
             Status = status,
         };
 
+    public bool HasFeed(FeedName name) =>
+        _feeds.Any(f => f.Name == name);
+
     public bool HasFeed(Slug slug) =>
         _feeds.Any(f => f.Slug == slug);
 

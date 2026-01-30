@@ -5,5 +5,5 @@ public enum UserStatus
     Pending,
     Active,
     Inactive,
-    Deleted,
+    Deleted, // TODO: Decide if this status is needed
 }
