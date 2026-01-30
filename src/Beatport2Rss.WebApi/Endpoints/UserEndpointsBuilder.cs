@@ -67,6 +67,27 @@ internal static class UserEndpointsBuilder
 
             //// groupBuilder.MapPut("/current", ...); // Update current user
 
+            // Temporary
+            groupBuilder
+                .MapPut(
+                    "/current/status",
+                    async ([FromBody] UpdateUserStatusRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateUserStatusCommand(
+                            context.User.Id,
+                            body.IsActive);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.UpdateCurrentStatus)
+                .WithDescription("Create status for current user.")
+                .AllowAnonymous()
+                .Accepts<UpdateUserStatusRequestBody>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
             //// groupBuilder.MapPut("/{id:guid}", ...); // Update user by id (by admin?)
 
             //// groupBuilder.MapDelete("/current", ...); // Delete current user

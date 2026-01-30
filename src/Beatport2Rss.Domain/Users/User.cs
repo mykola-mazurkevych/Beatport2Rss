@@ -57,6 +57,9 @@ public sealed class User : IAggregateRoot<UserId>
             Status = status,
         };
 
+    public void UpdateStatus(bool isActive) =>
+        Status = isActive ? UserStatus.Active : UserStatus.Inactive;
+
     public bool HasFeed(FeedName name) =>
         _feeds.Any(f => f.Name == name);
 
