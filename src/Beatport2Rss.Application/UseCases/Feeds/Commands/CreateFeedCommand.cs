@@ -25,12 +25,8 @@ internal sealed class CreateFeedCommandValidator :
 {
     public CreateFeedCommandValidator()
     {
-        RuleFor(c => c.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(c => c.Name)
-            .NotEmpty().WithMessage("Feed name is required.")
-            .MaximumLength(FeedName.MaxLength).WithMessage($"Feed name must be at most {FeedName.MaxLength} characters.");
+        RuleFor(c => c.UserId).IsUserId();
+        RuleFor(c => c.Name).IsFeedName();
     }
 }
 

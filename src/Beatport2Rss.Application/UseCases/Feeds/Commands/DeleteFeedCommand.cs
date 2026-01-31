@@ -23,12 +23,8 @@ internal sealed class DeleteFeedCommandValidator :
 {
     public DeleteFeedCommandValidator()
     {
-        RuleFor(c => c.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(c => c.Slug)
-            .NotEmpty().WithMessage("Slug is required.")
-            .MaximumLength(Slug.MaxLength).WithMessage($"Slug must be at most {Slug.MaxLength} characters.");
+        RuleFor(c => c.UserId).IsUserId();
+        RuleFor(c => c.Slug).IsSlug();
     }
 }
 

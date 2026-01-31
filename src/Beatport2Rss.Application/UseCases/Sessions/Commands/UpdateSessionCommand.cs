@@ -30,13 +30,8 @@ internal sealed class UpdateSessionCommandValidator :
 {
     public UpdateSessionCommandValidator()
     {
-        RuleFor(c => c.SessionId)
-            .NotEmpty().WithMessage("Session ID is required.");
-        
-        RuleFor(c => c.RefreshToken)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Refresh token is required.")
-            .Length(RefreshToken.Length).WithMessage($"Refresh token must be exactly {RefreshToken.Length} characters long.");
+        RuleFor(c => c.SessionId).IsSessionId();
+        RuleFor(c => c.RefreshToken).IsRefreshToken();
     }
 }
 

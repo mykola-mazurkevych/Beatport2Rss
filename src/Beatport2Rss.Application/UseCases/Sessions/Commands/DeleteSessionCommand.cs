@@ -19,8 +19,7 @@ internal sealed class DeleteSessionCommandValidator :
 {
     public DeleteSessionCommandValidator()
     {
-        RuleFor(c => c.SessionId)
-            .NotEmpty().WithMessage("Session ID is required.");
+        RuleFor(c => c.SessionId).IsSessionId();
     }
 }
 
