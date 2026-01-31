@@ -26,7 +26,7 @@ public sealed class UserValidationBehavior<TMessage, TResponse>(
 
         return userStatus switch
         {
-            null or { Status: UserStatus.Deleted } => (TResponse)Result.Unauthorized("The user is not authorized to perform this action."),
+            null => (TResponse)Result.Unauthorized("The user is not authorized to perform this action."),
             { Status: UserStatus.Pending or UserStatus.Inactive } => (TResponse)Result.Forbidden("The user is not active to perform this action."),
             { Status: UserStatus.Active } => await next(message, cancellationToken),
             _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
