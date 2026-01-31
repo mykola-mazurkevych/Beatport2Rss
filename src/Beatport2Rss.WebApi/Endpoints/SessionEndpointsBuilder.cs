@@ -22,7 +22,7 @@ internal static class SessionEndpointsBuilder
         {
             var groupBuilder = routeBuilder.MapGroup("/sessions").WithName("Sessions");
 
-            //// groupBuilder.MapGet("", ...); // Get sessions for curent user. Think if it's needed to see all sessions (for admin?)
+            //// groupBuilder.MapGet("", ...); // Get sessions for curent user. Think if it's needed to see all sessions (for admin?) (should be moved to user/current/sessions maybe?)
 
             groupBuilder
                 .MapPost(

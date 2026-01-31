@@ -80,8 +80,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.UpdateCurrentStatus)
-                .WithDescription("Create status for current user.")
-                .AllowAnonymous()
+                .WithDescription("Update status for current user.")
+                .RequireAuthorization()
                 .Accepts<UpdateUserStatusRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -90,9 +90,39 @@ internal static class UserEndpointsBuilder
 
             //// groupBuilder.MapPut("/{id:guid}", ...); // Update user by id (by admin?)
 
-            //// groupBuilder.MapDelete("/current", ...); // Delete current user
-            
-            //// groupBuilder.MapDelete("/{id:guid}", ...); // Delete user by id (by admin?)
+            groupBuilder
+                .MapDelete(
+                    "/current",
+                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new DeleteUserCommand(context.User.Id);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.DeleteCurrent)
+                .WithDescription("Delete current user.")
+                .RequireAuthorization()
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "/{id:guid}",
+                    async ([FromRoute] Guid id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new DeleteUserCommand(id);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.Delete)
+                .WithDescription("Delete current user.")
+                .RequireAuthorization(p => p.RequireRole("admin")) // TODO: implement
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;
         }
