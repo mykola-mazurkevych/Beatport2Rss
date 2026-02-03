@@ -25,23 +25,10 @@ internal sealed class CreateUserCommandValidator :
 {
     public CreateUserCommandValidator()
     {
-        RuleFor(c => c.EmailAddress)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Email address is required.")
-            .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters long.")
-            .EmailAddress().WithMessage("A valid email address is required.");
-
-        RuleFor(c => c.Password)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(Password.MinLength).WithMessage($"Password must be at least {Password.MinLength} characters long.")
-            .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters long.");
-
-        RuleFor(c => c.FirstName)
-            .MaximumLength(User.NameLength).WithMessage($"First name must be at most {User.NameLength} characters long.");
-        
-        RuleFor(c => c.LastName)
-            .MaximumLength(User.NameLength).WithMessage($"Last name must be at most {User.NameLength} characters long.");
+        RuleFor(c => c.EmailAddress).IsEmailAddress();
+        RuleFor(c => c.Password).IsPassword();
+        RuleFor(c => c.FirstName).IsFirstName();
+        RuleFor(c => c.LastName).IsLastName();
     }
 }
 

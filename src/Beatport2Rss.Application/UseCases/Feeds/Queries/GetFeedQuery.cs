@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.ReadModels.Feeds;
@@ -22,12 +23,8 @@ internal sealed class GetFeedQueryValidator :
 {
     public GetFeedQueryValidator()
     {
-        RuleFor(q => q.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(q => q.Slug)
-            .NotEmpty().WithMessage("Slug is required.")
-            .MaximumLength(Slug.MaxLength).WithMessage($"Slug must be at most {Slug.MaxLength} characters.");
+        RuleFor(q => q.UserId).IsUserId();
+        RuleFor(q => q.Slug).IsSlug();
     }
 }
 

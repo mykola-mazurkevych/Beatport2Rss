@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
@@ -18,8 +19,7 @@ internal sealed class DeleteSessionsCommandValidator :
 {
     public DeleteSessionsCommandValidator()
     {
-        RuleFor(c => c.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
+        RuleFor(c => c.UserId).IsUserId();
     }
 }
 

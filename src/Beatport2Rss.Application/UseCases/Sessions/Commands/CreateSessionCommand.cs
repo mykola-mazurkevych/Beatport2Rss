@@ -33,24 +33,10 @@ internal sealed class CreateSessionCommandValidator :
 {
     public CreateSessionCommandValidator()
     {
-        RuleFor(c => c.EmailAddress)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Email address is required.")
-            .MaximumLength(EmailAddress.MaxLength).WithMessage($"Email address must be at most {EmailAddress.MaxLength} characters.")
-            .EmailAddress().WithMessage("A valid email address is required.");
-
-        RuleFor(c => c.Password)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Password is required.")
-            .MinimumLength(Password.MinLength).WithMessage($"Password must be at least {Password.MinLength} characters long.")
-            .MaximumLength(Password.MaxLength).WithMessage($"Password must be at most {Password.MaxLength} characters.");
-
-        RuleFor(c => c.UserAgent)
-            .MaximumLength(Session.UserAgentMaxLength).WithMessage($"User agent must be at most {Session.UserAgentMaxLength} characters long.");
-
-        // TODO: add validation if this is actually an IP address
-        RuleFor(c => c.IpAddress)
-            .MaximumLength(Session.IpAddressMaxLength).WithMessage($"IP address must be at most {Session.IpAddressMaxLength} characters long.");
+        RuleFor(c => c.EmailAddress).IsEmailAddress();
+        RuleFor(c => c.Password).IsPassword();
+        RuleFor(c => c.UserAgent).IsUserAgent();
+        RuleFor(c => c.IpAddress).IsIpAddress();
     }
 }
 

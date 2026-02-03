@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
@@ -11,34 +12,31 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public readonly record struct UpdateUserStatusCommand(
-    Guid UserId,
-    bool IsActive) :
-    ICommand<Result>;
+public readonly record struct DeleteUserCommand(Guid UserId) :
+    ICommand<Result>, IRequireActiveUser;
 
-internal sealed class UpdateUserStatusCommandValidator :
-    AbstractValidator<UpdateUserStatusCommand>
+internal sealed class DeleteUserCommandValidator :
+    AbstractValidator<DeleteUserCommand>
 {
-    public UpdateUserStatusCommandValidator()
+    public DeleteUserCommandValidator()
     {
         RuleFor(c => c.UserId).IsUserId();
     }
 }
 
-internal sealed class UpdateUserStatusCommandHandler(
+internal sealed class DeleteUserCommandHandler(
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<UpdateUserStatusCommand, Result>
+    ICommandHandler<DeleteUserCommand, Result>
 {
     public async ValueTask<Result> Handle(
-        UpdateUserStatusCommand command,
+        DeleteUserCommand command,
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await userCommandRepository.LoadAsync(userId, cancellationToken);
 
-        user.UpdateStatus(command.IsActive);
-
+        userCommandRepository.Delete(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

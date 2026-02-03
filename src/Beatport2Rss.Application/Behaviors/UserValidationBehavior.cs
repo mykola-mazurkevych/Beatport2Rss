@@ -30,7 +30,7 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(
 
         return userStatus switch
         {
-            null or { Status: UserStatus.Deleted } => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
+            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
             { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             { Status: UserStatus.Active } => await next(message, cancellationToken),
             _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
@@ -53,7 +53,7 @@ internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
 
         return userStatus switch
         {
-            null or { Status: UserStatus.Deleted } => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
+            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
             { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             { Status: UserStatus.Active } => await next(message, cancellationToken),
             _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")

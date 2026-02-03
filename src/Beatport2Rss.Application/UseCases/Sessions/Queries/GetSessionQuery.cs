@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Domain.Sessions;
@@ -21,11 +22,8 @@ internal sealed class GetSessionQueryValidator :
 {
     public GetSessionQueryValidator()
     {
-        RuleFor(q => q.UserId)
-            .NotEmpty().WithMessage("User ID is required.");
-
-        RuleFor(q => q.SessionId)
-            .NotEmpty().WithMessage("Session ID is required.");
+        RuleFor(q => q.UserId).IsUserId();
+        RuleFor(q => q.SessionId).IsSessionId();
     }
 }
 
