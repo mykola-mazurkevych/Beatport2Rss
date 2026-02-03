@@ -2,12 +2,12 @@ using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Users;
+using Beatport2Rss.WebApi.Responses.Users;
 
 using Mediator;
 
@@ -68,12 +68,12 @@ internal static class UserEndpointsBuilder
                     {
                         var query = new GetUserQuery(context.User.Id);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(UserDetailsResponse.Create(result.Value)), context);
                     })
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user details")
                 .WithSummary("Get Details")
-                .Produces<UserDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<UserDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

@@ -21,9 +21,9 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
               feed.Slug == slug
         select new FeedDetailsReadModel(
             feed.Id,
-            feed.CreatedAt,
-            user.FullName,
             feed.Name,
             feed.Slug,
-            feed.Status == FeedStatus.Active);
+            user.FullName,
+            feed.Status == FeedStatus.Active,
+            feed.CreatedAt);
 }

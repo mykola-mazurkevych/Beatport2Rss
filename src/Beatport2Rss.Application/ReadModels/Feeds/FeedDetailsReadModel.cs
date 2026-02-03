@@ -5,8 +5,8 @@ namespace Beatport2Rss.Application.ReadModels.Feeds;
 
 public sealed record FeedDetailsReadModel(
     FeedId Id,
-    DateTimeOffset CreatedAt,
-    string? Owner,
     string Name,
     Slug Slug,
-    bool IsActive);
+    string? Owner,
+    bool IsActive,
+    DateTimeOffset CreatedAt);

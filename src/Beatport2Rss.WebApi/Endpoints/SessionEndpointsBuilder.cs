@@ -2,12 +2,12 @@ using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
+using Beatport2Rss.WebApi.Responses.Sessions;
 
 using Mediator;
 
@@ -50,14 +50,14 @@ internal static class SessionEndpointsBuilder
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: CreateSessionResponse.Create(result.Value)), context);
                     })
                 .AllowAnonymous()
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a new user session")
                 .WithSummary("Log In")
                 .Accepts<CreateSessionRequestBody>(MediaTypeNames.Application.Json)
-                .Produces<CreateSessionResult>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
+                .Produces<CreateSessionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -72,12 +72,12 @@ internal static class SessionEndpointsBuilder
                             context.User.Id,
                             context.User.SessionId);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(SessionDetailsResponse.Create(result.Value)), context);
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session details")
                 .WithSummary("Get Details")
-                .Produces<SessionDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<SessionDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -92,13 +92,13 @@ internal static class SessionEndpointsBuilder
                             context.User.SessionId,
                             body.RefreshToken);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(UpdateSessionResponse.Create(result.Value)), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session")
                 .WithSummary("Refresh Access Token")
                 .Accepts<UpdateSessionRequestBody>(MediaTypeNames.Application.Json)
-                .Produces<UpdateSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<UpdateSessionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

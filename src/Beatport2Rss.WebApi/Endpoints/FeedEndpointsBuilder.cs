@@ -2,12 +2,12 @@ using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Feeds;
+using Beatport2Rss.WebApi.Responses.Feeds;
 
 using Mediator;
 
@@ -68,12 +68,12 @@ internal static class FeedEndpointsBuilder
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(FeedDetailsResponse.Create(result.Value)), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
                 .WithSummary("Get Details")
-                .Produces<FeedDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<FeedDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
