@@ -1,5 +1,7 @@
 using System.Net.Mime;
 
+using Asp.Versioning.Builder;
+
 using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
@@ -18,9 +20,12 @@ internal static class UserEndpointsBuilder
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
-        public IEndpointRouteBuilder BuildUserEndpoints()
+        public IEndpointRouteBuilder BuildUserEndpoints(ApiVersionSet versionSet)
         {
-            var groupBuilder = routeBuilder.MapGroup("/users").WithName("Users");
+            var groupBuilder = routeBuilder.MapGroup("/users")
+                .WithApiVersionSet(versionSet)
+                .HasApiVersion(ApiVersionsContainer.V1)
+                .WithTags("Users");
 
             ////groupBuilder.MapGet("", ...); // Load all users (for admin?)
 
@@ -38,7 +43,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })
                 .WithName(UserEndpointNames.Create)
-                .WithDescription("Create a user.")
+                .WithDescription("Create a user")
+                .WithSummary("Create")
                 .AllowAnonymous()
                 .Accepts<CreateUserRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
@@ -56,7 +62,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(UserEndpointNames.GetCurrent)
-                .WithDescription("Get current user.")
+                .WithDescription("Get current user details")
+                .WithSummary("Get Current")
                 .RequireAuthorization()
                 .Produces<UserDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -80,7 +87,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.UpdateCurrentStatus)
-                .WithDescription("Update status for current user.")
+                .WithDescription("Update status for current user (temporary for testing)")
+                .WithSummary("Update Current Status")
                 .RequireAuthorization()
                 .Accepts<UpdateUserStatusRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
@@ -100,7 +108,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.DeleteCurrent)
-                .WithDescription("Delete current user.")
+                .WithDescription("Delete current user")
+                .WithSummary("Delete Current")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -117,7 +126,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.Delete)
-                .WithDescription("Delete current user.")
+                .WithDescription("Delete a user by id")
+                .WithSummary("Delete by Id")
                 .RequireAuthorization(p => p.RequireRole("admin")) // TODO: implement
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)

@@ -52,12 +52,12 @@
           "Microsoft.Extensions.Primitives": "8.0.0"
         }
       },
-      "Asp.Versioning.Http": {
+      "Asp.Versioning.Mvc": {
         "type": "Transitive",
         "resolved": "8.1.1",
-        "contentHash": "1D/Mzq1MSUSQe1eCY6GeEsu+tIlpzoWZxZkhlcw/uvtVoTrwO+BMl0fSj/XX8oZN1DutWTZqHDHgyDRq+IeSdQ==",
+        "contentHash": "mkJv6eAdlbHbqTdrUcfEYFoZuGL6HoR7O+Lfsvivixp7N5BNhfCFPPOwsBzdIiH1qzdJXyJf+C+DZ08j27PMPg==",
         "dependencies": {
-          "Asp.Versioning.Abstractions": "8.1.0"
+          "Asp.Versioning.Http": "8.1.1"
         }
       },
       "Humanizer.Core": {
@@ -451,19 +451,30 @@
       "beatport2rss.webapi": {
         "type": "Project",
         "dependencies": {
-          "Asp.Versioning.Mvc": "[8.1.1, )",
+          "Asp.Versioning.Http": "[8.1.1, )",
+          "Asp.Versioning.Mvc.ApiExplorer": "[8.1.1, )",
           "Beatport2Rss.Application": "[1.0.0, )",
           "Beatport2Rss.Infrastructure": "[1.0.0, )",
-          "Microsoft.AspNetCore.OpenApi": "[10.0.2, )"
+          "Microsoft.AspNetCore.OpenApi": "[10.0.2, )",
+          "Scalar.AspNetCore": "[2.12.30, )"
         }
       },
-      "Asp.Versioning.Mvc": {
+      "Asp.Versioning.Http": {
         "type": "CentralTransitive",
         "requested": "[8.1.1, )",
         "resolved": "8.1.1",
-        "contentHash": "mkJv6eAdlbHbqTdrUcfEYFoZuGL6HoR7O+Lfsvivixp7N5BNhfCFPPOwsBzdIiH1qzdJXyJf+C+DZ08j27PMPg==",
+        "contentHash": "1D/Mzq1MSUSQe1eCY6GeEsu+tIlpzoWZxZkhlcw/uvtVoTrwO+BMl0fSj/XX8oZN1DutWTZqHDHgyDRq+IeSdQ==",
         "dependencies": {
-          "Asp.Versioning.Http": "8.1.1"
+          "Asp.Versioning.Abstractions": "8.1.0"
+        }
+      },
+      "Asp.Versioning.Mvc.ApiExplorer": {
+        "type": "CentralTransitive",
+        "requested": "[8.1.1, )",
+        "resolved": "8.1.1",
+        "contentHash": "u8PrP6CjmurgIh0EDfg8Gc/GdpDHgkbv8OLKdxQcWb5W4sp0i9BcdbQlLvRcATjNIJUyr7ZmqXjmdsFfqnuy0g==",
+        "dependencies": {
+          "Asp.Versioning.Mvc": "8.1.1"
         }
       },
       "BCrypt.Net-Next": {
@@ -593,6 +604,12 @@
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
           "Npgsql": "10.0.0"
         }
+      },
+      "Scalar.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[2.12.30, )",
+        "resolved": "2.12.30",
+        "contentHash": "tG+i8CN7Ub26z1GkjK0Zo4aDa9Omh5I5xQGDYN1O23DByMxH8jXz0Qd9/yHYczqi6+bDXgpSAYDfn1VkbupqCw=="
       },
       "Slugify.Core": {
         "type": "CentralTransitive",

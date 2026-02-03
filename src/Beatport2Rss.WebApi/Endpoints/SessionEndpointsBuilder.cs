@@ -1,5 +1,7 @@
 using System.Net.Mime;
 
+using Asp.Versioning.Builder;
+
 using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
@@ -18,9 +20,12 @@ internal static class SessionEndpointsBuilder
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
-        public IEndpointRouteBuilder BuildSessionEndpoints()
+        public IEndpointRouteBuilder BuildSessionEndpoints(ApiVersionSet versionSet)
         {
-            var groupBuilder = routeBuilder.MapGroup("/sessions").WithName("Sessions");
+            var groupBuilder = routeBuilder.MapGroup("/sessions")
+                .WithApiVersionSet(versionSet)
+                .HasApiVersion(ApiVersionsContainer.V1)
+                .WithTags("Sessions");
 
             //// groupBuilder.MapGet("", ...); // Get sessions for curent user. Think if it's needed to see all sessions (for admin?) (should be moved to user/current/sessions maybe?)
 
@@ -38,7 +43,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
                     })
                 .WithName(SessionEndpointNames.Create)
-                .WithDescription("Create a user session (log in).")
+                .WithDescription("Create a user session")
+                .WithSummary("Log In")
                 .AllowAnonymous()
                 .Accepts<CreateSessionRequestBody>(MediaTypeNames.Application.Json)
                 .Produces<CreateSessionResult>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
@@ -59,7 +65,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.GetCurrent)
-                .WithDescription("Get current session.")
+                .WithDescription("Get current session details")
+                .WithSummary("Get Current")
                 .RequireAuthorization()
                 .Produces<SessionDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -79,7 +86,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
-                .WithDescription("Update current user session (refresh access token).")
+                .WithDescription("Update current user session")
+                .WithSummary("Refresh Access Token")
                 .RequireAuthorization()
                 .Accepts<UpdateSessionRequestBody>(MediaTypeNames.Application.Json)
                 .Produces<UpdateSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
@@ -98,7 +106,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteCurrent)
-                .WithDescription("Delete current user session (log out).")
+                .WithDescription("Delete current user session")
+                .WithSummary("Log Out")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -116,7 +125,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteById)
-                .WithDescription("Delete a user session.")
+                .WithDescription("Delete a user session by id")
+                .WithSummary("Delete Session by Id")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -134,7 +144,8 @@ internal static class SessionEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(SessionEndpointNames.DeleteAll)
-                .WithDescription("Delete all user sessions (log out from all devices).")
+                .WithDescription("Delete all user sessions (log out from all devices)")
+                .WithSummary("Delete All User Sessions")
                 .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
