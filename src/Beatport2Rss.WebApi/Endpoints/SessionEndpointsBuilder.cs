@@ -6,7 +6,6 @@ using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Sessions;
 
@@ -15,6 +14,16 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints;
+
+file static class SessionEndpointNames
+{
+    public const string Create = "CreateSession";
+    public const string DeleteAll = "DeleteAllSessions";
+    public const string DeleteById = "DeleteSession";
+    public const string DeleteCurrent = "DeleteCurrentSession";
+    public const string GetCurrent = "GetCurrentSession";
+    public const string UpdateCurrent = "UpdateCurrentSession";
+}
 
 internal static class SessionEndpointsBuilder
 {

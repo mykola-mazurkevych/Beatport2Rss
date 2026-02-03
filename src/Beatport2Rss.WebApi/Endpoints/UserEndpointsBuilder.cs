@@ -6,7 +6,6 @@ using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Users;
 
@@ -15,6 +14,15 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints;
+
+file static class UserEndpointNames
+{
+    public const string Create = "CreateUser";
+    public const string Delete = "DeleteUser";
+    public const string DeleteCurrent = "DeleteCurrentUser";
+    public const string GetCurrent = "GetCurrentUser";
+    public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
+}
 
 internal static class UserEndpointsBuilder
 {

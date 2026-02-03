@@ -6,7 +6,6 @@ using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Feeds;
 
@@ -15,6 +14,14 @@ using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints;
+
+file static class FeedEndpointNames
+{
+    public const string Create = "CreateFeed";
+    public const string Delete = "DeleteFeed";
+    public const string Get = "GetFeed";
+    public const string UpdateStatus = "UpdateFeedStatus";
+}
 
 internal static class FeedEndpointsBuilder
 {
