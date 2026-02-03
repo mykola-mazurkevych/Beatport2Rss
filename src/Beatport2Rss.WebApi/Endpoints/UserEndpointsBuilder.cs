@@ -23,6 +23,7 @@ internal static class UserEndpointsBuilder
         public IEndpointRouteBuilder BuildUserEndpoints(ApiVersionSet versionSet)
         {
             var groupBuilder = routeBuilder.MapGroup("/users")
+                .RequireAuthorization()
                 .WithApiVersionSet(versionSet)
                 .HasApiVersion(ApiVersionsContainer.V1)
                 .WithTags("Users");
@@ -43,7 +44,7 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })
                 .WithName(UserEndpointNames.Create)
-                .WithDescription("Create a user")
+                .WithDescription("Create a new user")
                 .WithSummary("Create")
                 .AllowAnonymous()
                 .Accepts<CreateUserRequestBody>(MediaTypeNames.Application.Json)
@@ -63,8 +64,7 @@ internal static class UserEndpointsBuilder
                     })
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user details")
-                .WithSummary("Get Current")
-                .RequireAuthorization()
+                .WithSummary("Get Details")
                 .Produces<UserDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -87,9 +87,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.UpdateCurrentStatus)
-                .WithDescription("Update status for current user (temporary for testing)")
-                .WithSummary("Update Current Status")
-                .RequireAuthorization()
+                .WithDescription("Update current user status (temporary for testing)")
+                .WithSummary("Update Status")
                 .Accepts<UpdateUserStatusRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -110,7 +109,6 @@ internal static class UserEndpointsBuilder
                 .WithName(UserEndpointNames.DeleteCurrent)
                 .WithDescription("Delete current user")
                 .WithSummary("Delete Current")
-                .RequireAuthorization()
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -126,8 +124,8 @@ internal static class UserEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.Delete)
-                .WithDescription("Delete a user by id")
-                .WithSummary("Delete by Id")
+                .WithDescription("Delete a user by its id")
+                .WithSummary("Delete")
                 .RequireAuthorization(p => p.RequireRole("admin")) // TODO: implement
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)

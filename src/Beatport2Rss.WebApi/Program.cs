@@ -61,11 +61,11 @@ var versionSet = app.NewApiVersionSet()
     .ReportApiVersions()
     .Build();
 
-app.MapGet("", () => "Hello, Beatport2Rss!");
-
 app
     .BuildFeedEndpoints(versionSet)
     .BuildSessionEndpoints(versionSet)
     .BuildUserEndpoints(versionSet);
+
+app.MapGet("", () => "Hello, Beatport2Rss!");
 
 app.Run();
