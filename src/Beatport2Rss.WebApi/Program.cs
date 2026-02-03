@@ -15,40 +15,51 @@ builder.Services
     .AddOpenApi()
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
-    .AddProblemDetails(o => o.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
-    .AddApiVersioning(o =>
+    .AddProblemDetails(options => options.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
+    .AddApiVersioning(options =>
     {
-        o.DefaultApiVersion = ApiVersionsContainer.Default;
-        o.AssumeDefaultVersionWhenUnspecified = true;
-        o.ReportApiVersions = true;
-        o.ApiVersionReader = new HeaderApiVersionReader(ResponseHeaderNames.ApiVersion);
+        options.DefaultApiVersion = ApiVersionsContainer.Default;
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.ReportApiVersions = true;
+        options.ApiVersionReader = new HeaderApiVersionReader(ResponseHeaderNames.ApiVersion);
+    })
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = false;
     });
 
 var app = builder.Build();
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto });
 
-app.UseAuthentication();
-app.UseAuthorization();
+app
+    .UseAuthentication()
+    .UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseDeveloperExceptionPage();
 }
 
-app.UseExceptionHandler()
+app
+    .UseExceptionHandler()
     .UseHttpsRedirection()
     .UseTraceIdMiddleware()
     .UseHealthCheckMiddleware();
 
-var v1Builder = app
-    .NewVersionedApi("Beatport2Rss API V1")
-    .HasApiVersion(ApiVersionsContainer.V1);
+var versionSet = app.NewApiVersionSet()
+    .HasApiVersion(ApiVersionsContainer.V1)
+    ////.HasApiVersion(ApiVersionsContainer.V2)
+    .ReportApiVersions()
+    .Build();
 
-v1Builder.MapGet("", () => "Hello, Beatport2Rss!");
-v1Builder
-    .BuildFeedEndpoints()
-    .BuildSessionEndpoints()
-    .BuildUserEndpoints();
+app
+    .BuildFeedEndpoints(versionSet)
+    .BuildSessionEndpoints(versionSet)
+    .BuildUserEndpoints(versionSet);
+
+app.MapGet("", () => "Hello, Beatport2Rss!");
 
 app.Run();

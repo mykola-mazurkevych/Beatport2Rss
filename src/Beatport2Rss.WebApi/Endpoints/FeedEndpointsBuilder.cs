@@ -1,5 +1,7 @@
 using System.Net.Mime;
 
+using Asp.Versioning.Builder;
+
 using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
@@ -18,9 +20,13 @@ internal static class FeedEndpointsBuilder
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
-        public IEndpointRouteBuilder BuildFeedEndpoints()
+        public IEndpointRouteBuilder BuildFeedEndpoints(ApiVersionSet versionSet)
         {
-            var groupBuilder = routeBuilder.MapGroup("/feeds").WithName("Feeds");
+            var groupBuilder = routeBuilder.MapGroup("feeds")
+                .RequireAuthorization()
+                .WithApiVersionSet(versionSet)
+                .HasApiVersion(ApiVersionsContainer.V1)
+                .WithTags("Feeds");
 
             //// groupBuilder.MapGet("", ...); // Get feeds
 
@@ -36,8 +42,8 @@ internal static class FeedEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(FeedEndpointNames.Create)
-                .WithDescription("Create a feed.")
-                .RequireAuthorization()
+                .WithDescription("Create a new feed")
+                .WithSummary("Create")
                 .Accepts<CreateFeedRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -58,8 +64,8 @@ internal static class FeedEndpointsBuilder
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(FeedEndpointNames.Get)
-                .WithDescription("Get a feed by slug.")
-                .RequireAuthorization()
+                .WithDescription("Get feed details by its slug")
+                .WithSummary("Get Details")
                 .Produces<FeedDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -82,8 +88,8 @@ internal static class FeedEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(FeedEndpointNames.UpdateStatus)
-                .WithDescription("Update status of a feed by slug.")
-                .RequireAuthorization()
+                .WithDescription("Update status of a feed by its slug")
+                .WithSummary("Update Status")
                 .Accepts<UpdateFeedStatusRequestBody>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
@@ -104,8 +110,8 @@ internal static class FeedEndpointsBuilder
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(FeedEndpointNames.Delete)
-                .WithDescription("Delete a feed by slug.")
-                .RequireAuthorization()
+                .WithDescription("Delete a feed by its slug")
+                .WithSummary("Delete")
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
