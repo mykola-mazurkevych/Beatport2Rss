@@ -15,7 +15,10 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public readonly record struct CreateFeedCommand(
+public sealed record CreateFeedRequest(
+    string? Name);
+
+public sealed record CreateFeedCommand(
     Guid UserId,
     string? Name) :
     ICommand<Result<Slug>>, IRequireActiveUser;

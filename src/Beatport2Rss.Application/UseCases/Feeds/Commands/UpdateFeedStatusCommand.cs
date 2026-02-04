@@ -13,7 +13,10 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public readonly record struct UpdateFeedStatusCommand(
+public sealed record UpdateFeedStatusRequest(
+    bool IsActive);
+
+public sealed record UpdateFeedStatusCommand(
     Guid UserId,
     string? Slug,
     bool IsActive) :

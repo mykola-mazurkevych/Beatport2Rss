@@ -11,7 +11,7 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
-public readonly record struct DeleteSessionCommand(Guid SessionId) :
+public sealed record DeleteSessionCommand(Guid SessionId) :
     ICommand<Result>;
 
 internal sealed class DeleteSessionCommandValidator :

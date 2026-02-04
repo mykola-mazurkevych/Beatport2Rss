@@ -14,16 +14,19 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
-public readonly record struct UpdateSessionCommand(
-    Guid SessionId,
-    string RefreshToken) :
-    ICommand<Result<UpdateSessionResult>>;
+public sealed record UpdateSessionRequest(
+    string? RefreshToken);
 
-public readonly record struct UpdateSessionResult(
+public sealed record UpdateSessionResponse(
     string AccessToken,
     AccessTokenType TokenType,
     int ExpiresIn,
     string RefreshToken);
+
+public sealed record UpdateSessionCommand(
+    Guid SessionId,
+    string? RefreshToken) :
+    ICommand<Result<UpdateSessionResponse>>;
 
 internal sealed class UpdateSessionCommandValidator :
     AbstractValidator<UpdateSessionCommand>
@@ -42,9 +45,9 @@ internal sealed class UpdateSessionCommandHandler(
     ISessionCommandRepository sessionCommandRepository,
     IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<UpdateSessionCommand, Result<UpdateSessionResult>>
+    ICommandHandler<UpdateSessionCommand, Result<UpdateSessionResponse>>
 {
-    public async ValueTask<Result<UpdateSessionResult>> Handle(
+    public async ValueTask<Result<UpdateSessionResponse>> Handle(
         UpdateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -71,12 +74,10 @@ internal sealed class UpdateSessionCommandHandler(
         sessionCommandRepository.Update(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var result = new UpdateSessionResult(
+        return new UpdateSessionResponse(
             accessToken.Value,
             accessToken.Type,
             expiresIn,
             newRefreshToken);
-
-        return result;
     }
 }

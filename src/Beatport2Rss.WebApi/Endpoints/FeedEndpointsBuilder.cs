@@ -5,8 +5,6 @@ using Asp.Versioning.Builder;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.WebApi.Extensions;
-using Beatport2Rss.WebApi.Requests.Feeds;
-using Beatport2Rss.WebApi.Responses.Feeds;
 
 using Mediator;
 
@@ -39,18 +37,18 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateFeedRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateFeedCommand(
                             context.User.Id,
-                            body.Name);
+                            request.Name);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a new feed")
                 .WithSummary("Create")
-                .Accepts<CreateFeedRequestBody>(MediaTypeNames.Application.Json)
+                .Accepts<CreateFeedRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -67,12 +65,12 @@ internal static class FeedEndpointsBuilder
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(FeedDetailsResponse.Create(result.Value)), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
                 .WithSummary("Get Details")
-                .Produces<FeedDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<GetFeedResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -84,19 +82,19 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/{slug}/status",
-                    async ([FromRoute] string slug, [FromBody] UpdateFeedStatusRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromRoute] string slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateFeedStatusCommand(
                             context.User.Id,
                             slug,
-                            body.IsActive);
+                            request.IsActive);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(FeedEndpointNames.UpdateStatus)
                 .WithDescription("Update status of a feed by its slug")
                 .WithSummary("Update Status")
-                .Accepts<UpdateFeedStatusRequestBody>(MediaTypeNames.Application.Json)
+                .Accepts<UpdateFeedStatusRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
