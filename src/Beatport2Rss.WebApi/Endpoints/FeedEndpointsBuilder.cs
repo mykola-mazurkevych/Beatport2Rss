@@ -4,7 +4,6 @@ using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
-using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Requests.Feeds;
 using Beatport2Rss.WebApi.Responses.Feeds;
