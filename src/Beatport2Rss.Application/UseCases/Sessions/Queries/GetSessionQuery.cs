@@ -31,7 +31,7 @@ internal sealed class GetSessionQueryHandler(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
-        var readModel = await sessionQueryRepository.LoadSessionDetailsQueryModelAsync(query.UserId, query.SessionId, cancellationToken);
+        var readModel = await sessionQueryRepository.LoadSessionDetailsReadModelAsync(query.UserId, query.SessionId, cancellationToken);
 
         return new GetSessionResponse(
             readModel.SessionId,

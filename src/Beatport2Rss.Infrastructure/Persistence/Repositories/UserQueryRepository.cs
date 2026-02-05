@@ -12,8 +12,8 @@ internal sealed class UserQueryRepository(Beatport2RssDbContext dbContext) :
     public Task<bool> ExistsAsync(UserId userId, CancellationToken cancellationToken = default) =>
         dbContext.Users.AnyAsync(user => user.Id == userId, cancellationToken);
 
-    public Task<UserStatusReadModel?> LoadUserStatusQueryModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
-        GetUserStatusQueryModelAsQueryable(userId).SingleOrDefaultAsync(cancellationToken);
+    public Task<UserStatusReadModel> LoadUserStatusReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
+        GetUserStatusReadModelAsQueryable(userId).SingleAsync(cancellationToken);
 
     public Task<UserAuthDetailsReadModel> LoadUserAuthDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
         GetUserAuthDetailsReadModelsAsQueryable(userId).SingleAsync(cancellationToken);
@@ -24,7 +24,7 @@ internal sealed class UserQueryRepository(Beatport2RssDbContext dbContext) :
     public Task<UserDetailsReadModel> LoadUserDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
         GetUserDetailsReadModelsAsQueryable(userId).SingleAsync(cancellationToken);
 
-    private IQueryable<UserStatusReadModel> GetUserStatusQueryModelAsQueryable(UserId userId) =>
+    private IQueryable<UserStatusReadModel> GetUserStatusReadModelAsQueryable(UserId userId) =>
         from user in dbContext.Users
         where user.Id == userId
         select new UserStatusReadModel(user.Status);

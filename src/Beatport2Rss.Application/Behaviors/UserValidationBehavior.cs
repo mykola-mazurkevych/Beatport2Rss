@@ -25,13 +25,13 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var userStatus = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
 
-        return userStatus.Status switch
+        return readModel.Status switch
         {
             UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             UserStatus.Active => await next(message, cancellationToken),
-            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
+            _ => throw new NotSupportedException($"User status '{readModel.Status}' is not supported.")
         };
     }
 }
@@ -47,13 +47,13 @@ internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var userStatus = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
 
-        return userStatus.Status switch
+        return readModel.Status switch
         {
             UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             UserStatus.Active => await next(message, cancellationToken),
-            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
+            _ => throw new NotSupportedException($"User status '{readModel.Status}' is not supported.")
         };
     }
 }
