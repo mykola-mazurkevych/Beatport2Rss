@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
@@ -22,17 +23,17 @@ public sealed record CreateSessionRequest(
     string? IpAddress);
 
 public sealed record CreateSessionResponse(
-    string AccessToken,
+    AccessToken AccessToken,
     AccessTokenType TokenType,
     int ExpiresIn,
-    string RefreshToken);
+    RefreshToken RefreshToken);
 
 public sealed record CreateSessionCommand(
     string? EmailAddress,
     string? Password,
     string? UserAgent,
     string? IpAddress) :
-    ICommand<Result<CreateSessionResponse>>;
+    ICommand<Result<CreateSessionResponse>>, IRequireValidation;
 
 internal sealed class CreateSessionCommandValidator :
     AbstractValidator<CreateSessionCommand>
@@ -87,7 +88,7 @@ internal sealed class CreateSessionCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new CreateSessionResponse(
-            accessToken.Value,
+            accessToken,
             accessToken.Type,
             expiresIn,
             refreshToken);

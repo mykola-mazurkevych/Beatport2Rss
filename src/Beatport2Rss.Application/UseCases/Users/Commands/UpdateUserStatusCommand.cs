@@ -1,11 +1,8 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
-
-using FluentValidation;
 
 using Mediator;
 
@@ -15,18 +12,9 @@ public sealed record UpdateUserStatusRequest(
     bool IsActive);
 
 public sealed record UpdateUserStatusCommand(
-    Guid UserId,
+    UserId UserId,
     bool IsActive) :
     ICommand<Result>;
-
-internal sealed class UpdateUserStatusCommandValidator :
-    AbstractValidator<UpdateUserStatusCommand>
-{
-    public UpdateUserStatusCommandValidator()
-    {
-        RuleFor(c => c.UserId).IsUserId();
-    }
-}
 
 internal sealed class UpdateUserStatusCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -37,8 +25,7 @@ internal sealed class UpdateUserStatusCommandHandler(
         UpdateUserStatusCommand command,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadAsync(userId, cancellationToken).ConfigureAwait(false);
+        var user = await userCommandRepository.LoadAsync(command.UserId, cancellationToken).ConfigureAwait(false);
 
         user.UpdateStatus(command.IsActive);
 

@@ -7,8 +7,6 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
@@ -17,20 +15,10 @@ public sealed record UpdateFeedStatusRequest(
     bool IsActive);
 
 public sealed record UpdateFeedStatusCommand(
-    Guid UserId,
-    string? Slug,
+    UserId UserId,
+    Slug Slug,
     bool IsActive) :
-    ICommand<Result>, IRequireActiveUser;
-
-internal sealed class UpdateFeedStatusCommandValidator :
-    AbstractValidator<UpdateFeedStatusCommand>
-{
-    public UpdateFeedStatusCommandValidator()
-    {
-        RuleFor(c => c.UserId).IsUserId();
-        RuleFor(c => c.Slug).IsSlug();
-    }
-}
+    ICommand<Result>, IRequireActiveUser, IRequireSlug;
 
 internal sealed class UpdateFeedStatusCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -41,18 +29,15 @@ internal sealed class UpdateFeedStatusCommandHandler(
         UpdateFeedStatusCommand command,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadWithFeedsAsync(userId, cancellationToken);
-
-        var slug = Slug.Create(command.Slug);
+        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
 
         // TODO: Move to behavior
-        if (!user.HasFeed(slug))
+        if (!user.HasFeed(command.Slug))
         {
-            return Result.NotFound($"Feed with slug '{slug}' was not found.");
+            return Result.NotFound($"Feed with slug '{command.Slug}' was not found.");
         }
 
-        user.UpdateFeedStatus(slug, command.IsActive);
+        user.UpdateFeedStatus(command.Slug, command.IsActive);
 
         userCommandRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);

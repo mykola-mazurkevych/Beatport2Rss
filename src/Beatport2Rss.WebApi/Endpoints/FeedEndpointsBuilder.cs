@@ -4,6 +4,7 @@ using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
@@ -59,7 +60,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/{slug}",
-                    async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetFeedQuery(
                             context.User.Id,
@@ -82,7 +83,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/{slug}/status",
-                    async ([FromRoute] string slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromRoute] Slug slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateFeedStatusCommand(
                             context.User.Id,
@@ -105,7 +106,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/{slug}",
-                    async ([FromRoute] string slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new DeleteFeedCommand(
                             context.User.Id,

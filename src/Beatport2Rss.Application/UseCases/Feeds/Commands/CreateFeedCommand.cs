@@ -19,16 +19,15 @@ public sealed record CreateFeedRequest(
     string? Name);
 
 public sealed record CreateFeedCommand(
-    Guid UserId,
+    UserId UserId,
     string? Name) :
-    ICommand<Result<Slug>>, IRequireActiveUser;
+    ICommand<Result<Slug>>, IRequireValidation, IRequireActiveUser;
 
 internal sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
 {
     public CreateFeedCommandValidator()
     {
-        RuleFor(c => c.UserId).IsUserId();
         RuleFor(c => c.Name).IsFeedName();
     }
 }
@@ -44,8 +43,7 @@ internal sealed class CreateFeedCommandHandler(
         CreateFeedCommand command,
         CancellationToken cancellationToken = default)
     {
-        var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadWithFeedsAsync(userId, cancellationToken);
+        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
 
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
@@ -59,7 +57,7 @@ internal sealed class CreateFeedCommandHandler(
         var feed = Feed.Create(
             feedId,
             clock.UtcNow,
-            userId,
+            user.Id,
             feedName,
             slug,
             FeedStatus.Active);

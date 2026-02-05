@@ -1,4 +1,3 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
@@ -7,14 +6,12 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
 public sealed record GetFeedResponse(
-    FeedId Id,
+    FeedId FeedId,
     Slug Slug,
     string Name,
     string? Owner,
@@ -22,19 +19,9 @@ public sealed record GetFeedResponse(
     DateTimeOffset CreatedAt);
 
 public sealed record GetFeedQuery(
-    Guid UserId,
-    string? Slug) :
-    IQuery<Result<GetFeedResponse>>, IRequireActiveUser;
-
-internal sealed class GetFeedQueryValidator :
-    AbstractValidator<GetFeedQuery>
-{
-    public GetFeedQueryValidator()
-    {
-        RuleFor(q => q.UserId).IsUserId();
-        RuleFor(q => q.Slug).IsSlug();
-    }
-}
+    UserId UserId,
+    Slug Slug) :
+    IQuery<Result<GetFeedResponse>>, IRequireSlug;
 
 internal sealed class GetFeedQueryHandler(
     IFeedQueryRepository feedQueryRepository) :
@@ -44,13 +31,10 @@ internal sealed class GetFeedQueryHandler(
         GetFeedQuery query,
         CancellationToken cancellationToken = default)
     {
-        var userId = UserId.Create(query.UserId);
-        var slug = Slug.Create(query.Slug);
-
-        var readModel = await feedQueryRepository.LoadFeedDetailsReadModelAsync(userId, slug, cancellationToken);
+        var readModel = await feedQueryRepository.LoadFeedDetailsReadModelAsync(query.UserId, query.Slug, cancellationToken);
 
         return new GetFeedResponse(
-            readModel.Id,
+            readModel.FeedId,
             readModel.Slug,
             readModel.Name,
             readModel.Owner,

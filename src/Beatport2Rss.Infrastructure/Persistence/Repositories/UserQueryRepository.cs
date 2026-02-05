@@ -9,6 +9,9 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 internal sealed class UserQueryRepository(Beatport2RssDbContext dbContext) :
     IUserQueryRepository
 {
+    public Task<bool> ExistsAsync(UserId userId, CancellationToken cancellationToken = default) =>
+        dbContext.Users.AnyAsync(user => user.Id == userId, cancellationToken);
+
     public Task<UserStatusReadModel?> LoadUserStatusQueryModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
         GetUserStatusQueryModelAsQueryable(userId).SingleOrDefaultAsync(cancellationToken);
 
