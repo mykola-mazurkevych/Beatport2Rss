@@ -12,7 +12,7 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public readonly record struct DeleteUserCommand(Guid UserId) :
+public sealed record DeleteUserCommand(Guid UserId) :
     ICommand<Result>, IRequireActiveUser;
 
 internal sealed class DeleteUserCommandValidator :

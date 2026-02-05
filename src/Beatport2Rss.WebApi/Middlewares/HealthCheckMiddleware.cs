@@ -1,12 +1,25 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 using System.Net.Mime;
 
 using Beatport2Rss.Infrastructure.Constants;
-using Beatport2Rss.WebApi.Responses.Health;
 
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Beatport2Rss.WebApi.Middlewares;
+
+file sealed record HealthResponse
+{
+    public required HealthStatus Status { get; init; }
+
+    public required HealthDetailsResponse Details { get; init; }
+}
+
+file sealed record HealthDetailsResponse
+{
+    public required HealthStatus DatabaseStatus { get; init; }
+}
 
 internal static class HealthCheckMiddleware
 {

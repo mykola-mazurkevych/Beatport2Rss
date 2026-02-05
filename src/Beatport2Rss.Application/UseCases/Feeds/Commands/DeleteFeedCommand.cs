@@ -13,7 +13,7 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public readonly record struct DeleteFeedCommand(
+public sealed record DeleteFeedCommand(
     Guid UserId,
     string? Slug) :
     ICommand<Result>, IRequireActiveUser;

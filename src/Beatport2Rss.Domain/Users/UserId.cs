@@ -1,4 +1,6 @@
-﻿using Beatport2Rss.Domain.Common.Constants;
+﻿using System.Diagnostics.CodeAnalysis;
+
+using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
 
@@ -6,7 +8,7 @@ using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
-public readonly record struct UserId : IValueObject
+public readonly record struct UserId : IValueObject, IParsable<UserId>
 {
     private UserId(Guid value) => Value = value;
 
@@ -14,6 +16,30 @@ public readonly record struct UserId : IValueObject
 
     public static UserId Create(Guid value) =>
         new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.UserIdEmpty)));
+
+    public static UserId Parse(string s, IFormatProvider? provider) =>
+        Create(Guid.Parse(s, provider));
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out UserId result)
+    {
+        result = default;
+
+        try
+        {
+            if (Guid.TryParse(s, provider, out var value))
+            {
+                result = Create(value);
+
+                return true;
+            }
+
+            return false;
+        }
+        catch (InvalidValueObjectValueException)
+        {
+            return false;
+        }
+    }
 
     public bool Equals(UserId other) => Value == other.Value;
 

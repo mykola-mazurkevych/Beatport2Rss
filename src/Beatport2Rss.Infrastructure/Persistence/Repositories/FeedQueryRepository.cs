@@ -11,7 +11,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
     IFeedQueryRepository
 {
-    public Task<FeedDetailsReadModel> LoadFeedDetailsQueryModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
+    public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         GetFeedDetailsReadModelsAsQueryable(userId, slug).SingleAsync(cancellationToken);
 
     private IQueryable<FeedDetailsReadModel> GetFeedDetailsReadModelsAsQueryable(UserId userId, Slug slug) =>
@@ -21,9 +21,9 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
               feed.Slug == slug
         select new FeedDetailsReadModel(
             feed.Id,
-            feed.CreatedAt,
-            user.FullName,
-            feed.Name,
             feed.Slug,
-            feed.Status == FeedStatus.Active);
+            feed.Name,
+            user.FullName,
+            feed.Status == FeedStatus.Active,
+            feed.CreatedAt);
 }
