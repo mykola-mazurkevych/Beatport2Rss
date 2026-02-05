@@ -11,7 +11,10 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public readonly record struct UpdateUserStatusCommand(
+public sealed record UpdateUserStatusRequest(
+    bool IsActive);
+
+public sealed record UpdateUserStatusCommand(
     Guid UserId,
     bool IsActive) :
     ICommand<Result>;

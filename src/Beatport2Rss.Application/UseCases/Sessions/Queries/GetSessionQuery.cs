@@ -1,6 +1,5 @@
 using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
 
@@ -12,10 +11,20 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Queries;
 
-public readonly record struct GetSessionQuery(
+public sealed record GetSessionResponse(
+    SessionId SessionId,
+    DateTimeOffset CreatedAt,
+    EmailAddress EmailAddress,
+    string? FirstName,
+    string? LastName,
+    string? UserAgent,
+    string? IpAddress,
+    bool IsExpired);
+
+public sealed record GetSessionQuery(
     Guid UserId,
     Guid SessionId) :
-    IQuery<Result<SessionDetailsReadModel>>;
+    IQuery<Result<GetSessionResponse>>;
 
 internal sealed class GetSessionQueryValidator :
     AbstractValidator<GetSessionQuery>
@@ -29,17 +38,25 @@ internal sealed class GetSessionQueryValidator :
 
 internal sealed class GetSessionQueryHandler(
     ISessionQueryRepository sessionQueryRepository) :
-    IQueryHandler<GetSessionQuery, Result<SessionDetailsReadModel>>
+    IQueryHandler<GetSessionQuery, Result<GetSessionResponse>>
 {
-    public async ValueTask<Result<SessionDetailsReadModel>> Handle(
+    public async ValueTask<Result<GetSessionResponse>> Handle(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
         var userId = UserId.Create(query.UserId);
         var sessionId = SessionId.Create(query.SessionId);
 
-        var sessionDetailsQueryModel = await sessionQueryRepository.LoadSessionDetailsQueryModelAsync(userId, sessionId, cancellationToken);
+        var readModel = await sessionQueryRepository.LoadSessionDetailsQueryModelAsync(userId, sessionId, cancellationToken);
 
-        return sessionDetailsQueryModel;
+        return new GetSessionResponse(
+            readModel.SessionId,
+            readModel.CreatedAt,
+            readModel.EmailAddress,
+            readModel.FirstName,
+            readModel.LastName,
+            readModel.UserAgent,
+            readModel.IpAddress,
+            readModel.IsExpired);
     }
 }

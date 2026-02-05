@@ -1,5 +1,4 @@
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
@@ -10,8 +9,16 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Queries;
 
-public readonly record struct GetUserQuery(Guid UserId) :
-    IQuery<Result<UserDetailsReadModel>>;
+public sealed record UserDetailsResponse(
+    EmailAddress EmailAddress,
+    string? FirstName,
+    string? LastName,
+    bool IsActive,
+    int FeedsCount,
+    int TagsCount);
+
+public sealed record GetUserQuery(Guid UserId) :
+    IQuery<Result<UserDetailsResponse>>;
 
 internal sealed class GetUserQueryValidator :
     AbstractValidator<GetUserQuery>
@@ -25,15 +32,22 @@ internal sealed class GetUserQueryValidator :
 
 internal sealed class GetUserQueryHandler(
     IUserQueryRepository userQueryRepository) :
-    IQueryHandler<GetUserQuery, Result<UserDetailsReadModel>>
+    IQueryHandler<GetUserQuery, Result<UserDetailsResponse>>
 {
-    public async ValueTask<Result<UserDetailsReadModel>> Handle(
+    public async ValueTask<Result<UserDetailsResponse>> Handle(
         GetUserQuery query,
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(query.UserId);
-        var userDetails = await userQueryRepository.LoadUserDetailsReadModelAsync(userId, cancellationToken);
 
-        return userDetails;
+        var readModel = await userQueryRepository.LoadUserDetailsReadModelAsync(userId, cancellationToken);
+
+        return new UserDetailsResponse(
+            readModel.EmailAddress,
+            readModel.FirstName,
+            readModel.LastName,
+            readModel.IsActive,
+            readModel.FeedsCount,
+            readModel.TagsCount);
     }
 }

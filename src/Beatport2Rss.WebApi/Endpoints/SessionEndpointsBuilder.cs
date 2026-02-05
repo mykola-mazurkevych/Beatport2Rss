@@ -2,19 +2,25 @@ using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
-using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
-using Beatport2Rss.WebApi.Requests.Sessions;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints;
+
+file static class SessionEndpointNames
+{
+    public const string Create = "CreateSession";
+    public const string DeleteAll = "DeleteAllSessions";
+    public const string DeleteById = "DeleteSession";
+    public const string DeleteCurrent = "DeleteCurrentSession";
+    public const string GetCurrent = "GetCurrentSession";
+    public const string UpdateCurrent = "UpdateCurrentSession";
+}
 
 internal static class SessionEndpointsBuilder
 {
@@ -33,11 +39,11 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
-                            body.EmailAddress,
-                            body.Password,
+                            request.EmailAddress,
+                            request.Password,
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
                         var result = await mediator.Send(command, cancellationToken);
@@ -47,8 +53,8 @@ internal static class SessionEndpointsBuilder
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a new user session")
                 .WithSummary("Log In")
-                .Accepts<CreateSessionRequestBody>(MediaTypeNames.Application.Json)
-                .Produces<CreateSessionResult>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
+                .Accepts<CreateSessionRequest>(MediaTypeNames.Application.Json)
+                .Produces<CreateSessionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -68,7 +74,7 @@ internal static class SessionEndpointsBuilder
                 .WithName(SessionEndpointNames.GetCurrent)
                 .WithDescription("Get current session details")
                 .WithSummary("Get Details")
-                .Produces<SessionDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<GetSessionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -77,19 +83,19 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current",
-                    async ([FromBody] UpdateSessionRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
-                            body.RefreshToken);
+                            request.RefreshToken);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session")
                 .WithSummary("Refresh Access Token")
-                .Accepts<UpdateSessionRequestBody>(MediaTypeNames.Application.Json)
-                .Produces<UpdateSessionResult>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Accepts<UpdateSessionRequest>(MediaTypeNames.Application.Json)
+                .Produces<UpdateSessionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

@@ -2,19 +2,24 @@ using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
-using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.WebApi.Constants.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
-using Beatport2Rss.WebApi.Requests.Users;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints;
+
+file static class UserEndpointNames
+{
+    public const string Create = "CreateUser";
+    public const string Delete = "DeleteUser";
+    public const string DeleteCurrent = "DeleteCurrentUser";
+    public const string GetCurrent = "GetCurrentUser";
+    public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
+}
 
 internal static class UserEndpointsBuilder
 {
@@ -33,13 +38,13 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateUserRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateUserCommand(
-                            body.EmailAddress,
-                            body.Password,
-                            body.FirstName,
-                            body.LastName);
+                            request.EmailAddress,
+                            request.Password,
+                            request.FirstName,
+                            request.LastName);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
                     })
@@ -47,7 +52,7 @@ internal static class UserEndpointsBuilder
                 .WithDescription("Create a new user")
                 .WithSummary("Create")
                 .AllowAnonymous()
-                .Accepts<CreateUserRequestBody>(MediaTypeNames.Application.Json)
+                .Accepts<CreateUserRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
@@ -65,7 +70,7 @@ internal static class UserEndpointsBuilder
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user details")
                 .WithSummary("Get Details")
-                .Produces<UserDetailsReadModel>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<UserDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -78,18 +83,18 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current/status",
-                    async ([FromBody] UpdateUserStatusRequestBody body, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateUserStatusCommand(
                             context.User.Id,
-                            body.IsActive);
+                            request.IsActive);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.UpdateCurrentStatus)
                 .WithDescription("Update current user status (temporary for testing)")
                 .WithSummary("Update Status")
-                .Accepts<UpdateUserStatusRequestBody>(MediaTypeNames.Application.Json)
+                .Accepts<UpdateUserStatusRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
