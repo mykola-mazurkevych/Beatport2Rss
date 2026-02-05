@@ -3,8 +3,6 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Queries;
@@ -17,18 +15,8 @@ public sealed record UserDetailsResponse(
     int FeedsCount,
     int TagsCount);
 
-public sealed record GetUserQuery(Guid UserId) :
+public sealed record GetUserQuery(UserId UserId) :
     IQuery<Result<UserDetailsResponse>>;
-
-internal sealed class GetUserQueryValidator :
-    AbstractValidator<GetUserQuery>
-{
-    public GetUserQueryValidator()
-    {
-        RuleFor(x => x.UserId)
-            .NotEmpty().WithMessage("User ID required.");
-    }
-}
 
 internal sealed class GetUserQueryHandler(
     IUserQueryRepository userQueryRepository) :

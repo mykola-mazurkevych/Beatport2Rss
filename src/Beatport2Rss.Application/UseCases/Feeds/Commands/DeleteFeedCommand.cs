@@ -7,26 +7,14 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
 public sealed record DeleteFeedCommand(
-    Guid UserId,
-    string? Slug) :
-    ICommand<Result>, IRequireActiveUser;
-
-internal sealed class DeleteFeedCommandValidator :
-    AbstractValidator<DeleteFeedCommand>
-{
-    public DeleteFeedCommandValidator()
-    {
-        RuleFor(c => c.UserId).IsUserId();
-        RuleFor(c => c.Slug).IsSlug();
-    }
-}
+    UserId UserId,
+    Slug Slug) :
+    ICommand<Result>, IRequireSlug;
 
 internal sealed class DeleteFeedCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -37,18 +25,15 @@ internal sealed class DeleteFeedCommandHandler(
         DeleteFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadWithFeedsAsync(userId, cancellationToken);
-
-        var slug = Slug.Create(command.Slug);
+        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
 
         // TODO: Move to behavior
-        if (!user.HasFeed(slug))
+        if (!user.HasFeed(command.Slug))
         {
-            return Result.NotFound($"Feed with slug '{slug}' was not found.");
+            return Result.NotFound($"Feed with slug '{command.Slug}' was not found.");
         }
 
-        user.RemoveFeed(slug);
+        user.RemoveFeed(command.Slug);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

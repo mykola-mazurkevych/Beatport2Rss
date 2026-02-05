@@ -5,23 +5,13 @@ using Beatport2Rss.Domain.Sessions;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
-public sealed record DeleteSessionCommand(Guid SessionId) :
+public sealed record DeleteSessionCommand(
+    SessionId SessionId) :
     ICommand<Result>;
-
-internal sealed class DeleteSessionCommandValidator :
-    AbstractValidator<DeleteSessionCommand>
-{
-    public DeleteSessionCommandValidator()
-    {
-        RuleFor(c => c.SessionId).IsSessionId();
-    }
-}
 
 internal sealed class DeleteSessionCommandHandler(
     ISessionCommandRepository sessionCommandRepository,
@@ -32,8 +22,7 @@ internal sealed class DeleteSessionCommandHandler(
         DeleteSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionCommandRepository.FindAsync(sessionId, cancellationToken);
+        var session = await sessionCommandRepository.FindAsync(command.SessionId, cancellationToken);
 
         if (session is null)
         {

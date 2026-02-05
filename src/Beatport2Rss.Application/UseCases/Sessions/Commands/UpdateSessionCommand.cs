@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
@@ -18,22 +19,21 @@ public sealed record UpdateSessionRequest(
     string? RefreshToken);
 
 public sealed record UpdateSessionResponse(
-    string AccessToken,
+    AccessToken AccessToken,
     AccessTokenType TokenType,
     int ExpiresIn,
-    string RefreshToken);
+    RefreshToken RefreshToken);
 
 public sealed record UpdateSessionCommand(
-    Guid SessionId,
+    SessionId SessionId,
     string? RefreshToken) :
-    ICommand<Result<UpdateSessionResponse>>;
+    ICommand<Result<UpdateSessionResponse>>, IRequireValidation;
 
 internal sealed class UpdateSessionCommandValidator :
     AbstractValidator<UpdateSessionCommand>
 {
     public UpdateSessionCommandValidator()
     {
-        RuleFor(c => c.SessionId).IsSessionId();
         RuleFor(c => c.RefreshToken).IsRefreshToken();
     }
 }
@@ -51,8 +51,7 @@ internal sealed class UpdateSessionCommandHandler(
         UpdateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
-        var sessionId = SessionId.Create(command.SessionId);
-        var session = await sessionCommandRepository.LoadAsync(sessionId, cancellationToken);
+        var session = await sessionCommandRepository.LoadAsync(command.SessionId, cancellationToken);
         var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(session.UserId, cancellationToken);
 
         var refreshToken = RefreshToken.Create(command.RefreshToken);
@@ -66,7 +65,7 @@ internal sealed class UpdateSessionCommandHandler(
             return Result.Unauthorized("The provided refresh token is invalid or has expired.");
         }
 
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, sessionId);
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, command.SessionId);
         (RefreshToken newRefreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
 
         session.Refresh(refreshTokenService.Hash(newRefreshToken), expiresAt);
@@ -75,7 +74,7 @@ internal sealed class UpdateSessionCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new UpdateSessionResponse(
-            accessToken.Value,
+            accessToken,
             accessToken.Type,
             expiresIn,
             newRefreshToken);

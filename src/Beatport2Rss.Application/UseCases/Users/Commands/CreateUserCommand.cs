@@ -1,4 +1,5 @@
 using Beatport2Rss.Application.Extensions;
+using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
@@ -24,7 +25,7 @@ public sealed record CreateUserCommand(
     string? Password,
     string? FirstName,
     string? LastName) :
-    ICommand<Result>;
+    ICommand<Result>, IRequireValidation;
 
 internal sealed class CreateUserCommandValidator :
     AbstractValidator<CreateUserCommand>
@@ -55,7 +56,7 @@ internal sealed class CreateUserCommandHandler(
 
         if (existingUser is not null)
         {
-            return Result.Conflict($"Email address {emailAddress} already taken.");
+            return Result.Conflict($"Email address '{emailAddress}' already taken.");
         }
 
         var userId = UserId.Create(Guid.CreateVersion7());

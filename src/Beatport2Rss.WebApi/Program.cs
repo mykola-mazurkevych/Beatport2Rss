@@ -1,9 +1,12 @@
+using System.Text.Json.Serialization;
+
 using Asp.Versioning;
 
 using Beatport2Rss.Application;
 using Beatport2Rss.Infrastructure;
 using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
+using Beatport2Rss.WebApi.Converters;
 using Beatport2Rss.WebApi.Endpoints;
 using Beatport2Rss.WebApi.Middlewares;
 
@@ -12,6 +15,16 @@ using Microsoft.AspNetCore.HttpOverrides;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
+    .ConfigureHttpJsonOptions(options =>
+    {
+        options.SerializerOptions.Converters.Add(new AccessTokenJsonConverter());
+        options.SerializerOptions.Converters.Add(new EmailAddressJsonConverter());
+        options.SerializerOptions.Converters.Add(new FeedIdJsonConverter());
+        options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.SerializerOptions.Converters.Add(new RefreshTokenJsonConverter());
+        options.SerializerOptions.Converters.Add(new SessionIdJsonConverter());
+        options.SerializerOptions.Converters.Add(new SlugJsonConverter());
+    })
     .AddOpenApi()
     .AddApplication()
     .AddInfrastructure(builder.Configuration)

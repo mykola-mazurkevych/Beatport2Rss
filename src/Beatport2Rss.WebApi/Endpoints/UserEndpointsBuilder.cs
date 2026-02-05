@@ -4,6 +4,7 @@ using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
+using Beatport2Rss.Domain.Users;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
@@ -121,8 +122,8 @@ internal static class UserEndpointsBuilder
 
             groupBuilder
                 .MapDelete(
-                    "/{id:guid}",
-                    async ([FromRoute] Guid id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    "/{id}",
+                    async ([FromRoute] UserId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new DeleteUserCommand(id);
                         var result = await mediator.Send(query, cancellationToken);
