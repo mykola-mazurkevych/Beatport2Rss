@@ -11,7 +11,6 @@ namespace Beatport2Rss.Application.Behaviors;
 
 file static class ErrorMessages
 {
-    public const string Unauthorized = "The user is not authorized to perform this action.";
     public const string Forbidden = "The user is not active to perform this action.";
 }
 
@@ -26,13 +25,12 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
+        var userStatus = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
 
-        return userStatus switch
+        return userStatus.Status switch
         {
-            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
-            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
-            { Status: UserStatus.Active } => await next(message, cancellationToken),
+            UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
+            UserStatus.Active => await next(message, cancellationToken),
             _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
         };
     }
@@ -49,13 +47,12 @@ internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
+        var userStatus = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
 
-        return userStatus switch
+        return userStatus.Status switch
         {
-            null => (TResult)Result.Unauthorized(ErrorMessages.Unauthorized),
-            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
-            { Status: UserStatus.Active } => await next(message, cancellationToken),
+            UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
+            UserStatus.Active => await next(message, cancellationToken),
             _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
         };
     }
