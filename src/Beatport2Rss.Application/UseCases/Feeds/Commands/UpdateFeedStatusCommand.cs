@@ -18,7 +18,7 @@ public sealed record UpdateFeedStatusCommand(
     UserId UserId,
     Slug Slug,
     bool IsActive) :
-    ICommand<Result>, IRequireValidation, IRequireActiveUser, IRequireSlug;
+    ICommand<Result>, IRequireActiveUser, IRequireSlug;
 
 internal sealed class UpdateFeedStatusCommandHandler(
     IUserCommandRepository userCommandRepository,

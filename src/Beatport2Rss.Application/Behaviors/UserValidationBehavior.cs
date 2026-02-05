@@ -22,14 +22,13 @@ public sealed class UserValidationBehavior<TMessage, TResponse>(
         CancellationToken cancellationToken)
     {
         var userId = UserId.Create(message.UserId);
-        var userStatus = await userQueryRepository.LoadUserStatusQueryModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
 
-        return userStatus switch
+        return readModel.Status switch
         {
-            null => (TResponse)Result.Unauthorized("The user is not authorized to perform this action."),
-            { Status: UserStatus.Pending or UserStatus.Inactive } => (TResponse)Result.Forbidden("The user is not active to perform this action."),
-            { Status: UserStatus.Active } => await next(message, cancellationToken),
-            _ => throw new NotSupportedException($"User status '{userStatus.Status}' is not supported.")
+            UserStatus.Pending or UserStatus.Inactive => (TResponse)Result.Forbidden("The user is not active to perform this action."),
+            UserStatus.Active => await next(message, cancellationToken),
+            _ => throw new NotSupportedException($"User status '{readModel.Status}' is not supported.")
         };
     }
 }

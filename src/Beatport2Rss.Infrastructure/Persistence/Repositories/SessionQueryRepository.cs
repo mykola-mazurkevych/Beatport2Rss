@@ -21,7 +21,7 @@ internal sealed class SessionQueryRepository(
                     session.Id == sessionId,
                 cancellationToken);
 
-    public Task<SessionDetailsReadModel> LoadSessionDetailsQueryModelAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
+    public Task<SessionDetailsReadModel> LoadSessionDetailsReadModelAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
         GetSessionDetailsReadModelsAsQueryable(userId, sessionId).SingleAsync(cancellationToken);
 
     private IQueryable<SessionDetailsReadModel> GetSessionDetailsReadModelsAsQueryable(UserId userId, SessionId sessionId) =>
