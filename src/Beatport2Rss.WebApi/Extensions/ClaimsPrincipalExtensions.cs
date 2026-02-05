@@ -10,7 +10,7 @@ internal static class ClaimsPrincipalExtensions
 {
     extension(ClaimsPrincipal principal)
     {
-        public Guid SessionId =>
+        public SessionId SessionId =>
             SessionId.Parse(principal.FindFirstValue(JwtRegisteredClaimNames.Sid) ?? string.Empty, provider: null);
 
         public UserId Id =>
