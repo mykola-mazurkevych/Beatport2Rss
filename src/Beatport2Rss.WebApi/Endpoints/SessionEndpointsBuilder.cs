@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 using Asp.Versioning.Builder;
@@ -40,7 +41,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
                             request.EmailAddress,
@@ -84,7 +85,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current",
-                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,

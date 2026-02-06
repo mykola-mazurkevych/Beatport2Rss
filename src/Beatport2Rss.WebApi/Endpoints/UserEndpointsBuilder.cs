@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 using Asp.Versioning.Builder;
@@ -39,7 +40,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateUserCommand(
                             request.EmailAddress,
@@ -84,7 +85,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current/status",
-                    async ([FromBody] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateUserStatusCommand(
                             context.User.Id,
