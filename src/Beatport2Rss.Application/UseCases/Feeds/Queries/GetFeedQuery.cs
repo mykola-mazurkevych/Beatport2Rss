@@ -21,7 +21,7 @@ public sealed record GetFeedResponse(
 public sealed record GetFeedQuery(
     UserId UserId,
     Slug Slug) :
-    IQuery<Result<GetFeedResponse>>, IRequireSlug;
+    IQuery<Result<GetFeedResponse>>, IRequireUser, IRequireFeed;
 
 internal sealed class GetFeedQueryHandler(
     IFeedQueryRepository feedQueryRepository) :

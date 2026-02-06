@@ -1,4 +1,3 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
@@ -14,7 +13,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 public sealed record DeleteFeedCommand(
     UserId UserId,
     Slug Slug) :
-    ICommand<Result>, IRequireSlug;
+    ICommand<Result>, IRequireUser, IRequireFeed;
 
 internal sealed class DeleteFeedCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -26,12 +25,6 @@ internal sealed class DeleteFeedCommandHandler(
         CancellationToken cancellationToken)
     {
         var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
-
-        // TODO: Move to behavior
-        if (!user.HasFeed(command.Slug))
-        {
-            return Result.NotFound($"Feed with slug '{command.Slug}' was not found.");
-        }
 
         user.RemoveFeed(command.Slug);
 
