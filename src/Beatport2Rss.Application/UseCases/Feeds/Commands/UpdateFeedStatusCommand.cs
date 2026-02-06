@@ -1,4 +1,3 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
@@ -18,7 +17,7 @@ public sealed record UpdateFeedStatusCommand(
     UserId UserId,
     Slug Slug,
     bool IsActive) :
-    ICommand<Result>, IRequireActiveUser, IRequireSlug;
+    ICommand<Result>, IRequireActiveUser, IRequireFeed;
 
 internal sealed class UpdateFeedStatusCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -30,12 +29,6 @@ internal sealed class UpdateFeedStatusCommandHandler(
         CancellationToken cancellationToken)
     {
         var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
-
-        // TODO: Move to behavior
-        if (!user.HasFeed(command.Slug))
-        {
-            return Result.NotFound($"Feed with slug '{command.Slug}' was not found.");
-        }
 
         user.UpdateFeedStatus(command.Slug, command.IsActive);
 
