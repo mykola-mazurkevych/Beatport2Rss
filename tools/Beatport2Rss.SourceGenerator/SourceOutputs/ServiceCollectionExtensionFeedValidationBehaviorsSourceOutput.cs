@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Beatport2Rss.SourceGenerator.SourceOutputs;
 
-internal static class UserValidationBehaviorsSourceOutput
+internal static class ServiceCollectionExtensionFeedValidationBehaviorsSourceOutput
 {
     public static void Add(
         SourceProductionContext context,
@@ -18,7 +18,7 @@ internal static class UserValidationBehaviorsSourceOutput
             .Select(i => i.Namespace)
             .Union(
             [
-                "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
+                "Beatport2Rss.Application.Behaviors",
                 "Beatport2Rss.Application.ReadModels.Feeds",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
@@ -34,16 +34,24 @@ internal static class UserValidationBehaviorsSourceOutput
         builder.AppendLine();
         builder.AppendLine("using FluentResults;");
         builder.AppendLine();
+        builder.AppendLine("using FluentValidation;");
+        builder.AppendLine();
         builder.AppendLine("using Mediator;");
         builder.AppendLine();
-        builder.Append("namespace Beatport2Rss.Application.Behaviors;");
+        builder.AppendLine("using Microsoft.Extensions.DependencyInjection;");
+        builder.AppendLine();
+        builder.AppendLine("namespace Beatport2Rss.Application;");
+        builder.AppendLine();
+
+        builder.AppendLine("public static partial class ServiceCollectionExtensions");
+        builder.AppendLine("{");
+        builder.AppendLine("    private static partial IServiceCollection AddFeedValidationBehaviors(this IServiceCollection services) =>");
+        builder.Append("        services");
 
         foreach (var info in mediatorMessageInfos.OrderBy(i => i.Name))
         {
             builder.AppendLine();
-            builder.AppendLine();
-
-            builder.AppendLine($"internal sealed class {info.Name}UserValidationBehavior(IUserQueryRepository userQueryRepository) :");
+            builder.Append("            .AddTransient<");
 
             var messageSymbol = info.Interfaces.Single(i => i is { Name: "ICommand" or "IQuery" });
             var resultSymbol = (INamedTypeSymbol)messageSymbol.TypeArguments.Single();
@@ -51,19 +59,21 @@ internal static class UserValidationBehaviorsSourceOutput
             if (resultSymbol.IsGenericType)
             {
                 var valueSymbol = resultSymbol.TypeArguments.Single();
-                builder.AppendLine($"    UserValidationBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>, {valueSymbol.Name}>(userQueryRepository),");
-                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>>");
+                builder.Append($"IPipelineBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>>");
             }
             else
             {
-                builder.AppendLine($"    UserValidationBehavior<{info.Name}, {resultSymbol.Name}>(userQueryRepository),");
-                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}>");
+                builder.Append($"IPipelineBehavior<{info.Name}, {resultSymbol.Name}>");
             }
 
-            builder.AppendLine("{");
-            builder.Append('}');
+            builder.Append(", ");
+            builder.Append($"{info.Name}FeedValidationBehavior");
+            builder.Append(">()");
         }
 
-        context.AddSource("UserValidationBehaviors.g.cs", builder.ToString());
+        builder.AppendLine(";");
+        builder.Append('}');
+
+        context.AddSource("ServiceCollectionExtensions.FeedValidationBehaviors.g.cs", builder.ToString());
     }
 }

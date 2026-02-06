@@ -8,21 +8,43 @@ using Mediator;
 
 namespace Beatport2Rss.Application.Behaviors;
 
-public sealed class FeedValidationBehavior<TMessage, TResponse>(
-    IFeedQueryRepository feedQueryRepository) :
-    IPipelineBehavior<TMessage, TResponse>
-    where TMessage : IMessage, IRequireUser, IRequireFeed
-    where TResponse : Result
+file static class ErrorMessages
 {
-    public async ValueTask<TResponse> Handle(
+    public const string NotFound = "Feed with slug '{0}' was not found.";
+}
+
+internal abstract class FeedValidationBehavior<TMessage, TResult>(
+    IFeedQueryRepository feedQueryRepository)
+    where TMessage : IMessage, IRequireUser, IRequireFeed
+    where TResult : Result
+{
+    public async ValueTask<TResult> Handle(
         TMessage message,
-        MessageHandlerDelegate<TMessage, TResponse> next,
+        MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
         var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResponse)Result.NotFound($"Feed with slug '{message.Slug}' was not found.");
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.Slug);
+    }
+}
+
+internal abstract class FeedValidationBehavior<TMessage, TResult, TResponse>(
+    IFeedQueryRepository feedQueryRepository)
+    where TMessage : IMessage, IRequireUser, IRequireFeed
+    where TResult : Result<TResponse>
+{
+    public async ValueTask<TResult> Handle(
+        TMessage message,
+        MessageHandlerDelegate<TMessage, TResult> next,
+        CancellationToken cancellationToken)
+    {
+        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
+
+        return exists
+            ? await next(message, cancellationToken)
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.Slug);
     }
 }

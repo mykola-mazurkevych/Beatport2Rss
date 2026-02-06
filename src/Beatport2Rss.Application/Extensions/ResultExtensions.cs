@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Beatport2Rss.SharedKernel.Errors;
 
 using FluentResults;
@@ -16,6 +18,9 @@ internal static class ResultExtensions
 
         public static Result NotFound(string message) =>
             Result.Fail(new NotFoundError(message));
+
+        public static Result NotFound(string message, params object?[] args) =>
+            Result.Fail(new NotFoundError(string.Format(CultureInfo.InvariantCulture, message, args)));
 
         public static Result Validation(string message, Dictionary<string, object> metadata) =>
             Result.Fail(new ValidationError(message).WithMetadata(metadata));

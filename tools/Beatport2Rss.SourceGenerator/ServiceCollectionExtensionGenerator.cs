@@ -11,15 +11,16 @@ public sealed class ServiceCollectionExtensionGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var requireValidationMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireValidation");
-
-        context.RegisterSourceOutput(requireValidationMessages, static (ctx, mi) => ValidationBehaviorsSourceOutput.Add(ctx, mi));
-        context.RegisterSourceOutput(requireValidationMessages, static (ctx, mi) => ServiceCollectionExtensionValidationBehaviorsSourceOutput.Add(ctx, mi));
-
-        context.RegisterSourceOutput(requireValidationMessages, static (ctx, mi) => ServiceCollectionExtensionValidatorsSourceOutput.Add(ctx, mi));
+        context.RegisterSourceOutput(requireValidationMessages, static (ctx, infos) => ValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireValidationMessages, static (ctx, infos) => ServiceCollectionExtensionValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireValidationMessages, static (ctx, infos) => ServiceCollectionExtensionValidatorsSourceOutput.Add(ctx, infos));
 
         var requireActiveUserMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireActiveUser");
+        context.RegisterSourceOutput(requireActiveUserMessages, static (ctx, infos) => UserValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireActiveUserMessages, static (ctx, infos) => ServiceCollectionExtensionUserValidationBehaviorsSourceOutput.Add(ctx, infos));
 
-        context.RegisterSourceOutput(requireActiveUserMessages, static (ctx, mi) => UserValidationBehaviorsSourceOutput.Add(ctx, mi));
-        context.RegisterSourceOutput(requireActiveUserMessages, static (ctx, mi) => ServiceCollectionExtensionUserValidationBehaviorsSourceOutput.Add(ctx, mi));
+        var requireFeedMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireFeed");
+        context.RegisterSourceOutput(requireFeedMessages, static (ctx, infos) => FeedValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireFeedMessages, static (ctx, infos) => ServiceCollectionExtensionFeedValidationBehaviorsSourceOutput.Add(ctx, infos));
     }
 }

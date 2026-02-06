@@ -17,10 +17,12 @@ public static partial class ServiceCollectionExtensions
                 })
                 .AddValidators()
                 .AddValidationBehaviors()
-                .AddUserValidationBehaviors();
+                .AddUserValidationBehaviors()
+                .AddFeedValidationBehaviors();
     }
 
-    private static partial IServiceCollection AddValidationBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddFeedValidationBehaviors(this IServiceCollection services);
     private static partial IServiceCollection AddUserValidationBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddValidationBehaviors(this IServiceCollection services);
     private static partial IServiceCollection AddValidators(this IServiceCollection services);
 }

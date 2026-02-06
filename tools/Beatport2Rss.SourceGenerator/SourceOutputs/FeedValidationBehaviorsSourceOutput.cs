@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Beatport2Rss.SourceGenerator.SourceOutputs;
 
-internal static class UserValidationBehaviorsSourceOutput
+internal static class FeedValidationBehaviorsSourceOutput
 {
     public static void Add(
         SourceProductionContext context,
@@ -43,7 +43,7 @@ internal static class UserValidationBehaviorsSourceOutput
             builder.AppendLine();
             builder.AppendLine();
 
-            builder.AppendLine($"internal sealed class {info.Name}UserValidationBehavior(IUserQueryRepository userQueryRepository) :");
+            builder.AppendLine($"internal sealed class {info.Name}FeedValidationBehavior(IFeedQueryRepository feedQueryRepository) :");
 
             var messageSymbol = info.Interfaces.Single(i => i is { Name: "ICommand" or "IQuery" });
             var resultSymbol = (INamedTypeSymbol)messageSymbol.TypeArguments.Single();
@@ -51,12 +51,12 @@ internal static class UserValidationBehaviorsSourceOutput
             if (resultSymbol.IsGenericType)
             {
                 var valueSymbol = resultSymbol.TypeArguments.Single();
-                builder.AppendLine($"    UserValidationBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>, {valueSymbol.Name}>(userQueryRepository),");
+                builder.AppendLine($"    FeedValidationBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>, {valueSymbol.Name}>(feedQueryRepository),");
                 builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>>");
             }
             else
             {
-                builder.AppendLine($"    UserValidationBehavior<{info.Name}, {resultSymbol.Name}>(userQueryRepository),");
+                builder.AppendLine($"    FeedValidationBehavior<{info.Name}, {resultSymbol.Name}>(feedQueryRepository),");
                 builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}>");
             }
 
@@ -64,6 +64,6 @@ internal static class UserValidationBehaviorsSourceOutput
             builder.Append('}');
         }
 
-        context.AddSource("UserValidationBehaviors.g.cs", builder.ToString());
+        context.AddSource("FeedValidationBehaviors.g.cs", builder.ToString());
     }
 }
