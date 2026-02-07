@@ -1,6 +1,5 @@
 using System.Reflection;
 
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Sessions;
@@ -10,9 +9,9 @@ using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.Entities;
-using Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 
@@ -32,24 +31,7 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder.Properties<BeatportAccessToken>().HaveConversion<BeatportAccessTokenValueConverter>();
-        configurationBuilder.Properties<BeatportId>().HaveConversion<BeatportIdValueConverter>();
-        configurationBuilder.Properties<BeatportSlug>().HaveConversion<BeatportSlugValueConverter>();
-        configurationBuilder.Properties<EmailAddress>().HaveConversion<EmailAddressValueConverter>();
-        configurationBuilder.Properties<FeedId>().HaveConversion<FeedIdValueConverter>();
-        configurationBuilder.Properties<FeedName>().HaveConversion<FeedNameValueConverter>();
-        configurationBuilder.Properties<PasswordHash>().HaveConversion<PasswordHashValueConverter>();
-        configurationBuilder.Properties<RefreshTokenHash>().HaveConversion<RefreshTokenHashValueConverter>();
-        configurationBuilder.Properties<ReleaseId>().HaveConversion<ReleaseIdValueConverter>();
-        configurationBuilder.Properties<SessionId>().HaveConversion<SessionIdValueConverter>();
-        configurationBuilder.Properties<Slug>().HaveConversion<SlugValueConverter>();
-        configurationBuilder.Properties<SubscriptionId>().HaveConversion<SubscriptionIdValueConverter>();
-        configurationBuilder.Properties<TagId>().HaveConversion<TagIdValueConverter>();
-        configurationBuilder.Properties<TagName>().HaveConversion<TagNameValueConverter>();
-        configurationBuilder.Properties<TokenId>().HaveConversion<TokenIdValueConverter>();
-        configurationBuilder.Properties<TrackId>().HaveConversion<TrackIdValueConverter>();
-        configurationBuilder.Properties<Uri>().HaveConversion<UriValueConverter>();
-        configurationBuilder.Properties<UserId>().HaveConversion<UserIdValueConverter>();
+        configurationBuilder.ConfigureConversions();
 
         base.ConfigureConventions(configurationBuilder);
     }
@@ -59,5 +41,21 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         base.OnModelCreating(modelBuilder);
+    }
+}
+
+file static class ModelConfigurationBuilderExtensions
+{
+    extension(ModelConfigurationBuilder builder)
+    {
+        public void ConfigureConversions() =>
+            typeof(Beatport2RssDbContext).Assembly
+                .GetTypes()
+                .Where(type =>
+                    type.BaseType is not null &&
+                    type.BaseType.IsGenericType &&
+                    type.BaseType.GetGenericTypeDefinition() == typeof(ValueConverter<,>))
+                .ToList()
+                .ForEach(converter => builder.Properties(converter.BaseType!.GetGenericArguments()[0]).HaveConversion(converter));
     }
 }
