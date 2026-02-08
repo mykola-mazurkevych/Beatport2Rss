@@ -400,7 +400,6 @@
         "dependencies": {
           "Beatport2Rss.Domain": "[1.0.0, )",
           "Beatport2Rss.SharedKernel": "[1.0.0, )",
-          "Beatport2Rss.SourceGenerator": "[1.0.0, )",
           "FluentResults": "[4.0.0, )",
           "FluentValidation": "[12.1.1, )",
           "Mediator.Abstractions": "[3.0.1, )"
@@ -425,6 +424,7 @@
           "Microsoft.EntityFrameworkCore.Tools": "[10.0.2, )",
           "Microsoft.IdentityModel.Tokens": "[8.15.0, )",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "[10.0.0, )",
+          "PuppeteerSharp": "[20.2.6, )",
           "Slugify.Core": "[5.1.1, )",
           "System.IdentityModel.Tokens.Jwt": "[8.15.0, )"
         }
@@ -434,9 +434,6 @@
         "dependencies": {
           "FluentResults": "[4.0.0, )"
         }
-      },
-      "beatport2rss.sourcegenerator": {
-        "type": "Project"
       },
       "beatport2rss.webapi": {
         "type": "Project",
@@ -608,6 +605,15 @@
           "Microsoft.EntityFrameworkCore": "[10.0.0, 11.0.0)",
           "Microsoft.EntityFrameworkCore.Relational": "[10.0.0, 11.0.0)",
           "Npgsql": "10.0.0"
+        }
+      },
+      "PuppeteerSharp": {
+        "type": "CentralTransitive",
+        "requested": "[20.2.6, )",
+        "resolved": "20.2.6",
+        "contentHash": "dq7b+ue88no8dT0+CToYR2q/zn2h4aDv091XRGd3XwDomDYVCE330PxSdJ8VEV7n4PxlthVlXZA/sUbvTfk6MQ==",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "8.0.0"
         }
       },
       "Slugify.Core": {
