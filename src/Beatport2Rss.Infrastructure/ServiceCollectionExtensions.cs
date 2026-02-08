@@ -7,12 +7,14 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
+using Beatport2Rss.Infrastructure.Services.Beatport;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
 using Beatport2Rss.Infrastructure.Services.Security;
@@ -40,6 +42,7 @@ public static class ServiceCollectionExtensions
                     o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .ConfigureOptions(configuration)
+                .AddBeatportServices()
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
@@ -49,6 +52,10 @@ public static class ServiceCollectionExtensions
 
     extension(IServiceCollection services)
     {
+        private IServiceCollection AddBeatportServices() =>
+            services
+                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>();
+
         private IServiceCollection AddHealthServices()
         {
             services
@@ -97,6 +104,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
@@ -108,6 +116,7 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
+                .Configure<BeatportCredentials>(c => configuration.GetSection(nameof(BeatportCredentials)).Bind(c))
                 .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
                 .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
     }
