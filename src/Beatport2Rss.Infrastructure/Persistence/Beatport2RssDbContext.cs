@@ -56,6 +56,6 @@ file static class ModelConfigurationBuilderExtensions
                     type.BaseType.IsGenericType &&
                     type.BaseType.GetGenericTypeDefinition() == typeof(ValueConverter<,>))
                 .ToList()
-                .ForEach(converter => builder.Properties(converter.BaseType!.GetGenericArguments()[0]).HaveConversion(converter));
+                .ForEach(converterType => builder.Properties(converterType.BaseType!.GetGenericArguments()[0]).HaveConversion(converterType));
     }
 }
