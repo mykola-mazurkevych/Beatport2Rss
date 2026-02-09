@@ -18,9 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
 public sealed record CreateSessionRequest(
     string? EmailAddress,
-    string? Password,
-    string? UserAgent,
-    string? IpAddress);
+    string? Password);
 
 public sealed record CreateSessionResponse(
     AccessToken AccessToken,
