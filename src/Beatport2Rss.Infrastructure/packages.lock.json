@@ -82,6 +82,12 @@
           "Npgsql": "10.0.0"
         }
       },
+      "PuppeteerSharp": {
+        "type": "Direct",
+        "requested": "[20.2.6, )",
+        "resolved": "20.2.6",
+        "contentHash": "dq7b+ue88no8dT0+CToYR2q/zn2h4aDv091XRGd3XwDomDYVCE330PxSdJ8VEV7n4PxlthVlXZA/sUbvTfk6MQ=="
+      },
       "Slugify.Core": {
         "type": "Direct",
         "requested": "[5.1.1, )",

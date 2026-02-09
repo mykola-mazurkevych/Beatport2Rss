@@ -8,7 +8,7 @@ using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Common.ValueObjects;
 
-public readonly record struct Slug : IValueObject
+public readonly record struct Slug : IValueObject, IParsable<Slug>
 {
     public const char Delimiter = '-';
     public const int SuffixLength = 4;
@@ -22,6 +22,18 @@ public readonly record struct Slug : IValueObject
         new(value
             .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.SlugEmpty))
             .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong)));
+
+    public static Slug Parse(string s, IFormatProvider? provider) =>
+        Create(s);
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Slug result)
+    {
+        result = string.IsNullOrWhiteSpace(s) || s.Length > MaxLength
+            ? default
+            : Create(s);
+
+        return result != default;
+    }
 
     public bool Equals(Slug other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
 

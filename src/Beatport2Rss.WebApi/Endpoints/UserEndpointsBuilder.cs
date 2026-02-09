@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
+using Beatport2Rss.Domain.Users;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
@@ -38,7 +40,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateUserCommand(
                             request.EmailAddress,
@@ -83,7 +85,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current/status",
-                    async ([FromBody] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateUserStatusCommand(
                             context.User.Id,
@@ -121,8 +123,8 @@ internal static class UserEndpointsBuilder
 
             groupBuilder
                 .MapDelete(
-                    "/{id:guid}",
-                    async ([FromRoute] Guid id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    "/{id}",
+                    async ([FromRoute] UserId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new DeleteUserCommand(id);
                         var result = await mediator.Send(query, cancellationToken);

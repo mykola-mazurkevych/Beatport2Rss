@@ -18,6 +18,7 @@ internal static class JwtEvents
     public static async Task OnTokenValidated(TokenValidatedContext context)
     {
         var sessionQueryRepository = context.HttpContext.RequestServices.GetRequiredService<ISessionQueryRepository>();
+        var userQueryRepository = context.HttpContext.RequestServices.GetRequiredService<IUserQueryRepository>();
 
         var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier);
         var sessionIdClaim = context.Principal?.FindFirst(JwtRegisteredClaimNames.Sid);
@@ -26,6 +27,7 @@ internal static class JwtEvents
             sessionIdClaim is null ||
             !UserId.TryParse(userIdClaim.Value, provider: null, out var userId) ||
             !SessionId.TryParse(sessionIdClaim.Value, provider: null, out var sessionId) ||
+            !(await userQueryRepository.ExistsAsync(userId)) ||
             !(await sessionQueryRepository.ExistsAsync(userId, sessionId)))
         {
             context.Fail("Session is not valid.");

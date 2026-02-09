@@ -16,8 +16,6 @@ public sealed class Token : IAggregateRoot<TokenId>
 
     public DateTimeOffset ExpiresAt { get; private set; }
 
-    public bool IsExpired => DateTimeOffset.UtcNow >= ExpiresAt;
-
     public static Token Create(
         TokenId id,
         DateTimeOffset createdAt,

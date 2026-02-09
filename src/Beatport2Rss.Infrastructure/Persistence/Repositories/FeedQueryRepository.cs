@@ -11,6 +11,13 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
     IFeedQueryRepository
 {
+    public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
+        dbContext.Feeds.AnyAsync(
+            f =>
+                f.UserId == userId &&
+                f.Slug == slug,
+            cancellationToken);
+
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         GetFeedDetailsReadModelsAsQueryable(userId, slug).SingleAsync(cancellationToken);
 

@@ -25,7 +25,5 @@ internal sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
 
         builder.Property(token => token.ExpiresAt)
             .IsRequired();
-
-        builder.Ignore(token => token.IsExpired);
     }
 }

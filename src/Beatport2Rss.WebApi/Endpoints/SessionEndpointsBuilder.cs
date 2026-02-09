@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
+using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
@@ -39,7 +41,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
                             request.EmailAddress,
@@ -83,7 +85,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current",
-                    async ([FromBody] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    async ([FromBody] [Required] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
@@ -121,8 +123,8 @@ internal static class SessionEndpointsBuilder
 
             groupBuilder
                 .MapDelete(
-                    "/{id:guid}",
-                    async ([FromRoute] Guid id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    "/{id}",
+                    async ([FromRoute] SessionId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(id);
                         var result = await mediator.Send(command, cancellationToken);

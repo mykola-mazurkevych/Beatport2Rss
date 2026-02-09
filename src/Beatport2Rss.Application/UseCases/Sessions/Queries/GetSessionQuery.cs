@@ -1,11 +1,8 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
-
-using FluentValidation;
 
 using Mediator;
 
@@ -22,19 +19,9 @@ public sealed record GetSessionResponse(
     bool IsExpired);
 
 public sealed record GetSessionQuery(
-    Guid UserId,
-    Guid SessionId) :
+    UserId UserId,
+    SessionId SessionId) :
     IQuery<Result<GetSessionResponse>>;
-
-internal sealed class GetSessionQueryValidator :
-    AbstractValidator<GetSessionQuery>
-{
-    public GetSessionQueryValidator()
-    {
-        RuleFor(q => q.UserId).IsUserId();
-        RuleFor(q => q.SessionId).IsSessionId();
-    }
-}
 
 internal sealed class GetSessionQueryHandler(
     ISessionQueryRepository sessionQueryRepository) :
@@ -44,10 +31,7 @@ internal sealed class GetSessionQueryHandler(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
-        var userId = UserId.Create(query.UserId);
-        var sessionId = SessionId.Create(query.SessionId);
-
-        var readModel = await sessionQueryRepository.LoadSessionDetailsQueryModelAsync(userId, sessionId, cancellationToken);
+        var readModel = await sessionQueryRepository.LoadSessionDetailsReadModelAsync(query.UserId, query.SessionId, cancellationToken);
 
         return new GetSessionResponse(
             readModel.SessionId,

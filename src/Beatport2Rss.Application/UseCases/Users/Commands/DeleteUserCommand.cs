@@ -1,28 +1,16 @@
-using Beatport2Rss.Application.Extensions;
-using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
-using FluentValidation;
-
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public sealed record DeleteUserCommand(Guid UserId) :
-    ICommand<Result>, IRequireActiveUser;
-
-internal sealed class DeleteUserCommandValidator :
-    AbstractValidator<DeleteUserCommand>
-{
-    public DeleteUserCommandValidator()
-    {
-        RuleFor(c => c.UserId).IsUserId();
-    }
-}
+public sealed record DeleteUserCommand(
+    UserId UserId) :
+    ICommand<Result>;
 
 internal sealed class DeleteUserCommandHandler(
     IUserCommandRepository userCommandRepository,
@@ -33,8 +21,7 @@ internal sealed class DeleteUserCommandHandler(
         DeleteUserCommand command,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(command.UserId);
-        var user = await userCommandRepository.LoadAsync(userId, cancellationToken);
+        var user = await userCommandRepository.LoadAsync(command.UserId, cancellationToken);
 
         userCommandRepository.Delete(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
