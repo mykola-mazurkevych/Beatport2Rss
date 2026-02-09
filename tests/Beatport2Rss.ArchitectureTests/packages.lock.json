@@ -456,7 +456,8 @@
           "Asp.Versioning.Mvc.ApiExplorer": "[8.1.1, )",
           "Beatport2Rss.Application": "[1.0.0, )",
           "Beatport2Rss.Infrastructure": "[1.0.0, )",
-          "Microsoft.AspNetCore.OpenApi": "[10.0.2, )"
+          "Microsoft.AspNetCore.OpenApi": "[10.0.2, )",
+          "Scalar.AspNetCore": "[2.12.30, )"
         }
       },
       "Asp.Versioning.Http": {
@@ -613,6 +614,12 @@
         "dependencies": {
           "Microsoft.Extensions.Logging": "8.0.0"
         }
+      },
+      "Scalar.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[2.12.30, )",
+        "resolved": "2.12.30",
+        "contentHash": "tG+i8CN7Ub26z1GkjK0Zo4aDa9Omh5I5xQGDYN1O23DByMxH8jXz0Qd9/yHYczqi6+bDXgpSAYDfn1VkbupqCw=="
       },
       "Slugify.Core": {
         "type": "CentralTransitive",

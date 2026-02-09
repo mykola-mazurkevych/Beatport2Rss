@@ -7,14 +7,17 @@ using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints;
 using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Middlewares;
+using Beatport2Rss.WebApi.Transformers;
 
 using Microsoft.AspNetCore.HttpOverrides;
+
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .ConfigureHttpJsonOptions(options => options.SerializerOptions.AddJsonValueConverters())
-    .AddOpenApi()
+    .AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddProblemDetails(options => options.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
@@ -42,6 +45,13 @@ app
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference(options =>
+    {
+        options.Title = "Beatport2Rss API Reference";
+        options.DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.JavaScript, ScalarClient.HttpClient);
+        options.AddPreferredSecuritySchemes("Bearer");
+        options.PersistentAuthentication = true;
+    });
     app.UseDeveloperExceptionPage();
 }
 
