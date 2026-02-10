@@ -70,6 +70,7 @@ var versionSet = app.NewApiVersionSet()
 app
     .BuildFeedEndpoints(versionSet)
     .BuildSessionEndpoints(versionSet)
+    .BuildTagEndpoints(versionSet)
     .BuildUserEndpoints(versionSet);
 
 app.MapGet("", () => "Hello, Beatport2Rss!");

@@ -1,3 +1,6 @@
+// ReSharper disable PropertyCanBeMadeInitOnly.Local
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
@@ -14,23 +17,21 @@ public sealed class Tag : IEntity<TagId>
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    public UserId UserId { get; private set; }
+
     public TagName Name { get; private set; }
     public Slug Slug { get; private set; }
 
-    public UserId UserId { get; private set; }
-
     public static Tag Create(
-        TagId id,
         DateTimeOffset createdAt,
+        UserId userId,
         TagName name,
-        Slug slug,
-        UserId userId) =>
+        Slug slug) =>
         new()
         {
-            Id = id,
             CreatedAt = createdAt,
+            UserId = userId,
             Name = name,
             Slug = slug,
-            UserId = userId,
         };
 }

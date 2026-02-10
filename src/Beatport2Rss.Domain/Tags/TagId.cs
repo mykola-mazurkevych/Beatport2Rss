@@ -1,10 +1,6 @@
 using System.Globalization;
 
-using Beatport2Rss.Domain.Common.Constants;
-using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.Domain.Common.Interfaces;
-
-using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Tags;
 
@@ -14,8 +10,7 @@ public readonly record struct TagId : IValueObject
 
     public int Value { get; }
 
-    public static TagId Create(int value) =>
-        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.TagIdInvalid)));
+    public static TagId Create(int value) => new(value);
 
     public bool Equals(TagId other) => Value == other.Value;
 
