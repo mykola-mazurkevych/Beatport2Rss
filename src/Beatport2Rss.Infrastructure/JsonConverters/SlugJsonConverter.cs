@@ -1,21 +1,22 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.Domain.Common.ValueObjects;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class RefreshTokenJsonConverter : JsonConverter<RefreshToken>
+internal sealed class SlugJsonConverter :
+    JsonConverter<Slug>
 {
-    public override RefreshToken Read(
+    public override Slug Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options) =>
-        RefreshToken.Create(reader.GetString());
+        Slug.Create(reader.GetString());
 
     public override void Write(
         Utf8JsonWriter writer,
-        RefreshToken value,
+        Slug value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
 }

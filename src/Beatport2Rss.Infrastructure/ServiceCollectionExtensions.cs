@@ -1,6 +1,7 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -39,7 +40,7 @@ public static class ServiceCollectionExtensions
                 {
                     options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.SerializerOptions.WriteIndented = true;
-                    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.SerializerOptions.AddJsonValueConverters();
                 })
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
@@ -120,5 +121,21 @@ public static class ServiceCollectionExtensions
                 .Configure<BeatportCredentials>(c => configuration.GetSection(nameof(BeatportCredentials)).Bind(c))
                 .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
                 .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
+    }
+
+    extension(JsonSerializerOptions options)
+    {
+        public void AddJsonValueConverters()
+        {
+            options.Converters.Add(new JsonStringEnumConverter());
+            Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type =>
+                    type.BaseType is not null &&
+                    type.BaseType.IsGenericType &&
+                    type.BaseType.GetGenericTypeDefinition() == typeof(JsonConverter<>))
+                .ToList()
+                .ForEach(converterType => options.Converters.Add((JsonConverter)Activator.CreateInstance(converterType)!));
+        }
     }
 }

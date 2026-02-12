@@ -5,7 +5,6 @@ using Beatport2Rss.Infrastructure;
 using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints;
-using Beatport2Rss.WebApi.Extensions;
 using Beatport2Rss.WebApi.Middlewares;
 using Beatport2Rss.WebApi.Transformers;
 
@@ -16,7 +15,6 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .ConfigureHttpJsonOptions(options => options.SerializerOptions.AddJsonValueConverters())
     .AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApplication()
     .AddInfrastructure(builder.Configuration)

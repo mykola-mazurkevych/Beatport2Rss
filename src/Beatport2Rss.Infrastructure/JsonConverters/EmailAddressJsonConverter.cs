@@ -1,21 +1,22 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Users;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class SlugJsonConverter : JsonConverter<Slug>
+internal sealed class EmailAddressJsonConverter :
+    JsonConverter<EmailAddress>
 {
-    public override Slug Read(
+    public override EmailAddress Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options) =>
-        Slug.Create(reader.GetString());
+        EmailAddress.Create(reader.GetString());
 
     public override void Write(
         Utf8JsonWriter writer,
-        Slug value,
+        EmailAddress value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
 }

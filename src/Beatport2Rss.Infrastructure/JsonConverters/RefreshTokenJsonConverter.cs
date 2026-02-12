@@ -1,21 +1,22 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Domain.Feeds;
+using Beatport2Rss.Domain.Sessions;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class FeedIdJsonConverter : JsonConverter<FeedId>
+internal sealed class RefreshTokenJsonConverter :
+    JsonConverter<RefreshToken>
 {
-    public override FeedId Read(
+    public override RefreshToken Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options) =>
-        FeedId.Create(reader.GetGuid());
+        RefreshToken.Create(reader.GetString());
 
     public override void Write(
         Utf8JsonWriter writer,
-        FeedId value,
+        RefreshToken value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
 }

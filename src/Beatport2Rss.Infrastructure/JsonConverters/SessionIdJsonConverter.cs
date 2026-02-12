@@ -3,9 +3,10 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Domain.Sessions;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class SessionIdJsonConverter : JsonConverter<SessionId>
+internal sealed class SessionIdJsonConverter :
+    JsonConverter<SessionId>
 {
     public override SessionId Read(
         ref Utf8JsonReader reader,
