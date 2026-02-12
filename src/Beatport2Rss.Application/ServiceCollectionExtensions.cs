@@ -18,15 +18,16 @@ public static class ServiceCollectionExtensions
             services
                 .AddValidators()
                 ////.AddValidatorsFromAssembly(typeof(ValidationBehavior<,>).Assembly)
-                .AddMediator(o =>
+                .AddMediator(options =>
                 {
-                    o.GenerateTypesAsInternal = true;
-                    o.ServiceLifetime = ServiceLifetime.Transient;
-                    o.PipelineBehaviors =
+                    options.GenerateTypesAsInternal = true;
+                    options.ServiceLifetime = ServiceLifetime.Transient;
+                    options.PipelineBehaviors =
                     [
                         typeof(ValidationBehavior<,>),
                         typeof(UserValidationBehavior<,>),
                         typeof(FeedValidationBehavior<,>),
+                        typeof(TagValidationBehavior<,>),
                     ];
                 });
 

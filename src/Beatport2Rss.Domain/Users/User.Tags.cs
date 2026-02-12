@@ -1,4 +1,5 @@
-﻿using Beatport2Rss.Domain.Tags;
+﻿using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Tags;
 
 namespace Beatport2Rss.Domain.Users;
 
@@ -13,4 +14,7 @@ public sealed partial class User
 
     public void AddTag(Tag tag) =>
         _tags.Add(tag);
+
+    public void RemoveTag(Slug slug) =>
+        _tags.RemoveWhere(t => t.Slug == slug);
 }

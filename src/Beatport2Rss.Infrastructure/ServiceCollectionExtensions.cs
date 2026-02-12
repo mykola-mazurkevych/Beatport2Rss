@@ -35,11 +35,11 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .ConfigureHttpJsonOptions(o =>
+                .ConfigureHttpJsonOptions(options =>
                 {
-                    o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    o.SerializerOptions.WriteIndented = true;
-                    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.SerializerOptions.WriteIndented = true;
+                    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 })
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
@@ -69,12 +69,12 @@ public static class ServiceCollectionExtensions
         {
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(o =>
+                .AddJwtBearer(options =>
                 {
-                    o.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
-                    o.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
+                    options.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
+                    options.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
 
-                    o.TokenValidationParameters = new TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidIssuer = jwtOptions.Issuer,
@@ -99,11 +99,12 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
+                .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
