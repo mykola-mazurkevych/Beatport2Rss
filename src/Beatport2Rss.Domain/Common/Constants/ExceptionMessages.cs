@@ -33,12 +33,11 @@ public static class ExceptionMessages
     public const string RefreshTokenHashEmpty = "Refresh token hash cannot be empty.";
 
     public const string SlugEmpty = "Slug cannot be empty.";
-    public const string SlugInvalid = "Slug is invalid.";
+    ////public const string SlugInvalid = "Slug is invalid.";
     public const string SlugTooLong = "Slug is too long.";
 
     public const string SubscriptionIdInvalid = "SubscriptionId must be positive.";
 
-    public const string TagIdInvalid = "TagId must be positive.";
     public const string TagNameEmpty = "TagName cannot be empty.";
     public const string TagNameTooLong = "TagName is too long.";
 

@@ -1,6 +1,7 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -35,11 +36,11 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .ConfigureHttpJsonOptions(o =>
+                .ConfigureHttpJsonOptions(options =>
                 {
-                    o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    o.SerializerOptions.WriteIndented = true;
-                    o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.SerializerOptions.WriteIndented = true;
+                    options.SerializerOptions.AddJsonValueConverters();
                 })
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
@@ -69,12 +70,12 @@ public static class ServiceCollectionExtensions
         {
             services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(o =>
+                .AddJwtBearer(options =>
                 {
-                    o.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
-                    o.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
+                    options.Events.OnAuthenticationFailed = JwtEvents.OnAuthenticationFailed;
+                    options.Events.OnTokenValidated = JwtEvents.OnTokenValidated;
 
-                    o.TokenValidationParameters = new TokenValidationParameters
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
                         ValidIssuer = jwtOptions.Issuer,
@@ -99,11 +100,12 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>(b => b.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
+                .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
@@ -119,5 +121,21 @@ public static class ServiceCollectionExtensions
                 .Configure<BeatportCredentials>(c => configuration.GetSection(nameof(BeatportCredentials)).Bind(c))
                 .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
                 .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
+    }
+
+    extension(JsonSerializerOptions options)
+    {
+        public void AddJsonValueConverters()
+        {
+            options.Converters.Add(new JsonStringEnumConverter());
+            Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(type =>
+                    type.BaseType is not null &&
+                    type.BaseType.IsGenericType &&
+                    type.BaseType.GetGenericTypeDefinition() == typeof(JsonConverter<>))
+                .ToList()
+                .ForEach(converterType => options.Converters.Add((JsonConverter)Activator.CreateInstance(converterType)!));
+        }
     }
 }

@@ -3,9 +3,10 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Domain.Common.ValueObjects;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class AccessTokenJsonConverter : JsonConverter<AccessToken>
+internal sealed class AccessTokenJsonConverter :
+    JsonConverter<AccessToken>
 {
     public override AccessToken Read(
         ref Utf8JsonReader reader,

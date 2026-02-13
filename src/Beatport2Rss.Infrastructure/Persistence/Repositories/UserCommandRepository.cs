@@ -9,8 +9,13 @@ internal sealed class UserCommandRepository(Beatport2RssDbContext dbContext) :
     CommandRepository<User, UserId>(dbContext),
     IUserCommandRepository
 {
-    public Task<User> LoadWithFeedsAsync(UserId id, CancellationToken cancellationToken = default) =>
+    public Task<User> LoadWithFeedsAsync(UserId userId, CancellationToken cancellationToken = default) =>
         Entities
             .Include(u => u.Feeds)
-            .SingleAsync(u => u.Id == id, cancellationToken);
+            .SingleAsync(u => u.Id == userId, cancellationToken);
+
+    public Task<User> LoadWithTagsAsync(UserId userId, CancellationToken cancellationToken = default) =>
+        Entities
+            .Include(u => u.Tags)
+            .SingleAsync(u => u.Id == userId, cancellationToken);
 }

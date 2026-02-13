@@ -1,8 +1,8 @@
 using System.Net;
 
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 
 using FluentValidation;
@@ -11,18 +11,6 @@ namespace Beatport2Rss.Application.Extensions;
 
 internal static class RuleBuilderExtensions
 {
-    extension<T>(IRuleBuilderInitial<T, Guid> ruleBuilder)
-    {
-        public void IsSessionId() =>
-            ruleBuilder.IsNotEmpty("Session ID is required.");
-
-        public void IsUserId() =>
-            ruleBuilder.IsNotEmpty("User ID is required.");
-
-        private void IsNotEmpty(string message) =>
-            ruleBuilder.NotEmpty().WithMessage(message);
-    }
-
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
         public void IsEmailAddress() =>
@@ -63,10 +51,10 @@ internal static class RuleBuilderExtensions
                 .IsNotEmpty("Refresh token is required.")
                 .IsExactlyLong(RefreshToken.Length, "Refresh token must be exactly {TotalLength} characters long.");
 
-        public void IsSlug() =>
+        public void IsTagName() =>
             ruleBuilder
-                .IsNotEmpty("Slug is required.")
-                .IsNotTooLong(Slug.MaxLength, "Slug must be at most {MaxLength} characters.");
+                .IsNotEmpty("Tag name is required.")
+                .IsNotTooLong(TagName.MaxLength, "Tag name must be at most {MaxLength} characters.");
 
         public void IsUserAgent() =>
             ruleBuilder

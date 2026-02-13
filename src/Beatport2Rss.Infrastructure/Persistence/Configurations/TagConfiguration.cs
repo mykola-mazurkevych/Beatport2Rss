@@ -16,7 +16,8 @@ internal sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.HasKey(tag => tag.Id);
 
         builder.Property(tag => tag.Id)
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedOnAdd();
 
         builder.Property(tag => tag.CreatedAt)
             .IsRequired();

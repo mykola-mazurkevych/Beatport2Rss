@@ -8,32 +8,36 @@ internal sealed class BearerSecuritySchemeTransformer(
     IAuthenticationSchemeProvider authenticationSchemeProvider) :
     IOpenApiDocumentTransformer
 {
-    public async Task TransformAsync(
-        OpenApiDocument document,
-        OpenApiDocumentTransformerContext context,
-        CancellationToken cancellationToken)
+    public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
     {
-        var schemes = await authenticationSchemeProvider.GetAllSchemesAsync();
-
-        if (schemes.All(s => s.Name != "Bearer"))
+        var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+        if (authenticationSchemes.All(a => a.Name != "Bearer"))
         {
             return;
         }
 
-        document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
-
-        document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
+        var bearerScheme = new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
             Scheme = "bearer",
             BearerFormat = "JWT",
             In = ParameterLocation.Header,
-            Description = "JWT Authorization"
+            Description = "JWT Authorization header using the Bearer scheme."
         };
 
-        document.Security ??= new List<OpenApiSecurityRequirement>();
+        document.Components ??= new OpenApiComponents();
 
-        document.Security.Add(new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("Bearer")] = [] });
+        document.AddComponent("Bearer", bearerScheme);
+
+        var securityRequirement = new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] };
+
+        var operations = document.Paths.Values
+            .Where(pathItem => pathItem.Operations is not null)
+            .SelectMany(pathItem => pathItem.Operations!.Values);
+        foreach (var operation in operations)
+        {
+            operation.Security ??= [];
+            operation.Security.Add(securityRequirement);
+        }
     }
 }

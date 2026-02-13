@@ -109,10 +109,10 @@ internal static class FeedEndpointsBuilder
                     "/{slug}",
                     async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new DeleteFeedCommand(
+                        var command = new DeleteFeedCommand(
                             context.User.Id,
                             slug);
-                        var result = await mediator.Send(query, cancellationToken);
+                        var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(FeedEndpointNames.Delete)

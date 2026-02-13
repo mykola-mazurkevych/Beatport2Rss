@@ -1,21 +1,22 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Domain.Feeds;
 
-namespace Beatport2Rss.WebApi.Converters;
+namespace Beatport2Rss.Infrastructure.JsonConverters;
 
-internal sealed class EmailAddressJsonConverter : JsonConverter<EmailAddress>
+internal sealed class FeedIdJsonConverter :
+    JsonConverter<FeedId>
 {
-    public override EmailAddress Read(
+    public override FeedId Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options) =>
-        EmailAddress.Create(reader.GetString());
+        FeedId.Create(reader.GetGuid());
 
     public override void Write(
         Utf8JsonWriter writer,
-        EmailAddress value,
+        FeedId value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
 }
