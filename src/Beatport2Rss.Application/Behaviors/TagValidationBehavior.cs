@@ -8,21 +8,43 @@ using Mediator;
 
 namespace Beatport2Rss.Application.Behaviors;
 
-public sealed class TagValidationBehavior<TMessage, TResponse>(
-    ITagQueryRepository feedQueryRepository) :
-    IPipelineBehavior<TMessage, TResponse>
-    where TMessage : IMessage, IRequireUser, IRequireTag
-    where TResponse : Result
+file static class ErrorMessages
 {
-    public async ValueTask<TResponse> Handle(
+    public const string NotFound = "Tag with slug '{0}' was not found.";
+}
+
+internal abstract class TagValidationBehavior<TMessage, TResult>(
+    ITagQueryRepository tagQueryRepository)
+    where TMessage : IMessage, IRequireUser, IRequireTag
+    where TResult : Result
+{
+    public async ValueTask<TResult> Handle(
         TMessage message,
-        MessageHandlerDelegate<TMessage, TResponse> next,
+        MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
+        var exists = await tagQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResponse)Result.NotFound($"Tag with slug '{message.Slug}' was not found.");
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.Slug);
+    }
+}
+
+internal abstract class TagValidationBehavior<TMessage, TResult, TResponse>(
+    ITagQueryRepository tagQueryRepository)
+    where TMessage : IMessage, IRequireUser, IRequireTag
+    where TResult : Result<TResponse>
+{
+    public async ValueTask<TResult> Handle(
+        TMessage message,
+        MessageHandlerDelegate<TMessage, TResult> next,
+        CancellationToken cancellationToken)
+    {
+        var exists = await tagQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
+
+        return exists
+            ? await next(message, cancellationToken)
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.Slug);
     }
 }

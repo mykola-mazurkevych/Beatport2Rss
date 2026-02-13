@@ -22,5 +22,9 @@ public sealed class ServiceCollectionExtensionGenerator : IIncrementalGenerator
         var requireFeedMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireFeed");
         context.RegisterSourceOutput(requireFeedMessages, static (ctx, infos) => FeedValidationBehaviorsSourceOutput.Add(ctx, infos));
         context.RegisterSourceOutput(requireFeedMessages, static (ctx, infos) => ServiceCollectionExtensionFeedValidationBehaviorsSourceOutput.Add(ctx, infos));
+
+        var requireTagMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireTag");
+        context.RegisterSourceOutput(requireTagMessages, static (ctx, infos) => TagValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireTagMessages, static (ctx, infos) => ServiceCollectionExtensionTagValidationBehaviorsSourceOutput.Add(ctx, infos));
     }
 }
