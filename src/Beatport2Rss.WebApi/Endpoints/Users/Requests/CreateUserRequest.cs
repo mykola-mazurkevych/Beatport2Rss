@@ -1,6 +1,6 @@
 namespace Beatport2Rss.WebApi.Endpoints.Users.Requests;
 
-public sealed record CreateUserRequest(
+internal sealed record CreateUserRequest(
     string? EmailAddress,
     string? Password,
     string? FirstName,

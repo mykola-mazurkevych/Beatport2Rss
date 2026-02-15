@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Common.ValueObjects;
 
 namespace Beatport2Rss.WebApi.Endpoints.Sessions.Responses;
 
-public sealed record SessionResponse(
+internal sealed record SessionResponse(
     string AccessToken,
     AccessTokenType TokenType,
     int ExpiresIn,

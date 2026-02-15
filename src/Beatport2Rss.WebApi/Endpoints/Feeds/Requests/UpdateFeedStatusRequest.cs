@@ -1,4 +1,4 @@
 namespace Beatport2Rss.WebApi.Endpoints.Feeds.Requests;
 
-public sealed record UpdateFeedStatusRequest(
+internal sealed record UpdateFeedStatusRequest(
     bool IsActive);

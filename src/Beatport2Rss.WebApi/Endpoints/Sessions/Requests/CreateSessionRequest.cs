@@ -1,5 +1,5 @@
 namespace Beatport2Rss.WebApi.Endpoints.Sessions.Requests;
 
-public sealed record CreateSessionRequest(
+internal sealed record CreateSessionRequest(
     string? EmailAddress,
     string? Password);

@@ -2,7 +2,7 @@ using Beatport2Rss.Application.Dtos.Feeds;
 
 namespace Beatport2Rss.WebApi.Endpoints.Feeds.Responses;
 
-public sealed record GetFeedResponse(
+internal sealed record GetFeedResponse(
     Guid Id,
     string Name,
     string Slug,

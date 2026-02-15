@@ -15,27 +15,23 @@ internal sealed class SessionQueryRepository(
 {
     public Task<bool> ExistsAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
         dbContext.Sessions
-            .AnyAsync(
-                session =>
-                    session.UserId == userId &&
-                    session.Id == sessionId,
-                cancellationToken);
+            .AnyAsync(session => session.UserId == userId && session.Id == sessionId, cancellationToken);
 
     public Task<SessionDetailsReadModel> LoadSessionDetailsReadModelAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
-        GetSessionDetailsReadModelsAsQueryable(userId, sessionId).SingleAsync(cancellationToken);
-
-    private IQueryable<SessionDetailsReadModel> GetSessionDetailsReadModelsAsQueryable(UserId userId, SessionId sessionId) =>
-        from session in dbContext.Sessions
-        join user in dbContext.Users on session.UserId equals user.Id
-        where session.UserId == userId &&
-              session.Id == sessionId
-        select new SessionDetailsReadModel(
-            session.Id,
-            session.CreatedAt,
-            user.EmailAddress,
-            user.FirstName,
-            user.LastName,
-            session.UserAgent,
-            session.IpAddress,
-            session.RefreshTokenExpiresAt < clock.UtcNow);
+        (
+            from session in dbContext.Sessions
+            join user in dbContext.Users on session.UserId equals user.Id
+            where session.UserId == userId &&
+                  session.Id == sessionId
+            select new SessionDetailsReadModel(
+                session.Id,
+                session.CreatedAt,
+                user.EmailAddress,
+                user.FirstName,
+                user.LastName,
+                session.UserAgent,
+                session.IpAddress,
+                session.RefreshTokenExpiresAt < clock.UtcNow)
+        )
+        .SingleAsync(cancellationToken);
 }

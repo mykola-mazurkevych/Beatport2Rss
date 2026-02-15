@@ -2,7 +2,7 @@ using Beatport2Rss.Application.Dtos.Users;
 
 namespace Beatport2Rss.WebApi.Endpoints.Users.Responses;
 
-public sealed record GetUserResponse(
+internal sealed record GetUserResponse(
     string EmailAddress,
     string? FirstName,
     string? LastName,

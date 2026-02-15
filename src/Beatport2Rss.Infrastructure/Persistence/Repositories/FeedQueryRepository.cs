@@ -16,7 +16,8 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
             .AnyAsync(f => f.UserId == userId && f.Slug == slug, cancellationToken);
 
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        (from feed in dbContext.Feeds
+        (
+            from feed in dbContext.Feeds
             join user in dbContext.Users on feed.UserId equals user.Id
             where feed.UserId == userId &&
                   feed.Slug == slug
@@ -26,6 +27,7 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
                 feed.Name,
                 user.FullName,
                 feed.Status == FeedStatus.Active,
-                feed.CreatedAt))
+                feed.CreatedAt)
+        )
         .SingleAsync(cancellationToken);
 }

@@ -1,4 +1,4 @@
 ﻿namespace Beatport2Rss.WebApi.Endpoints.Tags.Requests;
 
-public sealed record UpdateTagNameRequest(
+internal sealed record UpdateTagNameRequest(
     string? Name);

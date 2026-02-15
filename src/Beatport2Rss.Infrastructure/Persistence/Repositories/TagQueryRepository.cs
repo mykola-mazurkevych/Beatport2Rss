@@ -15,13 +15,15 @@ internal sealed class TagQueryRepository(Beatport2RssDbContext dbContext) :
             .AnyAsync(t => t.UserId == userId && t.Slug == slug, cancellationToken);
 
     public Task<TagDetailsReadModel> LoadTagDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        (from tag in dbContext.Tags
+        (
+            from tag in dbContext.Tags
             where tag.UserId == userId &&
                   tag.Slug == slug
             select new TagDetailsReadModel(
                 tag.Id,
                 tag.Name,
                 tag.Slug,
-                tag.CreatedAt))
+                tag.CreatedAt)
+        )
         .SingleAsync(cancellationToken);
 }
