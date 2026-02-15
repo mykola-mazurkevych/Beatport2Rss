@@ -27,8 +27,8 @@ internal static class JwtEvents
             sessionIdClaim is null ||
             !UserId.TryParse(userIdClaim.Value, provider: null, out var userId) ||
             !SessionId.TryParse(sessionIdClaim.Value, provider: null, out var sessionId) ||
-            !(await userQueryRepository.ExistsAsync(userId)) ||
-            !(await sessionQueryRepository.ExistsAsync(userId, sessionId)))
+            !await userQueryRepository.ExistsAsync(userId) ||
+            !await sessionQueryRepository.ExistsAsync(userId, sessionId))
         {
             context.Fail("Session is not valid.");
         }

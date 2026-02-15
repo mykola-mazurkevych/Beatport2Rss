@@ -5,8 +5,8 @@ namespace Beatport2Rss.Application.Dtos.Feeds;
 
 public sealed record FeedDto(
     FeedId Id,
-    Slug Slug,
     FeedName Name,
+    Slug Slug,
     string? Owner,
     bool IsActive,
     DateTimeOffset CreatedAt);

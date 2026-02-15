@@ -14,6 +14,13 @@ public sealed partial class User
 
     public void AddTag(Tag tag) =>
         _tags.Add(tag);
+    
+    public void UpdateTag(TagId id, TagName name, Slug slug)
+    {
+        var tag = _tags.Single(t => t.Id == id);
+        tag.UpdateName(name);
+        tag.UpdateSlug(slug);
+    }
 
     public void RemoveTag(Slug slug) =>
         _tags.RemoveWhere(t => t.Slug == slug);

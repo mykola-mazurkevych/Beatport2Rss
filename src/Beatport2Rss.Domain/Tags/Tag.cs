@@ -34,4 +34,10 @@ public sealed class Tag : IEntity<TagId>
             Name = name,
             Slug = slug,
         };
+
+    internal void UpdateName(TagName name) =>
+        Name = name;
+
+    internal void UpdateSlug(Slug slug) =>
+        Slug = slug;
 }

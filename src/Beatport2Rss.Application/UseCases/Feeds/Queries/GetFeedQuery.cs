@@ -27,8 +27,8 @@ internal sealed class GetFeedQueryHandler(
 
         return new FeedDto(
             readModel.Id,
-            readModel.Slug,
             readModel.Name,
+            readModel.Slug,
             readModel.Owner,
             readModel.IsActive,
             readModel.CreatedAt);
