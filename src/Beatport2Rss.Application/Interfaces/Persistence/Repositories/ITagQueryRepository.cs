@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.ReadModels.Tags;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
 
@@ -7,4 +8,5 @@ public interface ITagQueryRepository :
     IQueryRepository
 {
     Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
+    Task<TagDetailsReadModel> LoadTagDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
 }

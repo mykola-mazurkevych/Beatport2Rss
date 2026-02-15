@@ -4,6 +4,7 @@ using System.Net.Mime;
 using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Tags.Commands;
+using Beatport2Rss.Application.UseCases.Tags.Queries;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.WebApi.Endpoints.Tags.Requests;
 using Beatport2Rss.WebApi.Endpoints.Tags.Responses;
@@ -34,7 +35,7 @@ internal static class TagEndpoints
                 .WithApiVersionSet(versionSet)
                 .HasApiVersion(ApiVersionsContainer.V1)
                 .WithTags("Tags");
-            
+
             // groupBuilder.MapGet("", ...) // Get list of tags
 
             groupBuilder
@@ -60,6 +61,28 @@ internal static class TagEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
+                .MapGet(
+                    "/{slug}",
+                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetTagQuery(
+                            context.User.Id,
+                            slug);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.Ok(TagResponse.Create(result.Value)), context);
+                    }
+                )
+                .WithName(TagEndpointNames.Get)
+                .WithDescription("Get tag details by its slug")
+                .WithSummary("Get Details")
+                .Produces<TagResponse>()
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+        groupBuilder
                 .MapPut(
                     "/{slug}/name",
                     static async ([FromRoute] Slug slug, [FromBody] [Required] UpdateTagNameRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>

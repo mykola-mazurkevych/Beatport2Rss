@@ -59,7 +59,9 @@ internal sealed class UpdateTagNameCommandHandler(
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new TagDto(
+            tag.Id,
             tag.Name,
-            tag.Slug);
+            tag.Slug,
+            tag.CreatedAt);
     }
 }

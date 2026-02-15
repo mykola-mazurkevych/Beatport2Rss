@@ -1,9 +1,9 @@
 ﻿using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tags;
 
-namespace Beatport2Rss.Application.Dtos.Tags;
+namespace Beatport2Rss.Application.ReadModels.Tags;
 
-public sealed record TagDto(
+public sealed record TagDetailsReadModel(
     TagId Id,
     TagName Name,
     Slug Slug,
