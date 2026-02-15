@@ -12,25 +12,20 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
     IFeedQueryRepository
 {
     public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        dbContext.Feeds.AnyAsync(
-            f =>
-                f.UserId == userId &&
-                f.Slug == slug,
-            cancellationToken);
+        dbContext.Feeds
+            .AnyAsync(f => f.UserId == userId && f.Slug == slug, cancellationToken);
 
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        GetFeedDetailsReadModelsAsQueryable(userId, slug).SingleAsync(cancellationToken);
-
-    private IQueryable<FeedDetailsReadModel> GetFeedDetailsReadModelsAsQueryable(UserId userId, Slug slug) =>
-        from feed in dbContext.Feeds
-        join user in dbContext.Users on feed.UserId equals user.Id
-        where feed.UserId == userId &&
-              feed.Slug == slug
-        select new FeedDetailsReadModel(
-            feed.Id,
-            feed.Slug,
-            feed.Name,
-            user.FullName,
-            feed.Status == FeedStatus.Active,
-            feed.CreatedAt);
+        (from feed in dbContext.Feeds
+            join user in dbContext.Users on feed.UserId equals user.Id
+            where feed.UserId == userId &&
+                  feed.Slug == slug
+            select new FeedDetailsReadModel(
+                feed.Id,
+                feed.Slug,
+                feed.Name,
+                user.FullName,
+                feed.Status == FeedStatus.Active,
+                feed.CreatedAt))
+        .SingleAsync(cancellationToken);
 }

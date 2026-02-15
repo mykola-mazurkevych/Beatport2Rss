@@ -14,12 +14,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public sealed record CreateUserRequest(
-    string? EmailAddress,
-    string? Password,
-    string? FirstName,
-    string? LastName);
-
 public sealed record CreateUserCommand(
     string? EmailAddress,
     string? Password,

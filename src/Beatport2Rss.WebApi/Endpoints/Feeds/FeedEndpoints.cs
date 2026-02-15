@@ -6,13 +6,15 @@ using Asp.Versioning.Builder;
 using Beatport2Rss.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.WebApi.Endpoints.Feeds.Requests;
+using Beatport2Rss.WebApi.Endpoints.Feeds.Responses;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Beatport2Rss.WebApi.Endpoints;
+namespace Beatport2Rss.WebApi.Endpoints.Feeds;
 
 file static class FeedEndpointNames
 {
@@ -22,7 +24,7 @@ file static class FeedEndpointNames
     public const string UpdateStatus = "UpdateFeedStatus";
 }
 
-internal static class FeedEndpointsBuilder
+internal static class FeedEndpoints
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
@@ -39,7 +41,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] [Required] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateFeedCommand(
                             context.User.Id,
@@ -61,13 +63,13 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/{slug}",
-                    async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetFeedQuery(
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(GetFeedResponse.Create(result.Value)), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
@@ -84,7 +86,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/{slug}/status",
-                    async ([FromRoute] Slug slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateFeedStatusCommand(
                             context.User.Id,
@@ -107,7 +109,7 @@ internal static class FeedEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/{slug}",
-                    async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteFeedCommand(
                             context.User.Id,

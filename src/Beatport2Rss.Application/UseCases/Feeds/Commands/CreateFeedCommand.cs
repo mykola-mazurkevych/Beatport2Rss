@@ -15,9 +15,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public sealed record CreateFeedRequest(
-    string? Name);
-
 public sealed record CreateFeedCommand(
     UserId UserId,
     string? Name) :

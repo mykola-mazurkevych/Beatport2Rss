@@ -5,13 +5,14 @@ using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Tags.Commands;
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.WebApi.Endpoints.Tags.Requests;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Beatport2Rss.WebApi.Endpoints;
+namespace Beatport2Rss.WebApi.Endpoints.Tags;
 
 file static class TagEndpointNames
 {
@@ -20,7 +21,7 @@ file static class TagEndpointNames
     public const string Get = "GetTag";
 }
 
-internal static class TagEndpointsBuilder
+internal static class TagEndpoints
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
@@ -35,7 +36,7 @@ internal static class TagEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] [Required] CreateTagRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] CreateTagRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateTagCommand(
                             context.User.Id,
@@ -57,7 +58,7 @@ internal static class TagEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/{slug}",
-                    async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteTagCommand(
                             context.User.Id,

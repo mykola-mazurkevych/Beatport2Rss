@@ -6,13 +6,15 @@ using Asp.Versioning.Builder;
 using Beatport2Rss.Application.UseCases.Users.Commands;
 using Beatport2Rss.Application.UseCases.Users.Queries;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.WebApi.Endpoints.Users.Requests;
+using Beatport2Rss.WebApi.Endpoints.Users.Responses;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Beatport2Rss.WebApi.Endpoints;
+namespace Beatport2Rss.WebApi.Endpoints.Users;
 
 file static class UserEndpointNames
 {
@@ -23,7 +25,7 @@ file static class UserEndpointNames
     public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
 }
 
-internal static class UserEndpointsBuilder
+internal static class UserEndpoints
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
@@ -40,7 +42,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] [Required] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateUserCommand(
                             request.EmailAddress,
@@ -63,16 +65,16 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/current",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetUserQuery(context.User.Id);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(GetUserResponse.Create(result.Value)), context);
                     })
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user details")
                 .WithSummary("Get Details")
-                .Produces<UserDetailsResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<GetUserResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -85,7 +87,7 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current/status",
-                    async ([FromBody] [Required] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateUserStatusCommand(
                             context.User.Id,
@@ -107,10 +109,10 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/current",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new DeleteUserCommand(context.User.Id);
-                        var result = await mediator.Send(query, cancellationToken);
+                        var command = new DeleteUserCommand(context.User.Id);
+                        var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.DeleteCurrent)
@@ -124,10 +126,10 @@ internal static class UserEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/{id}",
-                    async ([FromRoute] UserId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] UserId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
-                        var query = new DeleteUserCommand(id);
-                        var result = await mediator.Send(query, cancellationToken);
+                        var command = new DeleteUserCommand(id);
+                        var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(Results.NoContent, context);
                     })
                 .WithName(UserEndpointNames.Delete)

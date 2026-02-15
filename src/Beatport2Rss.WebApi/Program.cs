@@ -4,7 +4,10 @@ using Beatport2Rss.Application;
 using Beatport2Rss.Infrastructure;
 using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
-using Beatport2Rss.WebApi.Endpoints;
+using Beatport2Rss.WebApi.Endpoints.Feeds;
+using Beatport2Rss.WebApi.Endpoints.Sessions;
+using Beatport2Rss.WebApi.Endpoints.Tags;
+using Beatport2Rss.WebApi.Endpoints.Users;
 using Beatport2Rss.WebApi.Middlewares;
 using Beatport2Rss.WebApi.Transformers;
 

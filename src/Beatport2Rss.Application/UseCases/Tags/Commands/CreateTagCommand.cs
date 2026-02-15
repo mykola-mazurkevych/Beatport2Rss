@@ -15,9 +15,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Tags.Commands;
 
-public sealed record CreateTagRequest(
-    string? Name);
-
 public sealed record CreateTagCommand(
     UserId UserId,
     string? Name) :
