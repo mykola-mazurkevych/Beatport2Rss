@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Beatport2Rss.Infrastructure.IntegrationTests" />
     <InternalsVisibleTo Include="Beatport2Rss.Infrastructure.UnitTests" />
   </ItemGroup>
 
