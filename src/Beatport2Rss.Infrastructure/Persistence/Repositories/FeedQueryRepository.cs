@@ -26,7 +26,7 @@ internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
                 feed.Slug,
                 feed.Name,
                 user.FullName,
-                feed.Status == FeedStatus.Active,
+                feed.IsActive,
                 feed.CreatedAt)
         )
         .SingleAsync(cancellationToken);

@@ -17,13 +17,13 @@ internal static class RuleBuilderExtensions
             ruleBuilder
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Email address is required.")
-                .IsNotTooLong(EmailAddress.MaxLength, "Email address must be at most {MaxLength} characters.")
+                .IsNotTooLong(EmailAddress.MaxLength, "Email address must be at most {MaxLength} characters long.")
                 .EmailAddress().WithMessage("A valid email address is required.");
 
         public void IsFeedName() =>
             ruleBuilder
                 .IsNotEmpty("Feed name is required.")
-                .IsNotTooLong(FeedName.MaxLength, "Feed name must be at most {MaxLength} characters.");
+                .IsNotTooLong(FeedName.MaxLength, "Feed name must be at most {MaxLength} characters long.");
 
         public void IsFirstName() =>
             ruleBuilder
@@ -43,7 +43,7 @@ internal static class RuleBuilderExtensions
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Password is required.")
                 .IsNotTooShort(Password.MinLength, "Password must be at least {MinLength} characters long.")
-                .IsNotTooLong(Password.MaxLength, "Password must be at most {MaxLength} characters.");
+                .IsNotTooLong(Password.MaxLength, "Password must be at most {MaxLength} characters long.");
 
         public void IsRefreshToken() =>
             ruleBuilder
@@ -54,7 +54,7 @@ internal static class RuleBuilderExtensions
         public void IsTagName() =>
             ruleBuilder
                 .IsNotEmpty("Tag name is required.")
-                .IsNotTooLong(TagName.MaxLength, "Tag name must be at most {MaxLength} characters.");
+                .IsNotTooLong(TagName.MaxLength, "Tag name must be at most {MaxLength} characters long.");
 
         public void IsUserAgent() =>
             ruleBuilder

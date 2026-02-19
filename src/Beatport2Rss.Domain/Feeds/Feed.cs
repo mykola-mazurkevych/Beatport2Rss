@@ -24,7 +24,11 @@ public sealed class Feed : IEntity<FeedId>
 
     public FeedStatus Status { get; private set; }
 
-    public IReadOnlySet<SubscriptionId> SubscriptionIds => _subscriptionIds.AsReadOnly();
+    public IReadOnlySet<SubscriptionId> SubscriptionIds =>
+        _subscriptionIds.AsReadOnly();
+
+    public bool IsActive =>
+        Status == FeedStatus.Active;
 
     public static Feed Create(
         FeedId id,
