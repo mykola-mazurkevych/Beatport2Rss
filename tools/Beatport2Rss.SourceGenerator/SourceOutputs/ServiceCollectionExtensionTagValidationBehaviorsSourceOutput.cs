@@ -19,7 +19,7 @@ internal static class ServiceCollectionExtensionTagValidationBehaviorsSourceOutp
             .Union(
             [
                 "Beatport2Rss.Application.Behaviors",
-                ////"Beatport2Rss.Application.ReadModels.Tags",
+                "Beatport2Rss.Application.Dtos.Tags",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

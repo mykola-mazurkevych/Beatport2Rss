@@ -1,11 +1,12 @@
-﻿using Beatport2Rss.Domain.Common.Interfaces;
-using Beatport2Rss.Domain.Common.ValueObjects;
+﻿using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Feeds;
 
-public sealed class Feed : IEntity<FeedId>
+public sealed class Feed :
+    IEntity<FeedId>
 {
     private readonly HashSet<SubscriptionId> _subscriptionIds = [];
 
@@ -24,7 +25,11 @@ public sealed class Feed : IEntity<FeedId>
 
     public FeedStatus Status { get; private set; }
 
-    public IReadOnlySet<SubscriptionId> SubscriptionIds => _subscriptionIds.AsReadOnly();
+    public IReadOnlySet<SubscriptionId> SubscriptionIds =>
+        _subscriptionIds.AsReadOnly();
+
+    public bool IsActive =>
+        Status == FeedStatus.Active;
 
     public static Feed Create(
         FeedId id,

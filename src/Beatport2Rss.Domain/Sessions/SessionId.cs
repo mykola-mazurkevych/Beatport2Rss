@@ -2,21 +2,27 @@ using System.Diagnostics.CodeAnalysis;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Sessions;
 
-public readonly record struct SessionId : IValueObject, IParsable<SessionId>
+public readonly record struct SessionId :
+    IId<SessionId>, IParsable<SessionId>
 {
     private SessionId(Guid value) => Value = value;
 
     public Guid Value { get; }
 
+    public static bool operator <(SessionId left, SessionId right) => left.Value < right.Value;
+    public static bool operator >(SessionId left, SessionId right) => left.Value > right.Value;
+    public static bool operator <=(SessionId left, SessionId right) => left.Value <= right.Value;
+    public static bool operator >=(SessionId left, SessionId right) => left.Value >= right.Value;
+
     public static SessionId Create(Guid value) =>
         new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.SessionIdEmpty)));
-    
+
     public static SessionId Parse(string s, IFormatProvider? provider) =>
         Create(Guid.Parse(s, provider));
 
@@ -26,14 +32,15 @@ public readonly record struct SessionId : IValueObject, IParsable<SessionId>
 
         try
         {
-            if (Guid.TryParse(s, provider, out var value))
+            if (!Guid.TryParse(s, provider, out var value))
             {
-                result = Create(value);
-
-                return true;
+                return false;
             }
 
-            return false;
+            result = Create(value);
+
+            return true;
+
         }
         catch (InvalidValueObjectValueException)
         {
@@ -41,18 +48,8 @@ public readonly record struct SessionId : IValueObject, IParsable<SessionId>
         }
     }
 
+    public int CompareTo(SessionId other) => Value.CompareTo(other.Value);
     public bool Equals(SessionId other) => Value == other.Value;
-
-    public static bool operator ==(SessionId left, Guid right) => left.Value == right;
-    public static bool operator !=(SessionId left, Guid right) => left.Value != right;
-    public static bool operator ==(Guid left, SessionId right) => left == right.Value;
-    public static bool operator !=(Guid left, SessionId right) => left != right.Value;
-
-    public static implicit operator Guid(SessionId sessionId) => sessionId.Value;
-    public static implicit operator string(SessionId sessionId) => sessionId.ToString();
-
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();
-
-    public Guid ToGuid() => Value;
 }

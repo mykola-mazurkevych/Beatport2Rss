@@ -1,8 +1,9 @@
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Users;
 
-public sealed partial class User : IAggregateRoot<UserId>
+public sealed partial class User :
+    IAggregateRoot<UserId>
 {
     public const int NameLength = 100;
 

@@ -1,23 +1,24 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 #pragma warning disable CA1708 // Identifiers should differ by more than case
 
-using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
+using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Infrastructure.Constants;
+using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services.Beatport;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
+using Beatport2Rss.Infrastructure.Services.Pagination;
 using Beatport2Rss.Infrastructure.Services.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -36,23 +37,16 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .ConfigureHttpJsonOptions(options =>
-                {
-                    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    options.SerializerOptions.WriteIndented = true;
-                    options.SerializerOptions.AddJsonValueConverters();
-                })
+                .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
+                .AddPagination()
                 .AddPersistence(configuration)
                 .AddSecurityServices();
-    }
 
-    extension(IServiceCollection services)
-    {
         private IServiceCollection AddBeatportServices() =>
             services
                 .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>();
@@ -98,6 +92,10 @@ public static class ServiceCollectionExtensions
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
 
+        private IServiceCollection AddPagination() =>
+            services
+                .AddSingleton<ICursorEndcoder, CursorEncoder>();
+
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
@@ -118,24 +116,9 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<BeatportCredentials>(c => configuration.GetSection(nameof(BeatportCredentials)).Bind(c))
-                .Configure<JwtOptions>(o => configuration.GetSection(nameof(JwtOptions)).Bind(o))
-                .Configure<RefreshTokenOptions>(o => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(o));
-    }
-
-    extension(JsonSerializerOptions options)
-    {
-        public void AddJsonValueConverters()
-        {
-            options.Converters.Add(new JsonStringEnumConverter());
-            Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(type =>
-                    type.BaseType is not null &&
-                    type.BaseType.IsGenericType &&
-                    type.BaseType.GetGenericTypeDefinition() == typeof(JsonConverter<>))
-                .ToList()
-                .ForEach(converterType => options.Converters.Add((JsonConverter)Activator.CreateInstance(converterType)!));
-        }
+                .Configure<BeatportCredentials>(credentials => configuration.GetSection(nameof(BeatportCredentials)).Bind(credentials))
+                .Configure<JsonSerializerOptions>(static options => options.Configure())
+                .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
+                .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
     }
 }

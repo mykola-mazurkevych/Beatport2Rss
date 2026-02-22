@@ -4,9 +4,9 @@ using Beatport2Rss.Domain.Feeds;
 namespace Beatport2Rss.Application.ReadModels.Feeds;
 
 public sealed record FeedDetailsReadModel(
-    FeedId FeedId,
+    FeedId Id,
     Slug Slug,
-    string Name,
+    FeedName Name,
     string? Owner,
     bool IsActive,
     DateTimeOffset CreatedAt);

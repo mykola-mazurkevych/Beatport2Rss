@@ -18,8 +18,8 @@ internal static class UserValidationBehaviorsSourceOutput
             .Select(i => i.Namespace)
             .Union(
             [
+                "Beatport2Rss.Application.Dtos.Tags",
                 "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
-                "Beatport2Rss.Application.ReadModels.Feeds",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

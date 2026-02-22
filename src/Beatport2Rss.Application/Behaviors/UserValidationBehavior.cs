@@ -29,8 +29,7 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(message.UserId);
-        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(message.UserId, cancellationToken);
 
         return readModel.Status switch
         {
@@ -51,8 +50,7 @@ internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(message.UserId);
-        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(message.UserId, cancellationToken);
 
         return readModel.Status switch
         {

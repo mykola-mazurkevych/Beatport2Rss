@@ -1,13 +1,14 @@
 // ReSharper disable PropertyCanBeMadeInitOnly.Local
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Tags;
 
-public sealed class Tag : IEntity<TagId>
+public sealed class Tag :
+    IEntity<TagId>
 {
     private Tag()
     {
@@ -34,4 +35,10 @@ public sealed class Tag : IEntity<TagId>
             Name = name,
             Slug = slug,
         };
+
+    internal void UpdateName(TagName name) =>
+        Name = name;
+
+    internal void UpdateSlug(Slug slug) =>
+        Slug = slug;
 }

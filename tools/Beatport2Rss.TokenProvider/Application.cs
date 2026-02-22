@@ -26,7 +26,8 @@ internal sealed class Application(
 
         if (result.IsSuccess)
         {
-            LogAccessToken(logger, result.Value, null);
+            var beatportAccessToken = result.Value;
+            LogAccessToken(logger, beatportAccessToken.Value, null);
 
             return;
         }

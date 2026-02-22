@@ -1,9 +1,9 @@
-﻿using Beatport2Rss.Application.Extensions;
+﻿using Beatport2Rss.Application.Dtos.Tags;
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 
@@ -15,13 +15,10 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Tags.Commands;
 
-public sealed record CreateTagRequest(
-    string? Name);
-
 public sealed record CreateTagCommand(
     UserId UserId,
     string? Name) :
-    ICommand<Result<Slug>>, IRequireActiveUser;
+    ICommand<Result<TagDto>>, IRequireActiveUser;
 
 internal sealed class CreateTagCommandValidator :
     AbstractValidator<CreateTagCommand>
@@ -38,16 +35,16 @@ internal sealed class CreateTagCommandHandler(
     ISlugGenerator slugGenerator,
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<CreateTagCommand, Result<Slug>>
+    ICommandHandler<CreateTagCommand, Result<TagDto>>
 {
-    public async ValueTask<Result<Slug>> Handle(
+    public async ValueTask<Result<TagDto>> Handle(
         CreateTagCommand command,
         CancellationToken cancellationToken)
     {
         var user = await userCommandRepository.LoadWithTagsAsync(command.UserId, cancellationToken);
 
         var tagName = TagName.Create(command.Name);
-        var slug = slugGenerator.Generate(tagName);
+        var slug = slugGenerator.Generate(tagName.Value);
 
         if (user.HasTag(tagName))
         {
@@ -65,6 +62,10 @@ internal sealed class CreateTagCommandHandler(
         userCommandRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return slug;
+        return new TagDto(
+            tag.Id,
+            tag.Name,
+            tag.Slug,
+            tag.CreatedAt);
     }
 }

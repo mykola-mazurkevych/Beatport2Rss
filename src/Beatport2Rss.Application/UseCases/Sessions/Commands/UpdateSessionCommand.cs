@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Dtos.Sessions;
 using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
@@ -15,19 +16,10 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Sessions.Commands;
 
-public sealed record UpdateSessionRequest(
-    string? RefreshToken);
-
-public sealed record UpdateSessionResponse(
-    AccessToken AccessToken,
-    AccessTokenType TokenType,
-    int ExpiresIn,
-    RefreshToken RefreshToken);
-
 public sealed record UpdateSessionCommand(
     SessionId SessionId,
     string? RefreshToken) :
-    ICommand<Result<UpdateSessionResponse>>, IRequireValidation;
+    ICommand<Result<SessionDto>>, IRequireValidation;
 
 internal sealed class UpdateSessionCommandValidator :
     AbstractValidator<UpdateSessionCommand>
@@ -45,9 +37,9 @@ internal sealed class UpdateSessionCommandHandler(
     ISessionCommandRepository sessionCommandRepository,
     IUserQueryRepository userQueryRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<UpdateSessionCommand, Result<UpdateSessionResponse>>
+    ICommandHandler<UpdateSessionCommand, Result<SessionDto>>
 {
-    public async ValueTask<Result<UpdateSessionResponse>> Handle(
+    public async ValueTask<Result<SessionDto>> Handle(
         UpdateSessionCommand command,
         CancellationToken cancellationToken = default)
     {
@@ -73,7 +65,7 @@ internal sealed class UpdateSessionCommandHandler(
         sessionCommandRepository.Update(session);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new UpdateSessionResponse(
+        return new SessionDto(
             accessToken,
             accessToken.Type,
             expiresIn,

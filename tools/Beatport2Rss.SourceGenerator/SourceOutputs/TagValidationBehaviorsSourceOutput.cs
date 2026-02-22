@@ -18,8 +18,8 @@ internal static class TagValidationBehaviorsSourceOutput
             .Select(i => i.Namespace)
             .Union(
             [
+                "Beatport2Rss.Application.Dtos.Tags",
                 "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
-                ////"Beatport2Rss.Application.ReadModels.Tags",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

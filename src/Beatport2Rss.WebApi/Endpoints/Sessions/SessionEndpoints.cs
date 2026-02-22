@@ -6,13 +6,15 @@ using Asp.Versioning.Builder;
 using Beatport2Rss.Application.UseCases.Sessions.Commands;
 using Beatport2Rss.Application.UseCases.Sessions.Queries;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.WebApi.Endpoints.Sessions.Requests;
+using Beatport2Rss.WebApi.Endpoints.Sessions.Responses;
 using Beatport2Rss.WebApi.Extensions;
 
 using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace Beatport2Rss.WebApi.Endpoints;
+namespace Beatport2Rss.WebApi.Endpoints.Sessions;
 
 file static class SessionEndpointNames
 {
@@ -24,7 +26,7 @@ file static class SessionEndpointNames
     public const string UpdateCurrent = "UpdateCurrentSession";
 }
 
-internal static class SessionEndpointsBuilder
+internal static class SessionEndpoints
 {
     extension(IEndpointRouteBuilder routeBuilder)
     {
@@ -41,7 +43,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPost(
                     "",
-                    async ([FromBody] [Required] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
                             request.EmailAddress,
@@ -49,14 +51,14 @@ internal static class SessionEndpointsBuilder
                             context.Request.Headers.UserAgent,
                             context.Connection.RemoteIpAddress?.ToString());
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(SessionEndpointNames.GetCurrent, value: SessionResponse.Create(result.Value)), context);
                     })
                 .AllowAnonymous()
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a new user session")
                 .WithSummary("Log In")
-                .Accepts<CreateSessionRequest>(MediaTypeNames.Application.Json)
-                .Produces<CreateSessionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
+                .Accepts<SessionResponse>(MediaTypeNames.Application.Json)
+                .Produces<SessionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -65,7 +67,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapGet(
                     "/current",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var query = new GetSessionQuery(
                             context.User.Id,
@@ -85,19 +87,19 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapPut(
                     "/current",
-                    async ([FromBody] [Required] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromBody] [Required] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
                             request.RefreshToken);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(result.Value), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(SessionResponse.Create(result.Value)), context);
                     })
                 .WithName(SessionEndpointNames.UpdateCurrent)
                 .WithDescription("Update current user session")
                 .WithSummary("Refresh Access Token")
                 .Accepts<UpdateSessionRequest>(MediaTypeNames.Application.Json)
-                .Produces<UpdateSessionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<SessionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -106,7 +108,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/current",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
                         var result = await mediator.Send(command, cancellationToken);
@@ -124,7 +126,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "/{id}",
-                    async ([FromRoute] SessionId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromRoute] SessionId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(id);
                         var result = await mediator.Send(command, cancellationToken);
@@ -142,7 +144,7 @@ internal static class SessionEndpointsBuilder
             groupBuilder
                 .MapDelete(
                     "",
-                    async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionsCommand(context.User.Id);
                         var result = await mediator.Send(command, cancellationToken);

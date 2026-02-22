@@ -28,11 +28,11 @@ internal sealed class JwtService(
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, userAuthDetails.Id),
+            new(JwtRegisteredClaimNames.Sub, userAuthDetails.Id.ToString()),
             new(JwtRegisteredClaimNames.GivenName, userAuthDetails.FirstName ?? string.Empty),
             new(JwtRegisteredClaimNames.FamilyName, userAuthDetails.LastName ?? string.Empty),
-            new(JwtRegisteredClaimNames.Email, userAuthDetails.EmailAddress),
-            new(JwtRegisteredClaimNames.Sid, sessionId),
+            new(JwtRegisteredClaimNames.Email, userAuthDetails.EmailAddress.Value),
+            new(JwtRegisteredClaimNames.Sid, sessionId.ToString()),
             new(JwtRegisteredClaimNames.Iat, issuedAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
         };
 

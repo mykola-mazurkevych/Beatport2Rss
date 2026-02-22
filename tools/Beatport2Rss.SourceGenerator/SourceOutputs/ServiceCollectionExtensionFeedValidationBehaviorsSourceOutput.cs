@@ -19,7 +19,7 @@ internal static class ServiceCollectionExtensionFeedValidationBehaviorsSourceOut
             .Union(
             [
                 "Beatport2Rss.Application.Behaviors",
-                "Beatport2Rss.Application.ReadModels.Feeds",
+                "Beatport2Rss.Application.Dtos.Feeds",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

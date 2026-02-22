@@ -31,7 +31,7 @@ internal sealed class RefreshTokenService(
 
     public RefreshTokenHash Hash(RefreshToken refreshToken)
     {
-        var bytes = Encoding.UTF8.GetBytes(refreshToken);
+        var bytes = Encoding.UTF8.GetBytes(refreshToken.Value);
         var hash = SHA256.HashData(bytes);
         var refreshTokenHash = RefreshTokenHash.Create(hash);
 

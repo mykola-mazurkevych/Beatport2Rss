@@ -18,8 +18,8 @@ internal static class FeedValidationBehaviorsSourceOutput
             .Select(i => i.Namespace)
             .Union(
             [
+                "Beatport2Rss.Application.Dtos.Feeds",
                 "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
-                "Beatport2Rss.Application.ReadModels.Feeds",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

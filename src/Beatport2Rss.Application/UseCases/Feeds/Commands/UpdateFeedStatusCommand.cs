@@ -10,9 +10,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public sealed record UpdateFeedStatusRequest(
-    bool IsActive);
-
 public sealed record UpdateFeedStatusCommand(
     UserId UserId,
     Slug Slug,

@@ -15,9 +15,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public sealed record CreateFeedRequest(
-    string? Name);
-
 public sealed record CreateFeedCommand(
     UserId UserId,
     string? Name) :
@@ -47,7 +44,7 @@ internal sealed class CreateFeedCommandHandler(
 
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
-        var slug = slugGenerator.Generate(feedName);
+        var slug = slugGenerator.Generate(feedName.Value);
 
         if (user.HasFeed(feedName))
         {

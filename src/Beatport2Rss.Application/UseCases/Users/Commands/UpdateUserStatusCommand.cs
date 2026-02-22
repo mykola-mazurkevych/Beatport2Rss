@@ -8,9 +8,6 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Users.Commands;
 
-public sealed record UpdateUserStatusRequest(
-    bool IsActive);
-
 public sealed record UpdateUserStatusCommand(
     UserId UserId,
     bool IsActive) :
