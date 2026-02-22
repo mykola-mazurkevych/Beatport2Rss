@@ -47,11 +47,12 @@ public sealed class PageBuilderTests : IAsyncLifetime
     [Fact]
     public async Task BuildAsync_WithoutCursors_Page1Returned()
     {
-        var page = await _pageBuilder.BuildAsync<PersonDto, PersonId>(
-            _dbContext.Persons.Select(PersonDto.FromPerson),
+        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+            _dbContext.Persons,
             Size,
             next: null,
             previous: null,
+            PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(Size, page.Size);
@@ -74,12 +75,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
     {
         var page1LastPerson = _persons[Size - 1];
         var next = _cursorEncoder.Encode(new Cursor<PersonId>(page1LastPerson.CreatedAt, page1LastPerson.Id));
-        var page = await _pageBuilder.BuildAsync<PersonDto, PersonId>(
-            _dbContext.Persons.Select(PersonDto.FromPerson),
+        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+            _dbContext.Persons,
             Size,
             next,
             previous: null,
-            cancellationToken: TestContext.Current.CancellationToken);
+            PersonPageDto.FromPerson,
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(Size, page.Size);
         Assert.Contains(page.Items, p => p.Id.Value == 6);
@@ -104,12 +106,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
     {
         var page2FirstPerson = _persons[Size];
         var previous = _cursorEncoder.Encode(new Cursor<PersonId>(page2FirstPerson.CreatedAt, page2FirstPerson.Id));
-        var page = await _pageBuilder.BuildAsync<PersonDto, PersonId>(
-            _dbContext.Persons.Select(PersonDto.FromPerson),
+        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+            _dbContext.Persons,
             Size,
             next: null,
             previous,
-            cancellationToken: TestContext.Current.CancellationToken);
+            PersonPageDto.FromPerson,
+            TestContext.Current.CancellationToken);
 
         Assert.Equal(Size, page.Size);
         Assert.Contains(page.Items, p => p.Id.Value == 1);
@@ -129,11 +132,12 @@ public sealed class PageBuilderTests : IAsyncLifetime
     [Fact(Skip = "Sorting does not work for now.")]
     public async Task BuildAsync_WhenSortedByNameAscending_AndWithoutCursors_Page1Returned()
     {
-        var page = await _pageBuilder.BuildAsync<PersonDto, PersonId>(
-            _dbContext.Persons.Select(PersonDto.FromPerson),
+        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+            _dbContext.Persons,
             Size,
             next: null,
             previous: null,
+            PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(Size, page.Size);
@@ -224,14 +228,14 @@ public sealed class PageBuilderTests : IAsyncLifetime
         DateTimeOffset CreatedAt) :
         IEntity<PersonId>;
 
-    private sealed record PersonDto(
+    private sealed record PersonPageDto(
         PersonId Id,
         string Name,
         int Age,
         DateTimeOffset CreatedAt) :
         IPageDto<PersonId>
     {
-        public static Expression<Func<Person, PersonDto>> FromPerson =>
+        public static Expression<Func<Person, PersonPageDto>> FromPerson =>
             person => new(person.Id,
                 person.Name,
                 person.Age,
