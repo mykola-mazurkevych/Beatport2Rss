@@ -12,6 +12,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
+    <PackageVersion Include="EFPagination" Version="1.0.0" />
     <PackageVersion Include="FluentResults" Version="4.0.0" />
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="Light.GuardClauses" Version="14.0.0" />
@@ -29,6 +30,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.3" />

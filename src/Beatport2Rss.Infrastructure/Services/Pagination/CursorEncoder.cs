@@ -11,12 +11,12 @@ namespace Beatport2Rss.Infrastructure.Services.Pagination;
 
 internal sealed class CursorEncoder(
     IOptions<JsonSerializerOptions> options) :
-    ICursorEndcoder
+    ICursorEncoder
 {
     private readonly JsonSerializerOptions _options = options.Value;
 
     public string Encode<TId>(Cursor<TId> cursor)
-        where TId : struct, IValueObject
+        where TId : struct, IId<TId>
     {
         var json = JsonSerializer.Serialize(cursor, _options);
         var bytes = System.Text.Encoding.UTF8.GetBytes(json);
@@ -24,7 +24,7 @@ internal sealed class CursorEncoder(
     }
 
     public Cursor<TId>? Decode<TId>(string? cursor)
-        where TId : struct, IValueObject
+        where TId : struct, IId<TId>
     {
         if (string.IsNullOrEmpty(cursor))
         {

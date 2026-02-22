@@ -94,7 +94,8 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddPagination() =>
             services
-                .AddSingleton<ICursorEndcoder, CursorEncoder>();
+                .AddSingleton<ICursorEncoder, CursorEncoder>()
+                .AddSingleton<IPageBuilder, PageBuilder>();
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
