@@ -2,7 +2,7 @@
 
 using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;

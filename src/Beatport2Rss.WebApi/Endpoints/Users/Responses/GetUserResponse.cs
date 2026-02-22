@@ -11,7 +11,7 @@ internal sealed record GetUserResponse(
     int TagsCount)
 {
     public static GetUserResponse Create(UserDto dto) =>
-        new(dto.EmailAddress,
+        new(dto.EmailAddress.Value,
             dto.FirstName,
             dto.LastName,
             dto.IsActive,

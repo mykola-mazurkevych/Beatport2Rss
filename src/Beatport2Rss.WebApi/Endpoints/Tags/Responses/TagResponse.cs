@@ -9,8 +9,8 @@ internal sealed record TagResponse(
     DateTimeOffset CreatedAt)
 {
     public static TagResponse Create(TagDto dto) =>
-        new(dto.Id,
-            dto.Name,
-            dto.Slug,
+        new(dto.Id.Value,
+            dto.Name.Value,
+            dto.Slug.Value,
             dto.CreatedAt);
 }

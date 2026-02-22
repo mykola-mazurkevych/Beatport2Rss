@@ -1,12 +1,12 @@
 using System.Linq.Expressions;
 
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface ICommandRepository<TEntity, in TId>
     where TEntity : class, IAggregateRoot<TId>
-    where TId : struct, IValueObject
+    where TId : struct, IId<TId>
 {
     Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken = default) =>
         LoadAsync(e => e.Id.Equals(id), cancellationToken);

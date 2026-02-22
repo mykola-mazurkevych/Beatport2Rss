@@ -1,10 +1,11 @@
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tracks;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Releases;
 
-public sealed class Release : IAggregateRoot<ReleaseId>
+public sealed class Release :
+    IAggregateRoot<ReleaseId>
 {
     private readonly HashSet<Track> _tracks = [];
 

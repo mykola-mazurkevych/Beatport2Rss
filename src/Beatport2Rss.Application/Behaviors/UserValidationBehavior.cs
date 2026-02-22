@@ -21,8 +21,7 @@ public sealed class UserValidationBehavior<TMessage, TResponse>(
         MessageHandlerDelegate<TMessage, TResponse> next,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(message.UserId);
-        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(message.UserId, cancellationToken);
 
         return readModel.Status switch
         {

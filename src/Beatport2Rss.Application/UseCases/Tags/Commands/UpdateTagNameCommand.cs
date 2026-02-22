@@ -46,9 +46,9 @@ internal sealed class UpdateTagNameCommandHandler(
         var tag = user.Tags.Single(t => t.Slug == command.Slug);
 
         var tagName = TagName.Create(command.Name);
-        var slug = slugGenerator.Generate(tagName);
+        var slug = slugGenerator.Generate(tagName.Value);
 
-        if (user.Tags.Any(t => t.Name == command.Name && t.Id != tag.Id))
+        if (user.Tags.Any(t => t.Name.Value == command.Name && t.Id != tag.Id))
         {
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }

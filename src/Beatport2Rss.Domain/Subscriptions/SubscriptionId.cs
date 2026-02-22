@@ -2,13 +2,14 @@ using System.Globalization;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Subscriptions;
 
-public readonly record struct SubscriptionId : IValueObject
+public readonly record struct SubscriptionId :
+    IId<SubscriptionId>
 {
     private SubscriptionId(int value) => Value = value;
 
@@ -17,18 +18,13 @@ public readonly record struct SubscriptionId : IValueObject
     public static SubscriptionId Create(int value) =>
         new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SubscriptionIdInvalid)));
 
+    public static bool operator <(SubscriptionId left, SubscriptionId right) => left.Value < right.Value;
+    public static bool operator >(SubscriptionId left, SubscriptionId right) => left.Value > right.Value;
+    public static bool operator <=(SubscriptionId left, SubscriptionId right) => left.Value >= right.Value;
+    public static bool operator >=(SubscriptionId left, SubscriptionId right) => left.Value >= right.Value;
+
+    public int CompareTo(SubscriptionId other) => Value.CompareTo(other.Value);
     public bool Equals(SubscriptionId other) => Value == other.Value;
-
-    public static bool operator ==(SubscriptionId left, int right) => left.Value == right;
-    public static bool operator !=(SubscriptionId left, int right) => left.Value != right;
-    public static bool operator ==(int left, SubscriptionId right) => left == right.Value;
-    public static bool operator !=(int left, SubscriptionId right) => left != right.Value;
-
-    public static implicit operator int(SubscriptionId subscriptionId) => subscriptionId.Value;
-    public static implicit operator string(SubscriptionId subscriptionId) => subscriptionId.ToString();
-
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString(CultureInfo.InvariantCulture);
-
-    public int ToInt32() => Value;
 }

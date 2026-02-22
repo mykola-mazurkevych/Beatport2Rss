@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +10,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext dbContext) :
     ICommandRepository<TEntity, TId>
     where TEntity : class, IAggregateRoot<TId>
-    where TId : struct, IValueObject
+    where TId : struct, IId<TId>
 {
     private readonly DbSet<TEntity> _dbSet = dbContext.Set<TEntity>();
 

@@ -13,5 +13,5 @@ internal sealed record SessionResponse(
         new(dto.AccessToken.Value,
             dto.TokenType,
             dto.ExpiresIn,
-            dto.RefreshToken);
+            dto.RefreshToken.Value);
 }

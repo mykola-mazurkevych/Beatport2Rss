@@ -44,7 +44,7 @@ internal sealed class CreateTagCommandHandler(
         var user = await userCommandRepository.LoadWithTagsAsync(command.UserId, cancellationToken);
 
         var tagName = TagName.Create(command.Name);
-        var slug = slugGenerator.Generate(tagName);
+        var slug = slugGenerator.Generate(tagName.Value);
 
         if (user.HasTag(tagName))
         {
