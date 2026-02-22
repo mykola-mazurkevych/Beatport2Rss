@@ -1,6 +1,6 @@
 ﻿using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +20,7 @@ internal sealed class PageBuilder(
         Func<TEntity, TDto> dtoSelector,
         CancellationToken cancellationToken = default)
         where TEntity : IEntity<TId>
-        where TId : struct, IValueObject, IComparable<TId>
+        where TId : struct, IId<TId>
     {
         var page = new Page<TDto>
         {

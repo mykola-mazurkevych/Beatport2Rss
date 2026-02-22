@@ -1,7 +1,7 @@
-namespace Beatport2Rss.Domain.Common.Interfaces;
+namespace Beatport2Rss.SharedKernel.Common;
 
 public interface IEntity<out TId>
-    where TId : struct, IValueObject
+    where TId : struct, IId<TId>
 {
     TId Id { get; }
 

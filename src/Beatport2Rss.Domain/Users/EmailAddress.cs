@@ -2,13 +2,14 @@ using System.Diagnostics.CodeAnalysis;
 
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Users;
 
-public readonly record struct EmailAddress : IValueObject
+public readonly record struct EmailAddress :
+    IValueObject
 {
     public const int MaxLength = 100;
 
@@ -23,14 +24,6 @@ public readonly record struct EmailAddress : IValueObject
             .MustBeEmailAddress(_ => new InvalidValueObjectValueException(ExceptionMessages.EmailAddressInvalid)));
 
     public bool Equals(EmailAddress other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
-
-    public static bool operator ==(EmailAddress left, string? right) => StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
-    public static bool operator !=(EmailAddress left, string? right) => !StringComparer.OrdinalIgnoreCase.Equals(left.Value, right);
-    public static bool operator ==(string? left, EmailAddress right) => StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
-    public static bool operator !=(string? left, EmailAddress right) => !StringComparer.OrdinalIgnoreCase.Equals(left, right.Value);
-
-    public static implicit operator string(EmailAddress emailAddress) => emailAddress.Value;
-
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
 }

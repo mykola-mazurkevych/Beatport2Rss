@@ -2,8 +2,8 @@
 using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Infrastructure.Services.Pagination;
+using Beatport2Rss.SharedKernel.Common;
 
 using Bogus;
 

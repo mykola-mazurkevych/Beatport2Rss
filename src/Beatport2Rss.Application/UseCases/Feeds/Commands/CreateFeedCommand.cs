@@ -44,7 +44,7 @@ internal sealed class CreateFeedCommandHandler(
 
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
-        var slug = slugGenerator.Generate(feedName);
+        var slug = slugGenerator.Generate(feedName.Value);
 
         if (user.HasFeed(feedName))
         {

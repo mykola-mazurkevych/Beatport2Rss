@@ -11,9 +11,9 @@ internal sealed record GetFeedResponse(
     DateTimeOffset CreatedAt)
 {
     public static GetFeedResponse Create(FeedDto dto) =>
-        new(dto.Id,
-            dto.Name,
-            dto.Slug,
+        new(dto.Id.Value,
+            dto.Name.Value,
+            dto.Slug.Value,
             dto.Owner,
             dto.IsActive,
             dto.CreatedAt);

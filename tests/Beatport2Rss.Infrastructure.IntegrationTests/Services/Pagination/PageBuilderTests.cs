@@ -5,8 +5,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Infrastructure.Services.Pagination;
+using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -185,12 +185,17 @@ public sealed class PageBuilderTests : IAsyncLifetime
     }
 
     private readonly record struct PersonId :
-        IValueObject, IComparable<PersonId>
+        IId<PersonId>
     {
         private PersonId(int value) =>
             Value = value;
 
         public int Value { get; }
+
+        public static bool operator <(PersonId left, PersonId right) => left.Value < right.Value;
+        public static bool operator >(PersonId left, PersonId right) => left.Value > right.Value;
+        public static bool operator <=(PersonId left, PersonId right) => left.Value <= right.Value;
+        public static bool operator >=(PersonId left, PersonId right) => left.Value >= right.Value;
 
         public static PersonId Create(int value) =>
             new(value);

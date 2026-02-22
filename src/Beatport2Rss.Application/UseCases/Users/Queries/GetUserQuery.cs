@@ -19,9 +19,7 @@ internal sealed class GetUserQueryHandler(
         GetUserQuery query,
         CancellationToken cancellationToken)
     {
-        var userId = UserId.Create(query.UserId);
-
-        var readModel = await userQueryRepository.LoadUserDetailsReadModelAsync(userId, cancellationToken);
+        var readModel = await userQueryRepository.LoadUserDetailsReadModelAsync(query.UserId, cancellationToken);
 
         return new UserDto(
             readModel.EmailAddress,

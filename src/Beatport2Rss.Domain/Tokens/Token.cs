@@ -1,8 +1,9 @@
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Tokens;
 
-public sealed class Token : IAggregateRoot<TokenId>
+public sealed class Token :
+    IAggregateRoot<TokenId>
 {
     private Token()
     {

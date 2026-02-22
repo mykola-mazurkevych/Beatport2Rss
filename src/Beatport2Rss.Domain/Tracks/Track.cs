@@ -1,10 +1,11 @@
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Releases;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Tracks;
 
-public sealed class Track : IEntity<TrackId>
+public sealed class Track :
+    IEntity<TrackId>
 {
     private Track()
     {

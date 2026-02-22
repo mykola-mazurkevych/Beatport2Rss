@@ -1,11 +1,12 @@
-using Beatport2Rss.Domain.Common.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Subscriptions;
 
-public sealed class Subscription : IAggregateRoot<SubscriptionId>
+public sealed class Subscription :
+    IAggregateRoot<SubscriptionId>
 {
     private readonly HashSet<FeedId> _feedIds = [];
     private readonly HashSet<TagId> _tagIds = [];

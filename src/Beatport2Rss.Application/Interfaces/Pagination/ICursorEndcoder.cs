@@ -1,5 +1,5 @@
 ﻿using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Domain.Common.Interfaces;
+using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Application.Interfaces.Pagination;
 
