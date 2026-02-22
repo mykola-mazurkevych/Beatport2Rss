@@ -10,6 +10,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Beatport2Rss.Application.UnitTests/Beatport2Rss.Application.UnitTests.csproj" />
     <Project Path="tests/Beatport2Rss.ArchitectureTests/Beatport2Rss.ArchitectureTests.csproj" />
+    <Project Path="tests/Beatport2Rss.Infrastructure.IntegrationTests/Beatport2Rss.Infrastructure.IntegrationTests.csproj" />
     <Project Path="tests/Beatport2Rss.Infrastructure.UnitTests/Beatport2Rss.Infrastructure.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tools/">

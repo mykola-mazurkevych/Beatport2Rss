@@ -49,15 +49,22 @@ public sealed class CursorEncoderTests
     }
 
     private readonly record struct IntId :
-        IValueObject
+        IId<IntId>
     {
         private IntId(int value) =>
             Value = value;
 
         public int Value { get; }
 
+        public static bool operator <(IntId left, IntId right) => left.Value < right.Value;
+        public static bool operator >(IntId left, IntId right) => left.Value > right.Value;
+        public static bool operator <=(IntId left, IntId right) => left.Value <= right.Value;
+        public static bool operator >=(IntId left, IntId right) => left.Value >= right.Value;
+
         public static IntId Create(int value) =>
             new(value);
+
+        public int CompareTo(IntId other) => Value.CompareTo(other.Value);
     }
 
     private sealed class IntIdJsonConverter :
@@ -77,15 +84,22 @@ public sealed class CursorEncoderTests
     }
 
     private readonly record struct GuidId :
-        IValueObject
+        IId<GuidId>
     {
         private GuidId(Guid value) =>
             Value = value;
 
         public Guid Value { get; }
 
+        public static bool operator <(GuidId left, GuidId right) => left.Value < right.Value;
+        public static bool operator >(GuidId left, GuidId right) => left.Value > right.Value;
+        public static bool operator <=(GuidId left, GuidId right) => left.Value <= right.Value;
+        public static bool operator >=(GuidId left, GuidId right) => left.Value >= right.Value;
+
         public static GuidId Create(Guid value) =>
             new(value);
+
+        public int CompareTo(GuidId other) => Value.CompareTo(other.Value);
     }
 
     private sealed class GuidIdJsonConverter :

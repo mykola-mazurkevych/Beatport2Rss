@@ -3,11 +3,11 @@ using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Application.Interfaces.Pagination;
 
-public interface ICursorEndcoder
+public interface ICursorEncoder
 {
     string Encode<TId>(Cursor<TId> cursor)
-        where TId : struct, IValueObject;
+        where TId : struct, IId<TId>;
 
     Cursor<TId>? Decode<TId>(string? base64String)
-        where TId : struct, IValueObject;
+        where TId : struct, IId<TId>;
 }
