@@ -21,6 +21,7 @@ file static class FeedEndpointNames
     public const string Create = "CreateFeed";
     public const string Delete = "DeleteFeed";
     public const string Get = "GetFeed";
+    public const string List = "ListFeeds";
     public const string UpdateStatus = "UpdateFeedStatus";
 }
 
@@ -36,7 +37,25 @@ internal static class FeedEndpoints
                 .HasApiVersion(ApiVersionsContainer.V1)
                 .WithTags("Feeds");
 
-            //// groupBuilder.MapGet("", ...); // Get feeds
+            groupBuilder.MapGet(
+                    "",
+                    static async ([FromQuery] int? size, [FromQuery] string? next, [FromQuery] string? previos, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetFeedsQuery(
+                            context.User.Id,
+                            size,
+                            next,
+                            previos);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetFeedsResponse>.Create(result.Value, GetFeedsResponse.Create)), context);
+                    })
+                .WithName(FeedEndpointNames.List)
+                .WithDescription("Get a list of feed")
+                .WithSummary("List")
+                .Produces<PageResponse<GetFeedsResponse>>(StatusCodes.Status201Created)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapPost(
