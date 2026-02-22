@@ -7,13 +7,12 @@ namespace Beatport2Rss.Application.Interfaces.Pagination;
 
 public interface IPageBuilder
 {
-    Task<Page<TDto>> BuildAsync<TEntity, TId, TDto>(
-        IQueryable<TEntity> entitiesAsQueryable,
+    Task<Page<TListDto>> BuildAsync<TListDto, TId>(
+        IQueryable<TListDto> entitiesAsQueryable,
         int? size,
         string? next,
         string? previous,
-        Func<TEntity, TDto> dtoSelector,
         CancellationToken cancellationToken = default)
-        where TEntity : IEntity<TId>
+        where TListDto : class, IPageDto<TId>
         where TId : struct, IId<TId>;
 }
