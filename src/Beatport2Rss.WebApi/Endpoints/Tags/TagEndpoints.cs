@@ -21,6 +21,7 @@ file static class TagEndpointNames
     public const string Create = "CreateTag";
     public const string Delete = "DeleteTag";
     public const string Get = "GetTag";
+    public const string List = "ListTags";
     public const string UpdateName = "UpdateName";
 }
 
@@ -36,7 +37,26 @@ internal static class TagEndpoints
                 .HasApiVersion(ApiVersionsContainer.V1)
                 .WithTags("Tags");
 
-            // groupBuilder.MapGet("", ...) // Get list of tags
+            groupBuilder.MapGet(
+                    "",
+                    static async ([FromQuery] int? size, [FromQuery] string? next, [FromQuery] string? previos, [FromServices] IMediator mediator, HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetTagsQuery(
+                            context.User.Id,
+                            size,
+                            next,
+                            previos);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetTagsResponse>.Create(result.Value, GetTagsResponse.Create)), context);
+                    })
+                .WithName(TagEndpointNames.List)
+                .WithDescription("Get a list of tags")
+                .WithSummary("List")
+                .Produces<PageResponse<GetTagsResponse>>(StatusCodes.Status201Created)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapPost(

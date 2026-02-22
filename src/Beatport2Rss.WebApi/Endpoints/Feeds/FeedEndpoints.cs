@@ -50,7 +50,7 @@ internal static class FeedEndpoints
                         return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetFeedsResponse>.Create(result.Value, GetFeedsResponse.Create)), context);
                     })
                 .WithName(FeedEndpointNames.List)
-                .WithDescription("Get a list of feed")
+                .WithDescription("Get a list of feeds")
                 .WithSummary("List")
                 .Produces<PageResponse<GetFeedsResponse>>(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
