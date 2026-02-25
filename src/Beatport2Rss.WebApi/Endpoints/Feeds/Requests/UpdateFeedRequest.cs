@@ -1,5 +1,6 @@
 namespace Beatport2Rss.WebApi.Endpoints.Feeds.Requests;
 
-internal sealed record CreateFeedRequest(
+internal sealed record UpdateFeedRequest(
     string Name,
+    bool UpdateSlug,
     bool IsActive);

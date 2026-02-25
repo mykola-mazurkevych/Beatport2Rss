@@ -22,6 +22,7 @@ file static class FeedEndpointNames
     public const string Delete = "DeleteFeed";
     public const string Get = "GetFeed";
     public const string List = "ListFeeds";
+    public const string Update = "UpdateStatus";
     public const string UpdateStatus = "UpdateFeedStatus";
 }
 
@@ -64,7 +65,8 @@ internal static class FeedEndpoints
                     {
                         var command = new CreateFeedCommand(
                             context.User.Id,
-                            request.Name);
+                            request.Name,
+                            request.IsActive);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
@@ -100,7 +102,29 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
-            //// groupBuilder.MapPut("/slug", ...); // Update feed
+            groupBuilder
+                .MapPut(
+                    "/{slug}",
+                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateFeedCommand(
+                            context.User.Id,
+                            slug,
+                            request.Name,
+                            request.UpdateSlug,
+                            request.IsActive);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.RedirectToRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
+                    })
+                .WithName(FeedEndpointNames.Update)
+                .WithDescription("Update feed by its slug")
+                .WithSummary("Update")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
                 .MapPut(

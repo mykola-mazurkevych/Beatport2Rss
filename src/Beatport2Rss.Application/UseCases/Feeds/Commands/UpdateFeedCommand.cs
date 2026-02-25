@@ -1,4 +1,4 @@
-using Beatport2Rss.Application.Extensions;
+﻿using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
@@ -15,54 +15,46 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
-public sealed record CreateFeedCommand(
+public sealed record UpdateFeedCommand(
     UserId UserId,
+    Slug Slug,
     string? Name,
+    bool UpdateSlug,
     bool IsActive) :
-    ICommand<Result<Slug>>, IRequireValidation, IRequireActiveUser;
+    ICommand<Result<Slug>>, IRequireUser, IRequireFeed;
 
-internal sealed class CreateFeedCommandValidator :
-    AbstractValidator<CreateFeedCommand>
+internal sealed class UpdateFeedCommandValidator :
+    AbstractValidator<UpdateFeedCommand>
 {
-    public CreateFeedCommandValidator()
+    public UpdateFeedCommandValidator()
     {
         RuleFor(c => c.Name).IsFeedName();
     }
 }
 
-internal sealed class CreateFeedCommandHandler(
-    IClock clock,
+internal sealed class UpdateFeedCommandHandler(
     ISlugGenerator slugGenerator,
     IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<CreateFeedCommand, Result<Slug>>
+    ICommandHandler<UpdateFeedCommand, Result<Slug>>
 {
     public async ValueTask<Result<Slug>> Handle(
-        CreateFeedCommand command,
-        CancellationToken cancellationToken = default)
+        UpdateFeedCommand command,
+        CancellationToken cancellationToken)
     {
+        var slug = command.Slug;
         var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
 
-        var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
-        var slug = slugGenerator.Generate(feedName.Value);
+        user.UpdateFeedName(command.Slug, feedName);
+        user.UpdateFeedStatus(command.Slug, command.IsActive);
 
-        if (user.HasFeed(feedName))
+        if (command.UpdateSlug)
         {
-            return Result.Conflict($"Feed name '{feedName}' is already taken.");
+            slug = slugGenerator.Generate(feedName.Value);
+            user.UpdateFeedSlug(command.Slug, slug);
         }
 
-        var feed = Feed.Create(
-            feedId,
-            clock.UtcNow,
-            user.Id,
-            feedName,
-            slug,
-            command.IsActive);
-
-        user.AddFeed(feed);
-
-        userCommandRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return slug;

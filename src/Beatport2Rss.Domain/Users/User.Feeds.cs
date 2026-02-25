@@ -18,6 +18,12 @@ public sealed partial class User
     public void RemoveFeed(Slug slug) =>
         _feeds.RemoveWhere(f => f.Slug == slug);
 
+    public void UpdateFeedName(Slug slug, FeedName name) =>
+        _feeds.Single(f => f.Slug == slug).UpdateName(name);
+
+    public void UpdateFeedSlug(Slug slug, Slug newSlug) =>
+        _feeds.Single(f => f.Slug == slug).UpdateSlug(newSlug);
+
     public void UpdateFeedStatus(Slug slug, bool isActive) =>
-        _feeds.Single(f => f.Slug == slug).UpdateStatus(isActive ? FeedStatus.Active : FeedStatus.Inactive);
+        _feeds.Single(f => f.Slug == slug).UpdateStatus(isActive);
 }

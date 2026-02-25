@@ -37,7 +37,7 @@ public sealed class Feed :
         UserId userId,
         FeedName name,
         Slug slug,
-        FeedStatus status) =>
+        bool isActive) =>
         new()
         {
             Id = id,
@@ -45,16 +45,24 @@ public sealed class Feed :
             UserId = userId,
             Name = name,
             Slug = slug,
-            Status = status,
+            Status = isActive? FeedStatus.Active : FeedStatus.Inactive,
         };
-    
+
     internal void UpdateName(FeedName name) =>
         Name = name;
 
-    internal void UpdateStatus(FeedStatus status) =>
-        Status = status;
+    internal void UpdateSlug(Slug slug) =>
+        Slug = slug;
 
-    internal void AddSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Add(subscriptionId);
-    internal void RemoveSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Remove(subscriptionId);
-    internal bool HasSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Contains(subscriptionId);
+    internal void UpdateStatus(bool isActive) =>
+        Status = isActive ? FeedStatus.Active : FeedStatus.Inactive;
+
+    internal void AddSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Add(subscriptionId);
+
+    internal void RemoveSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Remove(subscriptionId);
+
+    internal bool HasSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Contains(subscriptionId);
 }
