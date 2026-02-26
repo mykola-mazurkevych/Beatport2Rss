@@ -33,7 +33,7 @@ internal sealed class CreateFeedCommandValidator :
 internal sealed class CreateFeedCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
-    IUserCommandRepository userCommandRepository,
+    IFeedCommandRepository feedCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateFeedCommand, Result<Slug>>
 {
@@ -41,13 +41,11 @@ internal sealed class CreateFeedCommandHandler(
         CreateFeedCommand command,
         CancellationToken cancellationToken = default)
     {
-        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
-
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
         var slug = slugGenerator.Generate(feedName.Value);
 
-        if (user.HasFeed(feedName))
+        if (await feedCommandRepository.ExistsAsync(f => f.UserId == command.UserId && f.Name == feedName, cancellationToken))
         {
             return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }
@@ -55,14 +53,12 @@ internal sealed class CreateFeedCommandHandler(
         var feed = Feed.Create(
             feedId,
             clock.UtcNow,
-            user.Id,
+            command.UserId,
             feedName,
             slug,
             command.IsActive);
 
-        user.AddFeed(feed);
-
-        userCommandRepository.Update(user);
+        await feedCommandRepository.AddAsync(feed, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return slug;

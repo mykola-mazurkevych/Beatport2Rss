@@ -34,7 +34,7 @@ internal sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
             .IsRequired();
 
         builder.HasOne<User>()
-            .WithMany(user => user.Tags)
+            .WithMany()
             .HasForeignKey(tag => tag.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 

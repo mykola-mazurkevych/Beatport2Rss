@@ -29,8 +29,11 @@ public sealed class Subscription :
 
     public DateTimeOffset? RefreshedAt { get; private set; }
 
-    public IReadOnlySet<FeedId> FeedIds => _feedIds.AsReadOnly();
-    public IReadOnlySet<TagId> TagIds => _tagIds.AsReadOnly();
+    public IReadOnlySet<FeedId> FeedIds =>
+        _feedIds.AsReadOnly();
+
+    public IReadOnlySet<TagId> TagIds =>
+        _tagIds.AsReadOnly();
 
     public static Subscription Create(
         SubscriptionId id,
@@ -53,9 +56,15 @@ public sealed class Subscription :
             RefreshedAt = refreshedAt,
         };
 
-    public void MarkAsPulled(DateTimeOffset pulledDate) => RefreshedAt = pulledDate;
+    public void MarkAsRefreshed(DateTimeOffset refreshedAt) =>
+        RefreshedAt = refreshedAt;
 
-    public void AddTag(Tag tag) => _tagIds.Add(tag.Id);
-    public void RemoveTag(Tag tag) => _tagIds.Remove(tag.Id);
-    public bool HasTag(Tag tag) => _tagIds.Contains(tag.Id);
+    public void AddTag(TagId tagId) =>
+        _tagIds.Add(tagId);
+
+    public void RemoveTag(TagId tagId) =>
+        _tagIds.Remove(tagId);
+
+    public bool HasTag(TagId tagId) =>
+        _tagIds.Contains(tagId);
 }

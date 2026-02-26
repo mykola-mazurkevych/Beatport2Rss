@@ -16,7 +16,7 @@ public sealed record DeleteFeedCommand(
     ICommand<Result>, IRequireUser, IRequireFeed;
 
 internal sealed class DeleteFeedCommandHandler(
-    IUserCommandRepository userCommandRepository,
+    IFeedCommandRepository feedCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteFeedCommand, Result>
 {
@@ -24,10 +24,9 @@ internal sealed class DeleteFeedCommandHandler(
         DeleteFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
 
-        user.RemoveFeed(command.Slug);
-
+        feedCommandRepository.Delete(feed);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

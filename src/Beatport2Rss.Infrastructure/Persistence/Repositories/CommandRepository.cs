@@ -29,6 +29,9 @@ internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext db
         return entities.AsEnumerable();
     }
 
+    public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        _dbSet.AnyAsync(predicate, cancellationToken);
+
     public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default) =>
         _dbSet.AddAsync(entity, cancellationToken).AsTask();
 

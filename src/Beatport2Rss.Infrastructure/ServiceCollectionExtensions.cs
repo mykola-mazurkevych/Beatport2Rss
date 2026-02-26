@@ -105,6 +105,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()

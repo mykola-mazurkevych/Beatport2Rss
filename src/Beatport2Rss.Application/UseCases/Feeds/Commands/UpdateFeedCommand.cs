@@ -34,7 +34,7 @@ internal sealed class UpdateFeedCommandValidator :
 
 internal sealed class UpdateFeedCommandHandler(
     ISlugGenerator slugGenerator,
-    IUserCommandRepository userCommandRepository,
+    IFeedCommandRepository feedCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<UpdateFeedCommand, Result<Slug>>
 {
@@ -42,21 +42,23 @@ internal sealed class UpdateFeedCommandHandler(
         UpdateFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var slug = command.Slug;
-        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
 
         var feedName = FeedName.Create(command.Name);
-        user.UpdateFeedName(command.Slug, feedName);
-        user.UpdateFeedStatus(command.Slug, command.IsActive);
+        var slug = command.UpdateSlug ? slugGenerator.Generate(feedName.Value) : feed.Slug;
 
-        if (command.UpdateSlug)
+        if (await feedCommandRepository.ExistsAsync(f => f.UserId == command.UserId && f.Name == feedName && f.Id != feed.Id, cancellationToken))
         {
-            slug = slugGenerator.Generate(feedName.Value);
-            user.UpdateFeedSlug(command.Slug, slug);
+            return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }
 
+        feed.UpdateName(feedName);
+        feed.UpdateSlug(slug);
+        feed.UpdateStatus(command.IsActive);
+
+        feedCommandRepository.Update(feed);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return slug;
+        return feed.Slug;
     }
 }

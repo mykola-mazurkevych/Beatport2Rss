@@ -16,7 +16,7 @@ public sealed record DeleteTagCommand(
     ICommand<Result>, IRequireUser, IRequireTag;
 
 internal sealed class DeleteTagCommandHandler(
-    IUserCommandRepository userCommandRepository,
+    ITagCommandRepository tagCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteTagCommand, Result>
 {
@@ -24,10 +24,9 @@ internal sealed class DeleteTagCommandHandler(
         DeleteTagCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userCommandRepository.LoadWithTagsAsync(command.UserId, cancellationToken);
+        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.Slug, cancellationToken);
 
-        user.RemoveTag(command.Slug);
-
+        tagCommandRepository.Delete(tag);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

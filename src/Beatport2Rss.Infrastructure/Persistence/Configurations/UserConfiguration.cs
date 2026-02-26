@@ -39,12 +39,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.Status)
             .IsEnum();
 
-        builder.Navigation(user => user.Feeds)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
-        builder.Navigation(user => user.Tags)
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
         builder.Ignore(user => user.FullName);
         builder.Ignore(user => user.IsActive);
 

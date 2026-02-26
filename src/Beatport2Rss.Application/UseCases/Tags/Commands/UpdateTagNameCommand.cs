@@ -1,5 +1,4 @@
-﻿using Beatport2Rss.Application.Dtos.Tags;
-using Beatport2Rss.Application.Extensions;
+﻿using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
@@ -20,7 +19,7 @@ public sealed record UpdateTagNameCommand(
     UserId UserId,
     Slug Slug,
     string? Name) :
-    ICommand<Result<TagDto>>, IRequireActiveUser, IRequireTag;
+    ICommand<Result<Slug>>, IRequireActiveUser, IRequireTag;
 
 internal sealed class UpdateTagNameCommandValidator :
     AbstractValidator<UpdateTagNameCommand>
@@ -34,34 +33,30 @@ internal sealed class UpdateTagNameCommandValidator :
 
 internal sealed class UpdateTagNameCommandHandler(
     ISlugGenerator slugGenerator,
-    IUserCommandRepository userCommandRepository,
+    ITagCommandRepository tagCommandRepository,
     IUnitOfWork unitOfWork) :
-    ICommandHandler<UpdateTagNameCommand, Result<TagDto>>
+    ICommandHandler<UpdateTagNameCommand, Result<Slug>>
 {
-    public async ValueTask<Result<TagDto>> Handle(
+    public async ValueTask<Result<Slug>> Handle(
         UpdateTagNameCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userCommandRepository.LoadWithTagsAsync(command.UserId, cancellationToken);
-        var tag = user.Tags.Single(t => t.Slug == command.Slug);
+        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.Slug, cancellationToken);
 
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);
 
-        if (user.Tags.Any(t => t.Name.Value == command.Name && t.Id != tag.Id))
+        if (await tagCommandRepository.ExistsAsync(t => t.UserId == command.UserId && t.Name == tagName && t.Id != tag.Id, cancellationToken))
         {
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }
 
-        user.UpdateTag(tag.Id, tagName, slug);
+        tag.UpdateName(tagName);
+        tag.UpdateSlug(slug);
 
-        userCommandRepository.Update(user);
+        tagCommandRepository.Update(tag);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new TagDto(
-            tag.Id,
-            tag.Name,
-            tag.Slug,
-            tag.CreatedAt);
+        return tag.Slug;
     }
 }

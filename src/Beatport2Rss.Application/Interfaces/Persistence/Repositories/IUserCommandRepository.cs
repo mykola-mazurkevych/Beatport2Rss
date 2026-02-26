@@ -3,8 +3,4 @@ using Beatport2Rss.Domain.Users;
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface IUserCommandRepository :
-    ICommandRepository<User, UserId>
-{
-    Task<User> LoadWithFeedsAsync(UserId userId, CancellationToken cancellationToken = default);
-    Task<User> LoadWithTagsAsync(UserId userId, CancellationToken cancellationToken = default);
-}
+    ICommandRepository<User, UserId>;
