@@ -21,7 +21,7 @@ internal sealed class EmailAddressValueConverter() : ValueConverter<EmailAddress
 internal sealed class FeedIdValueConverter() : ValueConverter<FeedId, Guid>(feedId => feedId.Value, value => FeedId.Create(value));
 internal sealed class FeedNameValueConverter() : ValueConverter<FeedName, string>(feedName => feedName.Value, value => FeedName.Create(value));
 internal sealed class PasswordHashValueConverter() : ValueConverter<PasswordHash, string>(passwordHash => passwordHash.Value, value => PasswordHash.Create(value));
-internal sealed class RefreshTokenHashValueConverter() : ValueConverter<RefreshTokenHash, byte[]>(refreshToken => refreshToken.Value, value => RefreshTokenHash.Create(value));
+internal sealed class RefreshTokenHashValueConverter() : ValueConverter<RefreshTokenHash, byte[]>(refreshToken => refreshToken.Value.ToArray(), value => RefreshTokenHash.Create(value));
 internal sealed class ReleaseIdValueConverter() : ValueConverter<ReleaseId, int>(releaseId => releaseId.Value, value => ReleaseId.Create(value));
 internal sealed class SessionIdValueConverter() : ValueConverter<SessionId, Guid>(sessionId => sessionId.Value, value => SessionId.Create(value));
 internal sealed class SlugValueConverter() : ValueConverter<Slug, string>(slug => slug.Value, value => Slug.Create(value));
