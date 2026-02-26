@@ -1,6 +1,5 @@
-﻿using System.IO.Compression;
-
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
+﻿using Beatport2Rss.Application.Interfaces.Services.Beatport;
+using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Infrastructure.Options;
 
 using Microsoft.Extensions.Options;
@@ -9,49 +8,27 @@ using PuppeteerSharp;
 
 namespace Beatport2Rss.Infrastructure.Services.Beatport;
 
-file static class ChromiumConstants
-{
-    public const string DirectoryName = "chrome-win";
-    public const string ExecutableFileName = "chrome.exe";
-    public const string UriString = "https://download-chromium.appspot.com/dl/Win";
-}
-
 internal sealed class BeatportAccessTokenProvider(
-    IOptions<BeatportCredentials> beatportCredentials) :
-    IBeatportAccessTokenProvider, IDisposable, IAsyncDisposable
+    IOptions<BeatportCredentials> beatportCredentials,
+    IChromiumDownloader chromiumDownloader) :
+    IBeatportAccessTokenProvider
 {
-    private readonly BeatportCredentials _beatportCredentials = beatportCredentials.Value;
+#if DEBUG
+    private const bool Headless = false;
+#else
+    private const bool Headless = true;
+#endif
 
-    private readonly HttpClient _httpClient = new();
+    private readonly BeatportCredentials _beatportCredentials = beatportCredentials.Value;
 
     public async Task<(string? AccessToken, int ExpiresIn)> ProvideAsync(CancellationToken cancellationToken = default)
     {
+        var executablePath = await chromiumDownloader.EnsureInstalledAsync(cancellationToken);
+
         string? accessToken = null;
         int expiresIn = 0;
 
-        var tempPath = Path.GetTempPath();
-        var directoryPath = $"{tempPath}{ChromiumConstants.DirectoryName}";
-        var executablePath = $"{directoryPath}\\{ChromiumConstants.ExecutableFileName}";
-
-        if (!File.Exists(executablePath))
-        {
-            if (Directory.Exists(directoryPath))
-            {
-                Directory.Delete(directoryPath, true);
-            }
-
-            await using var chromiumZipArchiveStream = await _httpClient.GetStreamAsync(new Uri(ChromiumConstants.UriString), cancellationToken).ConfigureAwait(false);
-            await using var chromiumZipArchive = new ZipArchive(chromiumZipArchiveStream);
-            await chromiumZipArchive.ExtractToDirectoryAsync(tempPath, cancellationToken);
-        }
-
-#if DEBUG
-        const bool headless = false;
-#else
-        const bool headless = true;
-#endif
-
-        var launchOptions = new LaunchOptions { ExecutablePath = executablePath, Headless = headless, Browser = SupportedBrowser.Chrome };
+        var launchOptions = new LaunchOptions { ExecutablePath = executablePath, Headless = Headless, Browser = SupportedBrowser.Chrome };
         await using var browser = await Puppeteer.LaunchAsync(launchOptions).ConfigureAwait(false);
 
         await using var page = await browser.NewPageAsync().ConfigureAwait(false);
@@ -97,16 +74,5 @@ internal sealed class BeatportAccessTokenProvider(
         await page.WaitForResponseAsync("https://api.beatport.com/v4/swagger-ui/json/").ConfigureAwait(false);
 
         return (accessToken, expiresIn);
-    }
-
-    public void Dispose()
-    {
-        _httpClient.Dispose();
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        _httpClient.Dispose();
-        return ValueTask.CompletedTask;
     }
 }

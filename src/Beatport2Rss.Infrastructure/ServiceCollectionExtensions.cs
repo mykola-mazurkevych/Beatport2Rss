@@ -88,6 +88,7 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddMiscServices() =>
             services
+                .AddSingleton<IChromiumDownloader, ChromiumDownloader>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
