@@ -2,7 +2,7 @@ using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Users;
 
-public sealed partial class User :
+public sealed class User :
     IAggregateRoot<UserId>
 {
     public const int NameLength = 100;
@@ -28,7 +28,8 @@ public sealed partial class User :
             ? null
             : $"{FirstName} {LastName}".Trim();
 
-    public bool IsActive => Status == UserStatus.Active;
+    public bool IsActive =>
+        Status == UserStatus.Active;
 
     public static User Create(
         UserId id,

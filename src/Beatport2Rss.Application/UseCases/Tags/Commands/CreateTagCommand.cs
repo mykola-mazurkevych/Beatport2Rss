@@ -33,7 +33,7 @@ internal sealed class CreateTagCommandValidator :
 internal sealed class CreateTagCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
-    IUserCommandRepository userCommandRepository,
+    ITagCommandRepository tagCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateTagCommand, Result<TagDto>>
 {
@@ -41,25 +41,21 @@ internal sealed class CreateTagCommandHandler(
         CreateTagCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userCommandRepository.LoadWithTagsAsync(command.UserId, cancellationToken);
-
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);
 
-        if (user.HasTag(tagName))
+        if (await tagCommandRepository.ExistsAsync(t => t.UserId == command.UserId && t.Name == tagName, cancellationToken))
         {
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }
 
         var tag = Tag.Create(
             clock.UtcNow,
-            user.Id,
+            command.UserId,
             tagName,
             slug);
 
-        user.AddTag(tag);
-
-        userCommandRepository.Update(user);
+        await tagCommandRepository.AddAsync(tag, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new TagDto(

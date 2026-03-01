@@ -8,7 +8,7 @@ using Beatport2Rss.SharedKernel.Common;
 namespace Beatport2Rss.Domain.Tags;
 
 public sealed class Tag :
-    IEntity<TagId>
+    IAggregateRoot<TagId>
 {
     private Tag()
     {
@@ -36,9 +36,9 @@ public sealed class Tag :
             Slug = slug,
         };
 
-    internal void UpdateName(TagName name) =>
+    public void UpdateName(TagName name) =>
         Name = name;
 
-    internal void UpdateSlug(Slug slug) =>
+    public void UpdateSlug(Slug slug) =>
         Slug = slug;
 }

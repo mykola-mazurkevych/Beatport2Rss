@@ -112,7 +112,7 @@ internal static class TagEndpoints
                             slug,
                             request.Name);
                         var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(TagResponse.Create(result.Value)), context);
+                        return result.ToAspNetCoreResult(() => Results.RedirectToRoute(TagEndpointNames.Get, routeValues: new { slug = result.Value }), context);
                     })
                 .WithName(TagEndpointNames.UpdateName)
                 .WithDescription("Update tag's name by its slug")

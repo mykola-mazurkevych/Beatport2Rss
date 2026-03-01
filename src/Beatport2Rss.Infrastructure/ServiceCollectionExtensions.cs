@@ -88,6 +88,7 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddMiscServices() =>
             services
+                .AddSingleton<IChromiumDownloader, ChromiumDownloader>()
                 .AddSingleton<IClock, Clock>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
@@ -104,6 +105,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()

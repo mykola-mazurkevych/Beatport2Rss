@@ -17,7 +17,7 @@ public sealed record UpdateFeedStatusCommand(
     ICommand<Result>, IRequireActiveUser, IRequireFeed;
 
 internal sealed class UpdateFeedStatusCommandHandler(
-    IUserCommandRepository userCommandRepository,
+    IFeedCommandRepository feedCommandRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<UpdateFeedStatusCommand, Result>
 {
@@ -25,11 +25,11 @@ internal sealed class UpdateFeedStatusCommandHandler(
         UpdateFeedStatusCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userCommandRepository.LoadWithFeedsAsync(command.UserId, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
 
-        user.UpdateFeedStatus(command.Slug, command.IsActive);
+        feed.UpdateStatus(command.IsActive);
 
-        userCommandRepository.Update(user);
+        feedCommandRepository.Update(feed);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

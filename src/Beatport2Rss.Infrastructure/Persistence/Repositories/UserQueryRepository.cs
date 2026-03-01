@@ -49,14 +49,26 @@ internal sealed class UserQueryRepository(Beatport2RssDbContext dbContext) :
     public Task<UserDetailsReadModel> LoadUserDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
         (
             from user in dbContext.Users
+            join feeds in (
+                    from feed in dbContext.Feeds
+                    group feed by feed.UserId
+                    into grouping
+                    select new { UserId = grouping.Key, Count = grouping.Count() })
+                on user.Id equals feeds.UserId
+            join tags in (
+                    from tag in dbContext.Tags
+                    group tag by tag.UserId
+                    into grouping
+                    select new { UserId = grouping.Key, Count = grouping.Count() })
+                on user.Id equals tags.UserId
             where user.Id == userId
             select new UserDetailsReadModel(
                 user.EmailAddress,
                 user.FirstName,
                 user.LastName,
                 user.Status == UserStatus.Active,
-                user.Feeds.Count,
-                user.Tags.Count)
+                feeds.Count,
+                tags.Count)
         )
         .SingleAsync(cancellationToken);
 }

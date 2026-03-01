@@ -6,7 +6,7 @@ using Beatport2Rss.SharedKernel.Common;
 namespace Beatport2Rss.Domain.Feeds;
 
 public sealed class Feed :
-    IEntity<FeedId>
+    IAggregateRoot<FeedId>
 {
     private readonly HashSet<SubscriptionId> _subscriptionIds = [];
 
@@ -37,7 +37,7 @@ public sealed class Feed :
         UserId userId,
         FeedName name,
         Slug slug,
-        FeedStatus status) =>
+        bool isActive) =>
         new()
         {
             Id = id,
@@ -45,16 +45,24 @@ public sealed class Feed :
             UserId = userId,
             Name = name,
             Slug = slug,
-            Status = status,
+            Status = isActive? FeedStatus.Active : FeedStatus.Inactive,
         };
-    
-    internal void UpdateName(FeedName name) =>
+
+    public void UpdateName(FeedName name) =>
         Name = name;
 
-    internal void UpdateStatus(FeedStatus status) =>
-        Status = status;
+    public void UpdateSlug(Slug slug) =>
+        Slug = slug;
 
-    internal void AddSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Add(subscriptionId);
-    internal void RemoveSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Remove(subscriptionId);
-    internal bool HasSubscription(SubscriptionId subscriptionId) => _subscriptionIds.Contains(subscriptionId);
+    public void UpdateStatus(bool isActive) =>
+        Status = isActive ? FeedStatus.Active : FeedStatus.Inactive;
+
+    public void AddSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Add(subscriptionId);
+
+    public void RemoveSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Remove(subscriptionId);
+
+    public bool HasSubscription(SubscriptionId subscriptionId) =>
+        _subscriptionIds.Contains(subscriptionId);
 }

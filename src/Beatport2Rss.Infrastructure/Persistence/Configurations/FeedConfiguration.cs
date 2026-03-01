@@ -37,7 +37,7 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .IsRequired();
 
         builder.HasOne<User>()
-            .WithMany(user => user.Feeds)
+            .WithMany()
             .HasForeignKey(feed => feed.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
