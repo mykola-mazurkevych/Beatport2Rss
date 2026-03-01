@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 using Beatport2Rss.Domain.Common.Constants;
 using Beatport2Rss.Domain.Common.Exceptions;
 using Beatport2Rss.SharedKernel.Common;
@@ -15,7 +17,7 @@ public readonly record struct BeatportSlug :
 
     public string Value { get; }
 
-    public static BeatportSlug Create(string value) =>
+    public static BeatportSlug Create([NotNull] string? value) =>
         new(value
             .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugEmpty))
             .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.BeatportSlugTooLong)));

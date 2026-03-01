@@ -4,4 +4,5 @@ using Beatport2Rss.Domain.Tokens;
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class TokenCommandRepository(Beatport2RssDbContext dbContext) :
-    CommandRepository<Token, TokenId>(dbContext), ITokenCommandRepository;
+    CommandRepository<Token, TokenId>(dbContext),
+    ITokenCommandRepository;

@@ -49,7 +49,8 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddBeatportServices() =>
             services
-                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>();
+                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>()
+                .AddSingleton<IBeatportClient, BeatportClient>();
 
         private IServiceCollection AddHealthServices()
         {
@@ -102,12 +103,15 @@ public static class ServiceCollectionExtensions
             services
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
+                .AddTransient<ITokenQueryRepository, TokenQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 

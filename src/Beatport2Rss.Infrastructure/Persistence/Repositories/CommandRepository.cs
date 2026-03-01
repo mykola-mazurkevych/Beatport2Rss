@@ -25,15 +25,17 @@ internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext db
     public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
         var entities = await _dbSet.Where(predicate).ToListAsync(cancellationToken);
-
         return entities.AsEnumerable();
     }
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
         _dbSet.AnyAsync(predicate, cancellationToken);
 
-    public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default) =>
-        _dbSet.AddAsync(entity, cancellationToken).AsTask();
+    public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        var entry = await _dbSet.AddAsync(entity, cancellationToken);
+        return entry.Entity;
+    }
 
     public Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) =>
         _dbSet.AddRangeAsync(entities, cancellationToken);

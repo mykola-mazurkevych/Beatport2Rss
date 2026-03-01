@@ -6,6 +6,7 @@ using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints.Feeds;
 using Beatport2Rss.WebApi.Endpoints.Sessions;
+using Beatport2Rss.WebApi.Endpoints.Subscriptions;
 using Beatport2Rss.WebApi.Endpoints.Tags;
 using Beatport2Rss.WebApi.Endpoints.Users;
 using Beatport2Rss.WebApi.Middlewares;
@@ -71,6 +72,7 @@ var versionSet = app.NewApiVersionSet()
 app
     .BuildFeedEndpoints(versionSet)
     .BuildSessionEndpoints(versionSet)
+    .BuildSubscriptionEndpoints(versionSet)
     .BuildTagEndpoints(versionSet)
     .BuildUserEndpoints(versionSet);
 

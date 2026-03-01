@@ -16,7 +16,8 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.HasKey(subscription => subscription.Id);
 
         builder.Property(subscription => subscription.Id)
-            .IsRequired();
+            .IsRequired()
+            .ValueGeneratedOnAdd();
 
         builder.Property(subscription => subscription.CreatedAt)
             .IsRequired();
