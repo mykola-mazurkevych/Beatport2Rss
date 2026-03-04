@@ -4,6 +4,7 @@ using System.Net.Mime;
 using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Subscriptions.Commands;
+using Beatport2Rss.Application.UseCases.Subscriptions.Queries;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.WebApi.Endpoints.Subscriptions.Requests;
 using Beatport2Rss.WebApi.Endpoints.Subscriptions.Responses;
@@ -85,6 +86,46 @@ internal static class SubscriptionEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapGet(
+                    "artists/{beatportSlug}/{beatportId:int}",
+                    static async ([FromRoute] string beatportSlug, [FromRoute] int beatportId, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetSubscriptionQuery(
+                            BeatportSubscriptionType.Artist,
+                            beatportId,
+                            beatportSlug);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.Ok(SubscriptionResponse.Create(result.Value)), context);
+                    })
+                .WithName(SubscriptionEndpointNames.GetArtist)
+                .WithDescription("Get an artist by Beatport Slug and Beatport Id")
+                .WithSummary("Get Artist")
+                .Produces<SubscriptionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapGet(
+                    "labels/{beatportSlug}/{beatportId:int}",
+                    static async ([FromRoute] string beatportSlug, [FromRoute] int beatportId, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    {
+                        var query = new GetSubscriptionQuery(
+                            BeatportSubscriptionType.Label,
+                            beatportId,
+                            beatportSlug);
+                        var result = await mediator.Send(query, cancellationToken);
+                        return result.ToAspNetCoreResult(() => Results.Ok(SubscriptionResponse.Create(result.Value)), context);
+                    })
+                .WithName(SubscriptionEndpointNames.GetLabel)
+                .WithDescription("Get a label by Beatport Slug and Beatport Id")
+                .WithSummary("Get Label")
+                .Produces<SubscriptionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;

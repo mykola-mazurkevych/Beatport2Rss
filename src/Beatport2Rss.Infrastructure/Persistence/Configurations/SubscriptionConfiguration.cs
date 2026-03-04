@@ -42,9 +42,10 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
 
         builder.Property(subscription => subscription.RefreshedAt);
 
-        builder.HasIndex(subscription => new { subscription.BeatportId, subscription.BeatportType })
+        builder.HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug })
             .IsUnique();
 
+        builder.HasIndex(subscription => subscription.BeatportId);
         builder.HasIndex(subscription => subscription.BeatportSlug);
     }
 }

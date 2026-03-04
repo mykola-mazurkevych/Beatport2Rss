@@ -34,6 +34,7 @@ internal sealed class CreateSubscriptionCommandValidator :
 
 internal sealed class CreateSubscriptionCommandHandler(
     IBeatportClient beatportClient,
+    IBeatportUriBuilder beatportUriBuilder,
     IClock clock,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     ITokenQueryRepository tokenQueryRepository,
@@ -74,10 +75,11 @@ internal sealed class CreateSubscriptionCommandHandler(
         return new SubscriptionDto(
             subscription.Id,
             subscription.Name,
-            subscription.BeatportType,
             subscription.BeatportId,
             subscription.BeatportSlug,
+            beatportUriBuilder.Build(subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug),
             subscription.ImageUri,
+            subscription.CreatedAt,
             subscription.RefreshedAt);
     }
 

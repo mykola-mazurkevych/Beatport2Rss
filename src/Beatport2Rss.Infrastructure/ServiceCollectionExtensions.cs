@@ -50,7 +50,8 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddBeatportServices() =>
             services
                 .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>()
-                .AddSingleton<IBeatportClient, BeatportClient>();
+                .AddSingleton<IBeatportClient, BeatportClient>()
+                .AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
 
         private IServiceCollection AddHealthServices()
         {
@@ -108,6 +109,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
+                .AddTransient<ISubscriptionQueryRepository, SubscriptionQueryRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
