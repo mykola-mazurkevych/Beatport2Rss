@@ -1,0 +1,78 @@
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
+
+using Beatport2Rss.Application.Dtos.Beatport;
+using Beatport2Rss.Application.Interfaces.Services.Beatport;
+using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Tokens;
+using Beatport2Rss.SharedKernel.Extensions;
+
+using FluentResults;
+
+using Microsoft.Extensions.Options;
+
+namespace Beatport2Rss.Infrastructure.Services.Beatport;
+
+internal sealed class BeatportClient(
+    IOptions<JsonSerializerOptions> jsonSerializerOptions) :
+    IBeatportClient, IDisposable, IAsyncDisposable
+{
+    private const string BeatportApiUriString = "https://api.beatport.com/v4/catalog";
+
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
+    private readonly HttpClient _httpClient = new();
+
+    public async Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
+        BeatportId id,
+        BeatportAccessToken token,
+        CancellationToken cancellationToken = default)
+        where TBeatportDto : BeatportDto
+    {
+        var uriSegment = GetSegment<TBeatportDto>();
+        var uri = new Uri($"{BeatportApiUriString}/{uriSegment}/{id}/");
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+        var response = await _httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                var dto = await response.Content.ReadFromJsonAsync<TBeatportDto>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+                return dto;
+            case HttpStatusCode.Forbidden:
+                var forbiddenResult = await response.Content.ReadFromJsonAsync<ForbiddenResult>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+                return Result.Forbidden(forbiddenResult?.Detail ?? "Forbidden.");
+            default:
+                return Result.Unprocessable($"Beatport API return {response.StatusCode} status code.");
+        }
+    }
+
+    private static string GetSegment<TBeatportDto>()
+    {
+        if (typeof(TBeatportDto) == typeof(BeatportArtistDto))
+        {
+            return "artists";
+        }
+
+        if (typeof(TBeatportDto) == typeof(BeatportLabelDto))
+        {
+            return "labels";
+        }
+
+        throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported.");
+    }
+
+    public void Dispose()
+    {
+        _httpClient.Dispose();
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _httpClient.Dispose();
+        return ValueTask.CompletedTask;
+    }
+
+    private sealed record ForbiddenResult(string Detail);
+}

@@ -19,6 +19,7 @@ internal static class ValidationBehaviorsSourceOutput
             .Union(
             [
                 "Beatport2Rss.Application.Dtos.Sessions",
+                "Beatport2Rss.Application.Dtos.Subscriptions",
                 "Beatport2Rss.Domain.Common.ValueObjects",
             ])
             .Distinct()

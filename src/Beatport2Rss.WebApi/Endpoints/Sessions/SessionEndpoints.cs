@@ -57,7 +57,7 @@ internal static class SessionEndpoints
                 .WithName(SessionEndpointNames.Create)
                 .WithDescription("Create a new user session")
                 .WithSummary("Log In")
-                .Accepts<SessionResponse>(MediaTypeNames.Application.Json)
+                .Accepts<CreateSessionRequest>(MediaTypeNames.Application.Json)
                 .Produces<SessionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)

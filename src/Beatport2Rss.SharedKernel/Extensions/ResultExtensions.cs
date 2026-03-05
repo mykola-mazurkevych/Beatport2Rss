@@ -1,12 +1,14 @@
+#pragma warning disable CA1034 // Nested types should not be visible
+
 using System.Globalization;
 
 using Beatport2Rss.SharedKernel.Errors;
 
 using FluentResults;
 
-namespace Beatport2Rss.Application.Extensions;
+namespace Beatport2Rss.SharedKernel.Extensions;
 
-internal static class ResultExtensions
+public static class ResultExtensions
 {
     extension(Result)
     {
@@ -27,5 +29,11 @@ internal static class ResultExtensions
 
         public static Result Unauthorized(string message) =>
             Result.Fail(new UnauthorizedError(message));
+
+        public static Result Unprocessable(string message) =>
+            Result.Fail(new UnprocessableError(message));
+
+        public static Result Unprocessable(IResultBase result) =>
+            Result.Unprocessable(string.Join(" ", result.Errors.Select(e => e.Message)));
     }
 }

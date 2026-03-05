@@ -22,7 +22,7 @@ public interface ICommandRepository<TEntity, in TId>
 
     Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
 
-    Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+    Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
 
     void Update(TEntity entity);

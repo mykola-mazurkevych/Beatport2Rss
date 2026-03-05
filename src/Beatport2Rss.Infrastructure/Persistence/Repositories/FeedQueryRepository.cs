@@ -8,20 +8,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal sealed class FeedQueryRepository(Beatport2RssDbContext dbContext) :
+internal sealed class FeedQueryRepository(
+    IQueryable<Feed> feeds,
+    IQueryable<User> users) :
     IFeedQueryRepository
 {
-    public IQueryable<Feed> Feeds =>
-        dbContext.Feeds.AsNoTracking();
+    public IQueryable<Feed> Feeds => feeds;
 
     public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        dbContext.Feeds
+        feeds
             .AnyAsync(f => f.UserId == userId && f.Slug == slug, cancellationToken);
 
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         (
-            from feed in dbContext.Feeds
-            join user in dbContext.Users on feed.UserId equals user.Id
+            from feed in feeds
+            join user in users on feed.UserId equals user.Id
             where feed.UserId == userId &&
                   feed.Slug == slug
             select new FeedDetailsReadModel(

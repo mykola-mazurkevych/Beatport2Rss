@@ -6,6 +6,7 @@ using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints.Feeds;
 using Beatport2Rss.WebApi.Endpoints.Sessions;
+using Beatport2Rss.WebApi.Endpoints.Subscriptions;
 using Beatport2Rss.WebApi.Endpoints.Tags;
 using Beatport2Rss.WebApi.Endpoints.Users;
 using Beatport2Rss.WebApi.Middlewares;
@@ -49,7 +50,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options.Title = "Beatport2Rss API Reference";
-        options.DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.JavaScript, ScalarClient.HttpClient);
+        options.DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.CSharp, ScalarClient.HttpClient);
         options.AddPreferredSecuritySchemes("Bearer");
         options.PersistentAuthentication = true;
     });
@@ -71,6 +72,7 @@ var versionSet = app.NewApiVersionSet()
 app
     .BuildFeedEndpoints(versionSet)
     .BuildSessionEndpoints(versionSet)
+    .BuildSubscriptionEndpoints(versionSet)
     .BuildTagEndpoints(versionSet)
     .BuildUserEndpoints(versionSet);
 

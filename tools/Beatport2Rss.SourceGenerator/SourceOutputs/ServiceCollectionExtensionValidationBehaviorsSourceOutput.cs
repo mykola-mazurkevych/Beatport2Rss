@@ -21,6 +21,7 @@ internal static class ServiceCollectionExtensionValidationBehaviorsSourceOutput
                 "Beatport2Rss.Application.Behaviors",
                 "Beatport2Rss.Application.Dtos.Feeds",
                 "Beatport2Rss.Application.Dtos.Sessions",
+                "Beatport2Rss.Application.Dtos.Subscriptions",
                 "Beatport2Rss.Application.Dtos.Tags",
                 "Beatport2Rss.Application.Dtos.Users",
                 "Beatport2Rss.Domain.Common.ValueObjects",

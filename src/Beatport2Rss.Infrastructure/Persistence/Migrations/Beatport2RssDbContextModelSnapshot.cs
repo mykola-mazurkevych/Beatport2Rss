@@ -17,7 +17,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -155,7 +155,10 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Beatport2Rss.Domain.Subscriptions.Subscription", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
@@ -188,9 +191,11 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BeatportId");
+
                     b.HasIndex("BeatportSlug");
 
-                    b.HasIndex("BeatportId", "BeatportType")
+                    b.HasIndex("BeatportType", "BeatportId", "BeatportSlug")
                         .IsUnique();
 
                     b.ToTable("Subscriptions", (string)null);
@@ -385,7 +390,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Beatport2Rss.Domain.Feeds.Feed", b =>
                 {
                     b.HasOne("Beatport2Rss.Domain.Users.User", null)
-                        .WithMany("Feeds")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -403,7 +408,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Beatport2Rss.Domain.Tags.Tag", b =>
                 {
                     b.HasOne("Beatport2Rss.Domain.Users.User", null)
-                        .WithMany("Tags")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -451,13 +456,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Beatport2Rss.Domain.Releases.Release", b =>
                 {
                     b.Navigation("Tracks");
-                });
-
-            modelBuilder.Entity("Beatport2Rss.Domain.Users.User", b =>
-                {
-                    b.Navigation("Feeds");
-
-                    b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,23 +8,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal sealed class TagQueryRepository(Beatport2RssDbContext dbContext) :
+internal sealed class TagQueryRepository(IQueryable<Tag> tags) :
     ITagQueryRepository
 {
-    public IQueryable<Tag> Tags =>
-        dbContext.Tags.AsNoTracking();
+    public IQueryable<Tag> Tags => tags;
 
     public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        dbContext.Tags
-            .AnyAsync(
-                t =>
-                    t.UserId == userId &&
-                    t.Slug == slug,
-                cancellationToken);
+        tags.AnyAsync(t => t.UserId == userId && t.Slug == slug, cancellationToken);
 
     public Task<TagDetailsReadModel> LoadTagDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         (
-            from tag in dbContext.Tags
+            from tag in tags
             where tag.UserId == userId &&
                   tag.Slug == slug
             select new TagDetailsReadModel(

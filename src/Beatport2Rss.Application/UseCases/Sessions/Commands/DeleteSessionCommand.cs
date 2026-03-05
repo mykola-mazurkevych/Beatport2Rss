@@ -1,7 +1,7 @@
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Sessions;
+using Beatport2Rss.SharedKernel.Extensions;
 
 using FluentResults;
 

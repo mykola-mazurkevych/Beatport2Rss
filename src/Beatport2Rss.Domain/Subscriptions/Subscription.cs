@@ -1,3 +1,6 @@
+// ReSharper disable PropertyCanBeMadeInitOnly.Local
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
@@ -19,7 +22,7 @@ public sealed class Subscription :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public BeatportEntityType BeatportType { get; private set; }
+    public BeatportSubscriptionType BeatportType { get; private set; }
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
 
@@ -36,9 +39,8 @@ public sealed class Subscription :
         _tagIds.AsReadOnly();
 
     public static Subscription Create(
-        SubscriptionId id,
         DateTimeOffset createdAt,
-        BeatportEntityType beatportType,
+        BeatportSubscriptionType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         string name,
@@ -46,7 +48,6 @@ public sealed class Subscription :
         DateTimeOffset? refreshedAt) =>
         new()
         {
-            Id = id,
             CreatedAt = createdAt,
             BeatportType = beatportType,
             BeatportId = beatportId,

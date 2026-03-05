@@ -12,6 +12,7 @@ using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Extensions;
+using Beatport2Rss.Infrastructure.Jobs;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
@@ -26,6 +27,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+
+using Quartz;
 
 using Slugify;
 
@@ -42,6 +45,7 @@ public static class ServiceCollectionExtensions
                 .AddBeatportServices()
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
+                .AddJobs()
                 .AddMiscServices()
                 .AddPagination()
                 .AddPersistence(configuration)
@@ -49,7 +53,9 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddBeatportServices() =>
             services
-                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>();
+                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>()
+                .AddSingleton<IBeatportClient, BeatportClient>()
+                .AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
 
         private IServiceCollection AddHealthServices()
         {
@@ -86,6 +92,18 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
+        private IServiceCollection AddJobs() =>
+            services
+                .AddQuartz(configurator =>
+                {
+                    var jobKey = new JobKey(nameof(DeleteExpiredSessionsJob));
+
+                    configurator
+                        .AddJob<DeleteExpiredSessionsJob>(jobKey, _ => { })
+                        .AddTrigger(trigger => trigger.ForJob(jobKey).StartNow().WithSimpleSchedule(builder => builder.WithIntervalInHours(24).RepeatForever()));
+                })
+                .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
         private IServiceCollection AddMiscServices() =>
             services
                 .AddSingleton<IChromiumDownloader, ChromiumDownloader>()
@@ -101,13 +119,29 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users.AsNoTracking())
                 .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
                 .AddTransient<ISessionQueryRepository, SessionQueryRepository>()
+                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
+                .AddTransient<ISubscriptionQueryRepository, SubscriptionQueryRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
+                .AddTransient<ITokenQueryRepository, TokenQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 

@@ -7,46 +7,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal abstract class CommandRepository<TEntity, TId>(Beatport2RssDbContext dbContext) :
+internal abstract class CommandRepository<TEntity, TId>(DbSet<TEntity> dbSet) :
     ICommandRepository<TEntity, TId>
     where TEntity : class, IAggregateRoot<TId>
     where TId : struct, IId<TId>
 {
-    private readonly DbSet<TEntity> _dbSet = dbContext.Set<TEntity>();
-
-    protected IQueryable<TEntity> Entities => _dbSet;
-
     public Task<TEntity> LoadAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        _dbSet.SingleAsync(predicate, cancellationToken);
+        dbSet.SingleAsync(predicate, cancellationToken);
 
     public Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        _dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
+        dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
 
     public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        var entities = await _dbSet.Where(predicate).ToListAsync(cancellationToken);
-
+        var entities = await dbSet.Where(predicate).ToListAsync(cancellationToken);
         return entities.AsEnumerable();
     }
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
-        _dbSet.AnyAsync(predicate, cancellationToken);
+        dbSet.AnyAsync(predicate, cancellationToken);
 
-    public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default) =>
-        _dbSet.AddAsync(entity, cancellationToken).AsTask();
+    public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        var entry = await dbSet.AddAsync(entity, cancellationToken);
+        return entry.Entity;
+    }
 
     public Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default) =>
-        _dbSet.AddRangeAsync(entities, cancellationToken);
+        dbSet.AddRangeAsync(entities, cancellationToken);
 
     public void Update(TEntity entity) =>
-        _dbSet.Update(entity);
+        dbSet.Update(entity);
 
     public void UpdateRange(IEnumerable<TEntity> entities) =>
-        _dbSet.UpdateRange(entities);
+        dbSet.UpdateRange(entities);
 
     public void Delete(TEntity entity) =>
-        _dbSet.Remove(entity);
+        dbSet.Remove(entity);
 
     public void DeleteRange(IEnumerable<TEntity> entities) =>
-        _dbSet.RemoveRange(entities);
+        dbSet.RemoveRange(entities);
 }
