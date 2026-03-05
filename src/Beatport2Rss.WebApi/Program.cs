@@ -50,7 +50,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(options =>
     {
         options.Title = "Beatport2Rss API Reference";
-        options.DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.JavaScript, ScalarClient.HttpClient);
+        options.DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.CSharp, ScalarClient.HttpClient);
         options.AddPreferredSecuritySchemes("Bearer");
         options.PersistentAuthentication = true;
     });
