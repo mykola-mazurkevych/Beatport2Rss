@@ -7,14 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal sealed class SessionCommandRepository(Beatport2RssDbContext dbContext) :
-    CommandRepository<Session, SessionId>(dbContext),
+internal sealed class SessionCommandRepository(DbSet<Session> sessions) :
+    CommandRepository<Session, SessionId>(sessions),
     ISessionCommandRepository
 {
-    private readonly Beatport2RssDbContext _dbContext = dbContext;
+    private readonly DbSet<Session> _sessions = sessions;
 
     public Task ExecuteDeleteAsync(Expression<Func<Session, bool>> predicate, CancellationToken cancellationToken) =>
-        _dbContext.Sessions
+        _sessions
             .Where(predicate)
             .ExecuteDeleteAsync(cancellationToken);
 }

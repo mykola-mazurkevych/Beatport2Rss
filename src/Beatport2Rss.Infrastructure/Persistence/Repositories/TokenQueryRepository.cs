@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal sealed class TokenQueryRepository(Beatport2RssDbContext dbContext) :
+internal sealed class TokenQueryRepository(IQueryable<Token> tokens) :
     ITokenQueryRepository
 {
     public Task<Token?> FindAsync(CancellationToken cancellationToken = default) =>
-        dbContext.Tokens
-            .SingleOrDefaultAsync(cancellationToken);
+        tokens.SingleOrDefaultAsync(cancellationToken);
 }

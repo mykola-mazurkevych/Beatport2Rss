@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
-internal sealed class SubscriptionQueryRepository(Beatport2RssDbContext dbContext) :
+internal sealed class SubscriptionQueryRepository(IQueryable<Subscription> subscriptions) :
     ISubscriptionQueryRepository
 {
     public Task<SubscriptionDetailsReadModel?> LoadAsync(
@@ -16,7 +16,7 @@ internal sealed class SubscriptionQueryRepository(Beatport2RssDbContext dbContex
         BeatportSlug beatportSlug,
         CancellationToken cancellationToken = default) =>
         (
-            from subscription in dbContext.Subscriptions
+            from subscription in subscriptions
             where subscription.BeatportType == beatportType &&
                   subscription.BeatportId == beatportId &&
                   subscription.BeatportSlug == beatportSlug

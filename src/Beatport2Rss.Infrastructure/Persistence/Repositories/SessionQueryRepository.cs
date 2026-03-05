@@ -10,17 +10,18 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class SessionQueryRepository(
     IClock clock,
-    Beatport2RssDbContext dbContext) :
+    IQueryable<Session> sessions,
+    IQueryable<User> users) :
     ISessionQueryRepository
 {
     public Task<bool> ExistsAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
-        dbContext.Sessions
-            .AnyAsync(session => session.UserId == userId && session.Id == sessionId, cancellationToken);
+        sessions
+            .AnyAsync(s => s.UserId == userId && s.Id == sessionId, cancellationToken);
 
     public Task<SessionDetailsReadModel> LoadSessionDetailsReadModelAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
         (
-            from session in dbContext.Sessions
-            join user in dbContext.Users on session.UserId equals user.Id
+            from session in sessions
+            join user in users on session.UserId equals user.Id
             where session.UserId == userId &&
                   session.Id == sessionId
             select new SessionDetailsReadModel(
