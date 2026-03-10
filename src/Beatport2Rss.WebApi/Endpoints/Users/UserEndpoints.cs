@@ -42,7 +42,11 @@ internal static class UserEndpoints
             groupBuilder
                 .MapPost(
                     "",
-                    static async ([FromBody] [Required] CreateUserRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateUserRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateUserCommand(
                             request.EmailAddress,
@@ -65,7 +69,10 @@ internal static class UserEndpoints
             groupBuilder
                 .MapGet(
                     "/current",
-                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetUserQuery(context.User.Id);
                         var result = await mediator.Send(query, cancellationToken);
@@ -87,7 +94,11 @@ internal static class UserEndpoints
             groupBuilder
                 .MapPut(
                     "/current/status",
-                    static async ([FromBody] [Required] UpdateUserStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] UpdateUserStatusRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateUserStatusCommand(
                             context.User.Id,
@@ -109,7 +120,10 @@ internal static class UserEndpoints
             groupBuilder
                 .MapDelete(
                     "/current",
-                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteUserCommand(context.User.Id);
                         var result = await mediator.Send(command, cancellationToken);
@@ -126,7 +140,11 @@ internal static class UserEndpoints
             groupBuilder
                 .MapDelete(
                     "/{id}",
-                    static async ([FromRoute] UserId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] UserId id,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteUserCommand(id);
                         var result = await mediator.Send(command, cancellationToken);

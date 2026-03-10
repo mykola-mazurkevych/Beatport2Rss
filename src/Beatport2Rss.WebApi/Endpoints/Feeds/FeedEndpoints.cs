@@ -40,7 +40,13 @@ internal static class FeedEndpoints
 
             groupBuilder.MapGet(
                     "",
-                    static async ([FromQuery] int? size, [FromQuery] string? next, [FromQuery] string? previos, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromQuery] int? size,
+                        [FromQuery] string? next,
+                        [FromQuery] string? previos,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetFeedsQuery(
                             context.User.Id,
@@ -61,7 +67,11 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapPost(
                     "",
-                    static async ([FromBody] [Required] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateFeedRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateFeedCommand(
                             context.User.Id,
@@ -84,7 +94,11 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapGet(
                     "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetFeedQuery(
                             context.User.Id,
@@ -105,7 +119,12 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapPut(
                     "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromBody] UpdateFeedRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateFeedCommand(
                             context.User.Id,
@@ -130,7 +149,12 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapPut(
                     "/{slug}/status",
-                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromBody] UpdateFeedStatusRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateFeedStatusCommand(
                             context.User.Id,
@@ -153,7 +177,11 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapDelete(
                     "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteFeedCommand(
                             context.User.Id,

@@ -39,7 +39,12 @@ internal static class TagEndpoints
 
             groupBuilder.MapGet(
                     "",
-                    static async ([FromQuery] int? size, [FromQuery] string? next, [FromQuery] string? previos, [FromServices] IMediator mediator, HttpContext context,
+                    static async (
+                        [FromQuery] int? size,
+                        [FromQuery] string? next,
+                        [FromQuery] string? previos,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
                         CancellationToken cancellationToken) =>
                     {
                         var query = new GetTagsQuery(
@@ -61,7 +66,11 @@ internal static class TagEndpoints
             groupBuilder
                 .MapPost(
                     "",
-                    static async ([FromBody] [Required] CreateTagRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateTagRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateTagCommand(
                             context.User.Id,
@@ -83,7 +92,11 @@ internal static class TagEndpoints
             groupBuilder
                 .MapGet(
                     "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetTagQuery(
                             context.User.Id,
@@ -105,7 +118,12 @@ internal static class TagEndpoints
         groupBuilder
                 .MapPut(
                     "/{slug}/name",
-                    static async ([FromRoute] Slug slug, [FromBody] [Required] UpdateTagNameRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromBody] [Required] UpdateTagNameRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateTagNameCommand(
                             context.User.Id,
@@ -127,7 +145,11 @@ internal static class TagEndpoints
             groupBuilder
                 .MapDelete(
                     "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteTagCommand(
                             context.User.Id,

@@ -43,7 +43,11 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapPost(
                     "",
-                    static async ([FromBody] [Required] CreateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateSessionRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSessionCommand(
                             request.EmailAddress,
@@ -67,7 +71,10 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapGet(
                     "/current",
-                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetSessionQuery(
                             context.User.Id,
@@ -87,7 +94,11 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapPut(
                     "/current",
-                    static async ([FromBody] [Required] UpdateSessionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] UpdateSessionRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new UpdateSessionCommand(
                             context.User.SessionId,
@@ -108,7 +119,10 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapDelete(
                     "/current",
-                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(context.User.SessionId);
                         var result = await mediator.Send(command, cancellationToken);
@@ -126,7 +140,11 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapDelete(
                     "/{id}",
-                    static async ([FromRoute] SessionId id, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] SessionId id,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionCommand(id);
                         var result = await mediator.Send(command, cancellationToken);
@@ -144,7 +162,10 @@ internal static class SessionEndpoints
             groupBuilder
                 .MapDelete(
                     "",
-                    static async ([FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new DeleteSessionsCommand(context.User.Id);
                         var result = await mediator.Send(command, cancellationToken);

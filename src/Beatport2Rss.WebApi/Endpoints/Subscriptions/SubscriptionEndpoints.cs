@@ -39,7 +39,11 @@ internal static class SubscriptionEndpoints
             groupBuilder
                 .MapPost(
                     "artists",
-                    static async ([FromBody] [Required] CreateSubscriptionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateSubscriptionRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSubscriptionCommand(
                             request.BeatportId,
@@ -65,7 +69,11 @@ internal static class SubscriptionEndpoints
             groupBuilder
                 .MapPost(
                     "labels",
-                    static async ([FromBody] [Required] CreateSubscriptionRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromBody] [Required] CreateSubscriptionRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSubscriptionCommand(
                             request.BeatportId,
@@ -91,7 +99,12 @@ internal static class SubscriptionEndpoints
             groupBuilder
                 .MapGet(
                     "artists/{beatportSlug}/{beatportId:int}",
-                    static async ([FromRoute] string beatportSlug, [FromRoute] int beatportId, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] string beatportSlug,
+                        [FromRoute] int beatportId,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetSubscriptionQuery(
                             BeatportSubscriptionType.Artist,
@@ -111,7 +124,12 @@ internal static class SubscriptionEndpoints
             groupBuilder
                 .MapGet(
                     "labels/{beatportSlug}/{beatportId:int}",
-                    static async ([FromRoute] string beatportSlug, [FromRoute] int beatportId, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
+                    static async (
+                        [FromRoute] string beatportSlug,
+                        [FromRoute] int beatportId,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
                     {
                         var query = new GetSubscriptionQuery(
                             BeatportSubscriptionType.Label,
