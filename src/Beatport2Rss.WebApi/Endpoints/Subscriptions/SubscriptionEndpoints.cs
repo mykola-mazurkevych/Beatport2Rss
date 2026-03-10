@@ -5,6 +5,7 @@ using Asp.Versioning.Builder;
 
 using Beatport2Rss.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Application.UseCases.Subscriptions.Queries;
+using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.WebApi.Endpoints.Subscriptions.Requests;
 using Beatport2Rss.WebApi.Endpoints.Subscriptions.Responses;
@@ -46,8 +47,8 @@ internal static class SubscriptionEndpoints
                         CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSubscriptionCommand(
-                            request.BeatportId,
-                            BeatportSubscriptionType.Artist);
+                            BeatportSubscriptionType.Artist,
+                            request.BeatportId);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(
                             () => Results.CreatedAtRoute(
@@ -76,8 +77,8 @@ internal static class SubscriptionEndpoints
                         CancellationToken cancellationToken) =>
                     {
                         var command = new CreateSubscriptionCommand(
-                            request.BeatportId,
-                            BeatportSubscriptionType.Label);
+                            BeatportSubscriptionType.Label,
+                            request.BeatportId);
                         var result = await mediator.Send(command, cancellationToken);
                         return result.ToAspNetCoreResult(
                             () => Results.CreatedAtRoute(
@@ -98,10 +99,10 @@ internal static class SubscriptionEndpoints
 
             groupBuilder
                 .MapGet(
-                    "artists/{beatportSlug}/{beatportId:int}",
+                    "artists/{beatportSlug}/{beatportId}",
                     static async (
-                        [FromRoute] string beatportSlug,
-                        [FromRoute] int beatportId,
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
                         [FromServices] IMediator mediator,
                         HttpContext context,
                         CancellationToken cancellationToken) =>
@@ -123,10 +124,10 @@ internal static class SubscriptionEndpoints
 
             groupBuilder
                 .MapGet(
-                    "labels/{beatportSlug}/{beatportId:int}",
+                    "labels/{beatportSlug}/{beatportId}",
                     static async (
-                        [FromRoute] string beatportSlug,
-                        [FromRoute] int beatportId,
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
                         [FromServices] IMediator mediator,
                         HttpContext context,
                         CancellationToken cancellationToken) =>

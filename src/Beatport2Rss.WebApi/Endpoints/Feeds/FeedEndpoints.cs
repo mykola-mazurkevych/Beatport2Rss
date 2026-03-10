@@ -54,12 +54,12 @@ internal static class FeedEndpoints
                             next,
                             previos);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetFeedsResponse>.Create(result.Value, GetFeedsResponse.Create)), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<FeedsResponse>.Create(result.Value, FeedsResponse.Create)), context);
                     })
                 .WithName(FeedEndpointNames.List)
                 .WithDescription("Get a list of feeds")
                 .WithSummary("List")
-                .Produces<PageResponse<GetFeedsResponse>>(StatusCodes.Status201Created)
+                .Produces<PageResponse<FeedsResponse>>(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
@@ -104,12 +104,12 @@ internal static class FeedEndpoints
                             context.User.Id,
                             slug);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(GetFeedResponse.Create(result.Value)), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(FeedResponse.Create(result.Value)), context);
                     })
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
                 .WithSummary("Get Details")
-                .Produces<GetFeedResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<FeedResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

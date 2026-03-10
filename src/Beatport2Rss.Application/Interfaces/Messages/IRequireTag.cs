@@ -1,3 +1,8 @@
-﻿namespace Beatport2Rss.Application.Interfaces.Messages;
+﻿using Beatport2Rss.Domain.Common.ValueObjects;
 
-public interface IRequireTag : IRequireSlug;
+namespace Beatport2Rss.Application.Interfaces.Messages;
+
+public interface IRequireTag
+{
+    Slug TagSlug { get; }
+}

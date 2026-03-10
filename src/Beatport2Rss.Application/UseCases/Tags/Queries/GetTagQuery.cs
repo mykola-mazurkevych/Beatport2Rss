@@ -12,7 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Tags.Queries;
 
 public sealed record GetTagQuery(
     UserId UserId,
-    Slug Slug) :
+    Slug TagSlug) :
     IQuery<Result<TagDto>>, IRequireUser, IRequireTag;
 
 internal sealed class GetTagQueryHandler(
@@ -23,7 +23,7 @@ internal sealed class GetTagQueryHandler(
         GetTagQuery query,
         CancellationToken cancellationToken)
     {
-        var readModel = await tagQueryRepository.LoadTagDetailsReadModelAsync(query.UserId, query.Slug, cancellationToken);
+        var readModel = await tagQueryRepository.LoadTagDetailsReadModelAsync(query.UserId, query.TagSlug, cancellationToken);
 
         return new TagDto(
             readModel.Id,

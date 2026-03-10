@@ -19,10 +19,10 @@ public sealed class TagValidationBehavior<TMessage, TResponse>(
         MessageHandlerDelegate<TMessage, TResponse> next,
         CancellationToken cancellationToken)
     {
-        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
+        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.TagSlug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResponse)Result.NotFound($"Tag with slug '{message.Slug}' was not found.");
+            : (TResponse)Result.NotFound($"Tag with slug '{message.TagSlug}' was not found.");
     }
 }

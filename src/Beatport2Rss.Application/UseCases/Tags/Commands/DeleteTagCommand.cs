@@ -12,7 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Tags.Commands;
 
 public sealed record DeleteTagCommand(
     UserId UserId,
-    Slug Slug) :
+    Slug TagSlug) :
     ICommand<Result>, IRequireUser, IRequireTag;
 
 internal sealed class DeleteTagCommandHandler(
@@ -24,7 +24,7 @@ internal sealed class DeleteTagCommandHandler(
         DeleteTagCommand command,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.Slug, cancellationToken);
+        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.TagSlug, cancellationToken);
 
         tagCommandRepository.Delete(tag);
         await unitOfWork.SaveChangesAsync(cancellationToken);

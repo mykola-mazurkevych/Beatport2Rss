@@ -76,12 +76,12 @@ internal static class UserEndpoints
                     {
                         var query = new GetUserQuery(context.User.Id);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(GetUserResponse.Create(result.Value)), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(UserResponse.Create(result.Value)), context);
                     })
                 .WithName(UserEndpointNames.GetCurrent)
                 .WithDescription("Get current user details")
                 .WithSummary("Get Details")
-                .Produces<GetUserResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<UserResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)

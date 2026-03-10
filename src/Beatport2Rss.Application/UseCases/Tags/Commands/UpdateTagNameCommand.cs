@@ -18,7 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Tags.Commands;
 
 public sealed record UpdateTagNameCommand(
     UserId UserId,
-    Slug Slug,
+    Slug TagSlug,
     string? Name) :
     ICommand<Result<Slug>>, IRequireActiveUser, IRequireTag;
 
@@ -42,7 +42,7 @@ internal sealed class UpdateTagNameCommandHandler(
         UpdateTagNameCommand command,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.Slug, cancellationToken);
+        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.TagSlug, cancellationToken);
 
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);

@@ -12,7 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
 public sealed record GetFeedQuery(
     UserId UserId,
-    Slug Slug) :
+    Slug FeedSlug) :
     IQuery<Result<FeedDto>>, IRequireUser, IRequireFeed;
 
 internal sealed class GetFeedQueryHandler(
@@ -23,7 +23,7 @@ internal sealed class GetFeedQueryHandler(
         GetFeedQuery query,
         CancellationToken cancellationToken = default)
     {
-        var readModel = await feedQueryRepository.LoadFeedDetailsReadModelAsync(query.UserId, query.Slug, cancellationToken);
+        var readModel = await feedQueryRepository.LoadFeedDetailsReadModelAsync(query.UserId, query.FeedSlug, cancellationToken);
 
         return new FeedDto(
             readModel.Id,

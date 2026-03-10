@@ -12,7 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
 public sealed record DeleteFeedCommand(
     UserId UserId,
-    Slug Slug) :
+    Slug FeedSlug) :
     ICommand<Result>, IRequireUser, IRequireFeed;
 
 internal sealed class DeleteFeedCommandHandler(
@@ -24,7 +24,7 @@ internal sealed class DeleteFeedCommandHandler(
         DeleteFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.FeedSlug, cancellationToken);
 
         feedCommandRepository.Delete(feed);
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -53,12 +53,12 @@ internal static class TagEndpoints
                             next,
                             previos);
                         var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetTagsResponse>.Create(result.Value, GetTagsResponse.Create)), context);
+                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<TagsResponse>.Create(result.Value, TagsResponse.Create)), context);
                     })
                 .WithName(TagEndpointNames.List)
                 .WithDescription("Get a list of tags")
                 .WithSummary("List")
-                .Produces<PageResponse<GetTagsResponse>>(StatusCodes.Status201Created)
+                .Produces<PageResponse<TagsResponse>>(StatusCodes.Status201Created)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);

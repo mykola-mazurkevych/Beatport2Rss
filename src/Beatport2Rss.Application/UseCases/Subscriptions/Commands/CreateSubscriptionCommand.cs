@@ -18,8 +18,8 @@ using Mediator;
 namespace Beatport2Rss.Application.UseCases.Subscriptions.Commands;
 
 public sealed record CreateSubscriptionCommand(
-    int BeatportId,
-    BeatportSubscriptionType BeatportType) :
+    BeatportSubscriptionType BeatportType,
+    BeatportId BeatportId) :
     ICommand<Result<SubscriptionDto>>;
 
 internal sealed class CreateSubscriptionCommandValidator :
@@ -27,7 +27,6 @@ internal sealed class CreateSubscriptionCommandValidator :
 {
     public CreateSubscriptionCommandValidator()
     {
-        RuleFor(c => c.BeatportId).GreaterThan(0);
         RuleFor(c => c.BeatportType).IsInEnum();
     }
 }
@@ -45,8 +44,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         CreateSubscriptionCommand command,
         CancellationToken cancellationToken)
     {
-        var beatportId = BeatportId.Create(command.BeatportId);
-        if (await subscriptionCommandRepository.ExistsAsync(s => s.BeatportType == command.BeatportType && s.BeatportId == beatportId, cancellationToken))
+        if (await subscriptionCommandRepository.ExistsAsync(s => s.BeatportType == command.BeatportType && s.BeatportId == command.BeatportId, cancellationToken))
         {
             return Result.Conflict($"{command.BeatportType} already exists.");
         }
@@ -59,8 +57,8 @@ internal sealed class CreateSubscriptionCommandHandler(
 
         var subscriptionResult = command.BeatportType switch
         {
-            BeatportSubscriptionType.Artist => await GetArtistSubscriptionAsync(beatportId, token.AccessToken, cancellationToken),
-            BeatportSubscriptionType.Label => await GetLabelSubscriptionAsync(beatportId, token.AccessToken, cancellationToken),
+            BeatportSubscriptionType.Artist => await GetArtistSubscriptionAsync(command.BeatportId, token.AccessToken, cancellationToken),
+            BeatportSubscriptionType.Label => await GetLabelSubscriptionAsync(command.BeatportId, token.AccessToken, cancellationToken),
             _ => Result.Unprocessable($"{command.BeatportType} is not supported.")
         };
 
@@ -92,7 +90,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         return artistResult switch
         {
             { IsFailed: true } => Result.Unprocessable(artistResult),
-            { Value: null } => Result.Unprocessable("Not Found."),
+            { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 clock.UtcNow,
                 BeatportSubscriptionType.Artist,
@@ -113,7 +111,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         return labelResult switch
         {
             { IsFailed: true } => Result.Unprocessable(labelResult.Errors[0].Message),
-            { Value: null } => Result.Unprocessable("Not Found."),
+            { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 clock.UtcNow,
                 BeatportSubscriptionType.Label,

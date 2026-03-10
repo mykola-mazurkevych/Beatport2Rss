@@ -19,10 +19,10 @@ public sealed class FeedValidationBehavior<TMessage, TResponse>(
         MessageHandlerDelegate<TMessage, TResponse> next,
         CancellationToken cancellationToken)
     {
-        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.Slug, cancellationToken);
+        var exists = await feedQueryRepository.ExistsAsync(message.UserId, message.FeedSlug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResponse)Result.NotFound($"Feed with slug '{message.Slug}' was not found.");
+            : (TResponse)Result.NotFound($"Feed with slug '{message.FeedSlug}' was not found.");
     }
 }

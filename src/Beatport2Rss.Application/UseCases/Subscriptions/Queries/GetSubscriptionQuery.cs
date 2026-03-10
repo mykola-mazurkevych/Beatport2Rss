@@ -1,5 +1,4 @@
 using Beatport2Rss.Application.Dtos.Subscriptions;
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
@@ -16,9 +15,9 @@ using Mediator;
 namespace Beatport2Rss.Application.UseCases.Subscriptions.Queries;
 
 public sealed record GetSubscriptionQuery(
-    BeatportSubscriptionType Type,
-    int BeatportId,
-    string BeatportSlug) :
+    BeatportSubscriptionType BeatportType,
+    BeatportId BeatportId,
+    BeatportSlug BeatportSlug) :
     IQuery<Result<SubscriptionDto>>, IRequireValidation;
 
 internal sealed class GetSubscriptionQueryValidator :
@@ -26,9 +25,7 @@ internal sealed class GetSubscriptionQueryValidator :
 {
     public GetSubscriptionQueryValidator()
     {
-        RuleFor(q => q.Type).IsInEnum();
-        RuleFor(q => q.BeatportId).GreaterThan(0);
-        RuleFor(q => q.BeatportSlug).IsBeatportSlug();
+        RuleFor(q => q.BeatportType).IsInEnum();
     }
 }
 
@@ -41,13 +38,11 @@ internal sealed class GetSubscriptionQueryHandler(
         GetSubscriptionQuery query,
         CancellationToken cancellationToken)
     {
-        var beatportId = BeatportId.Create(query.BeatportId);
-        var beatportSlug = BeatportSlug.Create(query.BeatportSlug);
-        var readModel = await subscriptionQueryRepository.LoadAsync(query.Type, beatportId, beatportSlug, cancellationToken);
+        var readModel = await subscriptionQueryRepository.LoadAsync(query.BeatportType, query.BeatportId, query.BeatportSlug, cancellationToken);
 
         if (readModel is null)
         {
-            return Result.NotFound("Subscription not found");
+            return Result.NotFound("Subscription not found.");
         }
 
         return new SubscriptionDto(

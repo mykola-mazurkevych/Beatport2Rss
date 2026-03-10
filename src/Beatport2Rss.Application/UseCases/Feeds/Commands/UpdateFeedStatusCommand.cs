@@ -12,7 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
 public sealed record UpdateFeedStatusCommand(
     UserId UserId,
-    Slug Slug,
+    Slug FeedSlug,
     bool IsActive) :
     ICommand<Result>, IRequireActiveUser, IRequireFeed;
 
@@ -25,7 +25,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
         UpdateFeedStatusCommand command,
         CancellationToken cancellationToken)
     {
-        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.FeedSlug, cancellationToken);
 
         feed.UpdateStatus(command.IsActive);
 
