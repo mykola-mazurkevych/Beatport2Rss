@@ -4,7 +4,6 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
-using Beatport2Rss.SharedKernel.Extensions;
 
 using FluentResults;
 
@@ -18,7 +17,7 @@ public sealed record GetSubscriptionQuery(
     BeatportSubscriptionType BeatportType,
     BeatportId BeatportId,
     BeatportSlug BeatportSlug) :
-    IQuery<Result<SubscriptionDto>>, IRequireValidation;
+    IQuery<Result<SubscriptionDto>>, IRequireValidation, IRequireSubscription;
 
 internal sealed class GetSubscriptionQueryValidator :
     AbstractValidator<GetSubscriptionQuery>
@@ -39,11 +38,6 @@ internal sealed class GetSubscriptionQueryHandler(
         CancellationToken cancellationToken)
     {
         var readModel = await subscriptionQueryRepository.LoadAsync(query.BeatportType, query.BeatportId, query.BeatportSlug, cancellationToken);
-
-        if (readModel is null)
-        {
-            return Result.NotFound("Subscription not found.");
-        }
 
         return new SubscriptionDto(
             readModel.Id,

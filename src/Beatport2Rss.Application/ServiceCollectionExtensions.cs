@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
                         typeof(UserValidationBehavior<,>),
                         typeof(FeedValidationBehavior<,>),
                         typeof(TagValidationBehavior<,>),
+                        typeof(SubscriptionValidationBehavior<,>),
                     ];
                 });
 

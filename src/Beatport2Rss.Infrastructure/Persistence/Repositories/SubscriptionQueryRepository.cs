@@ -10,25 +10,37 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 internal sealed class SubscriptionQueryRepository(IQueryable<Subscription> subscriptions) :
     ISubscriptionQueryRepository
 {
-    public Task<SubscriptionDetailsReadModel?> LoadAsync(
+    public Task<bool> ExistsAsync(
         BeatportSubscriptionType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         CancellationToken cancellationToken = default) =>
-        (
-            from subscription in subscriptions
-            where subscription.BeatportType == beatportType &&
-                  subscription.BeatportId == beatportId &&
-                  subscription.BeatportSlug == beatportSlug
-            select new SubscriptionDetailsReadModel(
-                subscription.Id,
-                subscription.Name,
-                subscription.BeatportType,
-                subscription.BeatportId,
-                subscription.BeatportSlug,
-                subscription.ImageUri,
-                subscription.CreatedAt,
-                subscription.RefreshedAt)
-        )
-        .SingleOrDefaultAsync(cancellationToken);
+        subscriptions
+            .AnyAsync(
+                s =>
+                    s.BeatportType == beatportType &&
+                    s.BeatportId == beatportId &&
+                    s.BeatportSlug == beatportSlug,
+                cancellationToken);
+
+    public Task<SubscriptionDetailsReadModel> LoadAsync(
+        BeatportSubscriptionType beatportType,
+        BeatportId beatportId,
+        BeatportSlug beatportSlug,
+        CancellationToken cancellationToken = default) =>
+        subscriptions
+            .Where(s =>
+                s.BeatportType == beatportType &&
+                s.BeatportId == beatportId &&
+                s.BeatportSlug == beatportSlug)
+            .Select(s => new SubscriptionDetailsReadModel(
+                s.Id,
+                s.Name,
+                s.BeatportType,
+                s.BeatportId,
+                s.BeatportSlug,
+                s.ImageUri,
+                s.CreatedAt,
+                s.RefreshedAt))
+            .SingleAsync(cancellationToken);
 }
