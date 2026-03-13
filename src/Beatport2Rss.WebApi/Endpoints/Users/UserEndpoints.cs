@@ -22,6 +22,7 @@ file static class UserEndpointNames
     public const string Delete = "DeleteUser";
     public const string DeleteCurrent = "DeleteCurrentUser";
     public const string GetCurrent = "GetCurrentUser";
+    public const string UpdateCurrent = "UpdateCurrentUser";
     public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
 }
 
@@ -88,7 +89,30 @@ internal static class UserEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
-            //// groupBuilder.MapPut("/current", ...); // Update current user
+            groupBuilder
+                .MapPut(
+                    "/current",
+                    static async (
+                        [FromBody] [Required] UpdateUserRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateUserCommand(
+                            context.User.Id,
+                            request.FirstName,
+                            request.LastName);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.UpdateCurrent)
+                .WithDescription("Update current user")
+                .WithSummary("Update")
+                .Accepts<UpdateUserRequest>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             // Temporary
             groupBuilder
@@ -137,6 +161,7 @@ internal static class UserEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
+            // TODO: think if needed
             groupBuilder
                 .MapDelete(
                     "/{id}",

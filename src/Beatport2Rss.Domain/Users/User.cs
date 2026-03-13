@@ -50,6 +50,12 @@ public sealed class User :
             Status = status,
         };
 
+    public void UpdateFirstName(string? firstName) =>
+        FirstName = firstName;
+
+    public void UpdateLastName(string? lastName) =>
+        LastName = lastName;
+
     public void UpdateStatus(bool isActive) =>
         Status = isActive ? UserStatus.Active : UserStatus.Inactive;
 }
