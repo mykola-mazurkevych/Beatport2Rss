@@ -2,6 +2,7 @@ using Asp.Versioning;
 
 using Beatport2Rss.Application;
 using Beatport2Rss.Infrastructure;
+using Beatport2Rss.Jobs;
 using Beatport2Rss.WebApi;
 using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints.Feeds;
@@ -22,6 +23,7 @@ builder.Services
     .AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
+    .AddJobs()
     .AddProblemDetails(options => options.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(options =>
     {

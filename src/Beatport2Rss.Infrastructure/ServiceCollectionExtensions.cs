@@ -1,5 +1,4 @@
 #pragma warning disable CA1034 // Nested types should not be visible
-#pragma warning disable CA1708 // Identifiers should differ by more than case
 
 using System.Text;
 using System.Text.Json;
@@ -12,7 +11,6 @@ using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Extensions;
-using Beatport2Rss.Infrastructure.Jobs;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
@@ -27,8 +25,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-
-using Quartz;
 
 using Slugify;
 
@@ -45,7 +41,6 @@ public static class ServiceCollectionExtensions
                 .AddBeatportServices()
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
-                .AddJobs()
                 .AddMiscServices()
                 .AddPagination()
                 .AddPersistence(configuration)
@@ -91,18 +86,6 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
-
-        private IServiceCollection AddJobs() =>
-            services
-                .AddQuartz(configurator =>
-                {
-                    var jobKey = new JobKey(nameof(DeleteExpiredSessionsJob));
-
-                    configurator
-                        .AddJob<DeleteExpiredSessionsJob>(jobKey, _ => { })
-                        .AddTrigger(trigger => trigger.ForJob(jobKey).StartNow().WithSimpleSchedule(builder => builder.WithIntervalInHours(24).RepeatForever()));
-                })
-                .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         private IServiceCollection AddMiscServices() =>
             services

@@ -12,7 +12,7 @@ public interface ISubscriptionQueryRepository :
         BeatportSlug beatportSlug,
         CancellationToken cancellationToken = default);
 
-    Task<SubscriptionDetailsReadModel?> LoadAsync(
+    Task<SubscriptionDetailsReadModel> LoadAsync(
         BeatportSubscriptionType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
