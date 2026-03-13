@@ -53,6 +53,9 @@ public sealed class User :
     public void UpdateEmailAddress(EmailAddress emailAddress) =>
         EmailAddress = emailAddress;
 
+    public void UpdatePasswordHash(PasswordHash passwordHash) =>
+        PasswordHash = passwordHash;
+
     public void UpdateFirstName(string? firstName) =>
         FirstName = firstName;
 

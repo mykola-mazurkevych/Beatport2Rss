@@ -24,6 +24,7 @@ file static class UserEndpointNames
     public const string GetCurrent = "GetCurrentUser";
     public const string UpdateCurrent = "UpdateCurrentUser";
     public const string UpdateCurrentEmailAddress = "UpdateCurrentEmailAddress";
+    public const string UpdateCurrentPassword = "UpdateCurrentPassword";
     public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
 }
 
@@ -113,7 +114,7 @@ internal static class UserEndpoints
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
-            
+
             groupBuilder
                 .MapPut(
                     "/current/email-address",
@@ -132,10 +133,33 @@ internal static class UserEndpoints
                 .WithName(UserEndpointNames.UpdateCurrentEmailAddress)
                 .WithDescription("Update current user email address")
                 .WithSummary("Update Email Address")
-                .Accepts<UpdateUserStatusRequest>(MediaTypeNames.Application.Json)
+                .Accepts<UpdateUserEmailAddressRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapPut(
+                    "/current/password",
+                    static async (
+                        [FromBody] [Required] UpdateUserPasswordRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateUserPasswordCommand(
+                            context.User.Id,
+                            request.Password);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.UpdateCurrentPassword)
+                .WithDescription("Update current user password")
+                .WithSummary("Update Password")
+                .Accepts<UpdateUserPasswordRequest>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             // Temporary
