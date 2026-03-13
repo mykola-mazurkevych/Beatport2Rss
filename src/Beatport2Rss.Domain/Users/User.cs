@@ -50,6 +50,9 @@ public sealed class User :
             Status = status,
         };
 
+    public void UpdateEmailAddress(EmailAddress emailAddress) =>
+        EmailAddress = emailAddress;
+
     public void UpdateFirstName(string? firstName) =>
         FirstName = firstName;
 

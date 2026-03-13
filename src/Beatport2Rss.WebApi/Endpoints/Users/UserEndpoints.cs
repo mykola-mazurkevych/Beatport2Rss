@@ -23,6 +23,7 @@ file static class UserEndpointNames
     public const string DeleteCurrent = "DeleteCurrentUser";
     public const string GetCurrent = "GetCurrentUser";
     public const string UpdateCurrent = "UpdateCurrentUser";
+    public const string UpdateCurrentEmailAddress = "UpdateCurrentEmailAddress";
     public const string UpdateCurrentStatus = "UpdateCurrentUserStatus";
 }
 
@@ -111,6 +112,29 @@ internal static class UserEndpoints
                 .Accepts<UpdateUserRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+            
+            groupBuilder
+                .MapPut(
+                    "/current/email-address",
+                    static async (
+                        [FromBody] [Required] UpdateUserEmailAddressRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new UpdateUserEmailAddressCommand(
+                            context.User.Id,
+                            request.EmailAddress);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(UserEndpointNames.UpdateCurrentEmailAddress)
+                .WithDescription("Update current user email address")
+                .WithSummary("Update Email Address")
+                .Accepts<UpdateUserStatusRequest>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
@@ -136,7 +160,6 @@ internal static class UserEndpoints
                 .Accepts<UpdateUserStatusRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             //// groupBuilder.MapPut("/{id:guid}", ...); // Update user by id (by admin?)
