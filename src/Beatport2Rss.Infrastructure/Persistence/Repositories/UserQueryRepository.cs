@@ -54,26 +54,30 @@ internal sealed class UserQueryRepository(
     public Task<UserDetailsReadModel> LoadUserDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
         (
             from user in users
-            join feeds in (
+            join feed in (
                     from feed in feeds
                     group feed by feed.UserId
                     into grouping
-                    select new { UserId = grouping.Key, Count = grouping.Count() })
-                on user.Id equals feeds.UserId
-            join tags in (
+                    select new { UserId = grouping.Key, Count = (int?)grouping.Count() })
+                on user.Id equals feed.UserId
+                into userFeeds
+            from feeds in userFeeds.DefaultIfEmpty()
+            join tag in (
                     from tag in tags
                     group tag by tag.UserId
                     into grouping
-                    select new { UserId = grouping.Key, Count = grouping.Count() })
-                on user.Id equals tags.UserId
+                    select new { UserId = grouping.Key, Count = (int?)grouping.Count() })
+                on user.Id equals tag.UserId
+                into userTags
+            from tags in userTags.DefaultIfEmpty()
             where user.Id == userId
             select new UserDetailsReadModel(
                 user.EmailAddress,
                 user.FirstName,
                 user.LastName,
                 user.Status == UserStatus.Active,
-                feeds.Count,
-                tags.Count)
+                feeds.Count.GetValueOrDefault(),
+                tags.Count.GetValueOrDefault())
         )
         .SingleAsync(cancellationToken);
 }
