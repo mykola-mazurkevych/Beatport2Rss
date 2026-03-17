@@ -41,10 +41,12 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
             .HasForeignKey(feed => feed.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(feed => feed.Slug)
+        builder.HasIndex(feed => new { feed.UserId, feed.Name })
             .IsUnique();
 
-        builder.HasIndex(feed => new { feed.UserId, feed.Name })
+        builder.HasIndex(feed => new { feed.UserId, feed.Slug });
+
+        builder.HasIndex(feed => feed.Slug)
             .IsUnique();
     }
 }
