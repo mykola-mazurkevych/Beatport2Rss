@@ -10,5 +10,6 @@ public sealed record SubscriptionDto(
     BeatportSlug BeatportSlug,
     Uri BeatportUri,
     Uri ImageUri,
+    IEnumerable<SubscriptionTagDto> Tags,
     DateTimeOffset? CreatedAt,
     DateTimeOffset? RefreshedAt);

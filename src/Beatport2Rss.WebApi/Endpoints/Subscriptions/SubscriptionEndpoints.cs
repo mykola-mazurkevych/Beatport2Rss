@@ -110,6 +110,7 @@ internal static class SubscriptionEndpoints
                         CancellationToken cancellationToken) =>
                     {
                         var query = new GetSubscriptionQuery(
+                            context.User.Id,
                             BeatportSubscriptionType.Artist,
                             beatportId,
                             beatportSlug);
@@ -135,6 +136,7 @@ internal static class SubscriptionEndpoints
                         CancellationToken cancellationToken) =>
                     {
                         var query = new GetSubscriptionQuery(
+                            context.User.Id,
                             BeatportSubscriptionType.Label,
                             beatportId,
                             beatportSlug);

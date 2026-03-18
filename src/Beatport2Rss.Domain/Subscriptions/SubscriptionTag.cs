@@ -12,6 +12,6 @@ public sealed record SubscriptionTag :
 
     public TagId TagId { get; private set; }
 
-    internal static SubscriptionTag Create(TagId tagId) =>
+    public static SubscriptionTag Create(TagId tagId) =>
         new() { TagId = tagId };
 }
