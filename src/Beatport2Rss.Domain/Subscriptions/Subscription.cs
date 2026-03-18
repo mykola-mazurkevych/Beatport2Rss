@@ -60,4 +60,10 @@ public sealed class Subscription :
 
     public void AddTag(TagId tagId) =>
         _tags.Add(SubscriptionTag.Create(tagId));
+
+    public void RemoveTag(TagId tagId) =>
+        _tags.RemoveWhere(t => t.TagId == tagId);
+
+    public void RemoveTags() =>
+        _tags.Clear();
 }

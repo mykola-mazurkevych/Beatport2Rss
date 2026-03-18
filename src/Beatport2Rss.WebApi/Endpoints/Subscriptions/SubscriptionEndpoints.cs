@@ -23,6 +23,10 @@ file static class SubscriptionEndpointNames
     public const string CreateArtistTag = "CreateArtistTag";
     public const string CreateLabel = "CreateLabel";
     public const string CreateLabelTag = "CreateLabelTag";
+    public const string DeleteArtistTag = "DeleteArtistTag";
+    public const string DeleteArtistTags = "DeleteArtistTags";
+    public const string DeleteLabelTag = "DeleteLabelTag";
+    public const string DeleteLabelTags = "DeleteLabelTags";
     public const string GetArtist = "GetArtist";
     public const string GetLabel = "GetLabel";
 }
@@ -123,6 +127,7 @@ internal static class SubscriptionEndpoints
                 .Produces<SubscriptionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
@@ -149,6 +154,7 @@ internal static class SubscriptionEndpoints
                 .Produces<SubscriptionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
@@ -177,9 +183,10 @@ internal static class SubscriptionEndpoints
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
-            
+
             groupBuilder
                 .MapPost(
                     "labels/{beatportSlug}/{beatportId}/tags",
@@ -206,6 +213,123 @@ internal static class SubscriptionEndpoints
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "artists/{beatportSlug}/{beatportId}/tags",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSubscriptionTagsCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Artist,
+                            beatportId,
+                            beatportSlug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.DeleteArtistTags)
+                .WithDescription("Delete all tags from an artist")
+                .WithSummary("Delete Artist Tags")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "labels/{beatportSlug}/{beatportId}/tags",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSubscriptionTagsCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Label,
+                            beatportId,
+                            beatportSlug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.DeleteLabelTags)
+                .WithDescription("Delete all tags from an artist")
+                .WithSummary("Delete Label Tags")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "artists/{beatportSlug}/{beatportId}/tags/{slug}",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSubscriptionTagCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Artist,
+                            beatportId,
+                            beatportSlug,
+                            slug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.DeleteArtistTag)
+                .WithDescription("Delete tag from an artist")
+                .WithSummary("Delete Artist Tag")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapDelete(
+                    "labels/{beatportSlug}/{beatportId}/tags/{slug}",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromRoute] Slug slug,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new DeleteSubscriptionTagCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Label,
+                            beatportId,
+                            beatportSlug,
+                            slug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.DeleteLabelTag)
+                .WithDescription("Delete tag from a label")
+                .WithSummary("Delete Label Tag")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
