@@ -2,7 +2,6 @@
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.SharedKernel.Common;
 
@@ -11,8 +10,7 @@ namespace Beatport2Rss.Domain.Subscriptions;
 public sealed class Subscription :
     IAggregateRoot<SubscriptionId>
 {
-    private readonly HashSet<FeedId> _feedIds = [];
-    private readonly HashSet<TagId> _tagIds = [];
+    private readonly HashSet<SubscriptionTag> _tags = [];
 
     private Subscription()
     {
@@ -32,11 +30,8 @@ public sealed class Subscription :
 
     public DateTimeOffset? RefreshedAt { get; private set; }
 
-    public IReadOnlySet<FeedId> FeedIds =>
-        _feedIds.AsReadOnly();
-
-    public IReadOnlySet<TagId> TagIds =>
-        _tagIds.AsReadOnly();
+    public IReadOnlySet<SubscriptionTag> Tags =>
+        _tags.AsReadOnly();
 
     public static Subscription Create(
         DateTimeOffset createdAt,
@@ -60,12 +55,9 @@ public sealed class Subscription :
     public void MarkAsRefreshed(DateTimeOffset refreshedAt) =>
         RefreshedAt = refreshedAt;
 
+    public bool ContainsTag(TagId tagId) =>
+        _tags.Any(t => t.TagId == tagId);
+
     public void AddTag(TagId tagId) =>
-        _tagIds.Add(tagId);
-
-    public void RemoveTag(TagId tagId) =>
-        _tagIds.Remove(tagId);
-
-    public bool HasTag(TagId tagId) =>
-        _tagIds.Contains(tagId);
+        _tags.Add(SubscriptionTag.Create(tagId));
 }

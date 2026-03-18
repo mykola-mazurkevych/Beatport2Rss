@@ -20,7 +20,9 @@ namespace Beatport2Rss.WebApi.Endpoints.Subscriptions;
 file static class SubscriptionEndpointNames
 {
     public const string CreateArtist = "CreateArtist";
+    public const string CreateArtistTag = "CreateArtistTag";
     public const string CreateLabel = "CreateLabel";
+    public const string CreateLabelTag = "CreateLabelTag";
     public const string GetArtist = "GetArtist";
     public const string GetLabel = "GetLabel";
 }
@@ -145,6 +147,64 @@ internal static class SubscriptionEndpoints
                 .Produces<SubscriptionResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
+                .MapPost(
+                    "artists/{beatportSlug}/{beatportId}/tags",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromBody] [Required] CreateSubscriptionTagRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new CreateSubscriptionTagCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Artist,
+                            beatportId,
+                            beatportSlug,
+                            request.TagSlug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.CreateArtistTag)
+                .WithDescription("Add tag to an artist")
+                .WithSummary("Create Artist Tag")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+            
+            groupBuilder
+                .MapPost(
+                    "labels/{beatportSlug}/{beatportId}/tags",
+                    static async (
+                        [FromRoute] BeatportSlug beatportSlug,
+                        [FromRoute] BeatportId beatportId,
+                        [FromBody] [Required] CreateSubscriptionTagRequest request,
+                        [FromServices] IMediator mediator,
+                        HttpContext context,
+                        CancellationToken cancellationToken) =>
+                    {
+                        var command = new CreateSubscriptionTagCommand(
+                            context.User.Id,
+                            BeatportSubscriptionType.Label,
+                            beatportId,
+                            beatportSlug,
+                            request.TagSlug);
+                        var result = await mediator.Send(command, cancellationToken);
+                        return result.ToAspNetCoreResult(Results.NoContent, context);
+                    })
+                .WithName(SubscriptionEndpointNames.CreateLabelTag)
+                .WithDescription("Add tag to a label")
+                .WithSummary("Create Label Tag")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             return routeBuilder;

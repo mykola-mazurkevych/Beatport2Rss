@@ -11,5 +11,6 @@ public interface ITagQueryRepository :
     IQueryable<Tag> Tags { get; }
 
     Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
+    Task<TagId> LoadTagIdAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
     Task<TagDetailsReadModel> LoadTagDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
 }
