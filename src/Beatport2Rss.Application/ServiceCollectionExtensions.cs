@@ -16,17 +16,9 @@ public static partial class ServiceCollectionExtensions
                     options.ServiceLifetime = ServiceLifetime.Transient;
                 })
                 .AddValidators()
-                .AddValidationBehaviors()
-                .AddUserValidationBehaviors()
-                .AddFeedValidationBehaviors()
-                .AddTagValidationBehaviors()
-                .AddSubscriptionValidationBehaviors();
+                .AddBehaviors();
     }
 
-    private static partial IServiceCollection AddFeedValidationBehaviors(this IServiceCollection services);
-    private static partial IServiceCollection AddSubscriptionValidationBehaviors(this IServiceCollection services);
-    private static partial IServiceCollection AddUserValidationBehaviors(this IServiceCollection services);
-    private static partial IServiceCollection AddTagValidationBehaviors(this IServiceCollection services);
-    private static partial IServiceCollection AddValidationBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddBehaviors(this IServiceCollection services);
     private static partial IServiceCollection AddValidators(this IServiceCollection services);
 }

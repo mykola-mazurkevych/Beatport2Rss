@@ -9,7 +9,7 @@ namespace Beatport2Rss.SourceGenerator.IncrementalValueProviders;
 
 internal static class MediatorMessageInfoProvider
 {
-    public static IncrementalValueProvider<ImmutableArray<MediatorMessageInfo>> Provide(
+    public static IncrementalValueProvider<ImmutableArray<MessageInfo>> Provide(
         IncrementalGeneratorInitializationContext context,
         string metadataName) =>
         context.SyntaxProvider
@@ -27,7 +27,7 @@ internal static class MediatorMessageInfoProvider
                 {
                     if (@interface.OriginalDefinition.Equals(iMessageSymbol, SymbolEqualityComparer.Default))
                     {
-                        return new MediatorMessageInfo(
+                        return new MessageInfo(
                             recordSymbol.Name,
                             recordSymbol.ContainingNamespace.ToDisplayString(),
                             recordSymbol.Interfaces);
