@@ -8,6 +8,8 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
+using FluentValidation;
+
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Tags.Queries;
@@ -17,7 +19,18 @@ public sealed record GetTagsQuery(
     int? Size,
     string? Next,
     string? Previous) :
-    IQuery<Result<Page<TagPageDto>>>, IRequireUser;
+    IQuery<Result<Page<TagPageDto>>>, IRequireValidation, IRequireUser;
+
+internal sealed class GetTagsQueryValidator :
+    AbstractValidator<GetTagsQuery>
+{
+    public GetTagsQueryValidator(ICursorEncoder cursorEncoder)
+    {
+        RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
+        RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<TagId>(next, out var _));
+        RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<TagId>(previous, out var _));
+    }
+}
 
 internal sealed class GetFeedsQueryHandler(
     ITagQueryRepository tagQueryRepository,

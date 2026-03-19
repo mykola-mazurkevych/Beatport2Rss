@@ -8,6 +8,8 @@ using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
+using FluentValidation;
+
 using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
@@ -17,7 +19,18 @@ public sealed record GetFeedsQuery(
     int? Size,
     string? Next,
     string? Previous) :
-    IQuery<Result<Page<FeedPageDto>>>, IRequireUser;
+    IQuery<Result<Page<FeedPageDto>>>, IRequireValidation, IRequireUser;
+
+internal sealed class GetFeedsQueryValidator :
+    AbstractValidator<GetFeedsQuery>
+{
+    public GetFeedsQueryValidator(ICursorEncoder cursorEncoder)
+    {
+        RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
+        RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<FeedId>(next, out var _));
+        RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<FeedId>(previous, out var _));
+    }
+}
 
 internal sealed class GetFeedsQueryHandler(
     IFeedQueryRepository feedQueryRepository,
