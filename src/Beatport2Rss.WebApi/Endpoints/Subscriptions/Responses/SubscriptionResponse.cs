@@ -9,6 +9,7 @@ internal sealed record SubscriptionResponse(
     string BeatportSlug,
     Uri BeatportUri,
     Uri ImageUri,
+    IEnumerable<SubscriptionTagResponse> Tags,
     DateTimeOffset? CreatedAt,
     DateTimeOffset? RefreshedAt)
 {
@@ -19,6 +20,7 @@ internal sealed record SubscriptionResponse(
             dto.BeatportSlug.Value,
             dto.BeatportUri,
             dto.ImageUri,
+            dto.Tags.Select(SubscriptionTagResponse.Create),
             dto.CreatedAt,
             dto.RefreshedAt);
 }

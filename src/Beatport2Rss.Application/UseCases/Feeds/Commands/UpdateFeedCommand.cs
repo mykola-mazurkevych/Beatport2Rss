@@ -18,7 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 
 public sealed record UpdateFeedCommand(
     UserId UserId,
-    Slug Slug,
+    Slug FeedSlug,
     string? Name,
     bool UpdateSlug,
     bool IsActive) :
@@ -43,7 +43,7 @@ internal sealed class UpdateFeedCommandHandler(
         UpdateFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.Slug, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.FeedSlug, cancellationToken);
 
         var feedName = FeedName.Create(command.Name);
         var slug = command.UpdateSlug ? slugGenerator.Generate(feedName.Value) : feed.Slug;

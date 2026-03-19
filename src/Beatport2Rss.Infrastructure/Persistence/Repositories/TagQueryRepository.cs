@@ -16,6 +16,16 @@ internal sealed class TagQueryRepository(IQueryable<Tag> tags) :
     public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         tags.AnyAsync(t => t.UserId == userId && t.Slug == slug, cancellationToken);
 
+    public Task<TagId> LoadTagIdAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
+        (
+            from tag in tags
+            where tag.UserId == userId &&
+                  tag.Slug == slug
+            select tag.Id
+        )
+        .SingleAsync(cancellationToken);
+
+
     public Task<TagDetailsReadModel> LoadTagDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         (
             from tag in tags

@@ -38,10 +38,12 @@ internal sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
             .HasForeignKey(tag => tag.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(tag => tag.Slug)
+        builder.HasIndex(tag => new { tag.UserId, tag.Name })
             .IsUnique();
 
-        builder.HasIndex(tag => new { tag.UserId, tag.Name })
+        builder.HasIndex(tag => new { tag.UserId, tag.Slug });
+
+        builder.HasIndex(tag => tag.Slug)
             .IsUnique();
     }
 }

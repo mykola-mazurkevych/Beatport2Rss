@@ -1,11 +1,10 @@
 using Beatport2Rss.Application.Dtos.Subscriptions;
-using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
-using Beatport2Rss.SharedKernel.Extensions;
+using Beatport2Rss.Domain.Users;
 
 using FluentResults;
 
@@ -16,19 +15,18 @@ using Mediator;
 namespace Beatport2Rss.Application.UseCases.Subscriptions.Queries;
 
 public sealed record GetSubscriptionQuery(
-    BeatportSubscriptionType Type,
-    int BeatportId,
-    string BeatportSlug) :
-    IQuery<Result<SubscriptionDto>>, IRequireValidation;
+    UserId UserId,
+    BeatportSubscriptionType BeatportType,
+    BeatportId BeatportId,
+    BeatportSlug BeatportSlug) :
+    IQuery<Result<SubscriptionDto>>, IRequireValidation, IRequireSubscription;
 
 internal sealed class GetSubscriptionQueryValidator :
     AbstractValidator<GetSubscriptionQuery>
 {
     public GetSubscriptionQueryValidator()
     {
-        RuleFor(q => q.Type).IsInEnum();
-        RuleFor(q => q.BeatportId).GreaterThan(0);
-        RuleFor(q => q.BeatportSlug).IsBeatportSlug();
+        RuleFor(q => q.BeatportType).IsInEnum();
     }
 }
 
@@ -41,14 +39,12 @@ internal sealed class GetSubscriptionQueryHandler(
         GetSubscriptionQuery query,
         CancellationToken cancellationToken)
     {
-        var beatportId = BeatportId.Create(query.BeatportId);
-        var beatportSlug = BeatportSlug.Create(query.BeatportSlug);
-        var readModel = await subscriptionQueryRepository.LoadAsync(query.Type, beatportId, beatportSlug, cancellationToken);
-
-        if (readModel is null)
-        {
-            return Result.NotFound("Subscription not found");
-        }
+        var readModel = await subscriptionQueryRepository.LoadWithUserTagsAsync(
+            query.UserId,
+            query.BeatportType,
+            query.BeatportId,
+            query.BeatportSlug,
+            cancellationToken);
 
         return new SubscriptionDto(
             readModel.Id,
@@ -57,6 +53,7 @@ internal sealed class GetSubscriptionQueryHandler(
             readModel.BeatportSlug,
             beatportUriBuilder.Build(readModel.BeatportType, readModel.BeatportId, readModel.BeatportSlug),
             readModel.ImageUri,
+            readModel.Tags.Select(t => new SubscriptionTagDto(t.Name, t.Slug)),
             readModel.CreatedAt,
             readModel.RefreshedAt);
     }

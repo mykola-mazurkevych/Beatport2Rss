@@ -68,8 +68,12 @@ internal sealed class PageBuilder(
         page = page with
         {
             Items = pageEntities.AsReadOnly(),
-            Next = await context.HasNextAsync(pageEntities) ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[^1].CreatedAt, pageEntities[^1].Id)) : null,
-            Previous = await context.HasPreviousAsync(pageEntities) ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[0].CreatedAt, pageEntities[0].Id)) : null,
+            Next = await context.HasNextAsync(pageEntities)
+                ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[^1].CreatedAt, pageEntities[^1].Id))
+                : null,
+            Previous = await context.HasPreviousAsync(pageEntities)
+                ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[0].CreatedAt, pageEntities[0].Id))
+                : null,
         };
 
         return page;

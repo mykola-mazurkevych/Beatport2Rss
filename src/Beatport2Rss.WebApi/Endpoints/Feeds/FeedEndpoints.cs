@@ -1,30 +1,14 @@
-using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 
 using Asp.Versioning.Builder;
 
-using Beatport2Rss.Application.UseCases.Feeds.Commands;
-using Beatport2Rss.Application.UseCases.Feeds.Queries;
-using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.WebApi.Endpoints.Feeds.Handlers;
 using Beatport2Rss.WebApi.Endpoints.Feeds.Requests;
 using Beatport2Rss.WebApi.Endpoints.Feeds.Responses;
-using Beatport2Rss.WebApi.Extensions;
-
-using Mediator;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.WebApi.Endpoints.Feeds;
-
-file static class FeedEndpointNames
-{
-    public const string Create = "CreateFeed";
-    public const string Delete = "DeleteFeed";
-    public const string Get = "GetFeed";
-    public const string List = "ListFeeds";
-    public const string Update = "UpdateStatus";
-    public const string UpdateStatus = "UpdateFeedStatus";
-}
 
 internal static class FeedEndpoints
 {
@@ -32,49 +16,29 @@ internal static class FeedEndpoints
     {
         public IEndpointRouteBuilder BuildFeedEndpoints(ApiVersionSet versionSet)
         {
-            var groupBuilder = routeBuilder.MapGroup("feeds")
+            var groupBuilder = routeBuilder
+                .MapGroup("feeds")
                 .RequireAuthorization()
                 .WithApiVersionSet(versionSet)
                 .HasApiVersion(ApiVersionsContainer.V1)
                 .WithTags("Feeds");
 
-            groupBuilder.MapGet(
-                    "",
-                    static async ([FromQuery] int? size, [FromQuery] string? next, [FromQuery] string? previos, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var query = new GetFeedsQuery(
-                            context.User.Id,
-                            size,
-                            next,
-                            previos);
-                        var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(PageResponse<GetFeedsResponse>.Create(result.Value, GetFeedsResponse.Create)), context);
-                    })
+            groupBuilder
+                .MapGet("", ListFeedsEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.List)
                 .WithDescription("Get a list of feeds")
                 .WithSummary("List")
-                .Produces<PageResponse<GetFeedsResponse>>(StatusCodes.Status201Created)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<PageResponse<FeedsResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPost(
-                    "",
-                    static async ([FromBody] [Required] CreateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var command = new CreateFeedCommand(
-                            context.User.Id,
-                            request.Name,
-                            request.IsActive);
-                        var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
-                    })
+                .MapPost("", CreateFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Create)
                 .WithDescription("Create a new feed")
                 .WithSummary("Create")
                 .Accepts<CreateFeedRequest>(MediaTypeNames.Application.Json)
-                .Produces(StatusCodes.Status201Created)
+                .Produces<FeedResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
@@ -82,43 +46,22 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapGet(
-                    "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var query = new GetFeedQuery(
-                            context.User.Id,
-                            slug);
-                        var result = await mediator.Send(query, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.Ok(GetFeedResponse.Create(result.Value)), context);
-                    })
+                .MapGet("/{slug}", GetFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
                 .WithSummary("Get Details")
-                .Produces<GetFeedResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<FeedResponse>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPut(
-                    "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var command = new UpdateFeedCommand(
-                            context.User.Id,
-                            slug,
-                            request.Name,
-                            request.UpdateSlug,
-                            request.IsActive);
-                        var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(() => Results.RedirectToRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);
-                    })
+                .MapPut("/{slug}", UpdateFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Update)
                 .WithDescription("Update feed by its slug")
                 .WithSummary("Update")
+                .Accepts<UpdateFeedRequest>(MediaTypeNames.Application.Json)
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
@@ -128,17 +71,7 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPut(
-                    "/{slug}/status",
-                    static async ([FromRoute] Slug slug, [FromBody] UpdateFeedStatusRequest request, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var command = new UpdateFeedStatusCommand(
-                            context.User.Id,
-                            slug,
-                            request.IsActive);
-                        var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(Results.NoContent, context);
-                    })
+                .MapPut("/{slug}/status", UpdateFeedStatusEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.UpdateStatus)
                 .WithDescription("Update status of a feed by its slug")
                 .WithSummary("Update Status")
@@ -151,21 +84,11 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapDelete(
-                    "/{slug}",
-                    static async ([FromRoute] Slug slug, [FromServices] IMediator mediator, HttpContext context, CancellationToken cancellationToken) =>
-                    {
-                        var command = new DeleteFeedCommand(
-                            context.User.Id,
-                            slug);
-                        var result = await mediator.Send(command, cancellationToken);
-                        return result.ToAspNetCoreResult(Results.NoContent, context);
-                    })
+                .MapDelete("/{slug}", DeleteFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Delete)
                 .WithDescription("Delete a feed by its slug")
                 .WithSummary("Delete")
                 .Produces(StatusCodes.Status204NoContent)
-                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)

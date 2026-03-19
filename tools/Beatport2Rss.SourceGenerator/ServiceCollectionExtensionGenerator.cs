@@ -40,5 +40,9 @@ public sealed class ServiceCollectionExtensionGenerator : IIncrementalGenerator
         var requireTagMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireTag");
         context.RegisterSourceOutput(requireTagMessages, static (ctx, infos) => TagValidationBehaviorsSourceOutput.Add(ctx, infos));
         context.RegisterSourceOutput(requireTagMessages, static (ctx, infos) => ServiceCollectionExtensionTagValidationBehaviorsSourceOutput.Add(ctx, infos));
+
+        var requireSubscriptionMessages = MediatorMessageInfoProvider.Provide(context, "Beatport2Rss.Application.Interfaces.Messages.IRequireSubscription");
+        context.RegisterSourceOutput(requireSubscriptionMessages, static (ctx, infos) => SubscriptionValidationBehaviorsSourceOutput.Add(ctx, infos));
+        context.RegisterSourceOutput(requireSubscriptionMessages, static (ctx, infos) => ServiceCollectionExtensionSubscriptionValidationBehaviorsSourceOutput.Add(ctx, infos));
     }
 }

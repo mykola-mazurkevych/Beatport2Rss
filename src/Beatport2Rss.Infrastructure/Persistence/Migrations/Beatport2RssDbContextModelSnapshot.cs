@@ -56,6 +56,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId", "Name")
                         .IsUnique();
 
+                    b.HasIndex("UserId", "Slug");
+
                     b.ToTable("Feeds", (string)null);
                 });
 
@@ -233,6 +235,8 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.HasIndex("UserId", "Name")
                         .IsUnique();
 
+                    b.HasIndex("UserId", "Slug");
+
                     b.ToTable("Tags", (string)null);
                 });
 
@@ -369,24 +373,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.ToTable("FeedSubscriptions", (string)null);
                 });
 
-            modelBuilder.Entity("Beatport2Rss.Infrastructure.Persistence.Entities.SubscriptionTag", b =>
-                {
-                    b.Property<int>("SubscriptionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("SubscriptionId", "TagId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("SubscriptionTags", (string)null);
-                });
-
             modelBuilder.Entity("Beatport2Rss.Domain.Feeds.Feed", b =>
                 {
                     b.HasOne("Beatport2Rss.Domain.Users.User", null)
@@ -403,6 +389,35 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Domain.Subscriptions.Subscription", b =>
+                {
+                    b.OwnsMany("Beatport2Rss.Domain.Subscriptions.SubscriptionTag", "Tags", b1 =>
+                        {
+                            b1.Property<int>("SubscriptionId")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("TagId")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("SubscriptionId", "TagId");
+
+                            b1.HasIndex("TagId");
+
+                            b1.ToTable("SubscriptionTags", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubscriptionId");
+
+                            b1.HasOne("Beatport2Rss.Domain.Tags.Tag", null)
+                                .WithMany()
+                                .HasForeignKey("TagId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("Beatport2Rss.Domain.Tags.Tag", b =>
@@ -434,21 +449,6 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.HasOne("Beatport2Rss.Domain.Subscriptions.Subscription", null)
                         .WithMany()
                         .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Beatport2Rss.Infrastructure.Persistence.Entities.SubscriptionTag", b =>
-                {
-                    b.HasOne("Beatport2Rss.Domain.Subscriptions.Subscription", null)
-                        .WithMany()
-                        .HasForeignKey("SubscriptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Beatport2Rss.Domain.Tags.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

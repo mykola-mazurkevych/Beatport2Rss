@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿#pragma warning disable CA1031 // Do not catch general exception types
+
+using System.Text.Json;
 
 using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Pagination;
@@ -34,5 +36,21 @@ internal sealed class CursorEncoder(
         var bytes = Base64UrlTextEncoder.Decode(cursor);
         var json = System.Text.Encoding.UTF8.GetString(bytes);
         return JsonSerializer.Deserialize<Cursor<TId>>(json, _options);
+    }
+
+    public bool TryDecode<TId>(string? base64String, out Cursor<TId>? cursor)
+        where TId : struct, IId<TId>
+    {
+        cursor = null;
+
+        try
+        {
+            cursor = Decode<TId>(base64String);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

@@ -21,6 +21,9 @@ internal static class ValidationBehaviorsSourceOutput
                 "Beatport2Rss.Application.Dtos.Sessions",
                 "Beatport2Rss.Application.Dtos.Subscriptions",
                 "Beatport2Rss.Domain.Common.ValueObjects",
+                "Beatport2Rss.Application.Pagination",
+                "Beatport2Rss.Application.Dtos.Feeds",
+                "Beatport2Rss.Application.Dtos.Tags",
             ])
             .Distinct()
             .OrderBy(@namespace => @namespace)
@@ -52,14 +55,14 @@ internal static class ValidationBehaviorsSourceOutput
 
             if (resultSymbol.IsGenericType)
             {
-                var valueSymbol = resultSymbol.TypeArguments.Single();
-                builder.AppendLine($"    ValidationBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>, {valueSymbol.Name}>(validator),");
-                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>>");
+                var valueSymbol = (INamedTypeSymbol)resultSymbol.TypeArguments.Single();
+                builder.AppendLine($"    ValidationBehavior<{info.Name}, {GetSymbolName(resultSymbol)}, {GetSymbolName(valueSymbol)}>(validator),");
+                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {GetSymbolName(resultSymbol)}>");
             }
             else
             {
-                builder.AppendLine($"    ValidationBehavior<{info.Name}, {resultSymbol.Name}>(validator),");
-                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbol.Name}>");
+                builder.AppendLine($"    ValidationBehavior<{info.Name}, {GetSymbolName(resultSymbol)}>(validator),");
+                builder.AppendLine($"    IPipelineBehavior<{info.Name}, {GetSymbolName(resultSymbol)}>");
             }
 
             builder.AppendLine("{");
@@ -67,5 +70,17 @@ internal static class ValidationBehaviorsSourceOutput
         }
 
         context.AddSource("ValidationBehaviors.g.cs", builder.ToString());
+    }
+
+    private static string GetSymbolName(INamedTypeSymbol symbol)
+    {
+        var name = symbol.Name;
+
+        if (symbol.IsGenericType)
+        {
+            name += '<' + string.Join(", ", symbol.TypeArguments.Select(t => GetSymbolName((INamedTypeSymbol)t))) + '>';
+        }
+
+        return name;
     }
 }

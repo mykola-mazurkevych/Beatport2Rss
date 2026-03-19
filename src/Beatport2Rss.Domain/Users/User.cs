@@ -50,6 +50,18 @@ public sealed class User :
             Status = status,
         };
 
+    public void UpdateEmailAddress(EmailAddress emailAddress) =>
+        EmailAddress = emailAddress;
+
+    public void UpdatePasswordHash(PasswordHash passwordHash) =>
+        PasswordHash = passwordHash;
+
+    public void UpdateFirstName(string? firstName) =>
+        FirstName = firstName;
+
+    public void UpdateLastName(string? lastName) =>
+        LastName = lastName;
+
     public void UpdateStatus(bool isActive) =>
         Status = isActive ? UserStatus.Active : UserStatus.Inactive;
 }

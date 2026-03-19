@@ -2,11 +2,11 @@
 
 namespace Beatport2Rss.WebApi.Endpoints.Tags.Responses;
 
-internal sealed record GetTagsResponse(
+internal sealed record TagsResponse(
     string Name,
     string Slug)
 {
-    public static GetTagsResponse Create(TagPageDto dto) =>
+    public static TagsResponse Create(TagPageDto dto) =>
         new(dto.Name.Value,
             dto.Slug.Value);
 }

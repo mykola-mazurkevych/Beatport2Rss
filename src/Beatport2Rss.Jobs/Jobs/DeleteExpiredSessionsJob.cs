@@ -4,7 +4,7 @@ using Mediator;
 
 using Quartz;
 
-namespace Beatport2Rss.Infrastructure.Jobs;
+namespace Beatport2Rss.Jobs.Jobs;
 
 internal sealed class DeleteExpiredSessionsJob(IMediator mediator) :
     IJob

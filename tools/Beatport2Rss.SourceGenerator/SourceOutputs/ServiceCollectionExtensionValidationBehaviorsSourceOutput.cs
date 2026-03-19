@@ -25,6 +25,7 @@ internal static class ServiceCollectionExtensionValidationBehaviorsSourceOutput
                 "Beatport2Rss.Application.Dtos.Tags",
                 "Beatport2Rss.Application.Dtos.Users",
                 "Beatport2Rss.Domain.Common.ValueObjects",
+                "Beatport2Rss.Application.Pagination",
             ])
             .Distinct()
             .OrderBy(@namespace => @namespace)
@@ -60,15 +61,7 @@ internal static class ServiceCollectionExtensionValidationBehaviorsSourceOutput
             var messageSymbol = info.Interfaces.Single(i => i is { Name: "ICommand" or "IQuery" });
             var resultSymbol = (INamedTypeSymbol)messageSymbol.TypeArguments.Single();
 
-            if (resultSymbol.IsGenericType)
-            {
-                var valueSymbol = resultSymbol.TypeArguments.Single();
-                builder.Append($"IPipelineBehavior<{info.Name}, {resultSymbol.Name}<{valueSymbol.Name}>>");
-            }
-            else
-            {
-                builder.Append($"IPipelineBehavior<{info.Name}, {resultSymbol.Name}>");
-            }
+            builder.Append($"IPipelineBehavior<{info.Name}, {GetSymbolName(resultSymbol)}>");
 
             builder.Append(", ");
             builder.Append($"{info.Name}ValidationBehavior");
@@ -79,5 +72,17 @@ internal static class ServiceCollectionExtensionValidationBehaviorsSourceOutput
         builder.Append('}');
 
         context.AddSource("ServiceCollectionExtensions.ValidationBehaviors.g.cs", builder.ToString());
+    }
+
+    private static string GetSymbolName(INamedTypeSymbol symbol)
+    {
+        var name = symbol.Name;
+
+        if (symbol.IsGenericType)
+        {
+            name += '<' + string.Join(", ", symbol.TypeArguments.Select(t => GetSymbolName((INamedTypeSymbol)t))) + '>';
+        }
+
+        return name;
     }
 }

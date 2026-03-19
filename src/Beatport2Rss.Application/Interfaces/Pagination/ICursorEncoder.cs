@@ -10,4 +10,7 @@ public interface ICursorEncoder
 
     Cursor<TId>? Decode<TId>(string? base64String)
         where TId : struct, IId<TId>;
+
+    bool TryDecode<TId>(string? base64String, out Cursor<TId>? cursor)
+        where TId : struct, IId<TId>;
 }

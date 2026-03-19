@@ -10,5 +10,6 @@ public sealed record SubscriptionDetailsReadModel(
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,
     Uri ImageUri,
+    IEnumerable<SubscriptionTagDetailsReadModel> Tags,
     DateTimeOffset? CreatedAt,
     DateTimeOffset? RefreshedAt);
