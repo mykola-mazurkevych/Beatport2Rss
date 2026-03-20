@@ -19,7 +19,7 @@ file static class ErrorMessages
     public const string NotSupported = "User status '{0}' is not supported.";
 }
 
-internal abstract class UserValidationBehavior<TMessage, TResult>(
+internal abstract class RequireUserBehavior<TMessage, TResult>(
     IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
     where TResult : Result
@@ -40,7 +40,7 @@ internal abstract class UserValidationBehavior<TMessage, TResult>(
     }
 }
 
-internal abstract class UserValidationBehavior<TMessage, TResult, TResponse>(
+internal abstract class RequireUserBehavior<TMessage, TResult, TResponse>(
     IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
     where TResult : Result<TResponse>

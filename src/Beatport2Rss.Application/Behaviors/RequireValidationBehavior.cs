@@ -14,7 +14,7 @@ file static class ErrorMessages
     public const string Validation = "One or more validation errors occured.";
 }
 
-internal abstract class ValidationBehavior<TMessage, TResult>(IValidator<TMessage> validator)
+internal abstract class RequireValidationBehavior<TMessage, TResult>(IValidator<TMessage> validator)
     where TMessage : IMessage
     where TResult : Result
 {
@@ -32,7 +32,7 @@ internal abstract class ValidationBehavior<TMessage, TResult>(IValidator<TMessag
     }
 }
 
-internal abstract class ValidationBehavior<TMessage, TResult, TResponse>(IValidator<TMessage> validator)
+internal abstract class RequireValidationBehavior<TMessage, TResult, TResponse>(IValidator<TMessage> validator)
     where TMessage : IMessage
     where TResult : Result<TResponse>
 {

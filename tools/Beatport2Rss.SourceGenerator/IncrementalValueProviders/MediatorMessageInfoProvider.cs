@@ -18,6 +18,7 @@ internal static class MediatorMessageInfoProvider
                 transform: static (context, cancellationToken) => context.SemanticModel.GetDeclaredSymbol((RecordDeclarationSyntax)context.Node, cancellationToken) as INamedTypeSymbol)
             .Where(static symbol => symbol is not null)
             .Combine(context.CompilationProvider.Select((compilation, _) => compilation.GetTypeByMetadataName(metadataName)))
+            .Where(static pair => pair.Right is not null)
             .Select(static (pair, _) =>
             {
                 var recordSymbol = pair.Left!;

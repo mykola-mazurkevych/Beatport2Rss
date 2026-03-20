@@ -15,10 +15,16 @@ public static partial class ServiceCollectionExtensions
                     options.GenerateTypesAsInternal = true;
                     options.ServiceLifetime = ServiceLifetime.Transient;
                 })
-                .AddValidators()
-                .AddBehaviors();
+                .AddRequireUserBehaviors()
+                .AddRequireFeedBehaviors()
+                .AddRequireTagBehaviors()
+                .AddRequireSubscriptionBehaviors()
+                .AddValidators();
     }
 
-    private static partial IServiceCollection AddBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddRequireFeedBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddRequireSubscriptionBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddRequireTagBehaviors(this IServiceCollection services);
+    private static partial IServiceCollection AddRequireUserBehaviors(this IServiceCollection services);
     private static partial IServiceCollection AddValidators(this IServiceCollection services);
 }

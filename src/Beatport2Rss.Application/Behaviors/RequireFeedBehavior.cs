@@ -13,7 +13,7 @@ file static class ErrorMessages
     public const string NotFound = "Feed with slug '{0}' was not found.";
 }
 
-internal abstract class FeedValidationBehavior<TMessage, TResult>(
+internal abstract class RequireFeedBehavior<TMessage, TResult>(
     IFeedQueryRepository feedQueryRepository)
     where TMessage : IMessage, IRequireUser, IRequireFeed
     where TResult : Result
@@ -31,7 +31,7 @@ internal abstract class FeedValidationBehavior<TMessage, TResult>(
     }
 }
 
-internal abstract class FeedValidationBehavior<TMessage, TResult, TResponse>(
+internal abstract class RequireFeedBehavior<TMessage, TResult, TResponse>(
     IFeedQueryRepository feedQueryRepository)
     where TMessage : IMessage, IRequireUser, IRequireFeed
     where TResult : Result<TResponse>

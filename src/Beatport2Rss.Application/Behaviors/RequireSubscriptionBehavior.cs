@@ -13,7 +13,7 @@ file static class ErrorMessages
     public const string NotFound = "Subscription of type '{0}' with id '{1}' and slug '{2}' was not found.";
 }
 
-internal abstract class SubscriptionValidationBehavior<TMessage, TResult>(
+internal abstract class RequireSubscriptionBehavior<TMessage, TResult>(
     ISubscriptionQueryRepository subscriptionQueryRepository)
     where TMessage : IMessage, IRequireSubscription
     where TResult : Result
@@ -35,7 +35,7 @@ internal abstract class SubscriptionValidationBehavior<TMessage, TResult>(
     }
 }
 
-internal abstract class SubscriptionValidationBehavior<TMessage, TResult, TResponse>(
+internal abstract class RequireSubscriptionBehavior<TMessage, TResult, TResponse>(
     ISubscriptionQueryRepository subscriptionQueryRepository)
     where TMessage : IMessage, IRequireSubscription
     where TResult : Result<TResponse>

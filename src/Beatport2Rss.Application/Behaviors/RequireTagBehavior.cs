@@ -13,7 +13,7 @@ file static class ErrorMessages
     public const string NotFound = "Tag with slug '{0}' was not found.";
 }
 
-internal abstract class TagValidationBehavior<TMessage, TResult>(
+internal abstract class RequireTagBehavior<TMessage, TResult>(
     ITagQueryRepository tagQueryRepository)
     where TMessage : IMessage, IRequireUser, IRequireTag
     where TResult : Result
@@ -31,7 +31,7 @@ internal abstract class TagValidationBehavior<TMessage, TResult>(
     }
 }
 
-internal abstract class TagValidationBehavior<TMessage, TResult, TResponse>(
+internal abstract class RequireTagBehavior<TMessage, TResult, TResponse>(
     ITagQueryRepository tagQueryRepository)
     where TMessage : IMessage, IRequireUser, IRequireTag
     where TResult : Result<TResponse>
