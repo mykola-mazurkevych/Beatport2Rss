@@ -14,17 +14,17 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
-public sealed record GetFeedsQuery(
+public sealed record ListFeedsQuery(
     UserId UserId,
     int? Size,
     string? Next,
     string? Previous) :
     IQuery<Result<Page<FeedPageDto>>>, IRequireValidation, IRequireUser;
 
-internal sealed class GetFeedsQueryValidator :
-    AbstractValidator<GetFeedsQuery>
+internal sealed class ListFeedsQueryValidator :
+    AbstractValidator<ListFeedsQuery>
 {
-    public GetFeedsQueryValidator(ICursorEncoder cursorEncoder)
+    public ListFeedsQueryValidator(ICursorEncoder cursorEncoder)
     {
         RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
         RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<FeedId>(next, out var _));
@@ -32,17 +32,17 @@ internal sealed class GetFeedsQueryValidator :
     }
 }
 
-internal sealed class GetFeedsQueryHandler(
+internal sealed class ListFeedsQueryHandler(
     IFeedQueryRepository feedQueryRepository,
     IPageBuilder pageBuilder) :
-    IQueryHandler<GetFeedsQuery, Result<Page<FeedPageDto>>>
+    IQueryHandler<ListFeedsQuery, Result<Page<FeedPageDto>>>
 {
     public async ValueTask<Result<Page<FeedPageDto>>> Handle(
-        GetFeedsQuery query,
+        ListFeedsQuery query,
         CancellationToken cancellationToken)
     {
         var page = await pageBuilder.BuildAsync<Feed, FeedId, FeedPageDto>(
-            feedQueryRepository.Feeds,
+            feedQueryRepository.Feeds.Where(f => f.UserId == query.UserId),
             query.Size,
             query.Next,
             query.Previous,

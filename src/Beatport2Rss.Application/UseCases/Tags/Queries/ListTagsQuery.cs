@@ -14,17 +14,17 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Tags.Queries;
 
-public sealed record GetTagsQuery(
+public sealed record ListTagsQuery(
     UserId UserId,
     int? Size,
     string? Next,
     string? Previous) :
     IQuery<Result<Page<TagPageDto>>>, IRequireValidation, IRequireUser;
 
-internal sealed class GetTagsQueryValidator :
-    AbstractValidator<GetTagsQuery>
+internal sealed class ListTagsQueryValidator :
+    AbstractValidator<ListTagsQuery>
 {
-    public GetTagsQueryValidator(ICursorEncoder cursorEncoder)
+    public ListTagsQueryValidator(ICursorEncoder cursorEncoder)
     {
         RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
         RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<TagId>(next, out var _));
@@ -32,17 +32,17 @@ internal sealed class GetTagsQueryValidator :
     }
 }
 
-internal sealed class GetFeedsQueryHandler(
+internal sealed class ListFeedsQueryHandler(
     ITagQueryRepository tagQueryRepository,
     IPageBuilder pageBuilder) :
-    IQueryHandler<GetTagsQuery, Result<Page<TagPageDto>>>
+    IQueryHandler<ListTagsQuery, Result<Page<TagPageDto>>>
 {
     public async ValueTask<Result<Page<TagPageDto>>> Handle(
-        GetTagsQuery query,
+        ListTagsQuery query,
         CancellationToken cancellationToken)
     {
         var page = await pageBuilder.BuildAsync<Tag, TagId, TagPageDto>(
-            tagQueryRepository.Tags,
+            tagQueryRepository.Tags.Where(t => t.UserId == query.UserId),
             query.Size,
             query.Next,
             query.Previous,

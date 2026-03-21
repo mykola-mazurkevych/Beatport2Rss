@@ -26,7 +26,7 @@ internal static class TagEndpoints
             groupBuilder
                 .MapGet("", ListTagsEndpointHandler.Handle)
                 .WithName(TagEndpointNames.List)
-                .WithDescription("Get a list of tags")
+                .WithDescription("List tags")
                 .WithSummary("List")
                 .Produces<PageResponse<TagsResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)

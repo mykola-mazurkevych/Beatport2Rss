@@ -18,7 +18,7 @@ internal static class ListFeedsEndpointHandler
         HttpContext context,
         CancellationToken cancellationToken)
     {
-        var query = new GetFeedsQuery(
+        var query = new ListFeedsQuery(
             context.User.Id,
             size,
             next,

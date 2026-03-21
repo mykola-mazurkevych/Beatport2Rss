@@ -18,7 +18,7 @@ internal static class ListTagsEndpointHandler
         HttpContext context,
         CancellationToken cancellationToken)
     {
-        var query = new GetTagsQuery(
+        var query = new ListTagsQuery(
             context.User.Id,
             size,
             next,

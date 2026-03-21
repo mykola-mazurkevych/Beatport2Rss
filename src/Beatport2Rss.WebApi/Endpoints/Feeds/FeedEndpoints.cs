@@ -26,7 +26,7 @@ internal static class FeedEndpoints
             groupBuilder
                 .MapGet("", ListFeedsEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.List)
-                .WithDescription("Get a list of feeds")
+                .WithDescription("List of feeds")
                 .WithSummary("List")
                 .Produces<PageResponse<FeedsResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
