@@ -4,14 +4,9 @@ internal static class SubscriptionEndpointNames
 {
     private const string Prefix = "Subscription";
 
-    public const string CreateArtist = $"{Prefix}{nameof(CreateArtist)}";
-    public const string CreateArtistTag = $"{Prefix}{nameof(CreateArtistTag)}";
-    public const string CreateLabel = $"{Prefix}{nameof(CreateLabel)}";
-    public const string CreateLabelTag = $"{Prefix}{nameof(CreateLabelTag)}";
-    public const string DeleteArtistTag = $"{Prefix}{nameof(DeleteArtistTag)}";
-    public const string DeleteArtistTags = $"{Prefix}{nameof(DeleteArtistTags)}";
-    public const string DeleteLabelTag = $"{Prefix}{nameof(DeleteLabelTag)}";
-    public const string DeleteLabelTags = $"{Prefix}{nameof(DeleteLabelTags)}";
-    public const string GetArtist = $"{Prefix}{nameof(GetArtist)}";
-    public const string GetLabel = $"{Prefix}{nameof(GetLabel)}";
+    public const string Create = $"{Prefix}{nameof(Create)}";
+    public const string CreateTag = $"{Prefix}{nameof(CreateTag)}";
+    public const string DeleteTag = $"{Prefix}{nameof(DeleteTag)}";
+    public const string DeleteTags = $"{Prefix}{nameof(DeleteTags)}";
+    public const string Get = $"{Prefix}{nameof(Get)}";
 }

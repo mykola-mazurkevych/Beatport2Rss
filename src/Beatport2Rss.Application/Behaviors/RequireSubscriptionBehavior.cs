@@ -10,7 +10,7 @@ namespace Beatport2Rss.Application.Behaviors;
 
 file static class ErrorMessages
 {
-    public const string NotFound = "Subscription of type '{0}' with id '{1}' and slug '{2}' was not found.";
+    public const string NotFound = "Subscription with slug '{0}' was not found.";
 }
 
 internal abstract class RequireSubscriptionBehavior<TMessage, TResult>(
@@ -24,14 +24,12 @@ internal abstract class RequireSubscriptionBehavior<TMessage, TResult>(
         CancellationToken cancellationToken)
     {
         var exists = await subscriptionQueryRepository.ExistsAsync(
-            message.BeatportType,
-            message.BeatportId,
-            message.BeatportSlug,
+            message.SubscriptionSlug,
             cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.BeatportType, message.BeatportId, message.BeatportSlug);
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.SubscriptionSlug);
     }
 }
 
@@ -46,13 +44,11 @@ internal abstract class RequireSubscriptionBehavior<TMessage, TResult, TResponse
         CancellationToken cancellationToken)
     {
         var exists = await subscriptionQueryRepository.ExistsAsync(
-            message.BeatportType,
-            message.BeatportId,
-            message.BeatportSlug,
+            message.SubscriptionSlug,
             cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
-            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.BeatportType, message.BeatportId, message.BeatportSlug);
+            : (TResult)Result.NotFound(ErrorMessages.NotFound, message.SubscriptionSlug);
     }
 }

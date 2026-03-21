@@ -2,7 +2,6 @@ using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 
 using FluentResults;
@@ -13,9 +12,7 @@ namespace Beatport2Rss.Application.UseCases.Subscriptions.Commands;
 
 public sealed record DeleteSubscriptionTagsCommand(
     UserId UserId,
-    BeatportSubscriptionType BeatportType,
-    BeatportId BeatportId,
-    BeatportSlug BeatportSlug) :
+    Slug SubscriptionSlug) :
     ICommand<Result>, IRequireActiveUser, IRequireSubscription;
 
 internal sealed class DeleteSubscriptionTagsCommandHandler(
@@ -27,11 +24,7 @@ internal sealed class DeleteSubscriptionTagsCommandHandler(
         DeleteSubscriptionTagsCommand command,
         CancellationToken cancellationToken)
     {
-        var subscription = await subscriptionCommandRepository.LoadWithTagsAsync(
-            command.BeatportType,
-            command.BeatportId,
-            command.BeatportSlug,
-            cancellationToken);
+        var subscription = await subscriptionCommandRepository.LoadWithTagsAsync(command.SubscriptionSlug, cancellationToken);
 
         subscription.RemoveTags();
 

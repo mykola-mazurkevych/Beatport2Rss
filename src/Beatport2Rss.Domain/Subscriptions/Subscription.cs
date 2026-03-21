@@ -20,11 +20,12 @@ public sealed class Subscription :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    public SubscriptionName Name { get; private set; }
+    public Slug Slug { get; private set; }
+
     public BeatportSubscriptionType BeatportType { get; private set; }
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
-
-    public string Name { get; private set; } = null!;
 
     public Uri ImageUri { get; private set; } = null!;
 
@@ -35,19 +36,21 @@ public sealed class Subscription :
 
     public static Subscription Create(
         DateTimeOffset createdAt,
+        SubscriptionName name,
+        Slug slug,
         BeatportSubscriptionType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
-        string name,
         Uri imageUri,
         DateTimeOffset? refreshedAt) =>
         new()
         {
             CreatedAt = createdAt,
+            Name = name,
+            Slug = slug,
             BeatportType = beatportType,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
-            Name = name,
             ImageUri = imageUri,
             RefreshedAt = refreshedAt,
         };

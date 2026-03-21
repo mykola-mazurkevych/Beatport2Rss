@@ -14,33 +14,23 @@ internal sealed class SubscriptionQueryRepository(
     IQueryable<Tag> tags) :
     ISubscriptionQueryRepository
 {
-    public Task<bool> ExistsAsync(
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
-        CancellationToken cancellationToken = default) =>
-        subscriptions
-            .AnyAsync(
-                s =>
-                    s.BeatportType == beatportType &&
-                    s.BeatportId == beatportId &&
-                    s.BeatportSlug == beatportSlug,
-                cancellationToken);
+    public Task<bool> ExistsAsync(Slug slug, CancellationToken cancellationToken = default) =>
+        subscriptions.AnyAsync(s => s.Slug == slug, cancellationToken);
 
-    public Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(
-        UserId userId,
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
-        CancellationToken cancellationToken = default) =>
+    public Task<SubscriptionId> LoadSubscriptionIdAsync(Slug slug, CancellationToken cancellationToken = default) =>
+        subscriptions
+            .Where(s => s.Slug == slug)
+            .Select(s => s.Id)
+            .SingleAsync(cancellationToken);
+
+    public Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(Slug slug, UserId userId, CancellationToken cancellationToken = default) =>
         (
             from subscription in subscriptions
-            where subscription.BeatportType == beatportType &&
-                  subscription.BeatportId == beatportId &&
-                  subscription.BeatportSlug == beatportSlug
+            where subscription.Slug == slug
             select new SubscriptionDetailsReadModel(
                 subscription.Id,
                 subscription.Name,
+                subscription.Slug,
                 subscription.BeatportType,
                 subscription.BeatportId,
                 subscription.BeatportSlug,

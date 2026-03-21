@@ -23,9 +23,7 @@ internal static class CreateFeedSubscriptionEndpointHandler
         var command = new CreateFeedSubscriptionCommand(
             context.User.Id,
             slug,
-            request.BeatportType,
-            request.BeatportId,
-            request.BeatportSlug);
+            request.SubscriptionSlug);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(Results.NoContent, context);
     }

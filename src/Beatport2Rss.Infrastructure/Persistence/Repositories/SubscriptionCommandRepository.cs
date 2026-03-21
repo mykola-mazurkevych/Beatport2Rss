@@ -13,16 +13,9 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
 
     public Task<Subscription> LoadWithTagsAsync(
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
+        Slug slug,
         CancellationToken cancellationToken = default) =>
         _subscriptions
             .Include(s => s.Tags)
-            .SingleAsync(
-                s =>
-                    s.BeatportType == beatportType &&
-                    s.BeatportId == beatportId &&
-                    s.BeatportSlug == beatportSlug,
-                cancellationToken);
+            .SingleAsync(s => s.Slug == slug, cancellationToken);
 }

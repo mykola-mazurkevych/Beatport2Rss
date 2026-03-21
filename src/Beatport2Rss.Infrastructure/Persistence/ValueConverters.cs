@@ -26,6 +26,7 @@ internal sealed class ReleaseIdValueConverter() : ValueConverter<ReleaseId, int>
 internal sealed class SessionIdValueConverter() : ValueConverter<SessionId, Guid>(sessionId => sessionId.Value, value => SessionId.Create(value));
 internal sealed class SlugValueConverter() : ValueConverter<Slug, string>(slug => slug.Value, value => Slug.Create(value));
 internal sealed class SubscriptionIdValueConverter() : ValueConverter<SubscriptionId, int>(subscriptionId => subscriptionId.Value, value => SubscriptionId.Create(value));
+internal sealed class SubscriptionNameValueConverter() : ValueConverter<SubscriptionName, string>(subscriptionName => subscriptionName.Value, value => SubscriptionName.Create(value));
 internal sealed class TagIdValueConverter() : ValueConverter<TagId, int>(tagId => tagId.Value, value => TagId.Create(value));
 internal sealed class TagNameValueConverter() : ValueConverter<TagName, string>(tagName => tagName.Value, value => TagName.Create(value));
 internal sealed class TokenIdValueConverter() : ValueConverter<TokenId, Guid>(tokenId => tokenId.Value, value => TokenId.Create(value));

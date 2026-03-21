@@ -5,7 +5,8 @@ namespace Beatport2Rss.Application.ReadModels.Subscriptions;
 
 public sealed record SubscriptionDetailsReadModel(
     SubscriptionId Id,
-    string Name,
+    SubscriptionName Name,
+    Slug Slug,
     BeatportSubscriptionType BeatportType,
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,

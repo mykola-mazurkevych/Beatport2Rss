@@ -37,6 +37,8 @@ public static class ExceptionMessages
     public const string SlugTooLong = "Slug is too long.";
 
     public const string SubscriptionIdInvalid = "SubscriptionId must be positive.";
+    public const string SubscriptionNameEmpty = "SubscriptionName cannot be empty.";
+    public const string SubscriptionNameTooLong = "SubscriptionName is too long.";
 
     public const string TagNameEmpty = "TagName cannot be empty.";
     public const string TagNameTooLong = "TagName is too long.";

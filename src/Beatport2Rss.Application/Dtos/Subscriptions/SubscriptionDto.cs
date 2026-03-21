@@ -5,9 +5,8 @@ namespace Beatport2Rss.Application.Dtos.Subscriptions;
 
 public sealed record SubscriptionDto(
     SubscriptionId Id,
-    string Name,
-    BeatportId BeatportId,
-    BeatportSlug BeatportSlug,
+    SubscriptionName Name,
+    Slug Slug,
     Uri BeatportUri,
     Uri ImageUri,
     IEnumerable<SubscriptionTagDto> Tags,

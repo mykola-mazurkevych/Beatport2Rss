@@ -1,6 +1,5 @@
 using System.Net;
 
-using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Tags;
@@ -14,11 +13,6 @@ internal static class RuleBuilderExtensions
 {
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
-        public void IsBeatportSlug() =>
-            ruleBuilder
-                .IsNotEmpty("Beatport slug is required.")
-                .IsNotTooLong(BeatportSlug.MaxLength, "Beatport slug must be at most {MaxLength} characters long.");
-
         public void IsEmailAddress() =>
             ruleBuilder
                 .Cascade(CascadeMode.Stop)

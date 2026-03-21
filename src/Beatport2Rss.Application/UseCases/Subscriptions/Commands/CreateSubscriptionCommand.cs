@@ -35,6 +35,7 @@ internal sealed class CreateSubscriptionCommandHandler(
     IBeatportClient beatportClient,
     IBeatportUriBuilder beatportUriBuilder,
     IClock clock,
+    ISlugGenerator slugGenerator,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     ITokenQueryRepository tokenQueryRepository,
     IUnitOfWork unitOfWork) :
@@ -73,8 +74,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         return new SubscriptionDto(
             subscription.Id,
             subscription.Name,
-            subscription.BeatportId,
-            subscription.BeatportSlug,
+            subscription.Slug,
             beatportUriBuilder.Build(subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug),
             subscription.ImageUri,
             [],
@@ -87,17 +87,18 @@ internal sealed class CreateSubscriptionCommandHandler(
         BeatportAccessToken beatportAccessToken,
         CancellationToken cancellationToken)
     {
-        Result<BeatportArtistDto?> artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId, beatportAccessToken, cancellationToken);
+        var artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId, beatportAccessToken, cancellationToken);
         return artistResult switch
         {
             { IsFailed: true } => Result.Unprocessable(artistResult),
             { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 clock.UtcNow,
+                SubscriptionName.Create(artistResult.Value.Name),
+                slugGenerator.Generate(artistResult.Value.Name),
                 BeatportSubscriptionType.Artist,
                 artistResult.Value.Id,
                 artistResult.Value.Slug,
-                artistResult.Value.Name,
                 artistResult.Value.Image.Uri,
                 refreshedAt: null)
         };
@@ -115,10 +116,11 @@ internal sealed class CreateSubscriptionCommandHandler(
             { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 clock.UtcNow,
+                SubscriptionName.Create(labelResult.Value.Name),
+                slugGenerator.Generate(labelResult.Value.Name),
                 BeatportSubscriptionType.Label,
                 labelResult.Value.Id,
                 labelResult.Value.Slug,
-                labelResult.Value.Name,
                 labelResult.Value.Image.Uri,
                 refreshedAt: null)
         };

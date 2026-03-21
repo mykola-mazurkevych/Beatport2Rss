@@ -23,6 +23,14 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
         builder.Property(subscription => subscription.CreatedAt)
             .IsRequired();
 
+        builder.Property(subscription => subscription.Name)
+            .HasMaxLength(SubscriptionName.MaxLength)
+            .IsRequired();
+
+        builder.Property(subscription => subscription.Slug)
+            .HasMaxLength(Slug.MaxLength)
+            .IsRequired();
+
         builder.Property(subscription => subscription.BeatportType)
             .IsEnum();
 
@@ -31,10 +39,6 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
 
         builder.Property(subscription => subscription.BeatportSlug)
             .HasMaxLength(BeatportSlug.MaxLength)
-            .IsRequired();
-
-        builder.Property(subscription => subscription.Name)
-            .HasMaxLength(200)
             .IsRequired();
 
         builder.Property(subscription => subscription.ImageUri)
@@ -71,10 +75,11 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
             });
 
         builder
-            .HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug })
+            .HasIndex(subscription => subscription.Slug)
             .IsUnique();
 
-        builder.HasIndex(subscription => subscription.BeatportId);
-        builder.HasIndex(subscription => subscription.BeatportSlug);
+        builder
+            .HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId })
+            .IsUnique();
     }
 }

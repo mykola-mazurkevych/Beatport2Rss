@@ -5,8 +5,7 @@ namespace Beatport2Rss.WebApi.Endpoints.Subscriptions.Responses;
 internal sealed record SubscriptionResponse(
     int Id,
     string Name,
-    int BeatportId,
-    string BeatportSlug,
+    string Slug,
     Uri BeatportUri,
     Uri ImageUri,
     IEnumerable<SubscriptionTagResponse> Tags,
@@ -15,9 +14,8 @@ internal sealed record SubscriptionResponse(
 {
     public static SubscriptionResponse Create(SubscriptionDto dto) =>
         new(dto.Id.Value,
-            dto.Name,
-            dto.BeatportId.Value,
-            dto.BeatportSlug.Value,
+            dto.Name.Value,
+            dto.Slug.Value,
             dto.BeatportUri,
             dto.ImageUri,
             dto.Tags.Select(SubscriptionTagResponse.Create),

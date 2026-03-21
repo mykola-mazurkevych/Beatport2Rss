@@ -8,16 +8,8 @@ namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 public interface ISubscriptionQueryRepository :
     IQueryRepository
 {
-    Task<bool> ExistsAsync(
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
-        CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(Slug slug, CancellationToken cancellationToken = default);
 
-    Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(
-        UserId userId,
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
-        CancellationToken cancellationToken = default);
+    Task<SubscriptionId> LoadSubscriptionIdAsync(Slug slug, CancellationToken cancellationToken = default);
+    Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(Slug slug, UserId userId, CancellationToken cancellationToken = default);
 }

@@ -2,7 +2,6 @@ using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.SharedKernel.Extensions;
 
@@ -15,14 +14,12 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Commands;
 public sealed record CreateFeedSubscriptionCommand(
     UserId UserId,
     Slug FeedSlug,
-    BeatportSubscriptionType BeatportType,
-    BeatportId BeatportId,
-    BeatportSlug BeatportSlug) :
+    Slug SubscriptionSlug) :
     ICommand<Result>, IRequireActiveUser, IRequireFeed, IRequireSubscription;
 
 internal sealed class CreateFeedSubscriptionCommandHandler(
     IFeedCommandRepository feedCommandRepository,
-    ISubscriptionCommandRepository subscriptionCommandRepository,
+    ISubscriptionQueryRepository subscriptionQueryRepository,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateFeedSubscriptionCommand, Result>
 {
@@ -31,20 +28,14 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
         CancellationToken cancellationToken)
     {
         var feed = await feedCommandRepository.LoadWithSubscriptionsAsync(command.UserId, command.FeedSlug, cancellationToken);
-        var subscription = await subscriptionCommandRepository
-            .LoadAsync(
-                s =>
-                    s.BeatportType == command.BeatportType &&
-                    s.BeatportId == command.BeatportId &&
-                    s.BeatportSlug == command.BeatportSlug,
-                cancellationToken);
+        var subscriptionId = await subscriptionQueryRepository.LoadSubscriptionIdAsync(command.SubscriptionSlug, cancellationToken);
 
-        if (feed.HasSubscription(subscription.Id))
+        if (feed.HasSubscription(subscriptionId))
         {
             return Result.Conflict("Subscription already exists in the feed.");
         }
 
-        feed.AddSubscription(subscription.Id);
+        feed.AddSubscription(subscriptionId);
 
         feedCommandRepository.Update(feed);
         await unitOfWork.SaveChangesAsync(cancellationToken);

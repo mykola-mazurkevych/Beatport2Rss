@@ -6,9 +6,5 @@ namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 public interface ISubscriptionCommandRepository :
     ICommandRepository<Subscription, SubscriptionId>
 {
-    Task<Subscription> LoadWithTagsAsync(
-        BeatportSubscriptionType beatportType,
-        BeatportId beatportId,
-        BeatportSlug beatportSlug,
-        CancellationToken cancellationToken = default);
+    Task<Subscription> LoadWithTagsAsync(Slug slug, CancellationToken cancellationToken = default);
 }

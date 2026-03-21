@@ -2,7 +2,6 @@ using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.SharedKernel.Extensions;
 
@@ -14,9 +13,7 @@ namespace Beatport2Rss.Application.UseCases.Subscriptions.Commands;
 
 public sealed record CreateSubscriptionTagCommand(
     UserId UserId,
-    BeatportSubscriptionType BeatportType,
-    BeatportId BeatportId,
-    BeatportSlug BeatportSlug,
+    Slug SubscriptionSlug,
     Slug TagSlug) :
     ICommand<Result>, IRequireActiveUser, IRequireSubscription, IRequireTag;
 
@@ -30,12 +27,8 @@ internal sealed class CreateSubscriptionTagCommandHandler(
         CreateSubscriptionTagCommand command,
         CancellationToken cancellationToken)
     {
+        var subscription = await subscriptionCommandRepository.LoadWithTagsAsync(command.SubscriptionSlug, cancellationToken);
         var tagId = await tagQueryRepository.LoadTagIdAsync(command.UserId, command.TagSlug, cancellationToken);
-        var subscription = await subscriptionCommandRepository.LoadWithTagsAsync(
-            command.BeatportType,
-            command.BeatportId,
-            command.BeatportSlug,
-            cancellationToken);
 
         if (subscription.ContainsTag(tagId))
         {
