@@ -59,7 +59,7 @@ public sealed class Subscription :
         _tags.Any(t => t.TagId == tagId);
 
     public void AddTag(TagId tagId) =>
-        _tags.Add(SubscriptionTag.Create(tagId));
+        _tags.Add(SubscriptionTag.Create(Id, tagId));
 
     public void RemoveTag(TagId tagId) =>
         _tags.RemoveWhere(t => t.TagId == tagId);

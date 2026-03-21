@@ -8,7 +8,7 @@ namespace Beatport2Rss.Domain.Feeds;
 public sealed class Feed :
     IAggregateRoot<FeedId>
 {
-    private readonly HashSet<SubscriptionId> _subscriptionIds = [];
+    private readonly HashSet<FeedSubscription> _subscriptions = [];
 
     private Feed()
     {
@@ -25,8 +25,8 @@ public sealed class Feed :
 
     public FeedStatus Status { get; private set; }
 
-    public IReadOnlySet<SubscriptionId> SubscriptionIds =>
-        _subscriptionIds.AsReadOnly();
+    public IReadOnlySet<FeedSubscription> Subscriptions =>
+        _subscriptions.AsReadOnly();
 
     public bool IsActive =>
         Status == FeedStatus.Active;
@@ -58,11 +58,11 @@ public sealed class Feed :
         Status = isActive ? FeedStatus.Active : FeedStatus.Inactive;
 
     public void AddSubscription(SubscriptionId subscriptionId) =>
-        _subscriptionIds.Add(subscriptionId);
+        _subscriptions.Add(FeedSubscription.Create(Id, subscriptionId));
 
     public void RemoveSubscription(SubscriptionId subscriptionId) =>
-        _subscriptionIds.Remove(subscriptionId);
+        _subscriptions.RemoveWhere(subscription => subscription.SubscriptionId == subscriptionId);
 
     public bool HasSubscription(SubscriptionId subscriptionId) =>
-        _subscriptionIds.Contains(subscriptionId);
+        _subscriptions.Any(subscription => subscription.SubscriptionId == subscriptionId);
 }

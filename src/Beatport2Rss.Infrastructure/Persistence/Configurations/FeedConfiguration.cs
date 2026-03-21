@@ -1,5 +1,6 @@
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
+using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
@@ -35,6 +36,32 @@ internal sealed class FeedConfiguration : IEntityTypeConfiguration<Feed>
 
         builder.Property(feed => feed.UserId)
             .IsRequired();
+
+        builder.OwnsMany(
+            feed => feed.Subscriptions,
+            navigationBuilder =>
+            {
+                navigationBuilder.ToTable(nameof(Beatport2RssDbContext.FeedSubscriptions));
+
+                navigationBuilder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
+
+                navigationBuilder.Property(feedSubscription => feedSubscription.FeedId)
+                    .IsRequired();
+
+                navigationBuilder.Property(feedSubscription => feedSubscription.SubscriptionId)
+                    .IsRequired();
+
+                navigationBuilder
+                    .WithOwner()
+                    .HasForeignKey(feedSubscription => feedSubscription.FeedId);
+
+                navigationBuilder
+                    .HasOne<Subscription>()
+                    .WithMany()
+                    .HasForeignKey(feedSubscription => feedSubscription.SubscriptionId);
+
+                navigationBuilder.HasIndex(feedSubscription => feedSubscription.SubscriptionId);
+            });
 
         builder.HasOne<User>()
             .WithMany()

@@ -16,8 +16,11 @@ internal sealed class FeedQueryRepository(
     public IQueryable<Feed> Feeds => feeds;
 
     public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        feeds
-            .AnyAsync(f => f.UserId == userId && f.Slug == slug, cancellationToken);
+        feeds.AnyAsync(
+            f =>
+                f.UserId == userId &&
+                f.Slug == slug,
+            cancellationToken);
 
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         (

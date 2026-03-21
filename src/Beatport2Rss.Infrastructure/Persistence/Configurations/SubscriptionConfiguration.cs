@@ -48,24 +48,30 @@ internal sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subsc
             subscription => subscription.Tags,
             navigationBuilder =>
             {
-                const string subscriptionIdPropertyName = "SubscriptionId";
-
                 navigationBuilder.ToTable(nameof(Beatport2RssDbContext.SubscriptionTags));
 
-                navigationBuilder.HasKey(subscriptionIdPropertyName, nameof(SubscriptionTag.TagId));
+                navigationBuilder.HasKey(subscriptionTag => new { subscriptionTag.SubscriptionId, subscriptionTag.TagId });
 
-                navigationBuilder.WithOwner()
-                    .HasForeignKey(subscriptionIdPropertyName);
+                navigationBuilder.Property(subscriptionTag => subscriptionTag.SubscriptionId)
+                    .IsRequired();
 
                 navigationBuilder.Property(subscriptionTag => subscriptionTag.TagId)
                     .IsRequired();
 
-                navigationBuilder.HasOne<Tag>()
+                navigationBuilder
+                    .WithOwner()
+                    .HasForeignKey(subscriptionTag => subscriptionTag.SubscriptionId);
+
+                navigationBuilder
+                    .HasOne<Tag>()
                     .WithMany()
                     .HasForeignKey(subscriptionTag => subscriptionTag.TagId);
+
+                navigationBuilder.HasIndex(subscriptionTag => subscriptionTag.TagId);
             });
 
-        builder.HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug })
+        builder
+            .HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug })
             .IsUnique();
 
         builder.HasIndex(subscription => subscription.BeatportId);

@@ -46,6 +46,20 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
+                .MapPost("/{slug}/subscriptions", CreateFeedSubscriptionEndpointHandler.Handle)
+                .WithName(FeedEndpointNames.CreateSubscription)
+                .WithDescription("Add a subscription to a feed")
+                .WithSummary("Create Subscription")
+                .Accepts<CreateFeedSubscriptionRequest>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status409Conflict, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
                 .MapGet("/{slug}", GetFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Get)
                 .WithDescription("Get feed details by its slug")
