@@ -23,9 +23,7 @@ internal abstract class RequireSubscriptionBehavior<TMessage, TResult>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var exists = await subscriptionQueryRepository.ExistsAsync(
-            message.SubscriptionSlug,
-            cancellationToken);
+        var exists = await subscriptionQueryRepository.ExistsAsync(message.SubscriptionSlug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)
@@ -43,9 +41,7 @@ internal abstract class RequireSubscriptionBehavior<TMessage, TResult, TResponse
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var exists = await subscriptionQueryRepository.ExistsAsync(
-            message.SubscriptionSlug,
-            cancellationToken);
+        var exists = await subscriptionQueryRepository.ExistsAsync(message.SubscriptionSlug, cancellationToken);
 
         return exists
             ? await next(message, cancellationToken)

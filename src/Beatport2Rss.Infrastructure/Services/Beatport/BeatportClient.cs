@@ -48,25 +48,16 @@ internal sealed class BeatportClient(
         }
     }
 
-    private static string GetSegment<TBeatportDto>()
-    {
-        if (typeof(TBeatportDto) == typeof(BeatportArtistDto))
+    private static string GetSegment<TBeatportDto>() =>
+        typeof(TBeatportDto).Name switch
         {
-            return "artists";
-        }
+            nameof(BeatportArtistDto) => "artists",
+            nameof(BeatportLabelDto) => "labels",
+            _ => throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported.")
+        };
 
-        if (typeof(TBeatportDto) == typeof(BeatportLabelDto))
-        {
-            return "labels";
-        }
-
-        throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported.");
-    }
-
-    public void Dispose()
-    {
+    public void Dispose() =>
         _httpClient.Dispose();
-    }
 
     public ValueTask DisposeAsync()
     {
