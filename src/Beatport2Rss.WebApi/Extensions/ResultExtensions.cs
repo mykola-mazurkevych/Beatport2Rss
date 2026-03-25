@@ -25,6 +25,13 @@ internal static class ResultExtensions
                 { IsFailed: true } or { IsSuccess: false } => result.Error.ToProblemDetails(context),
             };
 
+        public IResult ToAspNetCoreResult(Func<T, IResult> onSuccess, HttpContext context) =>
+            result switch
+            {
+                { IsSuccess: true } or { IsFailed: false } => onSuccess(result.Value),
+                { IsFailed: true } or { IsSuccess: false } => result.Error.ToProblemDetails(context),
+            };
+
         private IError Error => result.Errors.Single();
     }
 }

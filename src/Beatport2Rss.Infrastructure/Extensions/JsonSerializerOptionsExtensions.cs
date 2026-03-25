@@ -8,10 +8,19 @@ internal static class JsonSerializerOptionsExtensions
 {
     extension(JsonSerializerOptions options)
     {
-        public void Configure()
+        public void ConfigureDefault()
         {
             options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.WriteIndented = true;
+            options.AddJsonValueConverters();
+        }
+
+        public static string Plain => "Plain";
+
+        public void ConfigurePlain()
+        {
+            options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.AddJsonValueConverters();
         }
 

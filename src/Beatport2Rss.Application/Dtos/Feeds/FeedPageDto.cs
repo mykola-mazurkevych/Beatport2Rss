@@ -14,7 +14,7 @@ public sealed record FeedPageDto(
     DateTimeOffset CreatedAt) :
     IPageDto<FeedId>
 {
-    public static Expression<Func<Feed, FeedPageDto>> FromFeed =>
+    public static Expression<Func<Feed, FeedPageDto>> Create =>
         feed => new FeedPageDto(
             feed.Id,
             feed.Name,

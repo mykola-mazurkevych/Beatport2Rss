@@ -11,9 +11,7 @@ public interface IPageBuilder
 {
     Task<Page<TPageDto>> BuildAsync<TEntity, TId, TPageDto>(
         IQueryable<TEntity> entities,
-        int? size,
-        string? next,
-        string? previous,
+        PageNavigation navigation,
         Expression<Func<TEntity, TPageDto>> selector,
         CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TId>

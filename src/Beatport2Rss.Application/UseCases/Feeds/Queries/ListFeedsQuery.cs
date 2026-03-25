@@ -16,20 +16,18 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
 public sealed record ListFeedsQuery(
     UserId UserId,
-    int? Size,
-    string? Next,
-    string? Previous) :
+    PageNavigation PageNavigation) :
     IQuery<Result<Page<FeedPageDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListFeedsQueryValidator :
     AbstractValidator<ListFeedsQuery>
 {
-    public ListFeedsQueryValidator(ICursorEncoder cursorEncoder)
-    {
-        RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
-        RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<FeedId>(next, out var _));
-        RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<FeedId>(previous, out var _));
-    }
+    // public ListFeedsQueryValidator(ICursorEncoder cursorEncoder)
+    // {
+    //     RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
+    //     RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<FeedId>(next, out var _));
+    //     RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<FeedId>(previous, out var _));
+    // }
 }
 
 internal sealed class ListFeedsQueryHandler(
@@ -43,10 +41,8 @@ internal sealed class ListFeedsQueryHandler(
     {
         var page = await pageBuilder.BuildAsync<Feed, FeedId, FeedPageDto>(
             feedQueryRepository.Feeds.Where(f => f.UserId == query.UserId),
-            query.Size,
-            query.Next,
-            query.Previous,
-            FeedPageDto.FromFeed,
+            query.PageNavigation,
+            FeedPageDto.Create,
             cancellationToken);
 
         return page;

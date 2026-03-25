@@ -18,26 +18,25 @@ internal sealed class PageBuilder(
 
     public async Task<Page<TPageDto>> BuildAsync<TEntity, TId, TPageDto>(
         IQueryable<TEntity> entities,
-        int? size,
-        string? next,
-        string? previous,
+        PageNavigation navigation,
         Expression<Func<TEntity, TPageDto>> selector,
         CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TId>
         where TId : struct, IId<TId>
         where TPageDto : IPageDto<TId>
     {
-        var page = new Page<TPageDto> { Size = size ?? DefaultSize, TotalCount = await entities.CountAsync(cancellationToken) };
+        var pageSize = navigation.PageSize ?? DefaultSize;
+        var totalCount = await entities.CountAsync(cancellationToken);
 
-        if (page.TotalCount == 0)
+        if (totalCount == 0)
         {
-            return page;
+            return new Page<TPageDto>([], PageMetadata.Empty(pageSize));
         }
 
         var definition = PaginationQuery.Build<TEntity>(builder => builder.Ascending(dto => dto.CreatedAt).Ascending(dto => dto.Id));
 
-        var nextCursor = cursorEncoder.Decode<TId>(next);
-        var previousCursor = cursorEncoder.Decode<TId>(previous);
+        var nextCursor = cursorEncoder.Decode<TId>(navigation.NextPage);
+        var previousCursor = cursorEncoder.Decode<TId>(navigation.PreviousPage);
 
         PaginationDirection direction;
         TEntity? reference = null;
@@ -59,23 +58,23 @@ internal sealed class PageBuilder(
         var context = entities.Paginate(definition, direction, reference);
 
         var pageEntities = await context.Query
-            .Take(page.Size)
+            .Take(pageSize)
             .Select(selector)
             .ToListAsync(cancellationToken);
 
         context.EnsureCorrectOrder(pageEntities);
 
-        page = page with
-        {
-            Items = pageEntities.AsReadOnly(),
-            Next = await context.HasNextAsync(pageEntities)
+        var metadata = new PageMetadata(
+            pageSize,
+            pageEntities.Count,
+            totalCount,
+            await context.HasNextAsync(pageEntities)
                 ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[^1].CreatedAt, pageEntities[^1].Id))
                 : null,
-            Previous = await context.HasPreviousAsync(pageEntities)
+            await context.HasPreviousAsync(pageEntities)
                 ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[0].CreatedAt, pageEntities[0].Id))
-                : null,
-        };
+                : null);
 
-        return page;
+        return new Page<TPageDto>(pageEntities.AsReadOnly(), metadata);
     }
 }

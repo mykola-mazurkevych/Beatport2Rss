@@ -2,12 +2,12 @@
 
 namespace Beatport2Rss.WebApi.Endpoints.Feeds.Responses;
 
-internal sealed record FeedsResponse(
+internal sealed record FeedPageResponse(
     string Name,
     string Slug,
     bool IsActive)
 {
-    public static FeedsResponse Create(FeedPageDto dto) =>
+    public static FeedPageResponse Create(FeedPageDto dto) =>
         new(dto.Name.Value,
             dto.Slug.Value,
             dto.IsActive);

@@ -16,20 +16,18 @@ namespace Beatport2Rss.Application.UseCases.Tags.Queries;
 
 public sealed record ListTagsQuery(
     UserId UserId,
-    int? Size,
-    string? Next,
-    string? Previous) :
+    PageNavigation PageNavigation) :
     IQuery<Result<Page<TagPageDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListTagsQueryValidator :
     AbstractValidator<ListTagsQuery>
 {
-    public ListTagsQueryValidator(ICursorEncoder cursorEncoder)
-    {
-        RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
-        RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<TagId>(next, out var _));
-        RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<TagId>(previous, out var _));
-    }
+    // public ListTagsQueryValidator(ICursorEncoder cursorEncoder)
+    // {
+    //     RuleFor(q => q.Size).GreaterThan(0).When(q => q.Size.HasValue);
+    //     RuleFor(q => q.Next).Must(next => cursorEncoder.TryDecode<TagId>(next, out var _));
+    //     RuleFor(q => q.Previous).Must(previous => cursorEncoder.TryDecode<TagId>(previous, out var _));
+    // }
 }
 
 internal sealed class ListFeedsQueryHandler(
@@ -43,9 +41,7 @@ internal sealed class ListFeedsQueryHandler(
     {
         var page = await pageBuilder.BuildAsync<Tag, TagId, TagPageDto>(
             tagQueryRepository.Tags.Where(t => t.UserId == query.UserId),
-            query.Size,
-            query.Next,
-            query.Previous,
+            query.PageNavigation,
             TagPageDto.FromTag,
             cancellationToken);
 
