@@ -15,6 +15,7 @@
     <Project Path="tests/Beatport2Rss.Infrastructure.UnitTests/Beatport2Rss.Infrastructure.UnitTests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
     <Project Path="tools/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
     <Project Path="tools/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj" />
   </Folder>

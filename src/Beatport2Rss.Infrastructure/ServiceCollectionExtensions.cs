@@ -22,6 +22,8 @@ using Beatport2Rss.Infrastructure.Services.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -102,6 +104,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
