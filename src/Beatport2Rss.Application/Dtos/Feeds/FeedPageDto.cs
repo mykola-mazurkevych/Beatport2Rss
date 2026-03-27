@@ -11,7 +11,8 @@ public sealed record FeedPageDto(
     FeedName Name,
     Slug Slug,
     bool IsActive,
-    DateTimeOffset CreatedAt) :
+    DateTimeOffset CreatedAt,
+    int SubscriptionsCount) :
     IPageDto<FeedId>
 {
     public static Expression<Func<Feed, FeedPageDto>> Create =>
@@ -20,5 +21,6 @@ public sealed record FeedPageDto(
             feed.Name,
             feed.Slug,
             feed.IsActive,
-            feed.CreatedAt);
+            feed.CreatedAt,
+            feed.Subscriptions.Count);
 }

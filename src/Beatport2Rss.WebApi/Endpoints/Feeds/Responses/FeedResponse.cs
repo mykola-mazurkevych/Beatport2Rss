@@ -8,7 +8,8 @@ internal sealed record FeedResponse(
     string Slug,
     string? Owner,
     bool IsActive,
-    DateTimeOffset CreatedAt)
+    DateTimeOffset CreatedAt,
+    int SubscriptionsCount)
 {
     public static FeedResponse Create(FeedDto dto) =>
         new(dto.Id.Value,
@@ -16,5 +17,6 @@ internal sealed record FeedResponse(
             dto.Slug.Value,
             dto.Owner,
             dto.IsActive,
-            dto.CreatedAt);
+            dto.CreatedAt,
+            dto.SubscriptionsCount);
 }

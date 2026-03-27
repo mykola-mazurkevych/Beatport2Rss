@@ -9,4 +9,5 @@ public sealed record FeedDto(
     Slug Slug,
     string? Owner,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    int SubscriptionsCount);

@@ -31,6 +31,7 @@ internal sealed class GetFeedQueryHandler(
             readModel.Slug,
             readModel.Owner,
             readModel.IsActive,
-            readModel.CreatedAt);
+            readModel.CreatedAt,
+            readModel.SubscriptionsCount);
     }
 }

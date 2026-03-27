@@ -9,4 +9,5 @@ public sealed record FeedDetailsReadModel(
     FeedName Name,
     string? Owner,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    int SubscriptionsCount);

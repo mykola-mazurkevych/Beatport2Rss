@@ -34,7 +34,8 @@ internal sealed class FeedQueryRepository(
                 feed.Name,
                 user.FullName,
                 feed.IsActive,
-                feed.CreatedAt)
+                feed.CreatedAt,
+                feed.Subscriptions.Count)
         )
         .SingleAsync(cancellationToken);
 }
