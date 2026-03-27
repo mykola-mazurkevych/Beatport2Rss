@@ -1,7 +1,6 @@
 using System.Text.Json;
 
 using Beatport2Rss.Application.UseCases.Tags.Queries;
-using Beatport2Rss.WebApi.Constants;
 using Beatport2Rss.WebApi.Endpoints.Tags.Responses;
 using Beatport2Rss.WebApi.Extensions;
 
@@ -28,8 +27,7 @@ internal static class ListTagsEndpointHandler
         return result.ToAspNetCoreResult(
             page =>
             {
-                var jsonSerializerOptions = jsonSerializerOptionsSnapshot.Get("Plain"); // TODO: use const
-                context.Response.Headers[ResponseHeaderNames.PageMetadata] = JsonSerializer.Serialize(page.Metadata, jsonSerializerOptions);
+                page.Metadata.ToHeaders(context);
                 return Results.Ok(page.Dtos.Select(TagPageResponse.Create));
             },
             context);

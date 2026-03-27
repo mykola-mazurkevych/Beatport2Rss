@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .ConfigureHttpJsonOptions(static options => options.SerializerOptions.ConfigureDefault())
+                .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
                 .AddHealthServices()
@@ -137,8 +137,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
                 .Configure<BeatportCredentials>(credentials => configuration.GetSection(nameof(BeatportCredentials)).Bind(credentials))
-                .Configure<JsonSerializerOptions>(static options => options.ConfigureDefault())
-                .Configure<JsonSerializerOptions>(JsonSerializerOptions.Plain, static options => options.ConfigurePlain())
+                .Configure<JsonSerializerOptions>(static options => options.Configure())
                 .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
                 .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
     }

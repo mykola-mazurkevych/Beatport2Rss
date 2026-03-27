@@ -25,7 +25,7 @@ internal sealed class PageBuilder(
         where TId : struct, IId<TId>
         where TPageDto : IPageDto<TId>
     {
-        var pageSize = navigation.PageSize ?? DefaultSize;
+        var pageSize = navigation.Size ?? DefaultSize;
         var totalCount = await entities.CountAsync(cancellationToken);
 
         if (totalCount == 0)
@@ -35,8 +35,8 @@ internal sealed class PageBuilder(
 
         var definition = PaginationQuery.Build<TEntity>(builder => builder.Ascending(dto => dto.CreatedAt).Ascending(dto => dto.Id));
 
-        var nextCursor = cursorEncoder.Decode<TId>(navigation.NextPage);
-        var previousCursor = cursorEncoder.Decode<TId>(navigation.PreviousPage);
+        var nextCursor = cursorEncoder.Decode<TId>(navigation.Next);
+        var previousCursor = cursorEncoder.Decode<TId>(navigation.Previous);
 
         PaginationDirection direction;
         TEntity? reference = null;
