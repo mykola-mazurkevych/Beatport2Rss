@@ -98,6 +98,18 @@ internal static class FeedEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
+                .MapDelete("/{slug}/subscriptions/{subscriptionSlug}", DeleteFeedSubscriptionEndpointHandler.Handle)
+                .WithName(FeedEndpointNames.DeleteSubscription)
+                .WithDescription("Remove a subscription from a feed")
+                .WithSummary("Delete Subscription")
+                .Produces(StatusCodes.Status204NoContent)
+                .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
                 .MapDelete("/{slug}", DeleteFeedEndpointHandler.Handle)
                 .WithName(FeedEndpointNames.Delete)
                 .WithDescription("Delete a feed by its slug")
