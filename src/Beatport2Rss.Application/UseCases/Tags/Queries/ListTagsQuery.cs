@@ -1,8 +1,8 @@
 ﻿using Beatport2Rss.Application.Dtos.Tags;
 using Beatport2Rss.Application.Interfaces.Messages;
-using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Pagination;
+using Beatport2Rss.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 
@@ -16,7 +16,7 @@ namespace Beatport2Rss.Application.UseCases.Tags.Queries;
 
 public sealed record ListTagsQuery(
     UserId UserId,
-    PageNavigation PageNavigation) :
+    Pagination Pagination) :
     IQuery<Result<Page<TagPageDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListTagsQueryValidator :
@@ -41,7 +41,7 @@ internal sealed class ListFeedsQueryHandler(
     {
         var page = await pageBuilder.BuildAsync<Tag, TagId, TagPageDto>(
             tagQueryRepository.Tags.Where(t => t.UserId == query.UserId),
-            query.PageNavigation,
+            query.Pagination,
             TagPageDto.FromTag,
             cancellationToken);
 

@@ -1,14 +1,14 @@
 using System.Linq.Expressions;
 
-using Beatport2Rss.Application.Interfaces.Pagination;
-using Beatport2Rss.Application.Pagination;
+using Beatport2Rss.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.SharedKernel.Common;
 
 using EFPagination;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Infrastructure.Services.Pagination;
+namespace Beatport2Rss.Infrastructure.Services.Querying.Paging;
 
 internal sealed class PageBuilder(
     ICursorEncoder cursorEncoder) :
@@ -18,25 +18,25 @@ internal sealed class PageBuilder(
 
     public async Task<Page<TPageDto>> BuildAsync<TEntity, TId, TPageDto>(
         IQueryable<TEntity> entities,
-        PageNavigation navigation,
+        Pagination pagination,
         Expression<Func<TEntity, TPageDto>> selector,
         CancellationToken cancellationToken = default)
         where TEntity : class, IEntity<TId>
         where TId : struct, IId<TId>
         where TPageDto : IPageDto<TId>
     {
-        var pageSize = navigation.Size ?? DefaultSize;
+        var pageSize = pagination.Size ?? DefaultSize;
         var totalCount = await entities.CountAsync(cancellationToken);
 
         if (totalCount == 0)
         {
-            return new Page<TPageDto>([], PageMetadata.Empty(pageSize));
+            return new Page<TPageDto>([], PageInfo.Empty(pageSize));
         }
 
         var definition = PaginationQuery.Build<TEntity>(builder => builder.Ascending(dto => dto.CreatedAt).Ascending(dto => dto.Id));
 
-        var nextCursor = cursorEncoder.Decode<TId>(navigation.Next);
-        var previousCursor = cursorEncoder.Decode<TId>(navigation.Previous);
+        var nextCursor = cursorEncoder.Decode<TId>(pagination.Next);
+        var previousCursor = cursorEncoder.Decode<TId>(pagination.Previous);
 
         PaginationDirection direction;
         TEntity? reference = null;
@@ -64,7 +64,7 @@ internal sealed class PageBuilder(
 
         context.EnsureCorrectOrder(pageEntities);
 
-        var metadata = new PageMetadata(
+        var pageInfo = new PageInfo(
             pageSize,
             pageEntities.Count,
             totalCount,
@@ -75,6 +75,6 @@ internal sealed class PageBuilder(
                 ? cursorEncoder.Encode(new Cursor<TId>(pageEntities[0].CreatedAt, pageEntities[0].Id))
                 : null);
 
-        return new Page<TPageDto>(pageEntities.AsReadOnly(), metadata);
+        return new Page<TPageDto>(pageEntities.AsReadOnly(), pageInfo);
     }
 }

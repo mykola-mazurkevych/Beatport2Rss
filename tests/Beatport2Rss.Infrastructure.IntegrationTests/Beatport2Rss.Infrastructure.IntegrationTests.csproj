@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include=".\Services\Pagination\PageBuilderTestsData.csv">
+    <Content Include=".\Services\Querying\Paging\PageBuilderTestsData.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -1,8 +1,8 @@
 ﻿using Beatport2Rss.Application.Dtos.Feeds;
 using Beatport2Rss.Application.Interfaces.Messages;
-using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Pagination;
+using Beatport2Rss.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
@@ -16,7 +16,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 
 public sealed record ListFeedsQuery(
     UserId UserId,
-    PageNavigation PageNavigation) :
+    Pagination Pagination) :
     IQuery<Result<Page<FeedPageDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListFeedsQueryValidator :
@@ -41,7 +41,7 @@ internal sealed class ListFeedsQueryHandler(
     {
         var page = await pageBuilder.BuildAsync<Feed, FeedId, FeedPageDto>(
             feedQueryRepository.Feeds.Where(f => f.UserId == query.UserId),
-            query.PageNavigation,
+            query.Pagination,
             FeedPageDto.Create,
             cancellationToken);
 

@@ -5,15 +5,15 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Application.Pagination;
-using Beatport2Rss.Infrastructure.Services.Pagination;
+using Beatport2Rss.Application.Querying.Paging;
+using Beatport2Rss.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.EntityFrameworkCore;
 
 using Xunit;
 
-namespace Beatport2Rss.Infrastructure.IntegrationTests.Services.Pagination;
+namespace Beatport2Rss.Infrastructure.IntegrationTests.Services.Querying.Paging;
 
 public sealed class PageBuilderTests : IAsyncLifetime
 {
@@ -47,13 +47,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
     [Fact]
     public async Task BuildAsync_WithoutCursors_Page1Returned()
     {
-        var navigation = new PageNavigation(
+        var pagination = new Pagination(
             Size,
             Next: null,
             Previous: null);
         var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
             _dbContext.Persons,
-            navigation,
+            pagination,
             PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -63,27 +63,27 @@ public sealed class PageBuilderTests : IAsyncLifetime
         Assert.Contains(page.Dtos, p => p.Id.Value == 3);
         Assert.Contains(page.Dtos, p => p.Id.Value == 4);
         Assert.Contains(page.Dtos, p => p.Id.Value == 5);
-        Assert.Equal(Size, page.Metadata.Size);
-        Assert.Equal(Size, page.Metadata.ItemsCount);
-        Assert.Equal(_dbContext.Persons.Count(), page.Metadata.TotalItemsCount);
-        Assert.NotNull(page.Metadata.Next);
-        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Metadata.Next);
+        Assert.Equal(Size, page.Info.Size);
+        Assert.Equal(Size, page.Info.ItemsCount);
+        Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
+        Assert.NotNull(page.Info.Next);
+        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Info.Next);
         Assert.NotNull(nextPageCursor);
         Assert.Equal(5, nextPageCursor.Id.Value);
-        Assert.Null(page.Metadata.Previous);
+        Assert.Null(page.Info.Previous);
     }
 
     [Fact]
     public async Task BuildAsync_WithNextCursor_Page2Returned()
     {
         var page1LastPerson = _persons[Size - 1];
-        var navigation = new PageNavigation(
+        var pagination = new Pagination(
             Size,
             Next: _cursorEncoder.Encode(new Cursor<PersonId>(page1LastPerson.CreatedAt, page1LastPerson.Id)),
             Previous: null);
         var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
             _dbContext.Persons,
-            navigation,
+            pagination,
             PersonPageDto.FromPerson,
             TestContext.Current.CancellationToken);
 
@@ -93,15 +93,15 @@ public sealed class PageBuilderTests : IAsyncLifetime
         Assert.Contains(page.Dtos, p => p.Id.Value == 8);
         Assert.Contains(page.Dtos, p => p.Id.Value == 9);
         Assert.Contains(page.Dtos, p => p.Id.Value == 10);
-        Assert.Equal(Size, page.Metadata.Size);
-        Assert.Equal(Size, page.Metadata.ItemsCount);
-        Assert.Equal(_dbContext.Persons.Count(), page.Metadata.TotalItemsCount);
-        Assert.NotNull(page.Metadata.Next);
-        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Metadata.Next);
+        Assert.Equal(Size, page.Info.Size);
+        Assert.Equal(Size, page.Info.ItemsCount);
+        Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
+        Assert.NotNull(page.Info.Next);
+        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Info.Next);
         Assert.NotNull(nextPageCursor);
         Assert.Equal(10, nextPageCursor.Id.Value);
-        Assert.NotNull(page.Metadata.Previous);
-        var previousPageCursor = _cursorEncoder.Decode<PersonId>(page.Metadata.Previous);
+        Assert.NotNull(page.Info.Previous);
+        var previousPageCursor = _cursorEncoder.Decode<PersonId>(page.Info.Previous);
         Assert.NotNull(previousPageCursor);
         Assert.Equal(6, previousPageCursor.Id.Value);
     }
@@ -110,13 +110,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
     public async Task BuildAsync_WithPreviousCursor_Page1Returned()
     {
         var page2FirstPerson = _persons[Size];
-        var navigation = new PageNavigation(
+        var pagination = new Pagination(
             Size,
             Next: null,
             Previous: _cursorEncoder.Encode(new Cursor<PersonId>(page2FirstPerson.CreatedAt, page2FirstPerson.Id)));
         var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
             _dbContext.Persons,
-            navigation,
+            pagination,
             PersonPageDto.FromPerson,
             TestContext.Current.CancellationToken);
 
@@ -126,26 +126,26 @@ public sealed class PageBuilderTests : IAsyncLifetime
         Assert.Contains(page.Dtos, p => p.Id.Value == 3);
         Assert.Contains(page.Dtos, p => p.Id.Value == 4);
         Assert.Contains(page.Dtos, p => p.Id.Value == 5);
-        Assert.Equal(Size, page.Metadata.Size);
-        Assert.Equal(Size, page.Metadata.ItemsCount);
-        Assert.Equal(_dbContext.Persons.Count(), page.Metadata.TotalItemsCount);
-        Assert.NotNull(page.Metadata.Next);
-        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Metadata.Next);
+        Assert.Equal(Size, page.Info.Size);
+        Assert.Equal(Size, page.Info.ItemsCount);
+        Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
+        Assert.NotNull(page.Info.Next);
+        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Info.Next);
         Assert.NotNull(nextPageCursor);
         Assert.Equal(5, nextPageCursor.Id.Value);
-        Assert.Null(page.Metadata.Previous);
+        Assert.Null(page.Info.Previous);
     }
 
     [Fact(Skip = "Sorting does not work for now.")]
     public async Task BuildAsync_WhenSortedByNameAscending_AndWithoutCursors_Page1Returned()
     {
-        var navigation = new PageNavigation(
+        var pagination = new Pagination(
             Size,
             Next: null,
             Previous: null);
         var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
             _dbContext.Persons,
-            navigation,
+            pagination,
             PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
@@ -155,14 +155,14 @@ public sealed class PageBuilderTests : IAsyncLifetime
         Assert.Contains(page.Dtos, p => p.Id.Value == 8); // Ava
         Assert.Contains(page.Dtos, p => p.Id.Value == 17); // Benjamin
         Assert.Contains(page.Dtos, p => p.Id.Value == 16); // Charlotte
-        Assert.Equal(Size, page.Metadata.Size);
-        Assert.Equal(Size, page.Metadata.ItemsCount);
-        Assert.Equal(_dbContext.Persons.Count(), page.Metadata.TotalItemsCount);
-        Assert.NotNull(page.Metadata.Next);
-        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Metadata.Next);
+        Assert.Equal(Size, page.Info.Size);
+        Assert.Equal(Size, page.Info.ItemsCount);
+        Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
+        Assert.NotNull(page.Info.Next);
+        var nextPageCursor = _cursorEncoder.Decode<PersonId>(page.Info.Next);
         Assert.NotNull(nextPageCursor);
         Assert.Equal(16, nextPageCursor.Id.Value);
-        Assert.Null(page.Metadata.Previous);
+        Assert.Null(page.Info.Previous);
     }
 
     public async ValueTask DisposeAsync()
@@ -177,7 +177,7 @@ public sealed class PageBuilderTests : IAsyncLifetime
         const int indexAge = 2;
         const int indexCreatedAt = 3;
 
-        var lines = await File.ReadAllLinesAsync(@"Services\Pagination\PageBuilderTestsData.csv");
+        var lines = await File.ReadAllLinesAsync(@"Services\Querying\Paging\PageBuilderTestsData.csv");
 
         var persons = lines
             .Select(line =>

@@ -14,7 +14,7 @@ namespace Beatport2Rss.WebApi.Endpoints.Feeds.Handlers;
 internal static class ListFeedsEndpointHandler
 {
     public static async Task<IResult> Handle(
-        [AsParameters] PageNavigationRequest pageNavigationRequest,
+        [AsParameters] PaginationRequest pageNavigationRequest,
         [FromServices] IMediator mediator,
         [FromServices] IOptionsSnapshot<JsonSerializerOptions> jsonSerializerOptionsSnapshot,
         HttpContext context,
@@ -22,12 +22,12 @@ internal static class ListFeedsEndpointHandler
     {
         var query = new ListFeedsQuery(
             context.User.Id,
-            pageNavigationRequest.ToPageNavigation());
+            pageNavigationRequest.ToPagination());
         var result = await mediator.Send(query, cancellationToken);
         return result.ToAspNetCoreResult(
             page =>
             {
-                page.Metadata.ToHeaders(context);
+                page.Info.ToHeaders(context);
                 return Results.Ok(page.Dtos.Select(FeedPageResponse.Create));
             },
             context);

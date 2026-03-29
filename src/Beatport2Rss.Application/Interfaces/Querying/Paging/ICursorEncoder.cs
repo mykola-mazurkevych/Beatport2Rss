@@ -1,7 +1,7 @@
-﻿using Beatport2Rss.Application.Pagination;
+﻿using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.SharedKernel.Common;
 
-namespace Beatport2Rss.Application.Interfaces.Pagination;
+namespace Beatport2Rss.Application.Interfaces.Querying.Paging;
 
 public interface ICursorEncoder
 {

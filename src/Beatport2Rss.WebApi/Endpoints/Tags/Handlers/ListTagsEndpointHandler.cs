@@ -14,7 +14,7 @@ namespace Beatport2Rss.WebApi.Endpoints.Tags.Handlers;
 internal static class ListTagsEndpointHandler
 {
     public static async Task<IResult> Handle(
-        [AsParameters] PageNavigationRequest pageNavigationRequest,
+        [AsParameters] PaginationRequest pageNavigationRequest,
         [FromServices] IMediator mediator,
         [FromServices] IOptionsSnapshot<JsonSerializerOptions> jsonSerializerOptionsSnapshot,
         HttpContext context,
@@ -22,12 +22,12 @@ internal static class ListTagsEndpointHandler
     {
         var query = new ListTagsQuery(
             context.User.Id,
-            pageNavigationRequest.ToPageNavigation());
+            pageNavigationRequest.ToPagination());
         var result = await mediator.Send(query, cancellationToken);
         return result.ToAspNetCoreResult(
             page =>
             {
-                page.Metadata.ToHeaders(context);
+                page.Info.ToHeaders(context);
                 return Results.Ok(page.Dtos.Select(TagPageResponse.Create));
             },
             context);

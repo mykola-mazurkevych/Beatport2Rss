@@ -1,6 +1,6 @@
-namespace Beatport2Rss.Application.Pagination;
+namespace Beatport2Rss.Application.Querying.Paging;
 
-public sealed record PageMetadata(
+public sealed record PageInfo(
     int Size,
     int ItemsCount,
     int TotalItemsCount,
@@ -9,7 +9,7 @@ public sealed record PageMetadata(
 {
     public int TotalCount => (int)Math.Ceiling((double)TotalItemsCount / Size);
 
-    public static PageMetadata Empty(int size) =>
+    public static PageInfo Empty(int size) =>
         new(size,
             ItemsCount: 0,
             TotalItemsCount: 0,

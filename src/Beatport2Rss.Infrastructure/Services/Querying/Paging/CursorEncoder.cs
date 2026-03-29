@@ -2,14 +2,14 @@
 
 using System.Text.Json;
 
-using Beatport2Rss.Application.Interfaces.Pagination;
-using Beatport2Rss.Application.Pagination;
+using Beatport2Rss.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.SharedKernel.Common;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Infrastructure.Services.Pagination;
+namespace Beatport2Rss.Infrastructure.Services.Querying.Paging;
 
 internal sealed class CursorEncoder(
     IOptions<JsonSerializerOptions> options) :

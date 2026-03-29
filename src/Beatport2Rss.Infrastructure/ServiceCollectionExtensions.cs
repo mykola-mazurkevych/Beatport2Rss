@@ -3,9 +3,9 @@
 using System.Text;
 using System.Text.Json;
 
-using Beatport2Rss.Application.Interfaces.Pagination;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
@@ -17,7 +17,7 @@ using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Services.Beatport;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
-using Beatport2Rss.Infrastructure.Services.Pagination;
+using Beatport2Rss.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Infrastructure.Services.Security;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,7 +44,7 @@ public static class ServiceCollectionExtensions
                 .AddHealthServices()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
-                .AddPagination()
+                .AddPaging()
                 .AddPersistence(configuration)
                 .AddSecurityServices();
 
@@ -96,7 +96,7 @@ public static class ServiceCollectionExtensions
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
 
-        private IServiceCollection AddPagination() =>
+        private IServiceCollection AddPaging() =>
             services
                 .AddSingleton<ICursorEncoder, CursorEncoder>()
                 .AddSingleton<IPageBuilder, PageBuilder>();
