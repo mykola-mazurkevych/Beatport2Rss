@@ -1,4 +1,3 @@
-using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
 
@@ -13,16 +12,12 @@ public sealed record DeleteSessionsCommand(
     ICommand<Result>;
 
 internal sealed class DeleteSessionsCommandHandler(
-    ISessionCommandRepository sessionCommandRepository,
-    IUnitOfWork unitOfWork) :
+    ISessionCommandRepository sessionCommandRepository) :
     ICommandHandler<DeleteSessionsCommand, Result>
 {
     public async ValueTask<Result> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
     {
-        var sessions = await sessionCommandRepository.FindAllAsync(s => s.UserId == command.UserId, cancellationToken);
-
-        sessionCommandRepository.DeleteRange(sessions);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await sessionCommandRepository.DeleteAsync(s => s.UserId == command.UserId, cancellationToken);
 
         return Result.Ok();
     }
