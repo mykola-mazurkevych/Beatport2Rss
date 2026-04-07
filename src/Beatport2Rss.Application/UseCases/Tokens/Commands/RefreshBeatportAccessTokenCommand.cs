@@ -38,8 +38,6 @@ internal sealed class RefreshBeatportAccessTokenCommandHandler(
             return Result.Fail(e.Message);
         }
 
-        var tokens = await tokenCommandRepository.FindAllAsync(_ => true, cancellationToken);
-
         var tokenId = TokenId.Create(Guid.NewGuid());
         var beatportAccessToken = BeatportAccessToken.Create(accessToken);
         var token = Token.Create(
@@ -48,7 +46,7 @@ internal sealed class RefreshBeatportAccessTokenCommandHandler(
             beatportAccessToken,
             clock.UtcNow.AddSeconds(expiresIn));
 
-        tokenCommandRepository.DeleteRange(tokens);
+        await tokenCommandRepository.DeleteAsync(_ => true, cancellationToken);
         await tokenCommandRepository.AddAsync(token, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

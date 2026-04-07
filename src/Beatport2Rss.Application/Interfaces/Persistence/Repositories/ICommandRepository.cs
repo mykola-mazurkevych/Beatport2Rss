@@ -4,30 +4,49 @@ using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
-public interface ICommandRepository<TEntity, in TId>
-    where TEntity : class, IAggregateRoot<TId>
+public interface ICommandRepository<TAggregateRoot, in TId>
+    where TAggregateRoot : class, IAggregateRoot<TId>
     where TId : struct, IId<TId>
 {
-    Task<TEntity> LoadAsync(TId id, CancellationToken cancellationToken = default) =>
-        LoadAsync(e => e.Id.Equals(id), cancellationToken);
+    Task<TAggregateRoot> LoadAsync(
+        TId id,
+        CancellationToken cancellationToken = default) =>
+        LoadAsync(
+            aggregateRoot => aggregateRoot.Id.Equals(id),
+            cancellationToken);
 
-    Task<TEntity> LoadAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<TAggregateRoot> LoadAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
-    Task<TEntity?> FindAsync(TId id, CancellationToken cancellationToken = default) =>
-        FindAsync(e => e.Id.Equals(id), cancellationToken);
+    Task<TAggregateRoot?> FindAsync(
+        TId id,
+        CancellationToken cancellationToken = default) =>
+        FindAsync(
+            aggregateRoot => aggregateRoot.Id.Equals(id),
+            cancellationToken);
 
-    Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<TAggregateRoot?> FindAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TAggregateRoot>> FindAllAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
-    Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default);
 
-    Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
-    Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
+    Task<TAggregateRoot> AddAsync(
+        TAggregateRoot aggregateRoot,
+        CancellationToken cancellationToken = default);
 
-    void Update(TEntity entity);
-    void UpdateRange(IEnumerable<TEntity> entities);
+    void Update(TAggregateRoot aggregateRoot);
 
-    void Delete(TEntity entity);
-    void DeleteRange(IEnumerable<TEntity> entities);
+    void Delete(TAggregateRoot aggregateRoot);
+
+    Task DeleteAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default);
 }
