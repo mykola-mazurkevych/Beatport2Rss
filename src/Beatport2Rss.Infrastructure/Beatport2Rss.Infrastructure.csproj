@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Beatport2Rss.Domain\Beatport2Rss.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Views\*.sql" />
+  </ItemGroup>
+
 </Project>

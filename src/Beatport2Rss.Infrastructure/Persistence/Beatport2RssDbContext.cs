@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Sessions;
@@ -27,6 +28,8 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Token> Tokens => this.Set<Token>();
     public DbSet<Track> Tracks => this.Set<Track>();
     public DbSet<User> Users => this.Set<User>();
+
+    public DbSet<UserReadModel> UserReadModels => this.Set<UserReadModel>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

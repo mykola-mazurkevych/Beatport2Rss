@@ -18,11 +18,8 @@ internal abstract class CommandRepository<TEntity, TId>(DbSet<TEntity> dbSet) :
     public Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
         dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
 
-    public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
-    {
-        var entities = await dbSet.Where(predicate).ToListAsync(cancellationToken);
-        return entities.AsEnumerable();
-    }
+    public async Task<IEnumerable<TEntity>> FindAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+        (await dbSet.Where(predicate).ToArrayAsync(cancellationToken)).AsEnumerable();
 
     public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
         dbSet.AnyAsync(predicate, cancellationToken);
