@@ -25,7 +25,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Beatport2Rss.Application.ReadModels.Users.UserReadModel", b =>
+            modelBuilder.Entity("Beatport2Rss.Application.ReadModels.Users.UserQueryModel", b =>
                 {
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

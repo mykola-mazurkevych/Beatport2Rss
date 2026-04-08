@@ -1,9 +1,9 @@
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.SharedKernel.Common;
 
-namespace Beatport2Rss.Application.ReadModels.Users;
+namespace Beatport2Rss.Application.QueryModels.Users;
 
-public sealed record UserReadModel(
+public sealed record UserQueryModel(
     UserId Id,
     DateTimeOffset CreatedAt,
     EmailAddress EmailAddress,
@@ -15,4 +15,4 @@ public sealed record UserReadModel(
     bool IsActive,
     int FeedsCount,
     int TagsCount) :
-    IReadModel<UserId>;
+    IQueryModel<UserId>;

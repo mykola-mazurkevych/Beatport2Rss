@@ -1,6 +1,6 @@
 namespace Beatport2Rss.SharedKernel.Common;
 
-public interface IReadModel<out TId>
+public interface IQueryModel<out TId>
     where TId : struct, IId<TId>
 {
     TId Id { get; }
