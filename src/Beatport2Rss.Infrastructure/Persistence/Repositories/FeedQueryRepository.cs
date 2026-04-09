@@ -9,8 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class FeedQueryRepository(
-    IQueryable<Feed> feeds,
-    IQueryable<User> users) :
+    IQueryable<Feed> feeds) :
     IFeedQueryRepository
 {
     public IQueryable<Feed> Feeds => feeds;
@@ -25,7 +24,6 @@ internal sealed class FeedQueryRepository(
     public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
         (
             from feed in feeds
-            join user in users on feed.UserId equals user.Id
             where feed.UserId == userId &&
                   feed.Slug == slug
             select new FeedDetailsReadModel(
