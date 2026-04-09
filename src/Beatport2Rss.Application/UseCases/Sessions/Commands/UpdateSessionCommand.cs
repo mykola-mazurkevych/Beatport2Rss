@@ -45,7 +45,7 @@ internal sealed class UpdateSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var session = await sessionCommandRepository.LoadAsync(command.SessionId, cancellationToken);
-        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(session.UserId, cancellationToken);
+        var user = await userQueryRepository.LoadAsync(session.UserId, cancellationToken);
 
         var refreshToken = RefreshToken.Create(command.RefreshToken);
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
@@ -58,7 +58,7 @@ internal sealed class UpdateSessionCommandHandler(
             return Result.Unauthorized("The provided refresh token is invalid or has expired.");
         }
 
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, command.SessionId);
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, command.SessionId);
         (RefreshToken newRefreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
 
         session.Refresh(refreshTokenService.Hash(newRefreshToken), expiresAt);

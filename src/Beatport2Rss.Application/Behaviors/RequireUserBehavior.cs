@@ -19,6 +19,7 @@ file static class ErrorMessages
     public const string NotSupported = "User status '{0}' is not supported.";
 }
 
+// TODO: Think maybe it's still better to load only user status here instead of whole query model
 internal abstract class RequireUserBehavior<TMessage, TResult>(
     IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
@@ -29,13 +30,13 @@ internal abstract class RequireUserBehavior<TMessage, TResult>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(message.UserId, cancellationToken);
+        var user = await userQueryRepository.LoadAsync(message.UserId, cancellationToken);
 
-        return readModel.Status switch
+        return user.Status switch
         {
             UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             UserStatus.Active => await next(message, cancellationToken),
-            _ => throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.NotSupported, readModel.Status))
+            _ => throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.NotSupported, user.Status))
         };
     }
 }
@@ -50,13 +51,13 @@ internal abstract class RequireUserBehavior<TMessage, TResult, TResponse>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var readModel = await userQueryRepository.LoadUserStatusReadModelAsync(message.UserId, cancellationToken);
+        var user = await userQueryRepository.LoadAsync(message.UserId, cancellationToken);
 
-        return readModel.Status switch
+        return user.Status switch
         {
             UserStatus.Pending or UserStatus.Inactive => (TResult)Result.Forbidden(ErrorMessages.Forbidden),
             UserStatus.Active => await next(message, cancellationToken),
-            _ => throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.NotSupported, readModel.Status))
+            _ => throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, ErrorMessages.NotSupported, user.Status))
         };
     }
 }

@@ -53,22 +53,22 @@ internal sealed class CreateSessionCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
-        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(emailAddress, cancellationToken);
+        var user = await userQueryRepository.FindAsync(emailAddress, cancellationToken);
 
-        if (userAuthDetails is null || !passwordHasher.Verify(password, userAuthDetails.PasswordHash))
+        if (user is null || !passwordHasher.Verify(password, user.PasswordHash))
         {
             return Result.Unauthorized("The provided email address or password is incorrect.");
         }
 
         var sessionId = SessionId.Create(Guid.CreateVersion7());
-        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(userAuthDetails, sessionId);
+        (AccessToken accessToken, int expiresIn) = accessTokenService.Generate(user, sessionId);
         (RefreshToken refreshToken, DateTimeOffset expiresAt) = refreshTokenService.Generate();
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);
 
         var session = Session.Create(
             sessionId,
             clock.UtcNow,
-            userAuthDetails.Id,
+            user.Id,
             refreshTokenHash,
             expiresAt,
             command.UserAgent,

@@ -23,14 +23,6 @@ public sealed class User :
 
     public UserStatus Status { get; private set; }
 
-    public string? FullName =>
-        string.IsNullOrWhiteSpace(FirstName) && string.IsNullOrWhiteSpace(LastName)
-            ? null
-            : $"{FirstName} {LastName}".Trim();
-
-    public bool IsActive =>
-        Status == UserStatus.Active;
-
     public static User Create(
         UserId id,
         DateTimeOffset createdAt,

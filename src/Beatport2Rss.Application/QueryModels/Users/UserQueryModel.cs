@@ -1,3 +1,4 @@
+using Beatport2Rss.Application.Interfaces.Models.Users;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.SharedKernel.Common;
 
@@ -15,4 +16,5 @@ public sealed record UserQueryModel(
     bool IsActive,
     int FeedsCount,
     int TagsCount) :
-    IQueryModel<UserId>;
+    IQueryModel<UserId>,
+    IHaveUserAuthDetails;

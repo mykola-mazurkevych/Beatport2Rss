@@ -32,7 +32,6 @@ internal sealed class FeedQueryRepository(
                 feed.Id,
                 feed.Slug,
                 feed.Name,
-                user.FullName,
                 feed.IsActive,
                 feed.CreatedAt,
                 feed.Subscriptions.Count)
