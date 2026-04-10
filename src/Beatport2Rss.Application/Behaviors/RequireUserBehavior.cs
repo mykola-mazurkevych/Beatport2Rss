@@ -19,7 +19,6 @@ file static class ErrorMessages
     public const string NotSupported = "User status '{0}' is not supported.";
 }
 
-// TODO: Think maybe it's still better to load only user status here instead of whole query model
 internal abstract class RequireUserBehavior<TMessage, TResult>(
     IUserQueryRepository userQueryRepository)
     where TMessage : IMessage, IRequireActiveUser
@@ -30,7 +29,7 @@ internal abstract class RequireUserBehavior<TMessage, TResult>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var user = await userQueryRepository.LoadAsync(message.UserId, cancellationToken);
+        var user = await userQueryRepository.LoadUserStatusAsync(message.UserId, cancellationToken);
 
         return user.Status switch
         {
@@ -51,7 +50,7 @@ internal abstract class RequireUserBehavior<TMessage, TResult, TResponse>(
         MessageHandlerDelegate<TMessage, TResult> next,
         CancellationToken cancellationToken)
     {
-        var user = await userQueryRepository.LoadAsync(message.UserId, cancellationToken);
+        var user = await userQueryRepository.LoadUserStatusAsync(message.UserId, cancellationToken);
 
         return user.Status switch
         {

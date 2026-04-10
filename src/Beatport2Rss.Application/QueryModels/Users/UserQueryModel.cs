@@ -17,4 +17,4 @@ public sealed record UserQueryModel(
     int FeedsCount,
     int TagsCount) :
     IQueryModel<UserId>,
-    IHaveUserAuthDetails;
+    IHaveUserAuth;
