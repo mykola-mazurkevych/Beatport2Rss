@@ -16,14 +16,14 @@ internal sealed class UserQueryRepository(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         base.ExistsAsync(
-            userQueryModel => userQueryModel.Id.Equals(userId),
+            userQueryModel => userQueryModel.Id == userId,
             cancellationToken);
 
     public async Task<IHaveUserDetails> LoadUserDetailsAsync(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         await LoadAsync(
-            userQueryModel => userQueryModel.Id.Equals(userId),
+            userQueryModel => userQueryModel.Id == userId,
             UserDetails.Selector,
             cancellationToken);
 
@@ -31,7 +31,7 @@ internal sealed class UserQueryRepository(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         await LoadAsync(
-            userQueryModel => userQueryModel.Id.Equals(userId),
+            userQueryModel => userQueryModel.Id == userId,
             UserAuthDetails.Selector,
             cancellationToken);
 
@@ -39,7 +39,7 @@ internal sealed class UserQueryRepository(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         await LoadAsync(
-            userQueryModel => userQueryModel.Id.Equals(userId),
+            userQueryModel => userQueryModel.Id == userId,
             UserStatusDetails.Selector,
             cancellationToken);
 
@@ -47,7 +47,7 @@ internal sealed class UserQueryRepository(
         EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await FindAsync(
-            userQueryModel => userQueryModel.EmailAddress.Equals(emailAddress),
+            userQueryModel => userQueryModel.EmailAddress == emailAddress,
             UserAuthDetails.Selector,
             cancellationToken);
 
