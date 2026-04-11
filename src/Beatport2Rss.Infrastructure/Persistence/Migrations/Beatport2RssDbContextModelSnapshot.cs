@@ -359,7 +359,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Beatport2Rss.Infrastructure.QueryModels.Users.UserQueryModel", b =>
+            modelBuilder.Entity("Beatport2Rss.Infrastructure.QueryModels.UserQueryModel", b =>
                 {
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

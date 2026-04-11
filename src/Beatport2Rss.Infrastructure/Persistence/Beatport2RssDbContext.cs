@@ -8,7 +8,7 @@ using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.Domain.Users;
-using Beatport2Rss.Infrastructure.QueryModels.Users;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

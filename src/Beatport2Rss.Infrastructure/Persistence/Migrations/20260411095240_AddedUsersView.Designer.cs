@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(Beatport2RssDbContext))]
-    [Migration("20260411094452_AddedUsersView")]
+    [Migration("20260411095240_AddedUsersView")]
     partial class AddedUsersView
     {
         /// <inheritdoc />
@@ -362,7 +362,7 @@ namespace Beatport2Rss.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Beatport2Rss.Infrastructure.QueryModels.Users.UserQueryModel", b =>
+            modelBuilder.Entity("Beatport2Rss.Infrastructure.QueryModels.UserQueryModel", b =>
                 {
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
