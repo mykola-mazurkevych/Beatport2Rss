@@ -1,38 +1,64 @@
+using System.Linq.Expressions;
+
+using Beatport2Rss.Application.Interfaces.Models.Sessions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
-using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
-
-using Microsoft.EntityFrameworkCore;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class SessionQueryRepository(
     IClock clock,
     IQueryable<Session> sessions,
-    IQueryable<User> users) :
+    IQueryable<SessionQueryModel> sessionQueryModels) :
+    QueryRepository<SessionQueryModel, SessionId>(sessionQueryModels),
     ISessionQueryRepository
 {
-    public Task<bool> ExistsAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
-        sessions
-            .AnyAsync(s => s.UserId == userId && s.Id == sessionId, cancellationToken);
+    public IQueryable<Session> Sessions => sessions;
 
-    public Task<SessionDetailsReadModel> LoadSessionDetailsReadModelAsync(UserId userId, SessionId sessionId, CancellationToken cancellationToken = default) =>
-        (
-            from session in sessions
-            join user in users on session.UserId equals user.Id
-            where session.UserId == userId &&
-                  session.Id == sessionId
-            select new SessionDetailsReadModel(
-                session.Id,
-                session.CreatedAt,
-                user.EmailAddress,
-                user.FirstName,
-                user.LastName,
-                session.UserAgent,
-                session.IpAddress,
-                session.RefreshTokenExpiresAt < clock.UtcNow)
-        )
-        .SingleAsync(cancellationToken);
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        SessionId sessionId,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            sessionQueryModel =>
+                sessionQueryModel.UserId == userId &&
+                sessionQueryModel.Id == sessionId,
+            cancellationToken);
+
+    public async Task<IHaveSessionDetails> LoadSessionDetailsAsync(
+        UserId userId,
+        SessionId sessionId,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            sessionQueryModel =>
+                sessionQueryModel.UserId == userId &&
+                sessionQueryModel.Id == sessionId,
+            SessionDetails.CreateSelector(clock.UtcNow),
+            cancellationToken);
+
+    private sealed record SessionDetails(
+        SessionId Id,
+        DateTimeOffset CreatedAt,
+        EmailAddress EmailAddress,
+        string? FirstName,
+        string? LastName,
+        string? UserAgent,
+        string? IpAddress,
+        bool IsExpired) :
+        IHaveSessionDetails
+    {
+        public static Expression<Func<SessionQueryModel, SessionDetails>> CreateSelector(DateTimeOffset now) =>
+            sessionQueryModel => new SessionDetails(
+                sessionQueryModel.Id,
+                sessionQueryModel.CreatedAt,
+                sessionQueryModel.EmailAddress,
+                sessionQueryModel.FirstName,
+                sessionQueryModel.LastName,
+                sessionQueryModel.UserAgent,
+                sessionQueryModel.IpAddress,
+                sessionQueryModel.RefreshTokenExpiresAt < now);
+    }
 }

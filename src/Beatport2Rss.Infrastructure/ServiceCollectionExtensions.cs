@@ -109,7 +109,8 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking()) // TODO: Remove
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SessionQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)

@@ -31,16 +31,16 @@ internal sealed class GetSessionQueryHandler(
         GetSessionQuery query,
         CancellationToken cancellationToken = default)
     {
-        var readModel = await sessionQueryRepository.LoadSessionDetailsReadModelAsync(query.UserId, query.SessionId, cancellationToken);
+        var sessionDetails = await sessionQueryRepository.LoadSessionDetailsAsync(query.UserId, query.SessionId, cancellationToken);
 
         return new GetSessionResponse(
-            readModel.SessionId,
-            readModel.CreatedAt,
-            readModel.EmailAddress,
-            readModel.FirstName,
-            readModel.LastName,
-            readModel.UserAgent,
-            readModel.IpAddress,
-            readModel.IsExpired);
+            sessionDetails.Id,
+            sessionDetails.CreatedAt,
+            sessionDetails.EmailAddress,
+            sessionDetails.FirstName,
+            sessionDetails.LastName,
+            sessionDetails.UserAgent,
+            sessionDetails.IpAddress,
+            sessionDetails.IsExpired);
     }
 }
