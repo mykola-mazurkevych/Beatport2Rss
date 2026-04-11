@@ -112,11 +112,12 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags.AsNoTracking()) // TODO: Remove
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().TagQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().UserQueryModels.AsNoTracking())
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()

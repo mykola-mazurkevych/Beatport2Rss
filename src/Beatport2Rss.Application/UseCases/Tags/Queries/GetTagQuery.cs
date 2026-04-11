@@ -23,12 +23,12 @@ internal sealed class GetTagQueryHandler(
         GetTagQuery query,
         CancellationToken cancellationToken)
     {
-        var readModel = await tagQueryRepository.LoadTagDetailsReadModelAsync(query.UserId, query.TagSlug, cancellationToken);
+        var tagDetails = await tagQueryRepository.LoadTagDetailsAsync(query.UserId, query.TagSlug, cancellationToken);
 
         return new TagDto(
-            readModel.Id,
-            readModel.Name,
-            readModel.Slug,
-            readModel.CreatedAt);
+            tagDetails.Id,
+            tagDetails.Name,
+            tagDetails.Slug,
+            tagDetails.CreatedAt);
     }
 }

@@ -15,7 +15,7 @@ internal sealed class UserQueryRepository(
     public Task<bool> ExistsAsync(
         UserId userId,
         CancellationToken cancellationToken = default) =>
-        base.ExistsAsync(
+        ExistsAsync(
             userQueryModel => userQueryModel.Id == userId,
             cancellationToken);
 
