@@ -7,7 +7,6 @@ public sealed record FeedDetailsReadModel(
     FeedId Id,
     Slug Slug,
     FeedName Name,
-    string? Owner,
     bool IsActive,
     DateTimeOffset CreatedAt,
     int SubscriptionsCount);

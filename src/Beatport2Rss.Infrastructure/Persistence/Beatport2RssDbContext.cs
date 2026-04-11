@@ -8,6 +8,7 @@ using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -27,6 +28,8 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Token> Tokens => this.Set<Token>();
     public DbSet<Track> Tracks => this.Set<Track>();
     public DbSet<User> Users => this.Set<User>();
+
+    public DbSet<UserQueryModel> UserQueryModels => this.Set<UserQueryModel>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

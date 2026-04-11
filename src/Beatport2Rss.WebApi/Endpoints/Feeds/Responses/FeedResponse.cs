@@ -6,7 +6,6 @@ internal sealed record FeedResponse(
     Guid Id,
     string Name,
     string Slug,
-    string? Owner,
     bool IsActive,
     DateTimeOffset CreatedAt,
     int SubscriptionsCount)
@@ -15,7 +14,6 @@ internal sealed record FeedResponse(
         new(dto.Id.Value,
             dto.Name.Value,
             dto.Slug.Value,
-            dto.Owner,
             dto.IsActive,
             dto.CreatedAt,
             dto.SubscriptionsCount);

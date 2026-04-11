@@ -3,9 +3,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
+using Beatport2Rss.Application.Interfaces.Models.Users;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
-using Beatport2Rss.Application.ReadModels.Users;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Infrastructure.Options;
@@ -22,7 +22,7 @@ internal sealed class JwtService(
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public (AccessToken AccessToken, int ExpiresIn) Generate(UserAuthDetailsReadModel userAuthDetails, SessionId sessionId)
+    public (AccessToken AccessToken, int ExpiresIn) Generate(IHaveUserAuthDetails userAuthDetails, SessionId sessionId)
     {
         var issuedAt = clock.UtcNow;
 

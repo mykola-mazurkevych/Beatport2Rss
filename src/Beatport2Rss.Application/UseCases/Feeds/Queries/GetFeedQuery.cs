@@ -29,7 +29,6 @@ internal sealed class GetFeedQueryHandler(
             readModel.Id,
             readModel.Name,
             readModel.Slug,
-            readModel.Owner,
             readModel.IsActive,
             readModel.CreatedAt,
             readModel.SubscriptionsCount);

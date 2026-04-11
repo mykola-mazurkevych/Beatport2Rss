@@ -1,83 +1,98 @@
-using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.ReadModels.Users;
-using Beatport2Rss.Domain.Feeds;
-using Beatport2Rss.Domain.Tags;
-using Beatport2Rss.Domain.Users;
+using System.Linq.Expressions;
 
-using Microsoft.EntityFrameworkCore;
+using Beatport2Rss.Application.Interfaces.Models.Users;
+using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class UserQueryRepository(
-    IQueryable<Feed> feeds,
-    IQueryable<Tag> tags,
-    IQueryable<User> users) :
+    IQueryable<UserQueryModel> userQueryModels) :
+    QueryRepository<UserQueryModel, UserId>(userQueryModels),
     IUserQueryRepository
 {
-    public Task<bool> ExistsAsync(UserId userId, CancellationToken cancellationToken = default) =>
-        users.AnyAsync(u => u.Id == userId, cancellationToken);
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        base.ExistsAsync(
+            userQueryModel => userQueryModel.Id == userId,
+            cancellationToken);
 
-    public Task<UserStatusReadModel> LoadUserStatusReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
-        (
-            from user in users
-            where user.Id == userId
-            select new UserStatusReadModel(user.Status)
-        )
-        .SingleAsync(cancellationToken);
+    public async Task<IHaveUserDetails> LoadUserDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            userQueryModel => userQueryModel.Id == userId,
+            UserDetails.Selector,
+            cancellationToken);
 
-    public Task<UserAuthDetailsReadModel> LoadUserAuthDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
-        (
-            from user in users
-            where user.Id == userId
-            select new UserAuthDetailsReadModel(
-                user.Id,
-                user.EmailAddress,
-                user.PasswordHash,
-                user.FirstName,
-                user.LastName)
-        )
-        .SingleAsync(cancellationToken);
+    public async Task<IHaveUserAuthDetails> LoadUserAuthDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            userQueryModel => userQueryModel.Id == userId,
+            UserAuthDetails.Selector,
+            cancellationToken);
 
-    public Task<UserAuthDetailsReadModel?> LoadUserAuthDetailsReadModelAsync(EmailAddress emailAddress, CancellationToken cancellationToken = default) =>
-        (
-            from user in users
-            where user.EmailAddress == emailAddress
-            select new UserAuthDetailsReadModel(
-                user.Id,
-                user.EmailAddress,
-                user.PasswordHash,
-                user.FirstName,
-                user.LastName)
-        )
-        .SingleOrDefaultAsync(cancellationToken);
+    public async Task<IHaveUserStatusDetails> LoadUserStatusDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            userQueryModel => userQueryModel.Id == userId,
+            UserStatusDetails.Selector,
+            cancellationToken);
 
-    public Task<UserDetailsReadModel> LoadUserDetailsReadModelAsync(UserId userId, CancellationToken cancellationToken = default) =>
-        (
-            from user in users
-            join feed in (
-                    from feed in feeds
-                    group feed by feed.UserId
-                    into grouping
-                    select new { UserId = grouping.Key, Count = (int?)grouping.Count() })
-                on user.Id equals feed.UserId
-                into userFeeds
-            from feeds in userFeeds.DefaultIfEmpty()
-            join tag in (
-                    from tag in tags
-                    group tag by tag.UserId
-                    into grouping
-                    select new { UserId = grouping.Key, Count = (int?)grouping.Count() })
-                on user.Id equals tag.UserId
-                into userTags
-            from tags in userTags.DefaultIfEmpty()
-            where user.Id == userId
-            select new UserDetailsReadModel(
-                user.EmailAddress,
-                user.FirstName,
-                user.LastName,
-                user.Status == UserStatus.Active,
-                feeds.Count.GetValueOrDefault(),
-                tags.Count.GetValueOrDefault())
-        )
-        .SingleAsync(cancellationToken);
+    public async Task<IHaveUserAuthDetails?> FindUserAuthDetailsAsync(
+        EmailAddress emailAddress,
+        CancellationToken cancellationToken = default) =>
+        await FindAsync(
+            userQueryModel => userQueryModel.EmailAddress == emailAddress,
+            UserAuthDetails.Selector,
+            cancellationToken);
+
+    private sealed record UserAuthDetails(
+        UserId Id,
+        EmailAddress EmailAddress,
+        PasswordHash PasswordHash,
+        string? FirstName,
+        string? LastName) :
+        IHaveUserAuthDetails
+    {
+        public static Expression<Func<UserQueryModel, UserAuthDetails>> Selector =>
+            userQueryModel => new UserAuthDetails(
+                userQueryModel.Id,
+                userQueryModel.EmailAddress,
+                userQueryModel.PasswordHash,
+                userQueryModel.FirstName,
+                userQueryModel.LastName);
+    }
+
+    private sealed record UserStatusDetails(
+        UserStatus Status) :
+        IHaveUserStatusDetails
+    {
+        public static Expression<Func<UserQueryModel, UserStatusDetails>> Selector =>
+            userQueryModel => new UserStatusDetails(
+                userQueryModel.Status);
+    }
+
+    private sealed record UserDetails(
+        EmailAddress EmailAddress,
+        string? FirstName,
+        string? LastName,
+        bool IsActive,
+        int FeedsCount,
+        int TagsCount) :
+        IHaveUserDetails
+    {
+        public static Expression<Func<UserQueryModel, UserDetails>> Selector =>
+            userQueryModel => new UserDetails(
+                userQueryModel.EmailAddress,
+                userQueryModel.FirstName,
+                userQueryModel.LastName,
+                userQueryModel.IsActive,
+                userQueryModel.FeedsCount,
+                userQueryModel.TagsCount);
+    }
 }

@@ -45,7 +45,7 @@ internal sealed class UpdateSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var session = await sessionCommandRepository.LoadAsync(command.SessionId, cancellationToken);
-        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(session.UserId, cancellationToken);
+        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsAsync(session.UserId, cancellationToken);
 
         var refreshToken = RefreshToken.Create(command.RefreshToken);
         var refreshTokenHash = refreshTokenService.Hash(refreshToken);

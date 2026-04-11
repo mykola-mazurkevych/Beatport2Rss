@@ -53,7 +53,7 @@ internal sealed class CreateSessionCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
         var password = Password.Create(command.Password);
-        var userAuthDetails = await userQueryRepository.LoadUserAuthDetailsReadModelAsync(emailAddress, cancellationToken);
+        var userAuthDetails = await userQueryRepository.FindUserAuthDetailsAsync(emailAddress, cancellationToken);
 
         if (userAuthDetails is null || !passwordHasher.Verify(password, userAuthDetails.PasswordHash))
         {

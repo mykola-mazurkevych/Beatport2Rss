@@ -39,9 +39,6 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(user => user.Status)
             .IsEnum();
 
-        builder.Ignore(user => user.FullName);
-        builder.Ignore(user => user.IsActive);
-
         builder.HasIndex(user => user.EmailAddress)
             .IsUnique();
     }
