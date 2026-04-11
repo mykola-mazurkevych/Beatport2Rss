@@ -1,21 +1,27 @@
 using Beatport2Rss.Application.Interfaces.Models.Users;
-using Beatport2Rss.Application.QueryModels.Users;
 using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
-public interface IUserQueryRepository :
-    IQueryRepository<UserQueryModel, UserId>
+public interface IUserQueryRepository
 {
-    Task<IHaveUserAuth> LoadUserAuthAsync(
+    Task<bool> ExistsAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
 
-    Task<IHaveUserStatus> LoadUserStatusAsync(
+    Task<IHaveUserDetails> LoadUserDetailsAsync(
         UserId userId,
         CancellationToken cancellationToken = default);
 
-    Task<IHaveUserAuth?> FindUserAuthAsync(
+    Task<IHaveUserAuthDetails> LoadUserAuthDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<IHaveUserStatusDetails> LoadUserStatusDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<IHaveUserAuthDetails?> FindUserAuthDetailsAsync(
         EmailAddress emailAddress,
         CancellationToken cancellationToken = default);
 }

@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 
 using Beatport2Rss.Application.Interfaces.Models.Users;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.QueryModels.Users;
 using Beatport2Rss.Domain.Users;
+using Beatport2Rss.Infrastructure.QueryModels.Users;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
@@ -12,51 +12,87 @@ internal sealed class UserQueryRepository(
     QueryRepository<UserQueryModel, UserId>(userQueryModels),
     IUserQueryRepository
 {
-    private static Expression<Func<UserQueryModel, UserAuthProjection>> UserAuthSelector =>
-        userQueryModel => new UserAuthProjection(
-            userQueryModel.Id,
-            userQueryModel.EmailAddress,
-            userQueryModel.PasswordHash,
-            userQueryModel.FirstName,
-            userQueryModel.LastName);
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        base.ExistsAsync(
+            userQueryModel => userQueryModel.Id.Equals(userId),
+            cancellationToken);
 
-    private static Expression<Func<UserQueryModel, UserStatusProjection>> UserStatusSelector =>
-        userQueryModel => new UserStatusProjection(
-            userQueryModel.Status);
-
-    public async Task<IHaveUserAuth> LoadUserAuthAsync(
+    public async Task<IHaveUserDetails> LoadUserDetailsAsync(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         await LoadAsync(
             userQueryModel => userQueryModel.Id.Equals(userId),
-            UserAuthSelector,
+            UserDetails.Selector,
             cancellationToken);
 
-    public async Task<IHaveUserStatus> LoadUserStatusAsync(
+    public async Task<IHaveUserAuthDetails> LoadUserAuthDetailsAsync(
         UserId userId,
         CancellationToken cancellationToken = default) =>
         await LoadAsync(
             userQueryModel => userQueryModel.Id.Equals(userId),
-            UserStatusSelector,
+            UserAuthDetails.Selector,
             cancellationToken);
 
-    public async Task<IHaveUserAuth?> FindUserAuthAsync(
+    public async Task<IHaveUserStatusDetails> LoadUserStatusDetailsAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            userQueryModel => userQueryModel.Id.Equals(userId),
+            UserStatusDetails.Selector,
+            cancellationToken);
+
+    public async Task<IHaveUserAuthDetails?> FindUserAuthDetailsAsync(
         EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
         await FindAsync(
             userQueryModel => userQueryModel.EmailAddress.Equals(emailAddress),
-            UserAuthSelector,
+            UserAuthDetails.Selector,
             cancellationToken);
 
-    private sealed record UserAuthProjection(
+    private sealed record UserAuthDetails(
         UserId Id,
         EmailAddress EmailAddress,
         PasswordHash PasswordHash,
         string? FirstName,
         string? LastName) :
-        IHaveUserAuth;
+        IHaveUserAuthDetails
+    {
+        public static Expression<Func<UserQueryModel, UserAuthDetails>> Selector =>
+            userQueryModel => new UserAuthDetails(
+                userQueryModel.Id,
+                userQueryModel.EmailAddress,
+                userQueryModel.PasswordHash,
+                userQueryModel.FirstName,
+                userQueryModel.LastName);
+    }
 
-    private sealed record UserStatusProjection(
+    private sealed record UserStatusDetails(
         UserStatus Status) :
-        IHaveUserStatus;
+        IHaveUserStatusDetails
+    {
+        public static Expression<Func<UserQueryModel, UserStatusDetails>> Selector =>
+            userQueryModel => new UserStatusDetails(
+                userQueryModel.Status);
+    }
+
+    private sealed record UserDetails(
+        EmailAddress EmailAddress,
+        string? FirstName,
+        string? LastName,
+        bool IsActive,
+        int FeedsCount,
+        int TagsCount) :
+        IHaveUserDetails
+    {
+        public static Expression<Func<UserQueryModel, UserDetails>> Selector =>
+            userQueryModel => new UserDetails(
+                userQueryModel.EmailAddress,
+                userQueryModel.FirstName,
+                userQueryModel.LastName,
+                userQueryModel.IsActive,
+                userQueryModel.FeedsCount,
+                userQueryModel.TagsCount);
+    }
 }

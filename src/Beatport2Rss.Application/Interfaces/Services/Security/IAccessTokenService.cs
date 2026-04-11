@@ -6,5 +6,5 @@ namespace Beatport2Rss.Application.Interfaces.Services.Security;
 
 public interface IAccessTokenService
 {
-    (AccessToken AccessToken, int ExpiresIn) Generate(IHaveUserAuth userAuth, SessionId sessionId);
+    (AccessToken AccessToken, int ExpiresIn) Generate(IHaveUserAuthDetails userAuthDetails, SessionId sessionId);
 }

@@ -22,16 +22,16 @@ internal sealed class JwtService(
 {
     private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
-    public (AccessToken AccessToken, int ExpiresIn) Generate(IHaveUserAuth userAuth, SessionId sessionId)
+    public (AccessToken AccessToken, int ExpiresIn) Generate(IHaveUserAuthDetails userAuthDetails, SessionId sessionId)
     {
         var issuedAt = clock.UtcNow;
 
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub, userAuth.Id.ToString()),
-            new(JwtRegisteredClaimNames.GivenName, userAuth.FirstName ?? string.Empty),
-            new(JwtRegisteredClaimNames.FamilyName, userAuth.LastName ?? string.Empty),
-            new(JwtRegisteredClaimNames.Email, userAuth.EmailAddress.Value),
+            new(JwtRegisteredClaimNames.Sub, userAuthDetails.Id.ToString()),
+            new(JwtRegisteredClaimNames.GivenName, userAuthDetails.FirstName ?? string.Empty),
+            new(JwtRegisteredClaimNames.FamilyName, userAuthDetails.LastName ?? string.Empty),
+            new(JwtRegisteredClaimNames.Email, userAuthDetails.EmailAddress.Value),
             new(JwtRegisteredClaimNames.Sid, sessionId.ToString()),
             new(JwtRegisteredClaimNames.Iat, issuedAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
         };
