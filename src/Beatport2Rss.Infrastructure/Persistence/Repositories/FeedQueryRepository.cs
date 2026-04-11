@@ -1,38 +1,59 @@
+using System.Linq.Expressions;
+
+using Beatport2Rss.Application.Interfaces.Models.Feeds;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
-
-using Microsoft.EntityFrameworkCore;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class FeedQueryRepository(
-    IQueryable<Feed> feeds) :
+    IQueryable<Feed> feeds,
+    IQueryable<FeedQueryModel> feedQueryModels) :
+    QueryRepository<FeedQueryModel, FeedId>(feedQueryModels),
     IFeedQueryRepository
 {
     public IQueryable<Feed> Feeds => feeds;
 
-    public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        feeds.AnyAsync(
-            f =>
-                f.UserId == userId &&
-                f.Slug == slug,
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            feedQueryModel =>
+                feedQueryModel.UserId == userId &&
+                feedQueryModel.Slug == slug,
             cancellationToken);
 
-    public Task<FeedDetailsReadModel> LoadFeedDetailsReadModelAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        (
-            from feed in feeds
-            where feed.UserId == userId &&
-                  feed.Slug == slug
-            select new FeedDetailsReadModel(
-                feed.Id,
-                feed.Slug,
-                feed.Name,
-                feed.IsActive,
-                feed.CreatedAt,
-                feed.Subscriptions.Count)
-        )
-        .SingleAsync(cancellationToken);
+    public async Task<IHaveFeedDetails> LoadFeedDetailsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
+        await LoadAsync(
+            feedQueryModel =>
+                feedQueryModel.UserId == userId &&
+                feedQueryModel.Slug == slug,
+            FeedDetails.Selector,
+            cancellationToken);
+
+    private sealed record FeedDetails(
+        FeedId Id,
+        FeedName Name,
+        Slug Slug,
+        bool IsActive,
+        DateTimeOffset CreatedAt,
+        int SubscriptionsCount) :
+        IHaveFeedDetails
+    {
+        public static Expression<Func<FeedQueryModel, FeedDetails>> Selector =>
+            feedQueryModel => new FeedDetails(
+                feedQueryModel.Id,
+                feedQueryModel.Name,
+                feedQueryModel.Slug,
+                feedQueryModel.IsActive,
+                feedQueryModel.CreatedAt,
+                feedQueryModel.SubscriptionsCount);
+    }
 }

@@ -5,13 +5,12 @@ using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
-public interface ITagQueryRepository :
-    IQueryRepository
+public interface ITagQueryRepository
 {
-    IQueryable<Tag> Tags { get; }
+    IQueryable<Tag> Tags { get; } // TODO: Delete
 
     Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
-    
+
     Task<TagId> LoadTagIdAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
     Task<IHaveTagDetails> LoadTagDetailsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
 }

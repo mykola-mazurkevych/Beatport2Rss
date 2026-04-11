@@ -106,7 +106,8 @@ public static class ServiceCollectionExtensions
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)

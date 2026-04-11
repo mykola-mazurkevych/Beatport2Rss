@@ -23,14 +23,14 @@ internal sealed class GetFeedQueryHandler(
         GetFeedQuery query,
         CancellationToken cancellationToken = default)
     {
-        var readModel = await feedQueryRepository.LoadFeedDetailsReadModelAsync(query.UserId, query.FeedSlug, cancellationToken);
+        var feedDetails = await feedQueryRepository.LoadFeedDetailsAsync(query.UserId, query.FeedSlug, cancellationToken);
 
         return new FeedDto(
-            readModel.Id,
-            readModel.Name,
-            readModel.Slug,
-            readModel.IsActive,
-            readModel.CreatedAt,
-            readModel.SubscriptionsCount);
+            feedDetails.Id,
+            feedDetails.Name,
+            feedDetails.Slug,
+            feedDetails.IsActive,
+            feedDetails.CreatedAt,
+            feedDetails.SubscriptionsCount);
     }
 }
