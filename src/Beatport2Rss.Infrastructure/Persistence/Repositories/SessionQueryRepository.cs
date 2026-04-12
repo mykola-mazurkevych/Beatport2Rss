@@ -5,7 +5,7 @@ using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Users;
-using Beatport2Rss.Infrastructure.QueryModels;
+using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 

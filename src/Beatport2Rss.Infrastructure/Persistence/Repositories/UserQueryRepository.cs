@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Beatport2Rss.Application.Interfaces.Models.Users;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Users;
-using Beatport2Rss.Infrastructure.QueryModels;
+using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 

@@ -1,4 +1,4 @@
-using Beatport2Rss.Infrastructure.QueryModels;
+using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 

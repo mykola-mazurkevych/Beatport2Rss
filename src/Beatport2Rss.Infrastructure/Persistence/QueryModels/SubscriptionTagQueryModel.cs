@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Infrastructure.QueryModels;
+namespace Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 internal sealed record SubscriptionTagQueryModel(
     Guid UserId,

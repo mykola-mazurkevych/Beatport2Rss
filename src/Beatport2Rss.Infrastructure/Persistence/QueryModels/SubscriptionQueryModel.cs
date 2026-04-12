@@ -2,7 +2,7 @@ using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.SharedKernel.Common;
 
-namespace Beatport2Rss.Infrastructure.QueryModels;
+namespace Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 internal sealed record SubscriptionQueryModel(
     SubscriptionId Id,
