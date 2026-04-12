@@ -1,49 +1,104 @@
+using System.Linq.Expressions;
+
+using Beatport2Rss.Application.Interfaces.Models.Subscriptions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.ReadModels.Subscriptions;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
-
-using Microsoft.EntityFrameworkCore;
+using Beatport2Rss.Infrastructure.QueryModels;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubscriptionQueryRepository(
-    IQueryable<Subscription> subscriptions,
-    IQueryable<Tag> tags) :
+    IQueryable<SubscriptionQueryModel> subscriptionQueryModels) :
+    QueryRepository<SubscriptionQueryModel, SubscriptionId>(subscriptionQueryModels),
     ISubscriptionQueryRepository
 {
     public Task<bool> ExistsAsync(Slug slug, CancellationToken cancellationToken = default) =>
-        subscriptions.AnyAsync(s => s.Slug == slug, cancellationToken);
+        base.ExistsAsync(
+            subscriptionQueryModel => subscriptionQueryModel.Slug == slug,
+            cancellationToken);
 
     public Task<SubscriptionId> LoadSubscriptionIdAsync(Slug slug, CancellationToken cancellationToken = default) =>
-        subscriptions
-            .Where(s => s.Slug == slug)
-            .Select(s => s.Id)
-            .SingleAsync(cancellationToken);
+        LoadAsync(
+            subscriptionQueryModel => subscriptionQueryModel.Slug == slug,
+            subscriptionQueryModel => subscriptionQueryModel.Id,
+            cancellationToken);
 
-    public Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(Slug slug, UserId userId, CancellationToken cancellationToken = default) =>
-        (
-            from subscription in subscriptions
-            where subscription.Slug == slug
-            select new SubscriptionDetailsReadModel(
-                subscription.Id,
-                subscription.Name,
-                subscription.Slug,
-                subscription.BeatportType,
-                subscription.BeatportId,
-                subscription.BeatportSlug,
-                subscription.ImageUri,
-                (
-                    from subscriptionTag in subscription.Tags
-                    join tag in tags
-                        on subscriptionTag.TagId equals tag.Id
-                    where tag.UserId == userId
-                    select new SubscriptionTagDetailsReadModel(tag.Name, tag.Slug)
-                ),
-                subscription.CreatedAt,
-                subscription.RefreshedAt)
-        )
-        .SingleAsync(cancellationToken);
+    public async Task<IHaveSubscriptionDetails> LoadWithUserTagsAsync(
+        Slug slug,
+        UserId userId,
+        CancellationToken cancellationToken = default)
+    {
+        var subscription = await LoadAsync(
+            subscriptionQueryModel => subscriptionQueryModel.Slug == slug,
+            SubscriptionDetailsProjection.Selector,
+            cancellationToken);
+
+        var tags = subscription.Tags
+            .Where(tagPayload => tagPayload.UserId == userId.Value)
+            .Select(tagPayload =>
+                new SubscriptionTagDetails(
+                    TagName.Create(tagPayload.Name),
+                    Slug.Create(tagPayload.Slug)))
+            .Cast<IHaveSubscriptionTagDetails>()
+            .ToArray();
+
+        return new SubscriptionDetails(
+            subscription.Id,
+            subscription.Name,
+            subscription.Slug,
+            subscription.BeatportType,
+            subscription.BeatportId,
+            subscription.BeatportSlug,
+            subscription.ImageUri,
+            tags,
+            subscription.CreatedAt,
+            subscription.RefreshedAt);
+    }
+
+    private sealed record SubscriptionDetailsProjection(
+        SubscriptionId Id,
+        SubscriptionName Name,
+        Slug Slug,
+        BeatportSubscriptionType BeatportType,
+        BeatportId BeatportId,
+        BeatportSlug BeatportSlug,
+        Uri ImageUri,
+        IReadOnlyCollection<SubscriptionTagQueryModel> Tags,
+        DateTimeOffset? CreatedAt,
+        DateTimeOffset? RefreshedAt)
+    {
+        public static Expression<Func<SubscriptionQueryModel, SubscriptionDetailsProjection>> Selector =>
+            subscriptionQueryModel => new SubscriptionDetailsProjection(
+                subscriptionQueryModel.Id,
+                subscriptionQueryModel.Name,
+                subscriptionQueryModel.Slug,
+                subscriptionQueryModel.BeatportType,
+                subscriptionQueryModel.BeatportId,
+                subscriptionQueryModel.BeatportSlug,
+                subscriptionQueryModel.ImageUri,
+                subscriptionQueryModel.Tags,
+                subscriptionQueryModel.CreatedAt,
+                subscriptionQueryModel.RefreshedAt);
+    }
+
+    private sealed record SubscriptionDetails(
+        SubscriptionId Id,
+        SubscriptionName Name,
+        Slug Slug,
+        BeatportSubscriptionType BeatportType,
+        BeatportId BeatportId,
+        BeatportSlug BeatportSlug,
+        Uri ImageUri,
+        IEnumerable<IHaveSubscriptionTagDetails> Tags,
+        DateTimeOffset? CreatedAt,
+        DateTimeOffset? RefreshedAt) :
+        IHaveSubscriptionDetails;
+
+    private sealed record SubscriptionTagDetails(
+        TagName Name,
+        Slug Slug) :
+        IHaveSubscriptionTagDetails;
 }

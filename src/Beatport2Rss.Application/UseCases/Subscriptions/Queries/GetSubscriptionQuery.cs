@@ -36,16 +36,16 @@ internal sealed class GetSubscriptionQueryHandler(
         GetSubscriptionQuery query,
         CancellationToken cancellationToken)
     {
-        var readModel = await subscriptionQueryRepository.LoadWithUserTagsAsync(query.SubscriptionSlug, query.UserId, cancellationToken);
+        var subscriptionDetails = await subscriptionQueryRepository.LoadWithUserTagsAsync(query.SubscriptionSlug, query.UserId, cancellationToken);
 
         return new SubscriptionDto(
-            readModel.Id,
-            readModel.Name,
-            readModel.Slug,
-            beatportUriBuilder.Build(readModel.BeatportType, readModel.BeatportId, readModel.BeatportSlug),
-            readModel.ImageUri,
-            readModel.Tags.Select(t => new SubscriptionTagDto(t.Name, t.Slug)),
-            readModel.CreatedAt,
-            readModel.RefreshedAt);
+            subscriptionDetails.Id,
+            subscriptionDetails.Name,
+            subscriptionDetails.Slug,
+            beatportUriBuilder.Build(subscriptionDetails.BeatportType, subscriptionDetails.BeatportId, subscriptionDetails.BeatportSlug),
+            subscriptionDetails.ImageUri,
+            subscriptionDetails.Tags.Select(subscriptionTagDetails => new SubscriptionTagDto(subscriptionTagDetails.Name, subscriptionTagDetails.Slug)),
+            subscriptionDetails.CreatedAt,
+            subscriptionDetails.RefreshedAt);
     }
 }

@@ -31,6 +31,7 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
 
     public DbSet<FeedQueryModel> FeedQueryModels => this.Set<FeedQueryModel>();
     public DbSet<SessionQueryModel> SessionQueryModels => this.Set<SessionQueryModel>();
+    public DbSet<SubscriptionQueryModel> SubscriptionQueryModels => this.Set<SubscriptionQueryModel>();
     public DbSet<TagQueryModel> TagQueryModels => this.Set<TagQueryModel>();
     public DbSet<UserQueryModel> UserQueryModels => this.Set<UserQueryModel>();
 
