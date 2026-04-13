@@ -17,7 +17,7 @@ internal sealed class DeleteSessionsCommandHandler(
 {
     public async ValueTask<Result> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
     {
-        await sessionCommandRepository.DeleteAsync(s => s.UserId == command.UserId, cancellationToken);
+        await sessionCommandRepository.DeleteAsync(command.UserId, cancellationToken);
 
         return Result.Ok();
     }

@@ -5,8 +5,7 @@ using Beatport2Rss.Domain.Users;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
-public interface ISubscriptionQueryRepository :
-    IQueryRepository
+public interface ISubscriptionQueryRepository
 {
     Task<bool> ExistsAsync(Slug slug, CancellationToken cancellationToken = default);
 

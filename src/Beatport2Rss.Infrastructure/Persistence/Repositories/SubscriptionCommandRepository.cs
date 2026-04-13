@@ -12,10 +12,22 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
 {
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
 
+    public Task<bool> ExistsAsync(
+        BeatportSubscriptionType beatportType,
+        BeatportId beatportId,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            subscription =>
+                subscription.BeatportType == beatportType &&
+                subscription.BeatportId == beatportId,
+            cancellationToken);
+
     public Task<Subscription> LoadWithTagsAsync(
         Slug slug,
         CancellationToken cancellationToken = default) =>
         _subscriptions
-            .Include(s => s.Tags)
-            .SingleAsync(s => s.Slug == slug, cancellationToken);
+            .Include(subscription => subscription.Tags)
+            .SingleAsync(
+                subscription => subscription.Slug == slug,
+                cancellationToken);
 }

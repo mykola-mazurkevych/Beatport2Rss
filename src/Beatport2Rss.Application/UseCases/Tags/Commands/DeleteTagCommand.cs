@@ -24,7 +24,7 @@ internal sealed class DeleteTagCommandHandler(
         DeleteTagCommand command,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.TagSlug, cancellationToken);
+        var tag = await tagCommandRepository.LoadAsync(command.UserId, command.TagSlug, cancellationToken);
 
         tagCommandRepository.Delete(tag);
         await unitOfWork.SaveChangesAsync(cancellationToken);

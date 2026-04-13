@@ -46,7 +46,7 @@ internal sealed class RefreshBeatportAccessTokenCommandHandler(
             beatportAccessToken,
             clock.UtcNow.AddSeconds(expiresIn));
 
-        await tokenCommandRepository.DeleteAsync(_ => true, cancellationToken);
+        await tokenCommandRepository.DeleteAllAsync(cancellationToken);
         await tokenCommandRepository.AddAsync(token, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -42,12 +42,12 @@ internal sealed class UpdateTagNameCommandHandler(
         UpdateTagNameCommand command,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.LoadAsync(t => t.UserId == command.UserId && t.Slug == command.TagSlug, cancellationToken);
+        var tag = await tagCommandRepository.LoadAsync(command.UserId, command.TagSlug, cancellationToken);
 
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);
 
-        if (await tagCommandRepository.ExistsAsync(t => t.UserId == command.UserId && t.Name == tagName && t.Id != tag.Id, cancellationToken))
+        if (await tagCommandRepository.ExistsExceptAsync(command.UserId, tagName, tag.Id, cancellationToken))
         {
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }

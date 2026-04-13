@@ -1,5 +1,4 @@
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Misc;
 
 using FluentResults;
 
@@ -11,7 +10,6 @@ public sealed record DeleteExpiredSessionsCommand :
     ICommand<Result>;
 
 internal sealed class DeleteExpiredSessionsCommandHandler(
-    IClock clock,
     ISessionCommandRepository sessionCommandRepository) :
     ICommandHandler<DeleteExpiredSessionsCommand, Result>
 {
@@ -19,7 +17,7 @@ internal sealed class DeleteExpiredSessionsCommandHandler(
         DeleteExpiredSessionsCommand command,
         CancellationToken cancellationToken = default)
     {
-        await sessionCommandRepository.ExecuteDeleteAsync(s => s.RefreshTokenExpiresAt < clock.UtcNow, cancellationToken);
+        await sessionCommandRepository.DeleteExpiredAsync(cancellationToken);
 
         return Result.Ok();
     }

@@ -23,7 +23,6 @@ internal sealed class DeleteSessionCommandHandler(
         CancellationToken cancellationToken = default)
     {
         var session = await sessionCommandRepository.FindAsync(command.SessionId, cancellationToken);
-
         if (session is null)
         {
             return Result.NotFound("Session not found.");

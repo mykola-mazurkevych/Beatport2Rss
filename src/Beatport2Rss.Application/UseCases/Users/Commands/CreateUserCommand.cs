@@ -47,10 +47,7 @@ internal sealed class CreateUserCommandHandler(
     {
         var emailAddress = EmailAddress.Create(command.EmailAddress);
 
-        var exists = await userCommandRepository.ExistsAsync(
-            u => u.EmailAddress == emailAddress,
-            cancellationToken);
-        if (exists)
+        if (await userCommandRepository.ExistsAsync(emailAddress, cancellationToken))
         {
             return Result.Conflict($"Email address '{emailAddress}' already taken.");
         }

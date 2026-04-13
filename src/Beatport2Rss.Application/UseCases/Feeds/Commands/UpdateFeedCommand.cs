@@ -43,12 +43,14 @@ internal sealed class UpdateFeedCommandHandler(
         UpdateFeedCommand command,
         CancellationToken cancellationToken)
     {
-        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.FeedSlug, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(command.UserId, command.FeedSlug, cancellationToken);
 
         var feedName = FeedName.Create(command.Name);
-        var slug = command.UpdateSlug ? slugGenerator.Generate(feedName.Value) : feed.Slug;
+        var slug = command.UpdateSlug
+            ? slugGenerator.Generate(feedName.Value)
+            : feed.Slug;
 
-        if (await feedCommandRepository.ExistsAsync(f => f.UserId == command.UserId && f.Name == feedName && f.Id != feed.Id, cancellationToken))
+        if (await feedCommandRepository.ExistsExceptAsync(command.UserId, feedName, feed.Id, cancellationToken))
         {
             return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }

@@ -25,7 +25,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
         UpdateFeedStatusCommand command,
         CancellationToken cancellationToken)
     {
-        var feed = await feedCommandRepository.LoadAsync(f => f.UserId == command.UserId && f.Slug == command.FeedSlug, cancellationToken);
+        var feed = await feedCommandRepository.LoadAsync(command.UserId, command.FeedSlug, cancellationToken);
 
         feed.UpdateStatus(command.IsActive);
 

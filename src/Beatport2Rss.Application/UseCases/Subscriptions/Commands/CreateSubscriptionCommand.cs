@@ -45,7 +45,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         CreateSubscriptionCommand command,
         CancellationToken cancellationToken)
     {
-        if (await subscriptionCommandRepository.ExistsAsync(s => s.BeatportType == command.BeatportType && s.BeatportId == command.BeatportId, cancellationToken))
+        if (await subscriptionCommandRepository.ExistsAsync(command.BeatportType, command.BeatportId, cancellationToken))
         {
             return Result.Conflict($"{command.BeatportType} already exists.");
         }

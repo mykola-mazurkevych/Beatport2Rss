@@ -45,7 +45,7 @@ internal sealed class CreateTagCommandHandler(
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);
 
-        if (await tagCommandRepository.ExistsAsync(t => t.UserId == command.UserId && t.Name == tagName, cancellationToken))
+        if (await tagCommandRepository.ExistsAsync(command.UserId, tagName, cancellationToken))
         {
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }

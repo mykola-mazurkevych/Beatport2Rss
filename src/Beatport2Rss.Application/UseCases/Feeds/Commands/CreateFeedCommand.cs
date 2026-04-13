@@ -46,7 +46,7 @@ internal sealed class CreateFeedCommandHandler(
         var feedName = FeedName.Create(command.Name);
         var slug = slugGenerator.Generate(feedName.Value);
 
-        if (await feedCommandRepository.ExistsAsync(f => f.UserId == command.UserId && f.Name == feedName, cancellationToken))
+        if (await feedCommandRepository.ExistsAsync(command.UserId, feedName, cancellationToken))
         {
             return Result.Conflict($"Feed name '{feedName}' is already taken.");
         }

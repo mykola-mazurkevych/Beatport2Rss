@@ -13,12 +13,52 @@ internal sealed class FeedCommandRepository(DbSet<Feed> feeds) :
 {
     private readonly DbSet<Feed> _feeds = feeds;
 
-    public Task<Feed> LoadWithSubscriptionsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        FeedName feedName,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            feed =>
+                feed.UserId == userId &&
+                feed.Name == feedName,
+            cancellationToken);
+
+    public Task<bool> ExistsExceptAsync(
+        UserId userId,
+        FeedName feedName,
+        FeedId exceptFeedId,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            feed =>
+                feed.UserId == userId &&
+                feed.Name == feedName &&
+                feed.Id != exceptFeedId,
+            cancellationToken);
+
+    public Task<Feed> LoadAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
+        LoadAsync(
+            feed =>
+                feed.UserId == userId &&
+                feed.Slug == slug,
+            cancellationToken);
+
+    public Task<Feed> LoadWithSubscriptionsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
         _feeds
-            .Include(f => f.Subscriptions)
+            .Include(feed => feed.Subscriptions)
             .SingleAsync(
-                f =>
-                    f.UserId == userId &&
-                    f.Slug == slug,
+                feed =>
+                    feed.UserId == userId &&
+                    feed.Slug == slug,
                 cancellationToken);
+
+    Task IFeedCommandRepository.AddAsync(
+        Feed feed,
+        CancellationToken cancellationToken) =>
+        AddAsync(feed, cancellationToken);
 }
