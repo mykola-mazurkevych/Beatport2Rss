@@ -14,5 +14,5 @@ internal sealed record SubscriptionQueryModel(
     BeatportSlug BeatportSlug,
     Uri ImageUri,
     DateTimeOffset? RefreshedAt,
-    IReadOnlyCollection<SubscriptionTagQueryModel> Tags) :
+    IReadOnlyList<SubscriptionTagQueryModel> Tags) :
     IQueryModel<SubscriptionId>;

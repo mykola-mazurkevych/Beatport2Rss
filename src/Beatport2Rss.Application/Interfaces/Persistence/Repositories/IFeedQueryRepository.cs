@@ -1,4 +1,4 @@
-using Beatport2Rss.Application.Interfaces.Models.Feeds;
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
@@ -9,6 +9,13 @@ public interface IFeedQueryRepository
 {
     IQueryable<Feed> Feeds { get; } // TODO: Delete
 
-    Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
-    Task<IHaveFeedDetails> LoadFeedDetailsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default);
+    Task<bool> ExistsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default);
+
+    Task<FeedDetailsReadModel> LoadFeedDetailsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default);
 }

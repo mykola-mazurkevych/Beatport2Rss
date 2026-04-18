@@ -20,14 +20,13 @@ internal sealed class SubscriptionQueryModelConfiguration : IEntityTypeConfigura
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.CreatedAt);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Name);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Slug);
-        builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportType).IsEnum();
+        builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportType)
+            .IsEnum();
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportId);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportSlug);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.ImageUri);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.RefreshedAt);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Tags)
-            .HasConversion(
-                new SubscriptionTagQueryModelsValueConverter(),
-                new SubscriptionTagQueryModelsValueComparer());
+            .HasConversion<SubscriptionTagQueryModelsValueConverter, SubscriptionTagQueryModelsValueComparer>();
     }
 }

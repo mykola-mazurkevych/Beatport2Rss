@@ -1,6 +1,4 @@
-using System.Linq.Expressions;
-
-using Beatport2Rss.Application.Interfaces.Models.Sessions;
+using Beatport2Rss.Application.ReadModels.Sessions;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Sessions;
@@ -28,7 +26,7 @@ internal sealed class SessionQueryRepository(
                 sessionQueryModel.Id == sessionId,
             cancellationToken);
 
-    public async Task<IHaveSessionDetails> LoadSessionDetailsAsync(
+    public async Task<SessionDetailsReadModel> LoadSessionDetailsAsync(
         UserId userId,
         SessionId sessionId,
         CancellationToken cancellationToken = default) =>
@@ -36,22 +34,7 @@ internal sealed class SessionQueryRepository(
             sessionQueryModel =>
                 sessionQueryModel.UserId == userId &&
                 sessionQueryModel.Id == sessionId,
-            SessionDetails.CreateSelector(clock.UtcNow),
-            cancellationToken);
-
-    private sealed record SessionDetails(
-        SessionId Id,
-        DateTimeOffset CreatedAt,
-        EmailAddress EmailAddress,
-        string? FirstName,
-        string? LastName,
-        string? UserAgent,
-        string? IpAddress,
-        bool IsExpired) :
-        IHaveSessionDetails
-    {
-        public static Expression<Func<SessionQueryModel, SessionDetails>> CreateSelector(DateTimeOffset now) =>
-            sessionQueryModel => new SessionDetails(
+            sessionQueryModel => new SessionDetailsReadModel(
                 sessionQueryModel.Id,
                 sessionQueryModel.CreatedAt,
                 sessionQueryModel.EmailAddress,
@@ -59,6 +42,6 @@ internal sealed class SessionQueryRepository(
                 sessionQueryModel.LastName,
                 sessionQueryModel.UserAgent,
                 sessionQueryModel.IpAddress,
-                sessionQueryModel.RefreshTokenExpiresAt < now);
-    }
+                sessionQueryModel.RefreshTokenExpiresAt < clock.UtcNow),
+            cancellationToken);
 }

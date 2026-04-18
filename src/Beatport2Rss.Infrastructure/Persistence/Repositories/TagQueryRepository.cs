@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-using Beatport2Rss.Application.Interfaces.Models.Tags;
+﻿using Beatport2Rss.Application.ReadModels.Tags;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tags;
@@ -17,14 +15,20 @@ internal sealed class TagQueryRepository(
 {
     public IQueryable<Tag> Tags => tags;
 
-    public Task<bool> ExistsAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
-        base.ExistsAsync(
+    public Task<bool> ExistsAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
             tagQueryModel =>
                 tagQueryModel.UserId == userId &&
                 tagQueryModel.Slug == slug,
             cancellationToken);
 
-    public Task<TagId> LoadTagIdAsync(UserId userId, Slug slug, CancellationToken cancellationToken = default) =>
+    public Task<TagId> LoadTagIdAsync(
+        UserId userId,
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
         LoadAsync(
             tagQueryModel =>
                 tagQueryModel.UserId == userId &&
@@ -32,7 +36,7 @@ internal sealed class TagQueryRepository(
             tagQueryModel => tagQueryModel.Id,
             cancellationToken);
 
-    public async Task<IHaveTagDetails> LoadTagDetailsAsync(
+    public async Task<TagDetailsReadModel> LoadTagDetailsAsync(
         UserId userId,
         Slug slug,
         CancellationToken cancellationToken = default) =>
@@ -40,21 +44,10 @@ internal sealed class TagQueryRepository(
             tagQueryModel =>
                 tagQueryModel.UserId == userId &&
                 tagQueryModel.Slug == slug,
-            TagDetails.Selector,
-            cancellationToken);
-
-    private sealed record TagDetails(
-        TagId Id,
-        TagName Name,
-        Slug Slug,
-        DateTimeOffset CreatedAt) :
-        IHaveTagDetails
-    {
-        public static Expression<Func<TagQueryModel, TagDetails>> Selector =>
-            tagQueryModel => new TagDetails(
+            tagQueryModel => new TagDetailsReadModel(
                 tagQueryModel.Id,
                 tagQueryModel.Name,
                 tagQueryModel.Slug,
-                tagQueryModel.CreatedAt);
-    }
+                tagQueryModel.CreatedAt),
+            cancellationToken);
 }

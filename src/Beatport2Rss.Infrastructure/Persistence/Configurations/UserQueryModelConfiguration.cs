@@ -20,7 +20,8 @@ internal sealed class UserQueryModelConfiguration : IEntityTypeConfiguration<Use
         builder.Property(userQueryModel => userQueryModel.PasswordHash);
         builder.Property(userQueryModel => userQueryModel.FirstName);
         builder.Property(userQueryModel => userQueryModel.LastName);
-        builder.Property(userQueryModel => userQueryModel.Status).IsEnum();
+        builder.Property(userQueryModel => userQueryModel.Status)
+            .IsEnum();
         builder.Property(userQueryModel => userQueryModel.IsActive);
         builder.Property(userQueryModel => userQueryModel.FeedsCount);
         builder.Property(userQueryModel => userQueryModel.TagsCount);

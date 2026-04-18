@@ -1,6 +1,4 @@
-using System.Linq.Expressions;
-
-using Beatport2Rss.Application.Interfaces.Models.Feeds;
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Feeds;
@@ -27,7 +25,7 @@ internal sealed class FeedQueryRepository(
                 feedQueryModel.Slug == slug,
             cancellationToken);
 
-    public async Task<IHaveFeedDetails> LoadFeedDetailsAsync(
+    public async Task<FeedDetailsReadModel> LoadFeedDetailsAsync(
         UserId userId,
         Slug slug,
         CancellationToken cancellationToken = default) =>
@@ -35,25 +33,12 @@ internal sealed class FeedQueryRepository(
             feedQueryModel =>
                 feedQueryModel.UserId == userId &&
                 feedQueryModel.Slug == slug,
-            FeedDetails.Selector,
-            cancellationToken);
-
-    private sealed record FeedDetails(
-        FeedId Id,
-        FeedName Name,
-        Slug Slug,
-        bool IsActive,
-        DateTimeOffset CreatedAt,
-        int SubscriptionsCount) :
-        IHaveFeedDetails
-    {
-        public static Expression<Func<FeedQueryModel, FeedDetails>> Selector =>
-            feedQueryModel => new FeedDetails(
+            feedQueryModel => new FeedDetailsReadModel(
                 feedQueryModel.Id,
                 feedQueryModel.Name,
                 feedQueryModel.Slug,
                 feedQueryModel.IsActive,
                 feedQueryModel.CreatedAt,
-                feedQueryModel.SubscriptionsCount);
-    }
+                feedQueryModel.SubscriptionsCount),
+            cancellationToken);
 }
