@@ -3,6 +3,7 @@ using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Application.Querying.Paging;
+using Beatport2Rss.Application.ReadModels.Feeds;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Users;
 
@@ -39,12 +40,21 @@ internal sealed class ListFeedsQueryHandler(
         ListFeedsQuery query,
         CancellationToken cancellationToken)
     {
-        var page = await pageBuilder.BuildAsync<Feed, FeedId, FeedPageDto>(
-            feedQueryRepository.Feeds.Where(f => f.UserId == query.UserId),
+        var page = await pageBuilder.BuildAsync<FeedPageReadModel, FeedId>(
+            feedQueryRepository.GetFeedPageReadModelsAsQueryable(query.UserId),
             query.Pagination,
-            FeedPageDto.Create,
             cancellationToken);
 
-        return page;
+        var feedPageDtos = page.Dtos
+            .Select(readModel => new FeedPageDto(
+                readModel.Id,
+                readModel.Name,
+                readModel.Slug,
+                readModel.IsActive,
+                readModel.CreatedAt,
+                readModel.SubscriptionsCount))
+            .ToList();
+
+        return new Page<FeedPageDto>(feedPageDtos, page.Info);
     }
 }

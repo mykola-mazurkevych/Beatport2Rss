@@ -1,7 +1,6 @@
 // ReSharper disable NotAccessedPositionalProperty.Local
 
 using System.Globalization;
-using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -51,18 +50,19 @@ public sealed class PageBuilderTests : IAsyncLifetime
             Size,
             Next: null,
             Previous: null);
-        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+        var page = await _pageBuilder.BuildAsync<Person, PersonId>(
             _dbContext.Persons,
             pagination,
-            PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(Size, page.Dtos.Count());
-        Assert.Contains(page.Dtos, p => p.Id.Value == 1);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 2);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 3);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 4);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 5);
+        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+
+        Assert.Equal(Size, dtos.Count);
+        Assert.Contains(dtos, p => p.Id.Value == 1);
+        Assert.Contains(dtos, p => p.Id.Value == 2);
+        Assert.Contains(dtos, p => p.Id.Value == 3);
+        Assert.Contains(dtos, p => p.Id.Value == 4);
+        Assert.Contains(dtos, p => p.Id.Value == 5);
         Assert.Equal(Size, page.Info.Size);
         Assert.Equal(Size, page.Info.ItemsCount);
         Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
@@ -81,18 +81,19 @@ public sealed class PageBuilderTests : IAsyncLifetime
             Size,
             Next: _cursorEncoder.Encode(new Cursor<PersonId>(page1LastPerson.CreatedAt, page1LastPerson.Id)),
             Previous: null);
-        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+        var page = await _pageBuilder.BuildAsync<Person, PersonId>(
             _dbContext.Persons,
             pagination,
-            PersonPageDto.FromPerson,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Size, page.Dtos.Count());
-        Assert.Contains(page.Dtos, p => p.Id.Value == 6);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 7);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 8);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 9);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 10);
+        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+
+        Assert.Equal(Size, dtos.Count);
+        Assert.Contains(dtos, p => p.Id.Value == 6);
+        Assert.Contains(dtos, p => p.Id.Value == 7);
+        Assert.Contains(dtos, p => p.Id.Value == 8);
+        Assert.Contains(dtos, p => p.Id.Value == 9);
+        Assert.Contains(dtos, p => p.Id.Value == 10);
         Assert.Equal(Size, page.Info.Size);
         Assert.Equal(Size, page.Info.ItemsCount);
         Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
@@ -114,18 +115,19 @@ public sealed class PageBuilderTests : IAsyncLifetime
             Size,
             Next: null,
             Previous: _cursorEncoder.Encode(new Cursor<PersonId>(page2FirstPerson.CreatedAt, page2FirstPerson.Id)));
-        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+        var page = await _pageBuilder.BuildAsync<Person, PersonId>(
             _dbContext.Persons,
             pagination,
-            PersonPageDto.FromPerson,
             TestContext.Current.CancellationToken);
 
-        Assert.Equal(Size, page.Dtos.Count());
-        Assert.Contains(page.Dtos, p => p.Id.Value == 1);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 2);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 3);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 4);
-        Assert.Contains(page.Dtos, p => p.Id.Value == 5);
+        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+
+        Assert.Equal(Size, dtos.Count);
+        Assert.Contains(dtos, p => p.Id.Value == 1);
+        Assert.Contains(dtos, p => p.Id.Value == 2);
+        Assert.Contains(dtos, p => p.Id.Value == 3);
+        Assert.Contains(dtos, p => p.Id.Value == 4);
+        Assert.Contains(dtos, p => p.Id.Value == 5);
         Assert.Equal(Size, page.Info.Size);
         Assert.Equal(Size, page.Info.ItemsCount);
         Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
@@ -143,18 +145,19 @@ public sealed class PageBuilderTests : IAsyncLifetime
             Size,
             Next: null,
             Previous: null);
-        var page = await _pageBuilder.BuildAsync<Person, PersonId, PersonPageDto>(
+        var page = await _pageBuilder.BuildAsync<Person, PersonId>(
             _dbContext.Persons,
             pagination,
-            PersonPageDto.FromPerson,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        Assert.Equal(Size, page.Dtos.Count());
-        Assert.Contains(page.Dtos, p => p.Id.Value == 14); // Amelia
-        Assert.Contains(page.Dtos, p => p.Id.Value == 1); // Andrew
-        Assert.Contains(page.Dtos, p => p.Id.Value == 8); // Ava
-        Assert.Contains(page.Dtos, p => p.Id.Value == 17); // Benjamin
-        Assert.Contains(page.Dtos, p => p.Id.Value == 16); // Charlotte
+        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+
+        Assert.Equal(Size, dtos.Count);
+        Assert.Contains(dtos, p => p.Id.Value == 14); // Amelia
+        Assert.Contains(dtos, p => p.Id.Value == 1); // Andrew
+        Assert.Contains(dtos, p => p.Id.Value == 8); // Ava
+        Assert.Contains(dtos, p => p.Id.Value == 17); // Benjamin
+        Assert.Contains(dtos, p => p.Id.Value == 16); // Charlotte
         Assert.Equal(Size, page.Info.Size);
         Assert.Equal(Size, page.Info.ItemsCount);
         Assert.Equal(_dbContext.Persons.Count(), page.Info.TotalItemsCount);
@@ -236,21 +239,14 @@ public sealed class PageBuilderTests : IAsyncLifetime
         string Name,
         int Age,
         DateTimeOffset CreatedAt) :
-        IEntity<PersonId>;
+        IPaginable<PersonId>;
 
     private sealed record PersonPageDto(
         PersonId Id,
         string Name,
         int Age,
         DateTimeOffset CreatedAt) :
-        IPageDto<PersonId>
-    {
-        public static Expression<Func<Person, PersonPageDto>> FromPerson =>
-            person => new(person.Id,
-                person.Name,
-                person.Age,
-                person.CreatedAt);
-    }
+        IPaginable<PersonId>;
 
     private sealed class TestDbContext(
         DbContextOptions<TestDbContext> options) :

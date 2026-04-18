@@ -7,7 +7,7 @@ namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface ITagQueryRepository
 {
-    IQueryable<Tag> Tags { get; } // TODO: Delete
+    IQueryable<TagPageReadModel> GetTagPageReadModelsAsQueryable(UserId userId);
 
     Task<bool> ExistsAsync(
         UserId userId,

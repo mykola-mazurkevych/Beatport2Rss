@@ -13,7 +13,16 @@ internal sealed class FeedQueryRepository(
     QueryRepository<FeedQueryModel, FeedId>(feedQueryModels),
     IFeedQueryRepository
 {
-    public IQueryable<Feed> Feeds => feeds;
+    public IQueryable<FeedPageReadModel> GetFeedPageReadModelsAsQueryable(UserId userId) =>
+        feeds
+            .Where(feed => feed.UserId == userId)
+            .Select(feed => new FeedPageReadModel(
+                feed.Id,
+                feed.CreatedAt,
+                feed.Name,
+                feed.Slug,
+                feed.IsActive,
+                feed.Subscriptions.Count));
 
     public Task<bool> ExistsAsync(
         UserId userId,

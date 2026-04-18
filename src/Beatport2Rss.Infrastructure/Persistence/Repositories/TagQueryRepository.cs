@@ -13,7 +13,14 @@ internal sealed class TagQueryRepository(
     QueryRepository<TagQueryModel, TagId>(tagQueryModels),
     ITagQueryRepository
 {
-    public IQueryable<Tag> Tags => tags;
+    public IQueryable<TagPageReadModel> GetTagPageReadModelsAsQueryable(UserId userId) =>
+        tags
+            .Where(tag => tag.UserId == userId)
+            .Select(tag => new TagPageReadModel(
+                tag.Id,
+                tag.CreatedAt,
+                tag.Name,
+                tag.Slug));
 
     public Task<bool> ExistsAsync(
         UserId userId,

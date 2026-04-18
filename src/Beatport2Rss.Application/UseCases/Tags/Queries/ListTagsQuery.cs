@@ -3,6 +3,7 @@ using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Application.Querying.Paging;
+using Beatport2Rss.Application.ReadModels.Tags;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Users;
 
@@ -30,7 +31,7 @@ internal sealed class ListTagsQueryValidator :
     // }
 }
 
-internal sealed class ListFeedsQueryHandler(
+internal sealed class ListTagsQueryHandler(
     ITagQueryRepository tagQueryRepository,
     IPageBuilder pageBuilder) :
     IQueryHandler<ListTagsQuery, Result<Page<TagPageDto>>>
@@ -39,12 +40,19 @@ internal sealed class ListFeedsQueryHandler(
         ListTagsQuery query,
         CancellationToken cancellationToken)
     {
-        var page = await pageBuilder.BuildAsync<Tag, TagId, TagPageDto>(
-            tagQueryRepository.Tags.Where(t => t.UserId == query.UserId),
+        var page = await pageBuilder.BuildAsync<TagPageReadModel, TagId>(
+            tagQueryRepository.GetTagPageReadModelsAsQueryable(query.UserId),
             query.Pagination,
-            TagPageDto.FromTag,
             cancellationToken);
 
-        return page;
+        var tagPageDtos = page.Dtos
+            .Select(readModel => new TagPageDto(
+                readModel.Id,
+                readModel.Name,
+                readModel.Slug,
+                readModel.CreatedAt))
+            .ToList();
+
+        return new Page<TagPageDto>(tagPageDtos, page.Info);
     }
 }
