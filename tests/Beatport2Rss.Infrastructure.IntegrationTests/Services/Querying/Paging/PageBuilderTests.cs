@@ -55,7 +55,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
             pagination,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+        var dtos = page.Dtos
+            .Select(person => new PersonPaginableDto(
+                person.Id,
+                person.Name,
+                person.Age,
+                person.CreatedAt))
+            .ToList();
 
         Assert.Equal(Size, dtos.Count);
         Assert.Contains(dtos, p => p.Id.Value == 1);
@@ -86,7 +92,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
             pagination,
             TestContext.Current.CancellationToken);
 
-        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+        var dtos = page.Dtos
+            .Select(person => new PersonPaginableDto(
+                person.Id,
+                person.Name,
+                person.Age,
+                person.CreatedAt))
+            .ToList();
 
         Assert.Equal(Size, dtos.Count);
         Assert.Contains(dtos, p => p.Id.Value == 6);
@@ -120,7 +132,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
             pagination,
             TestContext.Current.CancellationToken);
 
-        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+        var dtos = page.Dtos
+            .Select(person => new PersonPaginableDto(
+                person.Id,
+                person.Name,
+                person.Age,
+                person.CreatedAt))
+            .ToList();
 
         Assert.Equal(Size, dtos.Count);
         Assert.Contains(dtos, p => p.Id.Value == 1);
@@ -150,7 +168,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
             pagination,
             cancellationToken: TestContext.Current.CancellationToken);
 
-        var dtos = page.Dtos.Select(person => new PersonPageDto(person.Id, person.Name, person.Age, person.CreatedAt)).ToList();
+        var dtos = page.Dtos
+            .Select(person => new PersonPaginableDto(
+                person.Id,
+                person.Name,
+                person.Age,
+                person.CreatedAt))
+            .ToList();
 
         Assert.Equal(Size, dtos.Count);
         Assert.Contains(dtos, p => p.Id.Value == 14); // Amelia
@@ -241,7 +265,7 @@ public sealed class PageBuilderTests : IAsyncLifetime
         DateTimeOffset CreatedAt) :
         IPaginable<PersonId>;
 
-    private sealed record PersonPageDto(
+    private sealed record PersonPaginableDto(
         PersonId Id,
         string Name,
         int Age,

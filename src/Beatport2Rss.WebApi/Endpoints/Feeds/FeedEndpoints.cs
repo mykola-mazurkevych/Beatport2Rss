@@ -28,7 +28,7 @@ internal static class FeedEndpoints
                 .WithName(FeedEndpointNames.List)
                 .WithDescription("List of feeds")
                 .WithSummary("List")
-                .Produces<IEnumerable<FeedPageResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<IEnumerable<FeedPaginableResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 

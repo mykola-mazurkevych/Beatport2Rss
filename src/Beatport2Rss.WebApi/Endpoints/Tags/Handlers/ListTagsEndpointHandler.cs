@@ -28,7 +28,7 @@ internal static class ListTagsEndpointHandler
             page =>
             {
                 page.Info.ToHeaders(context);
-                return Results.Ok(page.Dtos.Select(TagPageResponse.Create));
+                return Results.Ok(page.Dtos.Select(TagPaginableResponse.Create));
             },
             context);
     }

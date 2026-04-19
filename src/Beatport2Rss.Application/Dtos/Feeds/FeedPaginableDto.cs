@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Feeds;
 
 namespace Beatport2Rss.Application.Dtos.Feeds;
 
-public sealed record FeedPageDto(
+public sealed record FeedPaginableDto(
     FeedId Id,
     FeedName Name,
     Slug Slug,

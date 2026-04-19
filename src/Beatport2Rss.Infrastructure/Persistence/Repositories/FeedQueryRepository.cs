@@ -8,21 +8,24 @@ using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class FeedQueryRepository(
-    IQueryable<Feed> feeds,
     IQueryable<FeedQueryModel> feedQueryModels) :
     QueryRepository<FeedQueryModel, FeedId>(feedQueryModels),
     IFeedQueryRepository
 {
-    public IQueryable<FeedPageReadModel> GetFeedPageReadModelsAsQueryable(UserId userId) =>
-        feeds
-            .Where(feed => feed.UserId == userId)
-            .Select(feed => new FeedPageReadModel(
-                feed.Id,
-                feed.CreatedAt,
-                feed.Name,
-                feed.Slug,
-                feed.IsActive,
-                feed.Subscriptions.Count));
+    private readonly IQueryable<FeedQueryModel> _feedQueryModels = feedQueryModels;
+
+    public IQueryable<FeedPaginableReadModel> GetFeedPaginableReadModelsAsQueryable(UserId userId) =>
+        _feedQueryModels
+            .Where(feedQueryModel => feedQueryModel.UserId == userId)
+            .Select(feedQueryModel => new FeedPaginableReadModel
+            {
+                Id = feedQueryModel.Id,
+                CreatedAt = feedQueryModel.CreatedAt,
+                Name = feedQueryModel.Name,
+                Slug = feedQueryModel.Slug,
+                IsActive = feedQueryModel.IsActive,
+                SubscriptionsCount = feedQueryModel.SubscriptionsCount
+            });
 
     public Task<bool> ExistsAsync(
         UserId userId,

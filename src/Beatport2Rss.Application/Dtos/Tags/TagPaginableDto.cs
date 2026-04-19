@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Tags;
 
 namespace Beatport2Rss.Application.Dtos.Tags;
 
-public sealed record TagPageDto(
+public sealed record TagPaginableDto(
     TagId Id,
     TagName Name,
     Slug Slug,

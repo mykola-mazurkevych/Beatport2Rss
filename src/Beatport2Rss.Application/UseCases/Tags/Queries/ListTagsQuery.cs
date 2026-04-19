@@ -18,7 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Tags.Queries;
 public sealed record ListTagsQuery(
     UserId UserId,
     Pagination Pagination) :
-    IQuery<Result<Page<TagPageDto>>>, IRequireValidation, IRequireUser;
+    IQuery<Result<Page<TagPaginableDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListTagsQueryValidator :
     AbstractValidator<ListTagsQuery>
@@ -34,25 +34,25 @@ internal sealed class ListTagsQueryValidator :
 internal sealed class ListTagsQueryHandler(
     ITagQueryRepository tagQueryRepository,
     IPageBuilder pageBuilder) :
-    IQueryHandler<ListTagsQuery, Result<Page<TagPageDto>>>
+    IQueryHandler<ListTagsQuery, Result<Page<TagPaginableDto>>>
 {
-    public async ValueTask<Result<Page<TagPageDto>>> Handle(
+    public async ValueTask<Result<Page<TagPaginableDto>>> Handle(
         ListTagsQuery query,
         CancellationToken cancellationToken)
     {
-        var page = await pageBuilder.BuildAsync<TagPageReadModel, TagId>(
-            tagQueryRepository.GetTagPageReadModelsAsQueryable(query.UserId),
+        var page = await pageBuilder.BuildAsync<TagPaginableReadModel, TagId>(
+            tagQueryRepository.GetTagPaginableReadModelsAsQueryable(query.UserId),
             query.Pagination,
             cancellationToken);
 
-        var tagPageDtos = page.Dtos
-            .Select(readModel => new TagPageDto(
-                readModel.Id,
-                readModel.Name,
-                readModel.Slug,
-                readModel.CreatedAt))
+        var tagPaginableDtos = page.Dtos
+            .Select(tagPaginableReadModel => new TagPaginableDto(
+                tagPaginableReadModel.Id,
+                tagPaginableReadModel.Name,
+                tagPaginableReadModel.Slug,
+                tagPaginableReadModel.CreatedAt))
             .ToList();
 
-        return new Page<TagPageDto>(tagPageDtos, page.Info);
+        return new Page<TagPaginableDto>(tagPaginableDtos, page.Info);
     }
 }

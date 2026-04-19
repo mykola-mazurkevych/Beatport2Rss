@@ -18,7 +18,7 @@ namespace Beatport2Rss.Application.UseCases.Feeds.Queries;
 public sealed record ListFeedsQuery(
     UserId UserId,
     Pagination Pagination) :
-    IQuery<Result<Page<FeedPageDto>>>, IRequireValidation, IRequireUser;
+    IQuery<Result<Page<FeedPaginableDto>>>, IRequireValidation, IRequireUser;
 
 internal sealed class ListFeedsQueryValidator :
     AbstractValidator<ListFeedsQuery>
@@ -34,27 +34,27 @@ internal sealed class ListFeedsQueryValidator :
 internal sealed class ListFeedsQueryHandler(
     IFeedQueryRepository feedQueryRepository,
     IPageBuilder pageBuilder) :
-    IQueryHandler<ListFeedsQuery, Result<Page<FeedPageDto>>>
+    IQueryHandler<ListFeedsQuery, Result<Page<FeedPaginableDto>>>
 {
-    public async ValueTask<Result<Page<FeedPageDto>>> Handle(
+    public async ValueTask<Result<Page<FeedPaginableDto>>> Handle(
         ListFeedsQuery query,
         CancellationToken cancellationToken)
     {
-        var page = await pageBuilder.BuildAsync<FeedPageReadModel, FeedId>(
-            feedQueryRepository.GetFeedPageReadModelsAsQueryable(query.UserId),
+        var page = await pageBuilder.BuildAsync<FeedPaginableReadModel, FeedId>(
+            feedQueryRepository.GetFeedPaginableReadModelsAsQueryable(query.UserId),
             query.Pagination,
             cancellationToken);
 
-        var feedPageDtos = page.Dtos
-            .Select(readModel => new FeedPageDto(
-                readModel.Id,
-                readModel.Name,
-                readModel.Slug,
-                readModel.IsActive,
-                readModel.CreatedAt,
-                readModel.SubscriptionsCount))
+        var feedPaginableDtos = page.Dtos
+            .Select(feedPaginableReadModel => new FeedPaginableDto(
+                feedPaginableReadModel.Id,
+                feedPaginableReadModel.Name,
+                feedPaginableReadModel.Slug,
+                feedPaginableReadModel.IsActive,
+                feedPaginableReadModel.CreatedAt,
+                feedPaginableReadModel.SubscriptionsCount))
             .ToList();
 
-        return new Page<FeedPageDto>(feedPageDtos, page.Info);
+        return new Page<FeedPaginableDto>(feedPaginableDtos, page.Info);
     }
 }

@@ -6,7 +6,7 @@ namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface IFeedQueryRepository
 {
-    IQueryable<FeedPageReadModel> GetFeedPageReadModelsAsQueryable(UserId userId);
+    IQueryable<FeedPaginableReadModel> GetFeedPaginableReadModelsAsQueryable(UserId userId);
 
     Task<bool> ExistsAsync(
         UserId userId,

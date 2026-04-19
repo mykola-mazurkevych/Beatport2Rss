@@ -8,19 +8,22 @@ using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class TagQueryRepository(
-    IQueryable<Tag> tags,
     IQueryable<TagQueryModel> tagQueryModels) :
     QueryRepository<TagQueryModel, TagId>(tagQueryModels),
     ITagQueryRepository
 {
-    public IQueryable<TagPageReadModel> GetTagPageReadModelsAsQueryable(UserId userId) =>
-        tags
-            .Where(tag => tag.UserId == userId)
-            .Select(tag => new TagPageReadModel(
-                tag.Id,
-                tag.CreatedAt,
-                tag.Name,
-                tag.Slug));
+    private readonly IQueryable<TagQueryModel> _tagQueryModels = tagQueryModels;
+
+    public IQueryable<TagPaginableReadModel> GetTagPaginableReadModelsAsQueryable(UserId userId) =>
+        _tagQueryModels
+            .Where(tagQueryModel => tagQueryModel.UserId == userId)
+            .Select(tagQueryModel => new TagPaginableReadModel
+            {
+                Id = tagQueryModel.Id,
+                CreatedAt = tagQueryModel.CreatedAt,
+                Name = tagQueryModel.Name,
+                Slug = tagQueryModel.Slug
+            });
 
     public Task<bool> ExistsAsync(
         UserId userId,

@@ -105,23 +105,18 @@ public static class ServiceCollectionExtensions
             services
                 .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds.AsNoTracking()) // TODO: Remove
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SessionQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SubscriptionQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags.AsNoTracking()) // TODO: Remove
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users.AsNoTracking()) // TODO: Remove
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().TagQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens.AsNoTracking()) // Ok for now
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().UserQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()

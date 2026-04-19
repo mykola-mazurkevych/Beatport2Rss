@@ -28,7 +28,7 @@ internal static class TagEndpoints
                 .WithName(TagEndpointNames.List)
                 .WithDescription("List tags")
                 .WithSummary("List")
-                .Produces<IEnumerable<TagPageResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<IEnumerable<TagPaginableResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 

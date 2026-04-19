@@ -28,7 +28,7 @@ internal static class ListFeedsEndpointHandler
             page =>
             {
                 page.Info.ToHeaders(context);
-                return Results.Ok(page.Dtos.Select(FeedPageResponse.Create));
+                return Results.Ok(page.Dtos.Select(FeedPaginableResponse.Create));
             },
             context);
     }

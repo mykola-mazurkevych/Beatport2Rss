@@ -9,13 +9,10 @@ namespace Beatport2Rss.Infrastructure.Persistence.Repositories;
 
 internal sealed class SessionQueryRepository(
     IClock clock,
-    IQueryable<Session> sessions,
     IQueryable<SessionQueryModel> sessionQueryModels) :
     QueryRepository<SessionQueryModel, SessionId>(sessionQueryModels),
     ISessionQueryRepository
 {
-    public IQueryable<Session> Sessions => sessions;
-
     public Task<bool> ExistsAsync(
         UserId userId,
         SessionId sessionId,
