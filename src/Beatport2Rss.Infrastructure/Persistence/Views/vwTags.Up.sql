@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW "vwTags" AS
+CREATE VIEW "vwTags" AS
 SELECT
     T."Id" AS "Id",
     T."CreatedAt" AS "CreatedAt",

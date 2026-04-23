@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class ReleaseConfiguration : IEntityTypeConfiguration<Release>
+internal sealed class ReleaseConfiguration :
+    IEntityTypeConfiguration<Release>
 {
     public void Configure(EntityTypeBuilder<Release> builder)
     {

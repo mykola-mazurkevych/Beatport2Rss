@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class SessionQueryModelConfiguration : IEntityTypeConfiguration<SessionQueryModel>
+internal sealed class SessionQueryModelConfiguration :
+    IEntityTypeConfiguration<SessionQueryModel>
 {
     public void Configure(EntityTypeBuilder<SessionQueryModel> builder)
     {
         builder.ToView("vwSessions");
 
-        builder.HasNoKey();
+        builder.HasKey(sessionQueryModel => sessionQueryModel.Id);
 
         builder.Property(sessionQueryModel => sessionQueryModel.Id);
         builder.Property(sessionQueryModel => sessionQueryModel.CreatedAt);

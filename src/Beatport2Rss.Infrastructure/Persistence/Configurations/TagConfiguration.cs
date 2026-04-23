@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
+internal sealed class TagConfiguration :
+    IEntityTypeConfiguration<Tag>
 {
     public void Configure(EntityTypeBuilder<Tag> builder)
     {

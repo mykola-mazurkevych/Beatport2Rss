@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class TokenConfiguration : IEntityTypeConfiguration<Token>
+internal sealed class TokenConfiguration :
+    IEntityTypeConfiguration<Token>
 {
     public void Configure(EntityTypeBuilder<Token> builder)
     {

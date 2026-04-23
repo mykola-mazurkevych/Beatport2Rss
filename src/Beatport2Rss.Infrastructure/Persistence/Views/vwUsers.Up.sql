@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW "vwUsers" AS
+CREATE VIEW "vwUsers" AS
 SELECT
     U."Id" AS "Id",
     U."CreatedAt" AS "CreatedAt",

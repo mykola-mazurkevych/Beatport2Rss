@@ -1,1 +1,1 @@
-DROP VIEW IF EXISTS "vwFeeds";
+DROP VIEW "vwFeeds";

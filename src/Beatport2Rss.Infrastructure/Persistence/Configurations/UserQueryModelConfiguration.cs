@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class UserQueryModelConfiguration : IEntityTypeConfiguration<UserQueryModel>
+internal sealed class UserQueryModelConfiguration :
+    IEntityTypeConfiguration<UserQueryModel>
 {
     public void Configure(EntityTypeBuilder<UserQueryModel> builder)
     {
         builder.ToView("vwUsers");
 
-        builder.HasNoKey();
+        builder.HasKey(userQueryModel => userQueryModel.Id);
 
         builder.Property(userQueryModel => userQueryModel.Id);
         builder.Property(userQueryModel => userQueryModel.CreatedAt);

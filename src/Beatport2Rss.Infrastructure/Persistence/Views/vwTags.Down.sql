@@ -1,1 +1,1 @@
-DROP VIEW IF EXISTS "vwTags";
+DROP VIEW "vwTags";

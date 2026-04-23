@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class TagQueryModelConfiguration : IEntityTypeConfiguration<TagQueryModel>
+internal sealed class TagQueryModelConfiguration :
+    IEntityTypeConfiguration<TagQueryModel>
 {
     public void Configure(EntityTypeBuilder<TagQueryModel> builder)
     {
         builder.ToView("vwTags");
 
-        builder.HasNoKey();
+        builder.HasKey(tagQueryModel => tagQueryModel.Id);
 
         builder.Property(tagQueryModel => tagQueryModel.Id);
         builder.Property(tagQueryModel => tagQueryModel.CreatedAt);

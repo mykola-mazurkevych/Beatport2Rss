@@ -1,1 +1,1 @@
-DROP VIEW IF EXISTS "vwUsers";
+DROP VIEW "vwUsers";

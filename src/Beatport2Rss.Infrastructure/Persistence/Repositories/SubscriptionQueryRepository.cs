@@ -27,32 +27,26 @@ internal sealed class SubscriptionQueryRepository(
             subscriptionQueryModel => subscriptionQueryModel.Id,
             cancellationToken);
 
-    public async Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(
+    public Task<SubscriptionDetailsReadModel> LoadWithUserTagsAsync(
         Slug slug,
         UserId userId,
-        CancellationToken cancellationToken = default)
-    {
-        var subscriptionQueryModel = await LoadAsync(
+        CancellationToken cancellationToken = default) =>
+        LoadAsync(
             subscriptionQueryModel => subscriptionQueryModel.Slug == slug,
-            subscriptionQueryModel => subscriptionQueryModel,
+            subscriptionQueryModel => new SubscriptionDetailsReadModel(
+                subscriptionQueryModel.Id,
+                subscriptionQueryModel.Name,
+                subscriptionQueryModel.Slug,
+                subscriptionQueryModel.BeatportType,
+                subscriptionQueryModel.BeatportId,
+                subscriptionQueryModel.BeatportSlug,
+                subscriptionQueryModel.ImageUri,
+                subscriptionQueryModel.Tags
+                    .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
+                    .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel(
+                        subscriptionTagQueryModel.Name,
+                        subscriptionTagQueryModel.Slug)),
+                subscriptionQueryModel.CreatedAt,
+                subscriptionQueryModel.RefreshedAt),
             cancellationToken);
-
-        var subscriptionDetailsReadModel = new SubscriptionDetailsReadModel(
-            subscriptionQueryModel.Id,
-            subscriptionQueryModel.Name,
-            subscriptionQueryModel.Slug,
-            subscriptionQueryModel.BeatportType,
-            subscriptionQueryModel.BeatportId,
-            subscriptionQueryModel.BeatportSlug,
-            subscriptionQueryModel.ImageUri,
-            subscriptionQueryModel.Tags
-                .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
-                .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel(
-                    subscriptionTagQueryModel.Name,
-                    subscriptionTagQueryModel.Slug)),
-            subscriptionQueryModel.CreatedAt,
-            subscriptionQueryModel.RefreshedAt);
-
-        return subscriptionDetailsReadModel;
-    }
 }

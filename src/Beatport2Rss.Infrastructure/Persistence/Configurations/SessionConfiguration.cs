@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class SessionConfiguration : IEntityTypeConfiguration<Session>
+internal sealed class SessionConfiguration :
+    IEntityTypeConfiguration<Session>
 {
     public void Configure(EntityTypeBuilder<Session> builder)
     {

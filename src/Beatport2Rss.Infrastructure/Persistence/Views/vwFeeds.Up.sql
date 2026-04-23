@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW "vwFeeds" AS
+CREATE VIEW "vwFeeds" AS
 SELECT
     F."Id"        AS "Id",
     F."CreatedAt" AS "CreatedAt",

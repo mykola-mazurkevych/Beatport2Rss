@@ -13,6 +13,8 @@ internal sealed record SubscriptionQueryModel(
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,
     Uri ImageUri,
-    DateTimeOffset? RefreshedAt,
-    IReadOnlyList<SubscriptionTagQueryModel> Tags) :
-    IQueryModel<SubscriptionId>;
+    DateTimeOffset? RefreshedAt) :
+    IQueryModel<SubscriptionId>
+{
+    public HashSet<SubscriptionTagQueryModel> Tags { get; set; } = [];
+}

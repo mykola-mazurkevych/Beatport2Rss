@@ -1,20 +1,19 @@
-using Beatport2Rss.Infrastructure.Persistence.ValueComparers;
 using Beatport2Rss.Infrastructure.Persistence.Extensions;
 using Beatport2Rss.Infrastructure.Persistence.QueryModels;
-using Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Beatport2Rss.Infrastructure.Persistence.Configurations;
 
-internal sealed class SubscriptionQueryModelConfiguration : IEntityTypeConfiguration<SubscriptionQueryModel>
+internal sealed class SubscriptionQueryModelConfiguration :
+    IEntityTypeConfiguration<SubscriptionQueryModel>
 {
     public void Configure(EntityTypeBuilder<SubscriptionQueryModel> builder)
     {
         builder.ToView("vwSubscriptions");
 
-        builder.HasNoKey();
+        builder.HasKey(subscriptionQueryModel => subscriptionQueryModel.Id);
 
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Id);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.CreatedAt);
@@ -26,7 +25,9 @@ internal sealed class SubscriptionQueryModelConfiguration : IEntityTypeConfigura
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportSlug);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.ImageUri);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.RefreshedAt);
-        builder.Property(subscriptionQueryModel => subscriptionQueryModel.Tags)
-            .HasConversion<SubscriptionTagQueryModelsValueConverter, SubscriptionTagQueryModelsValueComparer>();
+
+        builder.HasMany(subscriptionQueryModel => subscriptionQueryModel.Tags)
+            .WithOne()
+            .HasForeignKey(subscriptionTagQueryModel => subscriptionTagQueryModel.SubscriptionId);
     }
 }
