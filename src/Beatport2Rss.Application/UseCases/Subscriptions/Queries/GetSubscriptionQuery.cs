@@ -42,9 +42,16 @@ internal sealed class GetSubscriptionQueryHandler(
             subscriptionDetails.Id,
             subscriptionDetails.Name,
             subscriptionDetails.Slug,
-            beatportUriBuilder.Build(subscriptionDetails.BeatportType, subscriptionDetails.BeatportId, subscriptionDetails.BeatportSlug),
+            subscriptionDetails.BeatportType,
+            beatportUriBuilder.Build(
+                subscriptionDetails.BeatportType,
+                subscriptionDetails.BeatportId,
+                subscriptionDetails.BeatportSlug),
             subscriptionDetails.ImageUri,
-            subscriptionDetails.Tags.Select(subscriptionTagDetails => new SubscriptionTagDto(subscriptionTagDetails.Name, subscriptionTagDetails.Slug)),
+            subscriptionDetails.Tags
+                .Select(subscriptionTag => new SubscriptionTagDto(
+                    subscriptionTag.Name,
+                    subscriptionTag.Slug)),
             subscriptionDetails.CreatedAt,
             subscriptionDetails.RefreshedAt);
     }

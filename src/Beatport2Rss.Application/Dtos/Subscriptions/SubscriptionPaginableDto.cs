@@ -3,7 +3,7 @@ using Beatport2Rss.Domain.Subscriptions;
 
 namespace Beatport2Rss.Application.Dtos.Subscriptions;
 
-public sealed record SubscriptionDto(
+public sealed record SubscriptionPaginableDto(
     SubscriptionId Id,
     SubscriptionName Name,
     Slug Slug,
@@ -11,5 +11,4 @@ public sealed record SubscriptionDto(
     Uri BeatportUri,
     Uri ImageUri,
     IEnumerable<SubscriptionTagDto> Tags,
-    DateTimeOffset? CreatedAt,
     DateTimeOffset? RefreshedAt);

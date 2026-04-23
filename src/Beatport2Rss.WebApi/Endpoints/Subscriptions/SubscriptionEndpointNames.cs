@@ -5,6 +5,7 @@ internal static class SubscriptionEndpointNames
     private const string Prefix = "Subscription";
 
     public const string Create = $"{Prefix}{nameof(Create)}";
+    public const string List = $"{Prefix}{nameof(List)}";
     public const string CreateTag = $"{Prefix}{nameof(CreateTag)}";
     public const string DeleteTag = $"{Prefix}{nameof(DeleteTag)}";
     public const string DeleteTags = $"{Prefix}{nameof(DeleteTags)}";

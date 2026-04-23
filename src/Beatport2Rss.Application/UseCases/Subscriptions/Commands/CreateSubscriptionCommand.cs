@@ -75,7 +75,11 @@ internal sealed class CreateSubscriptionCommandHandler(
             subscription.Id,
             subscription.Name,
             subscription.Slug,
-            beatportUriBuilder.Build(subscription.BeatportType, subscription.BeatportId, subscription.BeatportSlug),
+            subscription.BeatportType,
+            beatportUriBuilder.Build(
+                subscription.BeatportType,
+                subscription.BeatportId,
+                subscription.BeatportSlug),
             subscription.ImageUri,
             [],
             subscription.CreatedAt,

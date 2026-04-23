@@ -8,6 +8,9 @@
         "explorer.fileNesting.enabled": true,
         "explorer.fileNesting.patterns": {
             "*.cs": "${basename}.*.cs",
+        },
+        "chat.tools.terminal.autoApprove": {
+            "dotnet test": true
         }
     }
 }

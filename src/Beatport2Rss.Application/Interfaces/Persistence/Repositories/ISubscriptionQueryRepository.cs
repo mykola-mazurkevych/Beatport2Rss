@@ -7,6 +7,8 @@ namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 
 public interface ISubscriptionQueryRepository
 {
+    IQueryable<SubscriptionPaginableReadModel> GetSubscriptionPaginableReadModelsAsQueryable(UserId userId);
+
     Task<bool> ExistsAsync(
         Slug slug,
         CancellationToken cancellationToken = default);

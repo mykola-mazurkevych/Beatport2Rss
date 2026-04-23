@@ -24,6 +24,15 @@ internal static class SubscriptionEndpoints
                 .WithTags("Subscriptions");
 
             groupBuilder
+                .MapGet("", ListSubscriptionsEndpointHandler.Handle)
+                .WithName(SubscriptionEndpointNames.List)
+                .WithDescription("List subscriptions")
+                .WithSummary("List")
+                .Produces<IEnumerable<SubscriptionPaginableResponse>>(StatusCodes.Status200OK, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
+
+            groupBuilder
                 .MapPost("", CreateSubscriptionEndpointHandler.Handle)
                 .WithName(SubscriptionEndpointNames.Create)
                 .WithDescription("Create a subscription by type")

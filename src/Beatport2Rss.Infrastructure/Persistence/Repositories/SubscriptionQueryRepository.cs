@@ -12,6 +12,30 @@ internal sealed class SubscriptionQueryRepository(
     QueryRepository<SubscriptionQueryModel, SubscriptionId>(subscriptionQueryModels),
     ISubscriptionQueryRepository
 {
+    private readonly IQueryable<SubscriptionQueryModel> _subscriptionQueryModels = subscriptionQueryModels;
+
+    public IQueryable<SubscriptionPaginableReadModel> GetSubscriptionPaginableReadModelsAsQueryable(UserId userId) =>
+        from subscriptionQueryModel in _subscriptionQueryModels
+        select new SubscriptionPaginableReadModel
+        {
+            Id = subscriptionQueryModel.Id,
+            CreatedAt = subscriptionQueryModel.CreatedAt,
+            Name = subscriptionQueryModel.Name,
+            Slug = subscriptionQueryModel.Slug,
+            BeatportType = subscriptionQueryModel.BeatportType,
+            BeatportId = subscriptionQueryModel.BeatportId,
+            BeatportSlug = subscriptionQueryModel.BeatportSlug,
+            ImageUri = subscriptionQueryModel.ImageUri,
+            RefreshedAt = subscriptionQueryModel.RefreshedAt,
+            Tags = subscriptionQueryModel.Tags
+                .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
+                .Select(subscriptionTagQueryModel =>new SubscriptionTagDetailsReadModel
+                    {
+                        Name = subscriptionTagQueryModel.Name,
+                        Slug = subscriptionTagQueryModel.Slug,
+                    }),
+        };
+
     public Task<bool> ExistsAsync(
         Slug slug,
         CancellationToken cancellationToken = default) =>
@@ -43,9 +67,12 @@ internal sealed class SubscriptionQueryRepository(
                 subscriptionQueryModel.ImageUri,
                 subscriptionQueryModel.Tags
                     .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
-                    .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel(
-                        subscriptionTagQueryModel.Name,
-                        subscriptionTagQueryModel.Slug)),
+                    .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel
+                        {
+                            Name = subscriptionTagQueryModel.Name,
+                            Slug = subscriptionTagQueryModel.Slug,
+                        }
+                    ),
                 subscriptionQueryModel.CreatedAt,
                 subscriptionQueryModel.RefreshedAt),
             cancellationToken);
