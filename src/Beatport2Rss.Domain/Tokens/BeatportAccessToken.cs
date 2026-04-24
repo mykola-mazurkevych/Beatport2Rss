@@ -11,7 +11,7 @@ namespace Beatport2Rss.Domain.Tokens;
 public readonly record struct BeatportAccessToken :
     IValueObject
 {
-    public const int MaxLength = 100;
+    public const int MaxLength = 2000;
 
     private BeatportAccessToken(string value) => Value = value;
 
