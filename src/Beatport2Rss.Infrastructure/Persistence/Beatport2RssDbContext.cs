@@ -23,12 +23,14 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Release> Releases => Set<Release>();
+    public DbSet<ReleaseSubscription> ReleaseSubscriptions => Set<ReleaseSubscription>();
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<Track> Tracks => Set<Track>();
+    public DbSet<TrackSubscription> TrackSubscriptions => Set<TrackSubscription>();
     public DbSet<User> Users => Set<User>();
 
     public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();

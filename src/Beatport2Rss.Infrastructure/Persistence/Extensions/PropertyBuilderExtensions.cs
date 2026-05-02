@@ -16,4 +16,13 @@ internal static class PropertyBuilderExtensions
                 .HasMaxLength(EnumMaxLength)
                 .IsRequired();
     }
+
+    extension(PropertyBuilder<Uri> builder)
+    {
+        public PropertyBuilder<Uri> IsUri() =>
+            builder
+                .HasConversion<string>()
+                .HasMaxLength(500)
+                .IsRequired();
+    }
 }

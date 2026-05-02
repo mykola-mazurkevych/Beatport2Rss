@@ -44,15 +44,14 @@ internal sealed class SubscriptionConfiguration :
             .IsRequired();
 
         builder.Property(subscription => subscription.ImageUri)
-            .HasMaxLength(500)
-            .IsRequired();
+            .IsUri();
 
         builder.Property(subscription => subscription.RefreshedAt)
             .IsRequired(false);
 
         builder.Property(subscription => subscription.CountryCode)
             .IsRequired(false);
-        
+
         builder.HasOne<Country>()
             .WithMany()
             .HasForeignKey(subscription => subscription.CountryCode);
@@ -83,12 +82,12 @@ internal sealed class SubscriptionConfiguration :
                 navigationBuilder.HasIndex(subscriptionTag => subscriptionTag.TagId);
             });
 
-        builder
-            .HasIndex(subscription => subscription.Slug)
+        builder.HasIndex(subscription => subscription.Slug)
             .IsUnique();
 
-        builder
-            .HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId })
+        builder.HasIndex(subscription => new { subscription.BeatportType, subscription.BeatportId })
             .IsUnique();
+
+        builder.HasIndex(subscription => subscription.BeatportSlug);
     }
 }

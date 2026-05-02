@@ -1,3 +1,6 @@
+// ReSharper disable PropertyCanBeMadeInitOnly.Local
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.SharedKernel.Common;
@@ -7,6 +10,8 @@ namespace Beatport2Rss.Domain.Tracks;
 public sealed class Track :
     IEntity<TrackId>
 {
+    private readonly HashSet<TrackSubscription> _subscriptions = [];
+
     private Track()
     {
     }
@@ -20,9 +25,8 @@ public sealed class Track :
 
     public int Number { get; private set; }
 
-    public string Artist { get; private set; } = null!;
-    public string Name { get; private set; } = null!;
-    public string MixName { get; private set; } = null!;
+    public TrackName Name { get; private set; }
+    public MixName MixName { get; private set; }
 
     public TimeSpan Length { get; private set; }
 
@@ -30,27 +34,25 @@ public sealed class Track :
 
     public ReleaseId ReleaseId { get; private set; }
 
+    public IReadOnlyCollection<TrackSubscription> Subscriptions => _subscriptions.AsReadOnly();
+
     public static Track Create(
-        TrackId id,
         DateTimeOffset createdAt,
         ReleaseId releaseId,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         int number,
-        string artist,
-        string name,
-        string mixName,
+        TrackName name,
+        MixName mixName,
         TimeSpan length,
         Uri sampleUri) =>
         new()
         {
-            Id = id,
             CreatedAt = createdAt,
             ReleaseId = releaseId,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             Number = number,
-            Artist = artist,
             Name = name,
             MixName = mixName,
             Length = length,

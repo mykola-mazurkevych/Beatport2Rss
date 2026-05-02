@@ -1,3 +1,6 @@
+// ReSharper disable PropertyCanBeMadeInitOnly.Local
+// ReSharper disable UnusedAutoPropertyAccessor.Local
+
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.SharedKernel.Common;
@@ -7,6 +10,7 @@ namespace Beatport2Rss.Domain.Releases;
 public sealed class Release :
     IAggregateRoot<ReleaseId>
 {
+    private readonly HashSet<ReleaseSubscription> _subscriptions = [];
     private readonly HashSet<Track> _tracks = [];
 
     private Release()
@@ -20,11 +24,8 @@ public sealed class Release :
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
 
-    public string Artist { get; private set; } = null!;
-    public string Name { get; private set; } = null!;
-
-    public string Label { get; private set; } = null!;
-    public string CatalogNumber { get; private set; } = null!;
+    public ReleaseName Name { get; private set; }
+    public CatelogNumber CatalogNumber { get; private set; }
 
     public Uri ImageUri { get; private set; } = null!;
 
@@ -34,40 +35,29 @@ public sealed class Release :
 
     public ReleaseStatus Status { get; private set; }
 
-    public IReadOnlySet<Track> Tracks => _tracks.AsReadOnly();
+    public IReadOnlyCollection<ReleaseSubscription> Subscriptions => _subscriptions.AsReadOnly();
+    public IReadOnlyCollection<Track> Tracks => _tracks.AsReadOnly();
 
     public static Release Create(
-        ReleaseId id,
         DateTimeOffset createdAt,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
-        string artist,
-        string name,
-        string label,
-        string catalogNumber,
+        ReleaseName name,
+        CatelogNumber catalogNumber,
         Uri imageUri,
         DateOnly releaseDate,
         int tracksCount,
         ReleaseStatus status) =>
         new()
         {
-            Id = id,
             CreatedAt = createdAt,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
-            Artist = artist,
             Name = name,
-            Label = label,
             CatalogNumber = catalogNumber,
             ImageUri = imageUri,
             ReleaseDate = releaseDate,
             TracksCount = tracksCount,
             Status = status,
         };
-
-    public void UpdateStatus(ReleaseStatus status) => Status = status;
-
-    public void AddTrack(Track track) => _tracks.Add(track);
-    public void RemoveTrack(Track track) => _tracks.Remove(track);
-    public Track? GetTrack(TrackId trackId) => _tracks.SingleOrDefault(t => t.Id == trackId);
 }

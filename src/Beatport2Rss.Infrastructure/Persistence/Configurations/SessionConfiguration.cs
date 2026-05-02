@@ -24,12 +24,14 @@ internal sealed class SessionConfiguration :
         builder.Property(session => session.RefreshTokenHash)
             .HasColumnType("bytea")
             .IsRequired();
+
         builder.Property(session => session.RefreshTokenExpiresAt)
             .IsRequired();
 
         builder.Property(session => session.UserAgent)
             .HasMaxLength(Session.UserAgentMaxLength)
             .IsRequired(false);
+
         builder.Property(session => session.IpAddress)
             .HasMaxLength(Session.IpAddressMaxLength)
             .IsRequired(false);
