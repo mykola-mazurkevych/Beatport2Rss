@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CA1303 // Do not pass literals as localized parameters
 
+// ReSharper disable AccessToDisposedClosure
+
 using System.Reflection;
 
 using Beatport2Rss.Application;
@@ -21,10 +23,36 @@ var configurationRoot = new ConfigurationBuilder()
     .Build();
 
 var serviceProvider = new ServiceCollection()
-    .AddLogging(builder => builder.AddConsole())
+    .AddLogging(builder => builder.AddSimpleConsole(options => options.TimestampFormat = Constants.DateTimeFormat))
     .AddApplication()
     .AddInfrastructure(configurationRoot)
     .AddSingleton<IApplication, Application>()
     .BuildServiceProvider();
 
-await serviceProvider.GetRequiredService<IApplication>().RunAsync();
+var cancellationTokenSource = new CancellationTokenSource();
+
+Console.CancelKeyPress += OnCancelKeyPress;
+
+try
+{
+    await serviceProvider
+        .GetRequiredService<IApplication>()
+        .RunAsync(args, cancellationTokenSource.Token);
+}
+catch (OperationCanceledException)
+    when (cancellationTokenSource.IsCancellationRequested)
+{
+}
+finally
+{
+    Console.CancelKeyPress -= OnCancelKeyPress;
+    cancellationTokenSource.Dispose();
+}
+
+return;
+
+void OnCancelKeyPress(object? _, ConsoleCancelEventArgs e)
+{
+    e.Cancel = true;
+    cancellationTokenSource.Cancel();
+}

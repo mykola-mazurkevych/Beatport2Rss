@@ -13,22 +13,23 @@ internal sealed class BeatportAccessTokenProvider(
     IChromiumDownloader chromiumDownloader) :
     IBeatportAccessTokenProvider
 {
-#if DEBUG
-    private const bool Headless = false;
-#else
-    private const bool Headless = true;
-#endif
-
     private readonly BeatportCredentials _beatportCredentials = beatportCredentials.Value;
 
-    public async Task<(string? AccessToken, int ExpiresIn)> ProvideAsync(CancellationToken cancellationToken = default)
+    public async Task<(string? AccessToken, int ExpiresIn)> ProvideAsync(
+        bool headless,
+        CancellationToken cancellationToken = default)
     {
         var executablePath = await chromiumDownloader.EnsureInstalledAsync(cancellationToken);
 
         string? accessToken = null;
         int expiresIn = 0;
 
-        var launchOptions = new LaunchOptions { ExecutablePath = executablePath, Headless = Headless, Browser = SupportedBrowser.Chrome };
+        var launchOptions = new LaunchOptions
+        {
+            ExecutablePath = executablePath,
+            Headless = headless,
+            Browser = SupportedBrowser.Chrome,
+        };
         await using var browser = await Puppeteer.LaunchAsync(launchOptions).ConfigureAwait(false);
 
         await using var page = await browser.NewPageAsync().ConfigureAwait(false);

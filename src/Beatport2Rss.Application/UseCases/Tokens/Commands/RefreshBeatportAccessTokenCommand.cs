@@ -12,17 +12,18 @@ using Mediator;
 
 namespace Beatport2Rss.Application.UseCases.Tokens.Commands;
 
-public sealed record RefreshBeatportAccessTokenCommand :
-    ICommand<Result<BeatportAccessToken>>;
+public sealed record RefreshBeatportAccessTokenCommand(
+    bool Headless) :
+    ICommand<Result>;
 
 internal sealed class RefreshBeatportAccessTokenCommandHandler(
     IClock clock,
     ITokenCommandRepository tokenCommandRepository,
     IUnitOfWork unitOfWork,
     IBeatportAccessTokenProvider beatportAccessTokenProvider) :
-    ICommandHandler<RefreshBeatportAccessTokenCommand, Result<BeatportAccessToken>>
+    ICommandHandler<RefreshBeatportAccessTokenCommand, Result>
 {
-    public async ValueTask<Result<BeatportAccessToken>> Handle(
+    public async ValueTask<Result> Handle(
         RefreshBeatportAccessTokenCommand command,
         CancellationToken cancellationToken)
     {
@@ -31,7 +32,7 @@ internal sealed class RefreshBeatportAccessTokenCommandHandler(
 
         try
         {
-            (accessToken, expiresIn) = await beatportAccessTokenProvider.ProvideAsync(cancellationToken);
+            (accessToken, expiresIn) = await beatportAccessTokenProvider.ProvideAsync(command.Headless, cancellationToken);
         }
         catch (Exception e)
         {
@@ -50,6 +51,6 @@ internal sealed class RefreshBeatportAccessTokenCommandHandler(
         await tokenCommandRepository.AddAsync(token, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return beatportAccessToken;
+        return Result.Ok();
     }
 }

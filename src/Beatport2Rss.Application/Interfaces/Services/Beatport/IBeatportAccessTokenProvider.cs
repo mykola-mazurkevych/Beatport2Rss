@@ -2,5 +2,7 @@
 
 public interface IBeatportAccessTokenProvider
 {
-    Task<(string? AccessToken, int ExpiresIn)> ProvideAsync(CancellationToken cancellationToken = default);
+    Task<(string? AccessToken, int ExpiresIn)> ProvideAsync(
+        bool headless,
+        CancellationToken cancellationToken = default);
 }
