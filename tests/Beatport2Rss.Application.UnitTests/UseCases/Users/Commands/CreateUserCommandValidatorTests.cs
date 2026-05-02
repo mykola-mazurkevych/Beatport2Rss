@@ -12,7 +12,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WithNoNames_ShouldSucceed()
     {
-        var command = new CreateUserCommand("email@address.com", "validpassword123", null, null);
+        var command = new CreateUserCommand("email@address.com", "validpassword123", null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -23,7 +23,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WithNames_ShouldSucceed()
     {
-        var command = new CreateUserCommand("email@address.com", "validpassword123", "First", "Last");
+        var command = new CreateUserCommand("email@address.com", "validpassword123", "First", "Last", null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -37,7 +37,7 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("   ")]
     public async Task Validate_WhenEmailAddressIsNullOrWhitespace_ShouldFail(string? emailAddress)
     {
-        var command = new CreateUserCommand(emailAddress, "validpassword123", null, null);
+        var command = new CreateUserCommand(emailAddress, "validpassword123", null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -50,7 +50,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WhenEmailAddressTooLong_ShouldFail()
     {
-        var command = new CreateUserCommand(new string('e', EmailAddress.MaxLength + 1) + "@address.com", "validpassword123", null, null);
+        var command = new CreateUserCommand(new string('e', EmailAddress.MaxLength + 1) + "@address.com", "validpassword123", null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -67,7 +67,7 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("email.address.com")]
     public async Task Validate_WhenEmailAddressInvalidFormat_ShouldFail(string emailAddress)
     {
-        var command = new CreateUserCommand(emailAddress, "validpassword123", null, null);
+        var command = new CreateUserCommand(emailAddress, "validpassword123", null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -83,7 +83,7 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("   ")]
     public async Task Validate_WhenPasswordIsNullOrEmpty_ShouldFail(string? password)
     {
-        var command = new CreateUserCommand("email@address.com", password, null, null);
+        var command = new CreateUserCommand("email@address.com", password, null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -98,7 +98,7 @@ public sealed class CreateUserCommandValidatorTests
     [InlineData("abc")]
     public async Task Validate_WhenPasswordTooShort_ShouldFail(string password)
     {
-        var command = new CreateUserCommand("email@address.com", password, null, null);
+        var command = new CreateUserCommand("email@address.com", password, null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -111,7 +111,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WhenPasswordTooLong_ShouldFail()
     {
-        var command = new CreateUserCommand("email@address.com", new string('a', Password.MaxLength + 1), null, null);
+        var command = new CreateUserCommand("email@address.com", new string('a', Password.MaxLength + 1), null, null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -124,7 +124,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WhenFirstNameTooLong_ShouldFail()
     {
-        var command = new CreateUserCommand("email@address.com", "validpassword123", new string('f', User.NameLength + 1), null);
+        var command = new CreateUserCommand("email@address.com", "validpassword123", new string('f', User.NameLength + 1), null, null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 
@@ -137,7 +137,7 @@ public sealed class CreateUserCommandValidatorTests
     [Fact]
     public async Task Validate_WhenLastNameTooLong_ShouldFail()
     {
-        var command = new CreateUserCommand("email@address.com", "validpassword123", null, new string('l', User.NameLength + 1));
+        var command = new CreateUserCommand("email@address.com", "validpassword123", null, new string('l', User.NameLength + 1), null);
 
         var result = await _validator.ValidateAsync(command, TestContext.Current.CancellationToken);
 

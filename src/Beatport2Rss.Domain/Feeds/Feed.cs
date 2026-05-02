@@ -28,9 +28,6 @@ public sealed class Feed :
     public IReadOnlySet<FeedSubscription> Subscriptions =>
         _subscriptions.AsReadOnly();
 
-    public bool IsActive =>
-        Status == FeedStatus.Active;
-
     public static Feed Create(
         FeedId id,
         DateTimeOffset createdAt,
@@ -45,7 +42,7 @@ public sealed class Feed :
             UserId = userId,
             Name = name,
             Slug = slug,
-            Status = isActive? FeedStatus.Active : FeedStatus.Inactive,
+            Status = isActive ? FeedStatus.Active : FeedStatus.Inactive,
         };
 
     public void UpdateName(FeedName name) =>

@@ -2,6 +2,7 @@
 // ReSharper disable UnusedAutoPropertyAccessor.Local
 
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.SharedKernel.Common;
 
@@ -31,6 +32,8 @@ public sealed class Subscription :
 
     public DateTimeOffset? RefreshedAt { get; private set; }
 
+    public CountryCode? CountryCode { get; private set; }
+
     public IReadOnlySet<SubscriptionTag> Tags =>
         _tags.AsReadOnly();
 
@@ -42,7 +45,8 @@ public sealed class Subscription :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         Uri imageUri,
-        DateTimeOffset? refreshedAt) =>
+        DateTimeOffset? refreshedAt,
+        CountryCode? countryCode) =>
         new()
         {
             CreatedAt = createdAt,
@@ -53,6 +57,7 @@ public sealed class Subscription :
             BeatportSlug = beatportSlug,
             ImageUri = imageUri,
             RefreshedAt = refreshedAt,
+            CountryCode = countryCode,
         };
 
     public void MarkAsRefreshed(DateTimeOffset refreshedAt) =>

@@ -1,4 +1,5 @@
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Infrastructure.Persistence.Extensions;
@@ -48,6 +49,13 @@ internal sealed class SubscriptionConfiguration :
 
         builder.Property(subscription => subscription.RefreshedAt)
             .IsRequired(false);
+
+        builder.Property(subscription => subscription.CountryCode)
+            .IsRequired(false);
+        
+        builder.HasOne<Country>()
+            .WithMany()
+            .HasForeignKey(subscription => subscription.CountryCode);
 
         builder.OwnsMany(
             subscription => subscription.Tags,

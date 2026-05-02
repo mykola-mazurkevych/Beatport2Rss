@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Sessions;
@@ -18,23 +19,24 @@ namespace Beatport2Rss.Infrastructure.Persistence;
 internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options) :
     DbContext(options)
 {
-    public DbSet<Feed> Feeds => this.Set<Feed>();
-    public DbSet<FeedSubscription> FeedSubscriptions => this.Set<FeedSubscription>();
-    public DbSet<Release> Releases => this.Set<Release>();
-    public DbSet<Session> Sessions => this.Set<Session>();
-    public DbSet<Subscription> Subscriptions => this.Set<Subscription>();
-    public DbSet<SubscriptionTag> SubscriptionTags => this.Set<SubscriptionTag>();
-    public DbSet<Tag> Tags => this.Set<Tag>();
-    public DbSet<Token> Tokens => this.Set<Token>();
-    public DbSet<Track> Tracks => this.Set<Track>();
-    public DbSet<User> Users => this.Set<User>();
+    public DbSet<Country> Countries => Set<Country>();
+    public DbSet<Feed> Feeds => Set<Feed>();
+    public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
+    public DbSet<Release> Releases => Set<Release>();
+    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<Token> Tokens => Set<Token>();
+    public DbSet<Track> Tracks => Set<Track>();
+    public DbSet<User> Users => Set<User>();
 
-    public DbSet<FeedQueryModel> FeedQueryModels => this.Set<FeedQueryModel>();
-    public DbSet<SessionQueryModel> SessionQueryModels => this.Set<SessionQueryModel>();
-    public DbSet<SubscriptionQueryModel> SubscriptionQueryModels => this.Set<SubscriptionQueryModel>();
-    public DbSet<SubscriptionTagQueryModel> SubscriptionTagQueryModels => this.Set<SubscriptionTagQueryModel>();
-    public DbSet<TagQueryModel> TagQueryModels => this.Set<TagQueryModel>();
-    public DbSet<UserQueryModel> UserQueryModels => this.Set<UserQueryModel>();
+    public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();
+    public DbSet<SessionQueryModel> SessionQueryModels => Set<SessionQueryModel>();
+    public DbSet<SubscriptionQueryModel> SubscriptionQueryModels => Set<SubscriptionQueryModel>();
+    public DbSet<SubscriptionTagQueryModel> SubscriptionTagQueryModels => Set<SubscriptionTagQueryModel>();
+    public DbSet<TagQueryModel> TagQueryModels => Set<TagQueryModel>();
+    public DbSet<UserQueryModel> UserQueryModels => Set<UserQueryModel>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

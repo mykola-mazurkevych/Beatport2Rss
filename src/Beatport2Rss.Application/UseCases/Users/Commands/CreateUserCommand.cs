@@ -4,6 +4,7 @@ using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.SharedKernel.Extensions;
 
@@ -19,7 +20,8 @@ public sealed record CreateUserCommand(
     string? EmailAddress,
     string? Password,
     string? FirstName,
-    string? LastName) :
+    string? LastName,
+    string? CountryCode) :
     ICommand<Result>, IRequireValidation;
 
 internal sealed class CreateUserCommandValidator :
@@ -31,6 +33,7 @@ internal sealed class CreateUserCommandValidator :
         RuleFor(c => c.Password).IsPassword();
         RuleFor(c => c.FirstName).IsFirstName();
         RuleFor(c => c.LastName).IsLastName();
+        RuleFor(c => c.CountryCode).IsCountryCode();
     }
 }
 
@@ -55,6 +58,7 @@ internal sealed class CreateUserCommandHandler(
         var userId = UserId.Create(Guid.CreateVersion7());
         var password = Password.Create(command.Password);
         var passwordHash = passwordHasher.Hash(password);
+        var countryCode = CountryCode.Create(command.CountryCode);
 
         var user = User.Create(
             userId,
@@ -63,7 +67,8 @@ internal sealed class CreateUserCommandHandler(
             passwordHash,
             command.FirstName,
             command.LastName,
-            UserStatus.Pending);
+            UserStatus.Pending,
+            countryCode);
 
         await userCommandRepository.AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

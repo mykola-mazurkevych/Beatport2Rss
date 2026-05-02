@@ -1,10 +1,12 @@
 using Beatport2Rss.Application.Dtos.Beatport;
 using Beatport2Rss.Application.Dtos.Subscriptions;
+using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.SharedKernel.Extensions;
@@ -19,7 +21,8 @@ namespace Beatport2Rss.Application.UseCases.Subscriptions.Commands;
 
 public sealed record CreateSubscriptionCommand(
     BeatportSubscriptionType BeatportType,
-    BeatportId BeatportId) :
+    BeatportId BeatportId,
+    string? CountryCode) :
     ICommand<Result<SubscriptionDto>>;
 
 internal sealed class CreateSubscriptionCommandValidator :
@@ -28,6 +31,7 @@ internal sealed class CreateSubscriptionCommandValidator :
     public CreateSubscriptionCommandValidator()
     {
         RuleFor(c => c.BeatportType).IsInEnum();
+        RuleFor(c => c.CountryCode).IsCountryCode();
     }
 }
 
@@ -56,10 +60,22 @@ internal sealed class CreateSubscriptionCommandHandler(
             return Result.Unprocessable("Token is missing.");
         }
 
+        var countryCode = string.IsNullOrEmpty(command.CountryCode)
+            ? (CountryCode?)null
+            : CountryCode.Create(command.CountryCode);
+
         var subscriptionResult = command.BeatportType switch
         {
-            BeatportSubscriptionType.Artist => await GetArtistSubscriptionAsync(command.BeatportId, token.AccessToken, cancellationToken),
-            BeatportSubscriptionType.Label => await GetLabelSubscriptionAsync(command.BeatportId, token.AccessToken, cancellationToken),
+            BeatportSubscriptionType.Artist => await GetArtistSubscriptionAsync(
+                command.BeatportId,
+                token.AccessToken,
+                countryCode,
+                cancellationToken),
+            BeatportSubscriptionType.Label => await GetLabelSubscriptionAsync(
+                command.BeatportId,
+                token.AccessToken,
+                countryCode,
+                cancellationToken),
             _ => Result.Unprocessable($"{command.BeatportType} is not supported.")
         };
 
@@ -89,6 +105,7 @@ internal sealed class CreateSubscriptionCommandHandler(
     private async Task<Result<Subscription>> GetArtistSubscriptionAsync(
         BeatportId beatportId,
         BeatportAccessToken beatportAccessToken,
+        CountryCode? countryCode,
         CancellationToken cancellationToken)
     {
         var artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId, beatportAccessToken, cancellationToken);
@@ -104,13 +121,15 @@ internal sealed class CreateSubscriptionCommandHandler(
                 artistResult.Value.Id,
                 artistResult.Value.Slug,
                 artistResult.Value.Image.Uri,
-                refreshedAt: null)
+                refreshedAt: null,
+                countryCode)
         };
     }
 
     private async Task<Result<Subscription>> GetLabelSubscriptionAsync(
         BeatportId beatportId,
         BeatportAccessToken beatportAccessToken,
+        CountryCode? countryCode,
         CancellationToken cancellationToken)
     {
         var labelResult = await beatportClient.GetAsync<BeatportLabelDto>(beatportId, beatportAccessToken, cancellationToken);
@@ -126,7 +145,8 @@ internal sealed class CreateSubscriptionCommandHandler(
                 labelResult.Value.Id,
                 labelResult.Value.Slug,
                 labelResult.Value.Image.Uri,
-                refreshedAt: null)
+                refreshedAt: null,
+                countryCode)
         };
     }
 }

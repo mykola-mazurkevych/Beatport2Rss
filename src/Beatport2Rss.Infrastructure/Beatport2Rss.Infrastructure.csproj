@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Persistence\Views\*.sql" />
+    <EmbeddedResource Include="Persistence\Seeders\Data\countries_csv.md.md" /> <!-- https://developers.google.com/public-data/docs/canonical/countries_csv.md.txt -->
   </ItemGroup>
 
 </Project>

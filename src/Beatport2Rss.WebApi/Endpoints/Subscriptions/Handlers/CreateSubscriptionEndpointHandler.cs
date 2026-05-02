@@ -21,7 +21,8 @@ internal static class CreateSubscriptionEndpointHandler
     {
         var command = new CreateSubscriptionCommand(
             request.BeatportType,
-            request.BeatportId);
+            request.BeatportId,
+            request.CountryCode);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(
             () => Results.CreatedAtRoute(

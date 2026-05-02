@@ -4,4 +4,5 @@ internal sealed record CreateUserRequest(
     string? EmailAddress,
     string? Password,
     string? FirstName,
-    string? LastName);
+    string? LastName,
+    string? CountryCode);

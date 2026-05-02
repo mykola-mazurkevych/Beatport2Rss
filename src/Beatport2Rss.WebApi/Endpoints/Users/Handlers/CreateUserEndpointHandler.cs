@@ -22,7 +22,8 @@ internal static class CreateUserEndpointHandler
             request.EmailAddress,
             request.Password,
             request.FirstName,
-            request.LastName);
+            request.LastName,
+            request.CountryCode);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(() => Results.StatusCode(StatusCodes.Status201Created), context);
     }

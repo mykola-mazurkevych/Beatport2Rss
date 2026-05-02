@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.SharedKernel.Common;
 
 namespace Beatport2Rss.Domain.Users;
@@ -23,6 +24,8 @@ public sealed class User :
 
     public UserStatus Status { get; private set; }
 
+    public CountryCode? CountryCode { get; private set; }
+
     public static User Create(
         UserId id,
         DateTimeOffset createdAt,
@@ -30,7 +33,8 @@ public sealed class User :
         PasswordHash passwordHash,
         string? firstName,
         string? lastName,
-        UserStatus status) =>
+        UserStatus status,
+        CountryCode? countryCode) =>
         new()
         {
             Id = id,
@@ -40,6 +44,7 @@ public sealed class User :
             FirstName = firstName,
             LastName = lastName,
             Status = status,
+            CountryCode = countryCode,
         };
 
     public void UpdateEmailAddress(EmailAddress emailAddress) =>
@@ -56,4 +61,7 @@ public sealed class User :
 
     public void UpdateStatus(bool isActive) =>
         Status = isActive ? UserStatus.Active : UserStatus.Inactive;
+
+    public void UpdateCountry(CountryCode? countryCode) =>
+        CountryCode = countryCode;
 }

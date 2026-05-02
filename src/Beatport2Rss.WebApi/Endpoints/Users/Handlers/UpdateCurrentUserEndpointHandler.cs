@@ -21,7 +21,8 @@ internal static class UpdateCurrentUserEndpointHandler
         var command = new UpdateUserCommand(
             context.User.Id,
             request.FirstName,
-            request.LastName);
+            request.LastName,
+            request.CountryCode);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(Results.NoContent, context);
     }

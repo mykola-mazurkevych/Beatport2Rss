@@ -9,11 +9,13 @@ using Beatport2Rss.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Extensions;
 using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
+using Beatport2Rss.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Infrastructure.Services.Beatport;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
@@ -104,7 +106,18 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>(builder => builder.UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext))))
+                .AddDbContext<Beatport2RssDbContext>(builder => builder
+                    .UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext)))
+                    .UseSeeding((dbContext, _) =>
+                    {
+                        CountriesSeeder.Seed(dbContext.Set<Country>());
+                        dbContext.SaveChanges();
+                    })
+                    .UseAsyncSeeding(async (dbContext, _, cancellationToken) =>
+                    {
+                        await CountriesSeeder.SeedAsync(dbContext.Set<Country>(), cancellationToken);
+                        await dbContext.SaveChangesAsync(cancellationToken);
+                    }))
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)

@@ -5,4 +5,5 @@ namespace Beatport2Rss.WebApi.Endpoints.Subscriptions.Requests;
 
 internal sealed record CreateSubscriptionRequest(
     BeatportSubscriptionType BeatportType,
-    BeatportId BeatportId);
+    BeatportId BeatportId,
+    string? CountryCode);

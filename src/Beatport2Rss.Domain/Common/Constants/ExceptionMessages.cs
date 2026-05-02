@@ -10,6 +10,12 @@ public static class ExceptionMessages
     public const string BeatportSlugEmpty = "BeatportSlug cannot be empty.";
     public const string BeatportSlugTooLong = "BeatportSlug is too long.";
 
+    public const string CountryCodeEmpty = "CountryCode cannot be empty.";
+    public const string CountryCodeIncorrectLength = "CountryCode has incorrect length.";
+
+    public const string CountryNameEmpty = "CountryName cannot be empty.";
+    public const string CountryNameTooLong = "CountryName is too long.";
+
     public const string EmailAddressEmpty = "Email address cannot be empty.";
     public const string EmailAddressInvalid = "Email address is invalid.";
     public const string EmailAddressTooLong = "Email address is too long.";
@@ -36,7 +42,6 @@ public static class ExceptionMessages
     ////public const string SlugInvalid = "Slug is invalid.";
     public const string SlugTooLong = "Slug is too long.";
 
-    public const string SubscriptionIdInvalid = "SubscriptionId must be positive.";
     public const string SubscriptionNameEmpty = "SubscriptionName cannot be empty.";
     public const string SubscriptionNameTooLong = "SubscriptionName is too long.";
 

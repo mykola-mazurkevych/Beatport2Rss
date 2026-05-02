@@ -1,3 +1,4 @@
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
@@ -39,6 +40,13 @@ internal sealed class UserConfiguration :
 
         builder.Property(user => user.Status)
             .IsEnum();
+
+        builder.Property(user => user.CountryCode)
+            .IsRequired(false);
+
+        builder.HasOne<Country>()
+            .WithMany()
+            .HasForeignKey(user => user.CountryCode);
 
         builder.HasIndex(user => user.EmailAddress)
             .IsUnique();

@@ -1,5 +1,6 @@
 using System.Net;
 
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Tags;
@@ -13,6 +14,10 @@ internal static class RuleBuilderExtensions
 {
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
+        public void IsCountryCode() =>
+            ruleBuilder
+                .IsNotTooLong(CountryCode.Length, "Country code must be ad most {MaxLength} characters long.");
+
         public void IsEmailAddress() =>
             ruleBuilder
                 .Cascade(CascadeMode.Stop)

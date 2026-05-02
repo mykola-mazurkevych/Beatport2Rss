@@ -17,8 +17,8 @@ internal static class MigrationBuilderExtensions
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName) ??
                                throw new InvalidOperationException($"Cannot find embedded SQL script: {resourceName}");
 
-            using var reader = new StreamReader(stream);
-            migrationBuilder.Sql(reader.ReadToEnd());
+            using var streamReader = new StreamReader(stream);
+            migrationBuilder.Sql(streamReader.ReadToEnd());
         }
     }
 
