@@ -42,6 +42,7 @@ public static class ServiceCollectionExtensions
                 .ConfigureOptions(configuration)
                 .AddBeatportServices()
                 .AddHealthServices()
+                .AddHttpClient()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
                 .AddPaging()

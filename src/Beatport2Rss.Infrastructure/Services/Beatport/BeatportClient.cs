@@ -16,13 +16,14 @@ using Microsoft.Extensions.Options;
 namespace Beatport2Rss.Infrastructure.Services.Beatport;
 
 internal sealed class BeatportClient(
+    IHttpClientFactory httpClientFactory,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
-    IBeatportClient, IDisposable, IAsyncDisposable
+    IBeatportClient
 {
     private const string BeatportApiUriString = "https://api.beatport.com/v4/catalog";
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
-    private readonly HttpClient _httpClient = new();
+    private readonly HttpClient _httpClient = httpClientFactory.CreateClient();
 
     public async Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
         BeatportId id,
@@ -55,15 +56,6 @@ internal sealed class BeatportClient(
             nameof(BeatportLabelDto) => "labels",
             _ => throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported.")
         };
-
-    public void Dispose() =>
-        _httpClient.Dispose();
-
-    public ValueTask DisposeAsync()
-    {
-        _httpClient.Dispose();
-        return ValueTask.CompletedTask;
-    }
 
     private sealed record ForbiddenResult(string Detail);
 }
