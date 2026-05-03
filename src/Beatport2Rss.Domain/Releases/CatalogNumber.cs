@@ -8,21 +8,21 @@ using Light.GuardClauses;
 
 namespace Beatport2Rss.Domain.Releases;
 
-public readonly record struct CatelogNumber :
+public readonly record struct CatalogNumber :
     IValueObject
 {
     public const int MaxLength = 100;
 
-    private CatelogNumber(string value) => Value = value;
+    private CatalogNumber(string value) => Value = value;
 
     public string Value { get; }
 
-    public static CatelogNumber Create([NotNull] string? value) =>
+    public static CatalogNumber Create([NotNull] string? value) =>
         new(value
             .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.CatelogNumberEmpty))
             .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.CatelogNumberTooLong)));
 
-    public bool Equals(CatelogNumber other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
+    public bool Equals(CatalogNumber other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);
     public override string ToString() => Value;
 }

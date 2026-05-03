@@ -25,7 +25,7 @@ public sealed class Release :
     public BeatportSlug BeatportSlug { get; private set; }
 
     public ReleaseName Name { get; private set; }
-    public CatelogNumber CatalogNumber { get; private set; }
+    public CatalogNumber CatalogNumber { get; private set; }
 
     public Uri ImageUri { get; private set; } = null!;
 
@@ -43,7 +43,7 @@ public sealed class Release :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         ReleaseName name,
-        CatelogNumber catalogNumber,
+        CatalogNumber catalogNumber,
         Uri imageUri,
         DateOnly releaseDate,
         int tracksCount,

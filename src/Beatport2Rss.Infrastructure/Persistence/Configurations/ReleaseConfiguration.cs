@@ -36,7 +36,7 @@ internal sealed class ReleaseConfiguration :
             .IsRequired();
 
         builder.Property(release => release.CatalogNumber)
-            .HasMaxLength(CatelogNumber.MaxLength)
+            .HasMaxLength(CatalogNumber.MaxLength)
             .IsRequired();
 
         builder.Property(release => release.ImageUri)

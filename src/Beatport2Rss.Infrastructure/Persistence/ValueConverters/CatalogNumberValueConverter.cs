@@ -5,6 +5,6 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Beatport2Rss.Infrastructure.Persistence.ValueConverters;
 
 internal sealed class CatalogNumberValueConverter() :
-    ValueConverter<CatelogNumber, string>(
+    ValueConverter<CatalogNumber, string>(
         catalogNumber => catalogNumber.Value,
-        value => CatelogNumber.Create(value));
+        value => CatalogNumber.Create(value));
