@@ -58,7 +58,9 @@ internal sealed class CreateUserCommandHandler(
         var userId = UserId.Create(Guid.CreateVersion7());
         var password = Password.Create(command.Password);
         var passwordHash = passwordHasher.Hash(password);
-        var countryCode = CountryCode.Create(command.CountryCode);
+        var countryCode = string.IsNullOrEmpty(command.CountryCode)
+            ? (CountryCode?)null
+            : CountryCode.Create(command.CountryCode);
 
         var user = User.Create(
             userId,
