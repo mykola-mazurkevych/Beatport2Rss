@@ -1,4 +1,4 @@
-DROP VIEW "vwSubscriptions";
+DROP VIEW IF EXISTS "vwSubscriptions";
 
 CREATE VIEW "vwSubscriptions" AS
 SELECT
