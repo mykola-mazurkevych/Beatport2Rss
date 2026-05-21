@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option csharp_namespace = "Beatport2Rss.TokenProvider";
+
+service TokenService {
+  rpc GetToken (Empty) returns (TokenReply);
+}
+
+message Empty {
+}
+
+message TokenReply {
+  string access_token = 1;
+}

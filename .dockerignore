@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.vs
+.vscode
+*.swp
+*.swo
+*~
+.idea
+*.user
+*.userprefs
+
+# Build artifacts
+bin/
+obj/
+dist/
+*.dll
+*.exe
+*.pdb
+
+# Test results
+TestResults/
+coverage/
+
+# NuGet
+packages/
+.nuget/
+
+# Local environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+*.md
+README.md
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore

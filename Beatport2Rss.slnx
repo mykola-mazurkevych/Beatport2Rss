@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/services/" />
+  <Folder Name="/services/TokenProvider/" />
+  <Folder Name="/services/TokenProvider/src/">
+    <Project Path="services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj" />
+  </Folder>
 
   <Folder Name="/src/">
     <Project Path="src/Beatport2Rss.Application/Beatport2Rss.Application.csproj" />
