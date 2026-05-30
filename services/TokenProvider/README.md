@@ -149,10 +149,16 @@ docker-compose -f docker/docker-compose.yml down
 docker-compose -f docker/docker-compose.yml logs -f
 ```
 
+## Startup Behavior
+
+- **Chromium Download**: Chromium binary (~200MB) is downloaded on service startup, before the service starts accepting requests
+- **Fail-Fast**: If the download fails, the service will not start, providing immediate visibility into deployment issues
+- **Subsequent Starts**: On restart, if Chromium is already cached, startup is fast (~2-3 seconds)
+
 ## Caching Strategy
 
 - **In-Memory Cache**: Tokens are cached in memory with a TTL matching the token's expiration
-- **Thread-Safe**: Uses `SemaphoreSlim` to prevent concurrent token refreshes
+- **Thread-Safe**: Uses `SemaphoreSlim` to prevent concurrent token refreshes with double-check locking
 - **Automatic Refresh**: Expired tokens are automatically fetched on the next request
 
 ## Health Check
@@ -166,14 +172,20 @@ GET http://localhost:5000/health
 ## Troubleshooting
 
 ### Service fails to start
-- Check Beatport credentials are correct
-- Ensure Chromium dependencies are available (see Dockerfile)
-- Check logs: `docker-compose logs token-provider`
+- Check Beatport credentials are correct and set via environment variables
+- Check Chromium download logs: `docker-compose logs token-provider`
+- Ensure network connectivity for downloading Chromium
+- Verify sufficient disk space for Chromium binary (~200MB)
+
+### Chromium download timeout
+- Increase startup timeout in Docker/K8s configuration
+- Check network bandwidth and connectivity
+- Consider using a local Chromium mirror (configure `ChromiumDownloaderOptions__BaseAddress`)
 
 ### Slow first token fetch
-- The first token acquisition downloads and caches Chromium (~200MB)
-- Subsequent token refreshes are faster
-- Consider pre-warming the cache during deployment
+- This should not occur - Chromium is downloaded at startup
+- If slow, check startup logs for warning messages about Chromium initialization
+- Token fetch itself is <100ms when Chromium is ready
 
 ### Port conflicts
 - Change port mapping in `docker-compose.yml` if port 5000 is in use
@@ -218,10 +230,12 @@ services/TokenProvider/
 
 ## Performance Considerations
 
-- **Memory**: Token cached in-memory (~5KB per token)
-- **CPU**: Heavy on first startup (Chromium download + initialization)
-- **Network**: Requires internet for Chromium download and Beatport API calls
-- **Latency**: First request takes ~5-10s, cached requests <100ms
+- **Startup Time**: ~30-60s (depending on network) due to Chromium download on first start
+  - Subsequent starts: ~2-3s (if Chromium cached)
+- **Memory**: Token cached in-memory (~5KB per token), plus Chromium process (~150-200MB)
+- **CPU**: Moderate during Chromium download, minimal during token serving
+- **Network**: Required for Chromium download at startup and Beatport API calls
+- **Request Latency**: <100ms for cached tokens, ~5-10s for token refresh (requires browser automation)
 
 ## License
 

@@ -5,9 +5,13 @@ using Beatport2Rss.TokenProvider.Services.Interfaces;
 
 using Microsoft.Extensions.Options;
 
+using Polly;
+using Polly.Retry;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
+builder.Services.AddHealthChecks();
 
 builder.Services
     .Configure<BeatportCredentials>(credentials => builder.Configuration.GetSection(nameof(BeatportCredentials)).Bind(credentials))
@@ -24,10 +28,19 @@ builder.Services.AddHttpClient<IChromiumDownloader, ChromiumDownloader>((provide
 builder.Services
     .AddSingleton<IAccessTokenProvider, AccessTokenProvider>()
     .AddSingleton<IBeatportAccessTokenInterceptor, BeatportAccessTokenInterceptor>()
-    .AddSingleton<IChromiumDownloader, ChromiumDownloader>();
+    .AddSingleton<IChromiumDownloader, ChromiumDownloader>()
+    .AddResiliencePipeline(
+        AccessTokenProvider.ResiliencePipelineKey, 
+        pipeline =>
+        {
+            pipeline.AddRetry(new RetryStrategyOptions { MaxRetryAttempts = 3 });
+            pipeline.AddTimeout(TimeSpan.FromSeconds(10));
+        })
+    .AddHostedService<ChromiumWarmup>();
 
 var app = builder.Build();
 
 app.MapGrpcService<TokenGrpcService>();
+app.MapHealthChecks("/health");
 
 app.Run();

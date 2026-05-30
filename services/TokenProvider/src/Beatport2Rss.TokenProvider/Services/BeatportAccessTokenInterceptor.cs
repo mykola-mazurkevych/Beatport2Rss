@@ -1,3 +1,5 @@
+#pragma warning disable CA1508 // Avoid dead conditional code
+
 using Beatport2Rss.TokenProvider.Options;
 using Beatport2Rss.TokenProvider.Services.Interfaces;
 
@@ -8,16 +10,19 @@ using PuppeteerSharp;
 namespace Beatport2Rss.TokenProvider.Services;
 
 internal sealed class BeatportAccessTokenInterceptor(
+    ILogger<BeatportAccessTokenInterceptor> logger,
     IOptions<BeatportCredentials> beatportCredentials,
     IChromiumDownloader chromiumDownloader) :
     IBeatportAccessTokenInterceptor
 {
     private readonly BeatportCredentials _beatportCredentials = beatportCredentials.Value;
 
-    public async Task<(string? AccessToken, int ExpiresIn)> InterceptAsync(
+    public async Task<(string AccessToken, int ExpiresIn)> InterceptAsync(
         bool headless,
         CancellationToken cancellationToken = default)
     {
+        BeatportAccessTokenInterceptorLogMessages.Started(logger);
+
         var executablePath = await chromiumDownloader.EnsureInstalledAsync(cancellationToken);
 
         string? accessToken = null;
@@ -73,6 +78,19 @@ internal sealed class BeatportAccessTokenInterceptor(
         ////await page.WaitForResponseAsync("https://api.beatport.com/v4/swagger-ui/");
         await page.WaitForResponseAsync("https://api.beatport.com/v4/swagger-ui/json/");
 
-        return (accessToken, expiresIn);
+        BeatportAccessTokenInterceptorLogMessages.Intercepted(logger, accessToken, expiresIn);
+
+        return string.IsNullOrEmpty(accessToken) || expiresIn == 0
+            ? throw new InvalidOperationException("Either access token is empty or expires in is zero")
+            : (accessToken, expiresIn);
     }
+}
+
+internal static partial class BeatportAccessTokenInterceptorLogMessages
+{
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Started")]
+    public static partial void Started(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Access token: {AccessToken}\nExpires in: {ExpiresIn}")]
+    public static partial void Intercepted(ILogger logger, string? accessToken, int expiresIn);
 }

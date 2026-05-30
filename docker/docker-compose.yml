@@ -1,9 +1,9 @@
-version: '3.8'
+name: beatport2rss
 
 services:
   postgres:
     image: postgres:latest
-    container_name: beatport2rss-postgres-db
+    container_name: postgres-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
@@ -21,9 +21,9 @@ services:
 
   token-provider:
     build:
-      context: .
+      context: ..
       dockerfile: services/TokenProvider/src/Beatport2Rss.TokenProvider/Dockerfile
-    container_name: beatport-token-provider
+    container_name: token-provider
     ports:
       - "5000:5000"
     environment:
@@ -31,6 +31,7 @@ services:
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
       - ChromiumDownloaderOptions__BaseAddress=https://edgedl.me.chromium.org/chromium-browser-snapshots
+      - ChromiumDownloaderOptions__CacheDirectory=/app/.cache
     volumes:
       - token-provider-cache:/app/.cache
     restart: unless-stopped

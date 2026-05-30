@@ -30,14 +30,15 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
-# Install PuppeteerSharp dependencies (required for Chromium)
-RUN apt-get update && apt-get install -y \
+# Update package lists first
+RUN apt-get update
+
+# Install PuppeteerSharp dependencies and curl for health checks
+RUN apt-get install -y \
     libx11-6 \
     libxext6 \
     libxrender1 \
-    libgconf-2-4 \
     libxrandr2 \
-    libpangocairo-1.0-0 \
     libpango-1.0-0 \
     libatk1.0-0 \
     libatk-bridge2.0-0 \
@@ -55,9 +56,9 @@ RUN apt-get update && apt-get install -y \
     libxcursor1 \
     libxi6 \
     libxtst6 \
-    libxrandr2 \
     fonts-liberation \
     ca-certificates \
+    curl \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
@@ -70,8 +71,8 @@ EXPOSE 5000
 ENV ASPNETCORE_HTTP_PORT=5000
 ENV ASPNETCORE_URLS=http://+:5000
 
-# Health check
+# Health check using HTTP health endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD dotnet --version || exit 1
+    CMD curl -f http://localhost:5000/health || exit 1
 
 ENTRYPOINT ["dotnet", "Beatport2Rss.TokenProvider.dll"]
