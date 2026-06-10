@@ -11,6 +11,7 @@ using Polly.Retry;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
+builder.Services.AddGrpcReflection();
 builder.Services.AddHealthChecks();
 
 builder.Services
@@ -34,13 +35,14 @@ builder.Services
         pipeline =>
         {
             pipeline.AddRetry(new RetryStrategyOptions { MaxRetryAttempts = 3 });
-            pipeline.AddTimeout(TimeSpan.FromSeconds(10));
+            pipeline.AddTimeout(TimeSpan.FromMinutes(5));
         })
     .AddHostedService<ChromiumWarmup>();
 
 var app = builder.Build();
 
 app.MapGrpcService<TokenGrpcService>();
+app.MapGrpcReflectionService();
 app.MapHealthChecks("/health");
 
 app.Run();

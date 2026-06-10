@@ -33,6 +33,7 @@ internal sealed class BeatportAccessTokenInterceptor(
             ExecutablePath = executablePath,
             Headless = headless,
             Browser = SupportedBrowser.Chrome,
+            Args = ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
         };
         await using var browser = await Puppeteer.LaunchAsync(launchOptions);
 

@@ -30,11 +30,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 
-# Update package lists first
-RUN apt-get update
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install PuppeteerSharp dependencies and curl for health checks
-RUN apt-get install -y \
+# Update package lists and install PuppeteerSharp/Chromium dependencies in one layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libx11-6 \
     libxext6 \
     libxrender1 \
@@ -52,15 +51,24 @@ RUN apt-get install -y \
     libnspr4 \
     libnss3 \
     libpulse0 \
+    libasound2t64 \
     libxcomposite1 \
     libxcursor1 \
     libxi6 \
     libxtst6 \
+    libxss1 \
+    libx11-xcb1 \
+    libxdamage1 \
+    libxkbcommon0 \
+    libxcb1 \
+    libxfixes3 \
+    libgcc-s1 \
+    libatspi2.0-0 \
+    libappindicator3-1 \
     fonts-liberation \
     ca-certificates \
     curl \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=publish /app/publish .
 
@@ -69,10 +77,9 @@ EXPOSE 5000
 
 # Set environment variables
 ENV ASPNETCORE_HTTP_PORT=5000
-ENV ASPNETCORE_URLS=http://+:5000
 
-# Health check using HTTP health endpoint
+# Health check using plain HTTP for the health endpoint
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+    CMD curl -f http://localhost:5001/health || exit 1
 
 ENTRYPOINT ["dotnet", "Beatport2Rss.TokenProvider.dll"]
