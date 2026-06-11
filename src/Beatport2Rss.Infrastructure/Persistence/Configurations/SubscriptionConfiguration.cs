@@ -46,9 +46,6 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.ImageUri)
             .IsUri();
 
-        builder.Property(subscription => subscription.RefreshedAt)
-            .IsRequired(false);
-
         builder.Property(subscription => subscription.CountryCode)
             .IsRequired(false);
 

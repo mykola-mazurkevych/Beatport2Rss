@@ -1,4 +1,5 @@
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.SharedKernel.Common;
 
@@ -13,7 +14,8 @@ internal sealed record SubscriptionQueryModel(
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,
     Uri ImageUri,
-    DateTimeOffset? RefreshedAt) :
+    CountryName? Country,
+    int SubscribersCount) :
     IQueryModel<SubscriptionId>
 {
     public HashSet<SubscriptionTagQueryModel> Tags { get; set; } = [];

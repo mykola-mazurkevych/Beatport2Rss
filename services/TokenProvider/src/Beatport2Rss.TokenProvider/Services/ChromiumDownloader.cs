@@ -44,12 +44,9 @@ internal sealed class ChromiumDownloader(
         await using var zipArchive = new ZipArchive(zipArchiveStream);
         await zipArchive.ExtractToDirectoryAsync(Path.GetTempPath(), cancellationToken);
 
-        if (!File.Exists(executablePath))
-        {
-            throw new InvalidOperationException("Chromium executable not found after extraction.");
-        }
-
-        return executablePath;
+        return File.Exists(executablePath)
+            ? executablePath
+            : throw new InvalidOperationException("Chromium executable not found after extraction.");
     }
 
     private static (string FolderName, string ExecutableName, string UriSegment) GetPlatformSpecificOptions() =>

@@ -1,4 +1,5 @@
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Subscriptions;
 
 namespace Beatport2Rss.Application.Dtos.Subscriptions;
@@ -10,6 +11,5 @@ public sealed record SubscriptionDto(
     BeatportSubscriptionType BeatportType,
     Uri BeatportUri,
     Uri ImageUri,
-    IEnumerable<SubscriptionTagDto> Tags,
-    DateTimeOffset? CreatedAt,
-    DateTimeOffset? RefreshedAt);
+    CountryName? Country,
+    IEnumerable<SubscriptionTagDto> Tags);

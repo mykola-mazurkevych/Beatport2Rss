@@ -97,9 +97,8 @@ internal sealed class CreateSubscriptionCommandHandler(
                 subscription.BeatportId,
                 subscription.BeatportSlug),
             subscription.ImageUri,
-            [],
-            subscription.CreatedAt,
-            subscription.RefreshedAt);
+            Country: null,
+            Tags: []);
     }
 
     private async Task<Result<Subscription>> GetArtistSubscriptionAsync(
@@ -121,7 +120,6 @@ internal sealed class CreateSubscriptionCommandHandler(
                 artistResult.Value.Id,
                 artistResult.Value.Slug,
                 artistResult.Value.Image.Uri,
-                refreshedAt: null,
                 countryCode)
         };
     }
@@ -145,7 +143,6 @@ internal sealed class CreateSubscriptionCommandHandler(
                 labelResult.Value.Id,
                 labelResult.Value.Slug,
                 labelResult.Value.Image.Uri,
-                refreshedAt: null,
                 countryCode)
         };
     }

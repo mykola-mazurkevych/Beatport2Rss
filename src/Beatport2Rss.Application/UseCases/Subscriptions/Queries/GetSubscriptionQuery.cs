@@ -48,11 +48,10 @@ internal sealed class GetSubscriptionQueryHandler(
                 subscriptionDetails.BeatportId,
                 subscriptionDetails.BeatportSlug),
             subscriptionDetails.ImageUri,
+            subscriptionDetails.Country,
             subscriptionDetails.Tags
                 .Select(subscriptionTag => new SubscriptionTagDto(
                     subscriptionTag.Name,
-                    subscriptionTag.Slug)),
-            subscriptionDetails.CreatedAt,
-            subscriptionDetails.RefreshedAt);
+                    subscriptionTag.Slug)));
     }
 }

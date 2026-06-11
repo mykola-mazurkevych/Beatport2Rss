@@ -30,8 +30,6 @@ public sealed class Subscription :
 
     public Uri ImageUri { get; private set; } = null!;
 
-    public DateTimeOffset? RefreshedAt { get; private set; }
-
     public CountryCode? CountryCode { get; private set; }
 
     public IReadOnlySet<SubscriptionTag> Tags =>
@@ -45,7 +43,6 @@ public sealed class Subscription :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         Uri imageUri,
-        DateTimeOffset? refreshedAt,
         CountryCode? countryCode) =>
         new()
         {
@@ -56,12 +53,8 @@ public sealed class Subscription :
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             ImageUri = imageUri,
-            RefreshedAt = refreshedAt,
             CountryCode = countryCode,
         };
-
-    public void MarkAsRefreshed(DateTimeOffset refreshedAt) =>
-        RefreshedAt = refreshedAt;
 
     public bool ContainsTag(TagId tagId) =>
         _tags.Any(t => t.TagId == tagId);

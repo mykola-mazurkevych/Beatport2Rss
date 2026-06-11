@@ -10,9 +10,8 @@ internal sealed record SubscriptionResponse(
     BeatportSubscriptionType BeatportType,
     Uri BeatportUri,
     Uri ImageUri,
-    IEnumerable<SubscriptionTagResponse> Tags,
-    DateTimeOffset? CreatedAt,
-    DateTimeOffset? RefreshedAt)
+    string? Country,
+    IEnumerable<SubscriptionTagResponse> Tags)
 {
     public static SubscriptionResponse Create(SubscriptionDto dto) =>
         new(dto.Id.Value,
@@ -21,7 +20,6 @@ internal sealed record SubscriptionResponse(
             dto.BeatportType,
             dto.BeatportUri,
             dto.ImageUri,
-            dto.Tags.Select(SubscriptionTagResponse.Create),
-            dto.CreatedAt,
-            dto.RefreshedAt);
+            dto.Country?.Value,
+            dto.Tags.Select(SubscriptionTagResponse.Create));
 }

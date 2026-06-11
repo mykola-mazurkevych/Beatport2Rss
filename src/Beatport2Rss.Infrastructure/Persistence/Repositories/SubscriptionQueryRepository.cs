@@ -26,14 +26,15 @@ internal sealed class SubscriptionQueryRepository(
             BeatportId = subscriptionQueryModel.BeatportId,
             BeatportSlug = subscriptionQueryModel.BeatportSlug,
             ImageUri = subscriptionQueryModel.ImageUri,
-            RefreshedAt = subscriptionQueryModel.RefreshedAt,
+            Country = subscriptionQueryModel.Country,
+            SubscribersCount = subscriptionQueryModel.SubscribersCount,
             Tags = subscriptionQueryModel.Tags
                 .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
-                .Select(subscriptionTagQueryModel =>new SubscriptionTagDetailsReadModel
-                    {
-                        Name = subscriptionTagQueryModel.Name,
-                        Slug = subscriptionTagQueryModel.Slug,
-                    }),
+                .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel
+                {
+                    Name = subscriptionTagQueryModel.Name,
+                    Slug = subscriptionTagQueryModel.Slug,
+                }),
         };
 
     public Task<bool> ExistsAsync(
@@ -65,15 +66,13 @@ internal sealed class SubscriptionQueryRepository(
                 subscriptionQueryModel.BeatportId,
                 subscriptionQueryModel.BeatportSlug,
                 subscriptionQueryModel.ImageUri,
+                subscriptionQueryModel.Country,
                 subscriptionQueryModel.Tags
                     .Where(subscriptionTagQueryModel => subscriptionTagQueryModel.UserId == userId)
                     .Select(subscriptionTagQueryModel => new SubscriptionTagDetailsReadModel
-                        {
-                            Name = subscriptionTagQueryModel.Name,
-                            Slug = subscriptionTagQueryModel.Slug,
-                        }
-                    ),
-                subscriptionQueryModel.CreatedAt,
-                subscriptionQueryModel.RefreshedAt),
+                    {
+                        Name = subscriptionTagQueryModel.Name,
+                        Slug = subscriptionTagQueryModel.Slug,
+                    })),
             cancellationToken);
 }

@@ -10,8 +10,9 @@ internal sealed record SubscriptionPaginableResponse(
     BeatportSubscriptionType BeatportType,
     Uri BeatportUri,
     Uri ImageUri,
-    IEnumerable<SubscriptionTagResponse> Tags,
-    DateTimeOffset? RefreshedAt)
+    string? Country,
+    int SubscribersCount,
+    IEnumerable<SubscriptionTagResponse> Tags)
 {
     public static SubscriptionPaginableResponse Create(SubscriptionPaginableDto dto) =>
         new(dto.Id.Value,
@@ -20,6 +21,7 @@ internal sealed record SubscriptionPaginableResponse(
             dto.BeatportType,
             dto.BeatportUri,
             dto.ImageUri,
-            dto.Tags.Select(SubscriptionTagResponse.Create),
-            dto.RefreshedAt);
+            dto.Country?.Value,
+            dto.SubscribersCount,
+            dto.Tags.Select(SubscriptionTagResponse.Create));
 }

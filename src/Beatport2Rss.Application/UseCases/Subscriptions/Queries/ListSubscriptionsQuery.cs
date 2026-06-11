@@ -50,11 +50,12 @@ internal sealed class ListSubscriptionsQueryHandler(
                     subscriptionPaginableReadModel.BeatportId,
                     subscriptionPaginableReadModel.BeatportSlug),
                 subscriptionPaginableReadModel.ImageUri,
+                subscriptionPaginableReadModel.Country,
+                subscriptionPaginableReadModel.SubscribersCount,
                 subscriptionPaginableReadModel.Tags
                     .Select(subscriptionTagReadModel => new SubscriptionTagDto(
                         subscriptionTagReadModel.Name,
-                        subscriptionTagReadModel.Slug)),
-                subscriptionPaginableReadModel.RefreshedAt))
+                        subscriptionTagReadModel.Slug))))
             .ToList();
 
         return new Page<SubscriptionPaginableDto>(subscriptionPaginableDtos, page.Info);

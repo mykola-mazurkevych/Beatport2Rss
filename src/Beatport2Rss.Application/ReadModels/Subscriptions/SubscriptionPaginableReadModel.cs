@@ -1,4 +1,5 @@
 using Beatport2Rss.Domain.Common.ValueObjects;
+using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.SharedKernel.Common;
 
@@ -14,6 +15,7 @@ public sealed record SubscriptionPaginableReadModel : IPaginable<SubscriptionId>
     public required BeatportId BeatportId { get; init; }
     public required BeatportSlug BeatportSlug { get; init; }
     public required Uri ImageUri { get; init; }
-    public required DateTimeOffset? RefreshedAt { get; init; }
+    public required CountryName? Country { get; init; }
+    public required int SubscribersCount { get; init; }
     public required IEnumerable<SubscriptionTagDetailsReadModel> Tags { get; init; }
 }
