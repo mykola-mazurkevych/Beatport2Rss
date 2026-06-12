@@ -1,6 +1,6 @@
-namespace Beatport2Rss.SharedKernel.Common;
+namespace Beatport2Rss.SharedKernel.Interfaces;
 
-public interface IEntity<out TId>
+public interface IPaginable<out TId>
     where TId : struct, IId<TId>
 {
     TId Id { get; }

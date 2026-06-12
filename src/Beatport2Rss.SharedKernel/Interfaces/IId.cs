@@ -1,6 +1,6 @@
 #pragma warning disable CA2225 // Operator overloads have named alternates
 
-namespace Beatport2Rss.SharedKernel.Common;
+namespace Beatport2Rss.SharedKernel.Interfaces;
 
 public interface IId<in TSelf> :
     IValueObject, IComparable<TSelf>

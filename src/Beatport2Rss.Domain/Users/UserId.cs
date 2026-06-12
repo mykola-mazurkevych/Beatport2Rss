@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
 using Beatport2Rss.Domain.Common.Constants;
-using Beatport2Rss.Domain.Common.Exceptions;
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Exceptions;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 

@@ -1,4 +1,4 @@
-namespace Beatport2Rss.SharedKernel.Common;
+namespace Beatport2Rss.SharedKernel.Interfaces;
 
 public interface IAggregateRoot<out TId> :
     IEntity<TId>

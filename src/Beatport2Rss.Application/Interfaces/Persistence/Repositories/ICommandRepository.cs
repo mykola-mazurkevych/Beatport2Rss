@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Domain.Tracks;
 

@@ -3,7 +3,7 @@
 
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Domain.Tags;
 

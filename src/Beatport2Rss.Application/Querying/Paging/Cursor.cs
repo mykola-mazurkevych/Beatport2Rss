@@ -1,4 +1,4 @@
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Application.Querying.Paging;
 

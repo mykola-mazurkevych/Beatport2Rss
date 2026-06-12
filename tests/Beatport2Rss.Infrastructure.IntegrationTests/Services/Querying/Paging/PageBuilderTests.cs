@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.Infrastructure.Services.Querying.Paging;
-using Beatport2Rss.SharedKernel.Common;
+using Beatport2Rss.SharedKernel.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 

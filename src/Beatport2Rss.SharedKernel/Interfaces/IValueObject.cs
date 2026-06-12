@@ -1,5 +1,5 @@
 #pragma warning disable CA1040 // Avoid empty interfaces
 
-namespace Beatport2Rss.SharedKernel.Common;
+namespace Beatport2Rss.SharedKernel.Interfaces;
 
 public interface IValueObject;
