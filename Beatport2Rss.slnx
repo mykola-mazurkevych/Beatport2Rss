@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/common/">
+    <Project Path="common/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
+  </Folder>
   <Folder Name="/services/" />
   <Folder Name="/services/TokenProvider/" />
   <Folder Name="/services/TokenProvider/src/">

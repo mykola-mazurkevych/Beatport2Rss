@@ -1,4 +1,4 @@
-using Beatport2Rss.Infrastructure.Persistence.Extensions;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 using Microsoft.EntityFrameworkCore;

@@ -35,7 +35,7 @@ internal sealed class PageBuilder(
         var previousCursor = cursorEncoder.Decode<TId>(pagination.Previous);
 
         PaginationDirection direction;
-        TPaginable? reference = null;
+        object? reference = null;
 
         if (previousCursor is null)
         {

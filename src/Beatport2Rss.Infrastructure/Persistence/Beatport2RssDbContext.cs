@@ -1,5 +1,6 @@
 using System.Reflection;
 
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Releases;
@@ -12,7 +13,6 @@ using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Infrastructure.Persistence;
 
@@ -52,21 +52,5 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         base.OnModelCreating(modelBuilder);
-    }
-}
-
-file static class ModelConfigurationBuilderExtensions
-{
-    extension(ModelConfigurationBuilder builder)
-    {
-        public void ConfigureConversions() =>
-            typeof(Beatport2RssDbContext).Assembly
-                .GetTypes()
-                .Where(type =>
-                    type.BaseType is not null &&
-                    type.BaseType.IsGenericType &&
-                    type.BaseType.GetGenericTypeDefinition() == typeof(ValueConverter<,>))
-                .ToList()
-                .ForEach(converterType => builder.Properties(converterType.BaseType!.GetGenericArguments()[0]).HaveConversion(converterType));
     }
 }

@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Beatport2Rss.Infrastructure.Persistence.Extensions;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
-internal static class PropertyBuilderExtensions
+public static class PropertyBuilderExtensions
 {
     private const int EnumMaxLength = 50;
+    private const int UriMaxLength = 500;
 
     extension<TEnum>(PropertyBuilder<TEnum> builder)
         where TEnum : struct, Enum
@@ -22,7 +23,7 @@ internal static class PropertyBuilderExtensions
         public PropertyBuilder<Uri> IsUri() =>
             builder
                 .HasConversion<string>()
-                .HasMaxLength(500)
+                .HasMaxLength(UriMaxLength)
                 .IsRequired();
     }
 }

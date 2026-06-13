@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Beatport2Rss.Infrastructure.Persistence.ValueConverters;
+namespace Beatport2Rss.Common.EntityFrameworkCore.ValueConverters;
 
-internal sealed class UriValueConverter() :
+public sealed class UriValueConverter() :
     ValueConverter<Uri, string>(
         uri => uri.ToString(),
         value => new Uri(value));

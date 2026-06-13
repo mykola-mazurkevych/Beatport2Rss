@@ -1,7 +1,7 @@
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Subscriptions;
-using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -1,6 +1,6 @@
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Users;
-using Beatport2Rss.Infrastructure.Persistence.Extensions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
