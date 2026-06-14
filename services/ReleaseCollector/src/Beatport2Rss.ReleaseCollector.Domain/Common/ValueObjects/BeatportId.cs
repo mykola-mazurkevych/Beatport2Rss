@@ -1,11 +1,12 @@
 using System.Globalization;
 
+using Beatport2Rss.ReleaseCollector.Domain.Common.Constants;
 using Beatport2Rss.SharedKernel.Exceptions;
 using Beatport2Rss.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.ReleaseCollector.Domain.Common;
+namespace Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
 
 public readonly record struct BeatportId :
     IValueObject

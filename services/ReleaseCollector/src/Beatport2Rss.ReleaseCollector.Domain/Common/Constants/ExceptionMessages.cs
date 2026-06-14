@@ -1,9 +1,9 @@
-using Beatport2Rss.ReleaseCollector.Domain.Common;
+using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
 using Beatport2Rss.ReleaseCollector.Domain.Releases;
 using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
 using Beatport2Rss.ReleaseCollector.Domain.Tracks;
 
-namespace Beatport2Rss.ReleaseCollector.Domain;
+namespace Beatport2Rss.ReleaseCollector.Domain.Common.Constants;
 
 internal static class ExceptionMessages
 {

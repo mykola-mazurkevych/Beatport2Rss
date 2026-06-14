@@ -1,5 +1,5 @@
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
-using Beatport2Rss.ReleaseCollector.Domain.Common;
+using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
 using Beatport2Rss.ReleaseCollector.Domain.Releases;
 using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
 

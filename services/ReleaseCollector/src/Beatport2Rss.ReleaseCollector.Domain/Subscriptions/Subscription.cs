@@ -1,6 +1,6 @@
 // ReSharper disable PropertyCanBeMadeInitOnly.Local
 
-using Beatport2Rss.ReleaseCollector.Domain.Common;
+using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
 using Beatport2Rss.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
