@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Beatport2Rss.Infrastructure\Beatport2Rss.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\services\ReleaseCollector\src\Beatport2Rss.ReleaseCollector.Infrastructure\Beatport2Rss.ReleaseCollector.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

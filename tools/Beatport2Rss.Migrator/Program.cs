@@ -2,7 +2,6 @@
 
 using System.Reflection;
 
-using Beatport2Rss.Infrastructure;
 using Beatport2Rss.Migrator;
 
 using Microsoft.Extensions.Configuration;
@@ -19,9 +18,13 @@ var configurationRoot = new ConfigurationBuilder()
     .AddUserSecrets(Assembly.GetEntryAssembly()!, optional: false)
     .Build();
 
-var serviceProvider = new ServiceCollection()
+var serviceCollection = new ServiceCollection();
+
+Beatport2Rss.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+Beatport2Rss.ReleaseCollector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+
+var serviceProvider =serviceCollection 
     .AddLogging(builder => builder.AddConsole())
-    .AddInfrastructure(configurationRoot)
     .AddSingleton<IApplication, Application>()
     .BuildServiceProvider();
 

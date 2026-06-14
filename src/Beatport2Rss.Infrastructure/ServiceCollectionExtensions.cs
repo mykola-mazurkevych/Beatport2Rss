@@ -51,11 +51,31 @@ public static class ServiceCollectionExtensions
                 .AddPersistence(configuration)
                 .AddSecurityServices();
 
+        public IServiceCollection AddMigrator(IConfiguration configuration) =>
+            services
+                .AddDbContext(configuration)
+                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>());
+
         private IServiceCollection AddBeatportServices() =>
             services
                 .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>()
                 .AddSingleton<IBeatportClient, BeatportClient>()
                 .AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
+
+        private IServiceCollection AddDbContext(IConfiguration configuration) =>
+            services
+                .AddDbContext<Beatport2RssDbContext>(builder => builder
+                    .UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext)))
+                    .UseSeeding((dbContext, _) =>
+                    {
+                        CountriesSeeder.Seed(dbContext.Set<Country>());
+                        dbContext.SaveChanges();
+                    })
+                    .UseAsyncSeeding(async (dbContext, _, cancellationToken) =>
+                    {
+                        await CountriesSeeder.SeedAsync(dbContext.Set<Country>(), cancellationToken);
+                        await dbContext.SaveChangesAsync(cancellationToken);
+                    }));
 
         private IServiceCollection AddHealthServices()
         {
@@ -106,19 +126,7 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>(builder => builder
-                    .UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext)))
-                    .UseSeeding((dbContext, _) =>
-                    {
-                        CountriesSeeder.Seed(dbContext.Set<Country>());
-                        dbContext.SaveChanges();
-                    })
-                    .UseAsyncSeeding(async (dbContext, _, cancellationToken) =>
-                    {
-                        await CountriesSeeder.SeedAsync(dbContext.Set<Country>(), cancellationToken);
-                        await dbContext.SaveChangesAsync(cancellationToken);
-                    }))
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>())
+                .AddDbContext(configuration)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SessionQueryModels.AsNoTracking())
