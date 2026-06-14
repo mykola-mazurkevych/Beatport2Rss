@@ -22,7 +22,6 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-!src/**/Releases/
 x64/
 x86/
 [Ww][Ii][Nn]32/
@@ -34,6 +33,8 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+!src/**/Releases/
+!services/**/src/**/Releases/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*

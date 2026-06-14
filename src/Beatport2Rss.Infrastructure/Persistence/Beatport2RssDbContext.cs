@@ -1,14 +1,10 @@
-using System.Reflection;
-
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Domain.Feeds;
-using Beatport2Rss.Domain.Releases;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Tags;
 using Beatport2Rss.Domain.Tokens;
-using Beatport2Rss.Domain.Tracks;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
@@ -22,15 +18,11 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Country> Countries => Set<Country>();
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
-    public DbSet<Release> Releases => Set<Release>();
-    public DbSet<ReleaseSubscription> ReleaseSubscriptions => Set<ReleaseSubscription>();
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Token> Tokens => Set<Token>();
-    public DbSet<Track> Tracks => Set<Track>();
-    public DbSet<TrackSubscription> TrackSubscriptions => Set<TrackSubscription>();
     public DbSet<User> Users => Set<User>();
 
     public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();
@@ -49,7 +41,7 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(Beatport2RssDbContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

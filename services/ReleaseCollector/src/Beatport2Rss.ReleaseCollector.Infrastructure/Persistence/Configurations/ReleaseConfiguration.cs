@@ -1,0 +1,83 @@
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.ReleaseCollector.Domain.Common;
+using Beatport2Rss.ReleaseCollector.Domain.Releases;
+using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Beatport2Rss.ReleaseCollector.Infrastructure.Persistence.Configurations;
+
+internal sealed class ReleaseConfiguration :
+    IEntityTypeConfiguration<Release>
+{
+    public void Configure(EntityTypeBuilder<Release> builder)
+    {
+        builder.ToTable(nameof(ReleaseCollectorDbContext.Releases));
+
+        builder.HasKey(release => release.Id);
+
+        builder.Property(release => release.Id)
+            .IsRequired()
+            .ValueGeneratedOnAdd();
+
+        builder.Property(release => release.CreatedAt)
+            .IsRequired();
+
+        builder.Property(release => release.BeatportId)
+            .IsRequired();
+
+        builder.Property(release => release.BeatportSlug)
+            .HasMaxLength(BeatportSlug.MaxLength)
+            .IsRequired();
+
+        builder.Property(release => release.Name)
+            .HasMaxLength(ReleaseName.MaxLength)
+            .IsRequired();
+
+        builder.Property(release => release.CatalogNumber)
+            .HasMaxLength(CatalogNumber.MaxLength)
+            .IsRequired();
+
+        builder.Property(release => release.ImageUri)
+            .IsUri();
+
+        builder.Property(release => release.ReleaseDate)
+            .IsRequired();
+
+        builder.OwnsMany(
+            release => release.Subscriptions,
+            navigationBuilder =>
+            {
+                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.ReleaseSubscriptions));
+
+                navigationBuilder.HasKey(releaseSubscription => new { releaseSubscription.ReleaseId, releaseSubscription.SubscriptionId, releaseSubscription.Type });
+
+                navigationBuilder.Property(releaseSubscription => releaseSubscription.ReleaseId)
+                    .IsRequired();
+
+                navigationBuilder.Property(releaseSubscription => releaseSubscription.SubscriptionId)
+                    .IsRequired();
+
+                navigationBuilder.Property(releaseSubscription => releaseSubscription.Type)
+                    .IsEnum();
+
+                navigationBuilder
+                    .WithOwner()
+                    .HasForeignKey(releaseSubscription => releaseSubscription.ReleaseId);
+
+                navigationBuilder
+                    .HasOne<Subscription>()
+                    .WithMany()
+                    .HasForeignKey(releaseSubscription => releaseSubscription.SubscriptionId);
+
+                navigationBuilder.HasIndex(releaseSubscription => releaseSubscription.SubscriptionId);
+            });
+
+        builder.Navigation(release => release.Tracks)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasIndex(release => release.BeatportId)
+            .IsUnique();
+    }
+}
