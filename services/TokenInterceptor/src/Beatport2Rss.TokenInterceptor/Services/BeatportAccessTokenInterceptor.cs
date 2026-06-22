@@ -1,13 +1,13 @@
 #pragma warning disable CA1508 // Avoid dead conditional code
 
-using Beatport2Rss.TokenProvider.Options;
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Options;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Microsoft.Extensions.Options;
 
 using PuppeteerSharp;
 
-namespace Beatport2Rss.TokenProvider.Services;
+namespace Beatport2Rss.TokenInterceptor.Services;
 
 internal sealed class BeatportAccessTokenInterceptor(
     ILogger<BeatportAccessTokenInterceptor> logger,

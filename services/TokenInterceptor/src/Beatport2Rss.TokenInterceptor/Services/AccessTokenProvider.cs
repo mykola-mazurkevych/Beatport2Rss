@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Microsoft.Extensions.Caching.Memory;
 
 using Polly.Registry;
 
-namespace Beatport2Rss.TokenProvider.Services;
+namespace Beatport2Rss.TokenInterceptor.Services;
 
 internal sealed class AccessTokenProvider(
     IMemoryCache cache,

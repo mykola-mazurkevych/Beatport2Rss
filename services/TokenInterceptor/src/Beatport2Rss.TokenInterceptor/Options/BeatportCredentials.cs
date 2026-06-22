@@ -1,4 +1,4 @@
-namespace Beatport2Rss.TokenProvider.Options;
+namespace Beatport2Rss.TokenInterceptor.Options;
 
 internal sealed record BeatportCredentials
 {

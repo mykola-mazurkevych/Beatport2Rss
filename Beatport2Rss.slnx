@@ -2,15 +2,21 @@
   <Folder Name="/common/">
     <Project Path="common/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
   </Folder>
+  <Folder Name="/docker/">
+    <File Path="docker/.env.example" />
+    <File Path="docker/docker-compose.yml" />
+  </Folder>
   <Folder Name="/services/" />
   <Folder Name="/services/ReleaseCollector/" />
   <Folder Name="/services/ReleaseCollector/src/">
     <Project Path="services/ReleaseCollector/src/Beatport2Rss.ReleaseCollector.Domain/Beatport2Rss.ReleaseCollector.Domain.csproj" />
     <Project Path="services/ReleaseCollector/src/Beatport2Rss.ReleaseCollector.Infrastructure/Beatport2Rss.ReleaseCollector.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/services/TokenProvider/" />
-  <Folder Name="/services/TokenProvider/src/">
-    <Project Path="services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj" />
+  <Folder Name="/services/TokenInterceptor/">
+    <File Path="services/TokenInterceptor/README.md" />
+  </Folder>
+  <Folder Name="/services/TokenInterceptor/src/">
+    <Project Path="services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj" />
   </Folder>
 
   <Folder Name="/src/">

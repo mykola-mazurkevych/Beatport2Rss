@@ -19,11 +19,11 @@ services:
       timeout: 5s
       retries: 5
 
-  token-provider:
+  token-interceptor:
     build:
       context: ..
-      dockerfile: services/TokenProvider/src/Beatport2Rss.TokenProvider/Dockerfile
-    container_name: token-provider
+      dockerfile: services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Dockerfile
+    container_name: token-interceptor
     ports:
       - "5000:5000"
     environment:
@@ -32,7 +32,7 @@ services:
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
       - ChromiumDownloaderOptions__BaseAddress=${CHROMIUM_BASE_URL}
     volumes:
-      - token-provider-cache:/app/.cache
+      - token-interceptor-cache:/app/.cache
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
@@ -46,4 +46,4 @@ services:
 
 volumes:
   postgres-data:
-  token-provider-cache:
+  token-interceptor-cache:

@@ -1,11 +1,11 @@
 using System.IO.Compression;
 
-using Beatport2Rss.TokenProvider.Options;
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Options;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.TokenProvider.Services;
+namespace Beatport2Rss.TokenInterceptor.Services;
 
 internal sealed class ChromiumDownloader(
     ILogger<ChromiumDownloader> logger,

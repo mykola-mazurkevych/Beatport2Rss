@@ -1,7 +1,8 @@
-using Beatport2Rss.TokenProvider.Options;
-using Beatport2Rss.TokenProvider.GrpcServices;
-using Beatport2Rss.TokenProvider.Services;
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.GrpcServices;
+using Beatport2Rss.TokenInterceptor.HostedServices;
+using Beatport2Rss.TokenInterceptor.Options;
+using Beatport2Rss.TokenInterceptor.Services;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Microsoft.Extensions.Options;
 

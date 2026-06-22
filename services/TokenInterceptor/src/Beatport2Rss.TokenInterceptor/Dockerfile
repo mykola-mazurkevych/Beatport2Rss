@@ -9,21 +9,21 @@ COPY ["Directory.Build.props", "."]
 COPY ["Directory.Packages.props", "."]
 COPY ["nuget.config", "."]
 
-# Copy the TokenProvider project and its dependencies
-COPY ["services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj", "services/TokenProvider/src/Beatport2Rss.TokenProvider/"]
+# Copy the TokenInterceptor project and its dependencies
+COPY ["services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj", "services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/"]
 
 # Restore dependencies
-RUN dotnet restore "services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj"
+RUN dotnet restore "services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj"
 
 # Copy source code
-COPY ["services/TokenProvider/src/", "services/TokenProvider/src/"]
+COPY ["services/TokenInterceptor/src/", "services/TokenInterceptor/src/"]
 
 # Build the project
-RUN dotnet build "services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj" -c Release -o /app/build
+RUN dotnet build "services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "services/TokenProvider/src/Beatport2Rss.TokenProvider/Beatport2Rss.TokenProvider.csproj" -c Release -o /app/publish
+RUN dotnet publish "services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj" -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
@@ -82,4 +82,4 @@ ENV ASPNETCORE_HTTP_PORT=5000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5001/health || exit 1
 
-ENTRYPOINT ["dotnet", "Beatport2Rss.TokenProvider.dll"]
+ENTRYPOINT ["dotnet", "Beatport2Rss.TokenInterceptor.dll"]

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Beatport2Rss.TokenProvider";
+option csharp_namespace = "Beatport2Rss.TokenInterceptor";
 
 service TokenService {
   rpc GetToken (Empty) returns (TokenReply);

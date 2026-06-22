@@ -1,8 +1,8 @@
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Grpc.Core;
 
-namespace Beatport2Rss.TokenProvider.GrpcServices;
+namespace Beatport2Rss.TokenInterceptor.GrpcServices;
 
 internal sealed class TokenGrpcService(
     IAccessTokenProvider accessTokenProvider) :

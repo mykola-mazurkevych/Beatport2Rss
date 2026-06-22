@@ -1,6 +1,6 @@
-using Beatport2Rss.TokenProvider.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
-namespace Beatport2Rss.TokenProvider.Services;
+namespace Beatport2Rss.TokenInterceptor.HostedServices;
 
 internal sealed class ChromiumWarmup(IChromiumDownloader chromiumDownloader) :
     IHostedService

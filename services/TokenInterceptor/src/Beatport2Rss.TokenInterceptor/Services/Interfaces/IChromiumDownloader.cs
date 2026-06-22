@@ -1,4 +1,4 @@
-namespace Beatport2Rss.TokenProvider.Services.Interfaces;
+namespace Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 internal interface IChromiumDownloader
 {
