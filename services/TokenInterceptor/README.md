@@ -37,14 +37,14 @@ The TokenInterceptor service is a specialized token provider that intercepts Bea
 
 ### gRPC Interface
 
-The service defines a simple gRPC contract (see `Protos/token.proto`):
+The service defines a simple gRPC contract shared from `common/protos/TokenService.proto`:
 
 ```protobuf
-service TokenService {
-  rpc GetToken (Empty) returns (TokenReply);
+service GrpcBeatportAccessTokenService {
+  rpc GetToken (GetTokenRequest) returns (GetTokenResponse);
 }
 
-message TokenReply {
+message GetTokenResponse {
   string access_token = 1;
 }
 ```

@@ -6,7 +6,6 @@ using System.Text.Json;
 using Beatport2Rss.Application.Dtos.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.SharedKernel.Extensions;
 
 using FluentResults;
@@ -27,13 +26,13 @@ internal sealed class BeatportClient(
 
     public async Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
         BeatportId id,
-        BeatportAccessToken token,
+        string accessToken,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto
     {
         var uriSegment = GetSegment<TBeatportDto>();
         var uri = new Uri($"{BeatportApiUriString}/{uriSegment}/{id}/");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token.Value);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         var response = await _httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
 
         switch (response.StatusCode)

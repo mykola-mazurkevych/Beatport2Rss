@@ -1,6 +1,5 @@
 using Beatport2Rss.Application.Dtos.Beatport;
 using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.Domain.Tokens;
 
 using FluentResults;
 
@@ -10,7 +9,7 @@ public interface IBeatportClient
 {
     Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
         BeatportId beatportId,
-        BeatportAccessToken beatportAccessToken,
+        string accessToken,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto;
 }
