@@ -9,6 +9,7 @@ using Beatport2Rss.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Infrastructure.Constants;
 using Beatport2Rss.Infrastructure.Extensions;
@@ -42,7 +43,7 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
-                .AddBeatportServices()
+                .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
@@ -56,9 +57,9 @@ public static class ServiceCollectionExtensions
                 .AddDbContext(configuration)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>());
 
-        private IServiceCollection AddBeatportServices() =>
+        private IServiceCollection AddBeatportServices(IConfiguration configuration) =>
             services
-                .AddSingleton<IBeatportAccessTokenProvider, BeatportAccessTokenProvider>()
+                .AddBeatportTokenProvider(configuration)
                 .AddSingleton<IBeatportClient, BeatportClient>()
                 .AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
 
@@ -136,8 +137,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SubscriptionTagQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().TagQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens.AsNoTracking()) // Ok for now
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tokens)
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().UserQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
                 .AddTransient<IUnitOfWork, UnitOfWork>()
@@ -149,8 +148,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ISubscriptionQueryRepository, SubscriptionQueryRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
-                .AddTransient<ITokenCommandRepository, TokenCommandRepository>()
-                .AddTransient<ITokenQueryRepository, TokenQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 

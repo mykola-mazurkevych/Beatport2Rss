@@ -4,7 +4,6 @@ using Beatport2Rss.Domain.Feeds;
 using Beatport2Rss.Domain.Sessions;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Tags;
-using Beatport2Rss.Domain.Tokens;
 using Beatport2Rss.Domain.Users;
 using Beatport2Rss.Infrastructure.Persistence.QueryModels;
 
@@ -22,7 +21,6 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
     public DbSet<Tag> Tags => Set<Tag>();
-    public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
 
     public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();

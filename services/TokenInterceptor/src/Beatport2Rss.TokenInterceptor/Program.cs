@@ -42,7 +42,7 @@ builder.Services
 
 var app = builder.Build();
 
-app.MapGrpcService<TokenGrpcService>();
+app.MapGrpcService<BeatportAccessTokenGrpcService>();
 app.MapGrpcReflectionService();
 app.MapHealthChecks("/health");
 

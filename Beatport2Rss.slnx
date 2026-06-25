@@ -1,6 +1,10 @@
 <Solution>
   <Folder Name="/common/">
+    <Project Path="common/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <Project Path="common/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
+  </Folder>
+  <Folder Name="/common/protos/">
+    <File Path="common/protos/TokenService.proto" />
   </Folder>
   <Folder Name="/docker/">
     <File Path="docker/.env.example" />
