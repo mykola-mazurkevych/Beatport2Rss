@@ -44,6 +44,9 @@ service GrpcBeatportAccessTokenService {
   rpc GetToken (GetTokenRequest) returns (GetTokenResponse);
 }
 
+message GetTokenRequest {
+}
+
 message GetTokenResponse {
   string access_token = 1;
 }

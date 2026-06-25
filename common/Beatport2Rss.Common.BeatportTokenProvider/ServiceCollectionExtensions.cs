@@ -19,11 +19,23 @@ public static class ServiceCollectionExtensions
         {
             services.Configure<BeatportTokenProviderOptions>(credentials => configuration.GetSection(nameof(BeatportTokenProviderOptions)).Bind(credentials));
 
-            services.AddGrpcClient<GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceClient>((provider, options) =>
-            {
-                var tokenOptions = provider.GetRequiredService<IOptions<BeatportTokenProviderOptions>>().Value;
-                options.Address = tokenOptions.TokenInterceptorGrpcUri;
-            });
+            services
+                .AddGrpcClient<GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceClient>((provider, options) =>
+                {
+                    var tokenOptions = provider.GetRequiredService<IOptions<BeatportTokenProviderOptions>>().Value;
+                    options.Address = tokenOptions.TokenInterceptorGrpcUri;
+                })
+                .ConfigurePrimaryHttpMessageHandler(provider =>
+                {
+                    var tokenOptions = provider.GetRequiredService<IOptions<BeatportTokenProviderOptions>>().Value;
+
+                    if (tokenOptions.TokenInterceptorGrpcUri.Scheme == Uri.UriSchemeHttp)
+                    {
+                        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                    }
+
+                    return new SocketsHttpHandler { EnableMultipleHttp2Connections = true };
+                });
 
             services.AddSingleton<IBeatportTokenProvider, Services.BeatportTokenProvider>();
 

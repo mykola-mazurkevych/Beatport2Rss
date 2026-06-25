@@ -32,8 +32,10 @@ internal sealed class BeatportClient(
     {
         var uriSegment = GetSegment<TBeatportDto>();
         var uri = new Uri($"{BeatportApiUriString}/{uriSegment}/{id}/");
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        var response = await _httpClient.GetAsync(uri, cancellationToken).ConfigureAwait(false);
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         switch (response.StatusCode)
         {

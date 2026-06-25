@@ -6,9 +6,9 @@ using Grpc.Core;
 
 namespace Beatport2Rss.TokenInterceptor.GrpcServices;
 
-internal sealed class GrpcBeatportAccessTokenService(
+internal sealed class BeatportAccessTokenGrpcService(
     IAccessTokenProvider accessTokenProvider) :
-    BeatportAccessTokenService.GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceBase
+    GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceBase
 {
     public override async Task<GetTokenResponse> GetToken(
         GetTokenRequest request,
