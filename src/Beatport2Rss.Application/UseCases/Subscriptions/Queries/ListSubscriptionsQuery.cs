@@ -2,7 +2,6 @@ using Beatport2Rss.Application.Dtos.Subscriptions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Querying.Paging;
-using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.Application.ReadModels.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;

@@ -11,5 +11,5 @@ internal sealed class BeatportUriBuilder(IOptions<BeatportOptions> beatportOptio
     private readonly BeatportOptions _beatportOptions = beatportOptions.Value;
 
     public Uri Build(int id, string slug) =>
-        new($"{_beatportOptions.WebBaseUri}/{slug}/{id}");
+        new(_beatportOptions.WebBaseUri, $"{slug.TrimStart('/')}/{id}");
 }

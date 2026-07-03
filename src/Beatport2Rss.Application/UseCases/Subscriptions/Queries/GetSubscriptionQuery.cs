@@ -1,7 +1,6 @@
 using Beatport2Rss.Application.Dtos.Subscriptions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
