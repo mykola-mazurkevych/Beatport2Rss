@@ -1,4 +1,4 @@
-namespace Beatport2Rss.TokenInterceptor.Services.Interfaces;
+namespace Beatport2Rss.TokenInterceptor.Interfaces;
 
 internal interface IBeatportAccessTokenInterceptor
 {

@@ -1,4 +1,4 @@
-using Beatport2Rss.TokenInterceptor.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Interfaces;
 
 namespace Beatport2Rss.TokenInterceptor.HostedServices;
 

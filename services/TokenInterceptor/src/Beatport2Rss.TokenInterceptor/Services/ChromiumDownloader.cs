@@ -1,7 +1,7 @@
 using System.IO.Compression;
 
+using Beatport2Rss.TokenInterceptor.Interfaces;
 using Beatport2Rss.TokenInterceptor.Options;
-using Beatport2Rss.TokenInterceptor.Services.Interfaces;
 
 using Microsoft.Extensions.Options;
 

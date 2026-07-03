@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.TokenInterceptor.Services.Interfaces;
+using Beatport2Rss.TokenInterceptor.Interfaces;
 
 using Microsoft.Extensions.Caching.Memory;
 
