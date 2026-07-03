@@ -12,7 +12,7 @@ using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Common.Beatport.Services;
 
-internal sealed class BeatportClient(
+internal sealed class BeatportV4Client(
     HttpClient httpClient,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IBeatportClient

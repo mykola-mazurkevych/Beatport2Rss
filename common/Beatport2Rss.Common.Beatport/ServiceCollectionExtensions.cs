@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
             services.Configure<BeatportOptions>(options => configuration.GetSection(nameof(BeatportOptions)).Bind(options));
 
             services.AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
-            services.AddHttpClient<IBeatportClient, BeatportClient>((provider, httpClient) =>
+            services.AddHttpClient<IBeatportClient, BeatportV4Client>((provider, httpClient) =>
             {
                 var options = provider.GetRequiredService<IOptions<BeatportOptions>>().Value;
                 httpClient.BaseAddress = new Uri(options.ApiV4BaseUri.ToString().TrimEnd('/') + '/');
