@@ -3,50 +3,42 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-using Beatport2Rss.Application.Dtos.Beatport;
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
-using Beatport2Rss.Domain.Common.ValueObjects;
-using Beatport2Rss.SharedKernel.Extensions;
+using Beatport2Rss.Common.Beatport.Interfaces;
+using Beatport2Rss.Common.Beatport.Models;
 
 using FluentResults;
 
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Infrastructure.Services.Beatport;
+namespace Beatport2Rss.Common.Beatport.Services;
 
 internal sealed class BeatportClient(
-    IHttpClientFactory httpClientFactory,
+    HttpClient httpClient,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IBeatportClient
 {
-    private const string BeatportApiUriString = "https://api.beatport.com/v4/catalog";
-
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
-    private readonly HttpClient _httpClient = httpClientFactory.CreateClient();
 
     public async Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
-        BeatportId id,
+        int id,
         string accessToken,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto
     {
-        var uriSegment = GetSegment<TBeatportDto>();
-        var uri = new Uri($"{BeatportApiUriString}/{uriSegment}/{id}/");
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{GetSegment<TBeatportDto>()}/{id}", UriKind.Relative));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
-
+        using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
-                var dto = await response.Content.ReadFromJsonAsync<TBeatportDto>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
-                return dto;
+                var beatportDto = await response.Content.ReadFromJsonAsync<TBeatportDto>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
+                return beatportDto;
             case HttpStatusCode.Forbidden:
                 var forbiddenResult = await response.Content.ReadFromJsonAsync<ForbiddenResult>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
-                return Result.Forbidden(forbiddenResult?.Detail ?? "Forbidden.");
+                return Result.Fail(forbiddenResult?.Detail ?? "Forbidden");
             default:
-                return Result.Unprocessable($"Beatport API return {response.StatusCode} status code.");
+                return Result.Fail($"Beatport API return {response.StatusCode} status code");
         }
     }
 
@@ -55,7 +47,7 @@ internal sealed class BeatportClient(
         {
             nameof(BeatportArtistDto) => "artists",
             nameof(BeatportLabelDto) => "labels",
-            _ => throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported.")
+            _ => throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported")
         };
 
     private sealed record ForbiddenResult(string Detail);

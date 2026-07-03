@@ -6,9 +6,9 @@ using System.Text.Json;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Querying.Paging;
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Application.Interfaces.Services.Security;
+using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Domain.Countries;
 using Beatport2Rss.Infrastructure.Constants;
@@ -17,7 +17,6 @@ using Beatport2Rss.Infrastructure.Options;
 using Beatport2Rss.Infrastructure.Persistence;
 using Beatport2Rss.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Infrastructure.Persistence.Seeders;
-using Beatport2Rss.Infrastructure.Services.Beatport;
 using Beatport2Rss.Infrastructure.Services.Health;
 using Beatport2Rss.Infrastructure.Services.Misc;
 using Beatport2Rss.Infrastructure.Services.Querying.Paging;
@@ -60,8 +59,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddBeatportServices(IConfiguration configuration) =>
             services
                 .AddBeatportTokenProvider(configuration)
-                .AddSingleton<IBeatportClient, BeatportClient>()
-                .AddSingleton<IBeatportUriBuilder, BeatportUriBuilder>();
+                .AddBeatportClient(configuration);
 
         private IServiceCollection AddDbContext(IConfiguration configuration) =>
             services

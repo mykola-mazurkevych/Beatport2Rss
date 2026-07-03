@@ -1,7 +1,8 @@
 using Beatport2Rss.Application.Dtos.Subscriptions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
+using Beatport2Rss.Common.Beatport;
+using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Users;
 
@@ -44,9 +45,8 @@ internal sealed class GetSubscriptionQueryHandler(
             subscriptionDetails.Slug,
             subscriptionDetails.BeatportType,
             beatportUriBuilder.Build(
-                subscriptionDetails.BeatportType,
-                subscriptionDetails.BeatportId,
-                subscriptionDetails.BeatportSlug),
+                subscriptionDetails.BeatportId.Value,
+                subscriptionDetails.BeatportSlug.Value),
             subscriptionDetails.ImageUri,
             subscriptionDetails.Country,
             subscriptionDetails.Tags

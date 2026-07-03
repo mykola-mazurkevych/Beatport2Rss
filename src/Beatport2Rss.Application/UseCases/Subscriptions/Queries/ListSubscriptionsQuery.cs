@@ -2,9 +2,10 @@ using Beatport2Rss.Application.Dtos.Subscriptions;
 using Beatport2Rss.Application.Interfaces.Messages;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Application.Interfaces.Querying.Paging;
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
+using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Application.Querying.Paging;
 using Beatport2Rss.Application.ReadModels.Subscriptions;
+using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Domain.Subscriptions;
 using Beatport2Rss.Domain.Users;
 
@@ -46,9 +47,8 @@ internal sealed class ListSubscriptionsQueryHandler(
                 subscriptionPaginableReadModel.Slug,
                 subscriptionPaginableReadModel.BeatportType,
                 beatportUriBuilder.Build(
-                    subscriptionPaginableReadModel.BeatportType,
-                    subscriptionPaginableReadModel.BeatportId,
-                    subscriptionPaginableReadModel.BeatportSlug),
+                    subscriptionPaginableReadModel.BeatportId.Value,
+                    subscriptionPaginableReadModel.BeatportSlug.Value),
                 subscriptionPaginableReadModel.ImageUri,
                 subscriptionPaginableReadModel.Country,
                 subscriptionPaginableReadModel.SubscribersCount,
