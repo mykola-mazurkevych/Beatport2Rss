@@ -2,6 +2,8 @@ using Beatport2Rss.SharedKernel.Interfaces;
 
 using NetArchTest.Rules;
 
+using Xunit;
+
 namespace Beatport2Rss.ArchitectureTests;
 
 public sealed class DomainTests : Base.Tests
