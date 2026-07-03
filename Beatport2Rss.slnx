@@ -3,6 +3,7 @@
     <Project Path="common/Beatport2Rss.Common.Beatport/Beatport2Rss.Common.Beatport.csproj" />
     <Project Path="common/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <Project Path="common/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
+    <Project Path="common/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj" />
   </Folder>
   <Folder Name="/common/protos/">
     <File Path="common/protos/TokenService.proto" />
