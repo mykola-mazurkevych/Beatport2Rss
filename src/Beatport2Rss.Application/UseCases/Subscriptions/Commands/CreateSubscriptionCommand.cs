@@ -1,10 +1,10 @@
-using Beatport2Rss.Application.Dtos.Beatport;
 using Beatport2Rss.Application.Dtos.Subscriptions;
 using Beatport2Rss.Application.Extensions;
 using Beatport2Rss.Application.Interfaces.Persistence;
 using Beatport2Rss.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Application.Interfaces.Services.Beatport;
 using Beatport2Rss.Application.Interfaces.Services.Misc;
+using Beatport2Rss.Common.Beatport.Interfaces;
+using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 using Beatport2Rss.Domain.Common.ValueObjects;
 using Beatport2Rss.Domain.Countries;
@@ -95,9 +95,8 @@ internal sealed class CreateSubscriptionCommandHandler(
             subscription.Slug,
             subscription.BeatportType,
             beatportUriBuilder.Build(
-                subscription.BeatportType,
-                subscription.BeatportId,
-                subscription.BeatportSlug),
+                    subscription.BeatportId.Value,
+                    subscription.BeatportSlug.Value),
             subscription.ImageUri,
             Country: null,
             Tags: []);
@@ -109,7 +108,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         CountryCode? countryCode,
         CancellationToken cancellationToken)
     {
-        var artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId, accessToken, cancellationToken);
+        var artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId.Value, accessToken, cancellationToken);
         return artistResult switch
         {
             { IsFailed: true } => Result.Unprocessable(artistResult),
@@ -119,8 +118,8 @@ internal sealed class CreateSubscriptionCommandHandler(
                 SubscriptionName.Create(artistResult.Value.Name),
                 slugGenerator.Generate(artistResult.Value.Name),
                 BeatportSubscriptionType.Artist,
-                artistResult.Value.Id,
-                artistResult.Value.Slug,
+                BeatportId.Create(artistResult.Value.Id),
+                BeatportSlug.Create(artistResult.Value.Slug),
                 artistResult.Value.Image.Uri,
                 countryCode)
         };
@@ -132,7 +131,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         CountryCode? countryCode,
         CancellationToken cancellationToken)
     {
-        var labelResult = await beatportClient.GetAsync<BeatportLabelDto>(beatportId, accessToken, cancellationToken);
+        var labelResult = await beatportClient.GetAsync<BeatportLabelDto>(beatportId.Value, accessToken, cancellationToken);
         return labelResult switch
         {
             { IsFailed: true } => Result.Unprocessable(labelResult.Errors[0].Message),
@@ -142,8 +141,8 @@ internal sealed class CreateSubscriptionCommandHandler(
                 SubscriptionName.Create(labelResult.Value.Name),
                 slugGenerator.Generate(labelResult.Value.Name),
                 BeatportSubscriptionType.Label,
-                labelResult.Value.Id,
-                labelResult.Value.Slug,
+                BeatportId.Create(labelResult.Value.Id),
+                BeatportSlug.Create(labelResult.Value.Slug),
                 labelResult.Value.Image.Uri,
                 countryCode)
         };

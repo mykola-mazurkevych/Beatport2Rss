@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\common\Beatport2Rss.Common.Beatport\Beatport2Rss.Common.Beatport.csproj" />
     <ProjectReference Include="..\..\common\Beatport2Rss.Common.BeatportTokenProvider\Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <ProjectReference Include="..\..\common\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Application\Beatport2Rss.Application.csproj" />
