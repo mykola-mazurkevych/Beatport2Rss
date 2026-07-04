@@ -4,13 +4,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <NoWarn>
-      CA1515; <!-- Consider making public types internal -->
-      CA1707; <!-- Identifiers should not contain underscores -->
-    </NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="coverlet.collector">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

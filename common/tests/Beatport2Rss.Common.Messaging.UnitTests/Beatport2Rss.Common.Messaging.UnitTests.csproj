@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <NoWarn>
-      CA1707; <!-- Identifiers should not contain underscores -->
-    </NoWarn>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
