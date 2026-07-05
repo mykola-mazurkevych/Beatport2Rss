@@ -1,7 +1,7 @@
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.ReleaseCollector.Domain.Artists;
 using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
 using Beatport2Rss.ReleaseCollector.Domain.Releases;
-using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
 using Beatport2Rss.ReleaseCollector.Domain.Tracks;
 
 using Microsoft.EntityFrameworkCore;
@@ -53,32 +53,31 @@ internal sealed class TrackConfiguration :
             .IsRequired();
 
         builder.OwnsMany(
-            track => track.Subscriptions,
+            track => track.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.TrackSubscriptions));
+                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.TrackArtists));
 
-                navigationBuilder.HasKey(trackSubscription => new { trackSubscription.TrackId, trackSubscription.SubscriptionId, trackSubscription.Type });
+                navigationBuilder.HasKey(trackArtist => new { trackArtist.TrackId, trackArtist.ArtistId, trackArtist.Type });
 
-                navigationBuilder.Property(trackSubscription => trackSubscription.TrackId)
+                navigationBuilder.Property(trackArtist => trackArtist.TrackId)
                     .IsRequired();
 
-                navigationBuilder.Property(trackSubscription => trackSubscription.SubscriptionId)
+                navigationBuilder.Property(trackArtist => trackArtist.ArtistId)
                     .IsRequired();
 
-                navigationBuilder.Property(trackSubscription => trackSubscription.Type)
+                navigationBuilder.Property(trackArtist => trackArtist.Type)
                     .IsEnum();
 
                 navigationBuilder
                     .WithOwner()
-                    .HasForeignKey(trackSubscription => trackSubscription.TrackId);
+                    .HasForeignKey(trackArtist => trackArtist.TrackId);
 
-                navigationBuilder
-                    .HasOne<Subscription>()
+                navigationBuilder.HasOne<Artist>()
                     .WithMany()
-                    .HasForeignKey(trackSubscription => trackSubscription.SubscriptionId);
+                    .HasForeignKey(trackArtist => trackArtist.ArtistId);
 
-                navigationBuilder.HasIndex(trackSubscription => trackSubscription.SubscriptionId);
+                navigationBuilder.HasIndex(trackArtist => trackArtist.ArtistId);
             });
 
         builder.HasOne<Release>()

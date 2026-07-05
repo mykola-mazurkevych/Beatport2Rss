@@ -1,6 +1,7 @@
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.ReleaseCollector.Domain.Artists;
+using Beatport2Rss.ReleaseCollector.Domain.Labels;
 using Beatport2Rss.ReleaseCollector.Domain.Releases;
-using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
 using Beatport2Rss.ReleaseCollector.Domain.Tracks;
 
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,12 @@ internal sealed class ReleaseCollectorDbContext(DbContextOptions<ReleaseCollecto
 {
     private const string SchemaName = "collector";
 
+    public DbSet<Artist> Artists => Set<Artist>();
+    public DbSet<Label> Labels => Set<Label>();
     public DbSet<Release> Releases => Set<Release>();
-    public DbSet<ReleaseSubscription> ReleaseSubscriptions => Set<ReleaseSubscription>();
-    public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
     public DbSet<Track> Tracks => Set<Track>();
-    public DbSet<TrackSubscription> TrackSubscriptions => Set<TrackSubscription>();
+    public DbSet<TrackArtist> TrackArtists => Set<TrackArtist>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

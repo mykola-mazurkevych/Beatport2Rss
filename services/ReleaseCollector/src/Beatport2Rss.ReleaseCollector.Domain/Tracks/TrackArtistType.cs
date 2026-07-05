@@ -1,6 +1,6 @@
 namespace Beatport2Rss.ReleaseCollector.Domain.Tracks;
 
-public enum TrackSubscriptionType
+public enum TrackArtistType
 {
     Artist,
     Remixer,

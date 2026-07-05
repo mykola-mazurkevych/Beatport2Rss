@@ -1,7 +1,5 @@
-// ReSharper disable PropertyCanBeMadeInitOnly.Local
-// ReSharper disable UnusedMember.Local
-
 using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
+using Beatport2Rss.ReleaseCollector.Domain.Labels;
 using Beatport2Rss.ReleaseCollector.Domain.Tracks;
 using Beatport2Rss.SharedKernel.Interfaces;
 
@@ -10,15 +8,20 @@ namespace Beatport2Rss.ReleaseCollector.Domain.Releases;
 public sealed class Release :
     IAggregateRoot<ReleaseId>
 {
-    private readonly HashSet<ReleaseSubscription> _subscriptions = [];
+    private readonly HashSet<ReleaseArtist> _artists = [];
     private readonly HashSet<Track> _tracks = [];
 
     private Release()
     {
     }
 
-    private Release(IEnumerable<ReleaseSubscription> subscriptions, IEnumerable<Track> tracks) =>
-        (_subscriptions, _tracks) = ([.. subscriptions], [.. tracks]);
+    private Release(
+        IEnumerable<ReleaseArtist> artists,
+        IEnumerable<Track> tracks)
+    {
+        _artists = [.. artists];
+        _tracks = [.. tracks];
+    }
 
     public ReleaseId Id { get; private set; }
 
@@ -28,13 +31,14 @@ public sealed class Release :
     public BeatportSlug BeatportSlug { get; private set; }
 
     public ReleaseName Name { get; private set; }
+    public DateOnly ReleaseDate { get; private set; }
+
+    public LabelId LabelId { get; private set; }
     public CatalogNumber CatalogNumber { get; private set; }
 
     public Uri ImageUri { get; private set; } = null!;
 
-    public DateOnly ReleaseDate { get; private set; }
-
-    public IReadOnlyCollection<ReleaseSubscription> Subscriptions => _subscriptions.AsReadOnly();
+    public IReadOnlyCollection<ReleaseArtist> Artists => _artists.AsReadOnly();
     public IReadOnlyCollection<Track> Tracks => _tracks.AsReadOnly();
 
     public static Release Create(
@@ -43,20 +47,22 @@ public sealed class Release :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         ReleaseName name,
+        DateOnly releaseDate,
+        LabelId labelId,
         CatalogNumber catalogNumber,
         Uri imageUri,
-        DateOnly releaseDate,
-        IEnumerable<ReleaseSubscription> subscriptions,
+        IEnumerable<ReleaseArtist> artists,
         IEnumerable<Track> tracks) =>
-        new(subscriptions, tracks)
+        new(artists, tracks)
         {
             Id = id,
             CreatedAt = createdAt,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             Name = name,
+            ReleaseDate = releaseDate,
+            LabelId = labelId,
             CatalogNumber = catalogNumber,
             ImageUri = imageUri,
-            ReleaseDate = releaseDate,
         };
 }

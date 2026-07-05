@@ -1,8 +1,7 @@
 namespace Beatport2Rss.ReleaseCollector.Domain.Releases;
 
-public enum ReleaseSubscriptionType
+public enum ReleaseArtistType
 {
     Artist,
     Remixer,
-    Label,
 }

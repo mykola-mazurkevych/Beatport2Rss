@@ -1,7 +1,8 @@
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.ReleaseCollector.Domain.Artists;
 using Beatport2Rss.ReleaseCollector.Domain.Common.ValueObjects;
+using Beatport2Rss.ReleaseCollector.Domain.Labels;
 using Beatport2Rss.ReleaseCollector.Domain.Releases;
-using Beatport2Rss.ReleaseCollector.Domain.Subscriptions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -35,6 +36,12 @@ internal sealed class ReleaseConfiguration :
             .HasMaxLength(ReleaseName.MaxLength)
             .IsRequired();
 
+        builder.Property(release => release.LabelId)
+            .IsRequired();
+
+        builder.Property(release => release.ReleaseDate)
+            .IsRequired();
+
         builder.Property(release => release.CatalogNumber)
             .HasMaxLength(CatalogNumber.MaxLength)
             .IsRequired();
@@ -42,37 +49,36 @@ internal sealed class ReleaseConfiguration :
         builder.Property(release => release.ImageUri)
             .IsUri();
 
-        builder.Property(release => release.ReleaseDate)
-            .IsRequired();
-
         builder.OwnsMany(
-            release => release.Subscriptions,
+            release => release.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.ReleaseSubscriptions));
+                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.ReleaseArtists));
 
-                navigationBuilder.HasKey(releaseSubscription => new { releaseSubscription.ReleaseId, releaseSubscription.SubscriptionId, releaseSubscription.Type });
+                navigationBuilder.HasKey(releaseArtist => new { releaseArtist.ReleaseId, releaseArtist.ArtistId, releaseArtist.Type });
 
-                navigationBuilder.Property(releaseSubscription => releaseSubscription.ReleaseId)
+                navigationBuilder.Property(releaseArtist => releaseArtist.ReleaseId)
                     .IsRequired();
 
-                navigationBuilder.Property(releaseSubscription => releaseSubscription.SubscriptionId)
+                navigationBuilder.Property(releaseArtist => releaseArtist.ArtistId)
                     .IsRequired();
 
-                navigationBuilder.Property(releaseSubscription => releaseSubscription.Type)
+                navigationBuilder.Property(releaseArtist => releaseArtist.Type)
                     .IsEnum();
 
-                navigationBuilder
-                    .WithOwner()
-                    .HasForeignKey(releaseSubscription => releaseSubscription.ReleaseId);
+                navigationBuilder.WithOwner()
+                    .HasForeignKey(releaseArtist => releaseArtist.ReleaseId);
 
-                navigationBuilder
-                    .HasOne<Subscription>()
+                navigationBuilder.HasOne<Artist>()
                     .WithMany()
-                    .HasForeignKey(releaseSubscription => releaseSubscription.SubscriptionId);
+                    .HasForeignKey(releaseArtist => releaseArtist.ArtistId);
 
-                navigationBuilder.HasIndex(releaseSubscription => releaseSubscription.SubscriptionId);
+                navigationBuilder.HasIndex(releaseArtist => releaseArtist.ArtistId);
             });
+
+        builder.HasOne<Label>()
+            .WithMany()
+            .HasForeignKey(release => release.LabelId);
 
         builder.Navigation(release => release.Tracks)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
