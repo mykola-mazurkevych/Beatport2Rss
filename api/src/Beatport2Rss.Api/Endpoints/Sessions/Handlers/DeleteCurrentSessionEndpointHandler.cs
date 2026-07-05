@@ -1,0 +1,21 @@
+using Beatport2Rss.Api.Application.UseCases.Sessions.Commands;
+using Beatport2Rss.Api.Extensions;
+
+using Mediator;
+
+using Microsoft.AspNetCore.Mvc;
+
+namespace Beatport2Rss.Api.Endpoints.Sessions.Handlers;
+
+internal static class DeleteCurrentSessionEndpointHandler
+{
+    public static async Task<IResult> Handle(
+        [FromServices] IMediator mediator,
+        HttpContext context,
+        CancellationToken cancellationToken)
+    {
+        var command = new DeleteSessionCommand(context.User.SessionId);
+        var result = await mediator.Send(command, cancellationToken);
+        return result.ToAspNetCoreResult(Results.NoContent, context);
+    }
+}

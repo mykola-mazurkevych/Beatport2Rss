@@ -62,7 +62,7 @@ internal sealed class RequireValidationBuilder :
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.Append("namespace Beatport2Rss.Application.Behaviors;");
+        sourceTextBuilder.Append("namespace Beatport2Rss.Api.Application.Behaviors;");
         sourceTextBuilder.Append(_builder);
 
         return SourceText.From(sourceTextBuilder.ToString(), Encoding.UTF8);

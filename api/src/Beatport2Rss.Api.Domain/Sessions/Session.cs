@@ -1,0 +1,52 @@
+using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.SharedKernel.Interfaces;
+
+namespace Beatport2Rss.Api.Domain.Sessions;
+
+public sealed class Session :
+    IAggregateRoot<SessionId>
+{
+    public const int UserAgentMaxLength = 1024;
+    public const int IpAddressMaxLength = 45;
+
+    private Session()
+    {
+    }
+
+    public SessionId Id { get; private set; }
+
+    public DateTimeOffset CreatedAt { get; private set; }
+    
+    public UserId UserId { get; private set; }
+
+    public RefreshTokenHash RefreshTokenHash { get; private set; }
+    public DateTimeOffset RefreshTokenExpiresAt { get; private set; }
+
+    public string? UserAgent { get; private set; }
+    public string? IpAddress { get; private set; }
+
+    public static Session Create(
+        SessionId id,
+        DateTimeOffset createdAt,
+        UserId userId,
+        RefreshTokenHash refreshTokenHash,
+        DateTimeOffset refreshTokenExpiresAt,
+        string? userAgent,
+        string? ipAddress) =>
+        new()
+        {
+            Id = id,
+            CreatedAt = createdAt,
+            UserId = userId,
+            RefreshTokenHash = refreshTokenHash,
+            RefreshTokenExpiresAt = refreshTokenExpiresAt,
+            UserAgent = userAgent,
+            IpAddress = ipAddress,
+        };
+
+    public void Refresh(RefreshTokenHash refreshTokenHash, DateTimeOffset refreshTokenExpiresAt)
+    {
+        RefreshTokenHash = refreshTokenHash;
+        RefreshTokenExpiresAt = refreshTokenExpiresAt;
+    }
+}

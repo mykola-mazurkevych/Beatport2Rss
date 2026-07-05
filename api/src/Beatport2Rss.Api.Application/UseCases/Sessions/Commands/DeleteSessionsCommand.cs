@@ -1,0 +1,24 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Domain.Users;
+
+using FluentResults;
+
+using Mediator;
+
+namespace Beatport2Rss.Api.Application.UseCases.Sessions.Commands;
+
+public sealed record DeleteSessionsCommand(
+    UserId UserId) :
+    ICommand<Result>;
+
+internal sealed class DeleteSessionsCommandHandler(
+    ISessionCommandRepository sessionCommandRepository) :
+    ICommandHandler<DeleteSessionsCommand, Result>
+{
+    public async ValueTask<Result> Handle(DeleteSessionsCommand command, CancellationToken cancellationToken = default)
+    {
+        await sessionCommandRepository.DeleteAsync(command.UserId, cancellationToken);
+
+        return Result.Ok();
+    }
+}

@@ -419,4 +419,4 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-src/Beatport2Rss.Application/Generated/
+api/src/Beatport2Rss.Api.Application/Generated/

@@ -1,0 +1,17 @@
+using Beatport2Rss.Api.Application.UseCases.Sessions.Commands;
+
+using Mediator;
+
+using Quartz;
+
+namespace Beatport2Rss.Jobs.Jobs;
+
+internal sealed class DeleteExpiredSessionsJob(IMediator mediator) :
+    IJob
+{
+    public async Task Execute(IJobExecutionContext context)
+    {
+        var command = new DeleteExpiredSessionsCommand();
+        await mediator.Send(command, context.CancellationToken);
+    }
+}

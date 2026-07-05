@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <NoWarn>
+      CA1515; <!-- Consider making public types internal -->
+    </NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.SharedKernel\Beatport2Rss.Common.SharedKernel.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Api.Application\Beatport2Rss.Api.Application.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Api.Infrastructure\Beatport2Rss.Api.Infrastructure.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Api.Jobs\Beatport2Rss.Api.Jobs.csproj" />
+  </ItemGroup>
+
+</Project>

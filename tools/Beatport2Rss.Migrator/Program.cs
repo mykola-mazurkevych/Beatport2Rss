@@ -20,8 +20,8 @@ var configurationRoot = new ConfigurationBuilder()
 
 var serviceCollection = new ServiceCollection();
 
-Beatport2Rss.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
-Beatport2Rss.ReleaseCollector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
 
 var serviceProvider =serviceCollection 
     .AddLogging(builder => builder.AddConsole())

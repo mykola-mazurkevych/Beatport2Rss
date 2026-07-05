@@ -19,7 +19,7 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
 
     private readonly HashSet<string> _namespaces =
     [
-        "Beatport2Rss.Application.Behaviors",
+        "Beatport2Rss.Api.Application.Behaviors",
         "FluentResults",
         "FluentValidation",
         "Mediator",
@@ -52,7 +52,7 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.AppendLine("namespace Beatport2Rss.Application;");
+        sourceTextBuilder.AppendLine("namespace Beatport2Rss.Api.Application;");
         sourceTextBuilder.AppendLine("public static partial class ServiceCollectionExtensions");
         sourceTextBuilder.AppendLine("{");
         sourceTextBuilder.AppendLine($"    private static partial IServiceCollection AddRequire{entityName}Behaviors(this IServiceCollection services) =>");

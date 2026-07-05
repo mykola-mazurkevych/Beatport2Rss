@@ -1,0 +1,30 @@
+using Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Beatport2Rss.Api.Infrastructure.Persistence.Configurations;
+
+internal sealed class UserQueryModelConfiguration :
+    IEntityTypeConfiguration<UserQueryModel>
+{
+    public void Configure(EntityTypeBuilder<UserQueryModel> builder)
+    {
+        builder.ToView("vwUsers");
+
+        builder.HasKey(userQueryModel => userQueryModel.Id);
+
+        builder.Property(userQueryModel => userQueryModel.Id);
+        builder.Property(userQueryModel => userQueryModel.CreatedAt);
+        builder.Property(userQueryModel => userQueryModel.EmailAddress);
+        builder.Property(userQueryModel => userQueryModel.PasswordHash);
+        builder.Property(userQueryModel => userQueryModel.FirstName);
+        builder.Property(userQueryModel => userQueryModel.LastName);
+        builder.Property(userQueryModel => userQueryModel.Status)
+            .IsEnum();
+        builder.Property(userQueryModel => userQueryModel.IsActive);
+        builder.Property(userQueryModel => userQueryModel.FeedsCount);
+        builder.Property(userQueryModel => userQueryModel.TagsCount);
+    }
+}

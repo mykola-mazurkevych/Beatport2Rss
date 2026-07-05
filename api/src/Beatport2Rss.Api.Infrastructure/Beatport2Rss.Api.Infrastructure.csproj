@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Beatport2Rss.Api.Infrastructure.IntegrationTests" />
+    <InternalsVisibleTo Include="Beatport2Rss.Api.Infrastructure.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" />
+    <PackageReference Include="EFPagination" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="PuppeteerSharp" />
+    <PackageReference Include="Slugify.Core" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.Beatport\Beatport2Rss.Common.Beatport.csproj" />
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.BeatportTokenProvider\Beatport2Rss.Common.BeatportTokenProvider.csproj" />
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Api.Application\Beatport2Rss.Api.Application.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Api.Domain\Beatport2Rss.Api.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Persistence\Views\*.sql" />
+    <EmbeddedResource Include="Persistence\Seeders\Data\countries_csv.md.md" /> <!-- https://developers.google.com/public-data/docs/canonical/countries_csv.md.txt -->
+  </ItemGroup>
+
+</Project>

@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Beatport2Rss.Infrastructure\Beatport2Rss.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\services\ReleaseCollector\src\Beatport2Rss.ReleaseCollector.Infrastructure\Beatport2Rss.ReleaseCollector.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\api\src\Beatport2Rss.Api.Infrastructure\Beatport2Rss.Api.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\services\Collector\src\Beatport2Rss.Collector.Infrastructure\Beatport2Rss.Collector.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

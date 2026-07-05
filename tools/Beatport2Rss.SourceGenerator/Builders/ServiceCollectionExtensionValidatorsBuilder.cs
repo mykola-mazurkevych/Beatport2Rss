@@ -42,7 +42,7 @@ internal sealed class ServiceCollectionExtensionValidatorsBuilder :
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.AppendLine("namespace Beatport2Rss.Application;");
+        sourceTextBuilder.AppendLine("namespace Beatport2Rss.Api.Application;");
         sourceTextBuilder.AppendLine("public static partial class ServiceCollectionExtensions");
         sourceTextBuilder.AppendLine("{");
         sourceTextBuilder.AppendLine("    private static partial IServiceCollection AddValidators(this IServiceCollection services) =>");

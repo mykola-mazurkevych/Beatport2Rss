@@ -1,0 +1,39 @@
+#pragma warning disable CA1034 // Nested types should not be visible
+
+using System.Globalization;
+
+using Beatport2Rss.Common.SharedKernel.Errors;
+
+using FluentResults;
+
+namespace Beatport2Rss.Common.SharedKernel.Extensions;
+
+public static class ResultExtensions
+{
+    extension(Result)
+    {
+        public static Result Conflict(string message) =>
+            Result.Fail(new ConflictError(message));
+
+        public static Result Forbidden(string message) =>
+            Result.Fail(new ForbiddenError(message));
+
+        public static Result NotFound(string message) =>
+            Result.Fail(new NotFoundError(message));
+
+        public static Result NotFound(string message, params object?[] args) =>
+            Result.Fail(new NotFoundError(string.Format(CultureInfo.InvariantCulture, message, args)));
+
+        public static Result Validation(string message, Dictionary<string, object> metadata) =>
+            Result.Fail(new ValidationError(message).WithMetadata(metadata));
+
+        public static Result Unauthorized(string message) =>
+            Result.Fail(new UnauthorizedError(message));
+
+        public static Result Unprocessable(string message) =>
+            Result.Fail(new UnprocessableError(message));
+
+        public static Result Unprocessable(IResultBase result) =>
+            Result.Unprocessable(string.Join(" ", result.Errors.Select(e => e.Message)));
+    }
+}

@@ -1,51 +1,50 @@
 <Solution>
+  <Folder Name="/api/" />
+  <Folder Name="/api/src/">
+    <Project Path="api/src/Beatport2Rss.Api/Beatport2Rss.Api.csproj" />
+    <Project Path="api/src/Beatport2Rss.Api.Application/Beatport2Rss.Api.Application.csproj" />
+    <Project Path="api/src/Beatport2Rss.Api.Domain/Beatport2Rss.Api.Domain.csproj" />
+    <Project Path="api/src/Beatport2Rss.Api.Infrastructure/Beatport2Rss.Api.Infrastructure.csproj" />
+    <Project Path="api/src/Beatport2Rss.Api.Jobs/Beatport2Rss.Api.Jobs.csproj" />
+  </Folder>
+  <Folder Name="/api/tests/">
+    <Project Path="api/tests/Beatport2Rss.Api.Application.UnitTests/Beatport2Rss.Api.Application.UnitTests.csproj" />
+    <Project Path="api/tests/Beatport2Rss.Api.ArchitectureTests/Beatport2Rss.Api.ArchitectureTests.csproj" />
+    <Project Path="api/tests/Beatport2Rss.Api.Infrastructure.IntegrationTests/Beatport2Rss.Api.Infrastructure.IntegrationTests.csproj" />
+    <Project Path="api/tests/Beatport2Rss.Api.Infrastructure.UnitTests/Beatport2Rss.Api.Infrastructure.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/common/" />
+  <Folder Name="/common/protos/">
+    <File Path="common/protos/TokenService.proto" />
+  </Folder>
   <Folder Name="/common/src/">
     <Project Path="common/src/Beatport2Rss.Common.Beatport/Beatport2Rss.Common.Beatport.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/common/tests/">
     <Project Path="common/tests/Beatport2Rss.Common.Messaging.UnitTests/Beatport2Rss.Common.Messaging.UnitTests.csproj" />
-  </Folder>
-  <Folder Name="/common/protos/">
-    <File Path="common/protos/TokenService.proto" />
   </Folder>
   <Folder Name="/docker/">
     <File Path="docker/.env.example" />
     <File Path="docker/docker-compose.yml" />
   </Folder>
   <Folder Name="/services/" />
-  <Folder Name="/services/ReleaseCollector/" />
-  <Folder Name="/services/ReleaseCollector/src/">
-    <Project Path="services/ReleaseCollector/src/Beatport2Rss.ReleaseCollector.Domain/Beatport2Rss.ReleaseCollector.Domain.csproj" />
-    <Project Path="services/ReleaseCollector/src/Beatport2Rss.ReleaseCollector.Infrastructure/Beatport2Rss.ReleaseCollector.Infrastructure.csproj" />
+  <Folder Name="/services/Collector/" />
+  <Folder Name="/services/Collector/src/">
+    <Project Path="services/Collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
+    <Project Path="services/Collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/services/TokenInterceptor/">
-    <File Path="services/TokenInterceptor/README.md" />
+  <Folder Name="/services/Interceptor/">
+    <File Path="services/Interceptor/README.md" />
   </Folder>
-  <Folder Name="/services/TokenInterceptor/src/">
-    <Project Path="services/TokenInterceptor/src/Beatport2Rss.TokenInterceptor/Beatport2Rss.TokenInterceptor.csproj" />
-  </Folder>
-
-  <Folder Name="/src/">
-    <Project Path="src/Beatport2Rss.Application/Beatport2Rss.Application.csproj" />
-    <Project Path="src/Beatport2Rss.Domain/Beatport2Rss.Domain.csproj" />
-    <Project Path="src/Beatport2Rss.Infrastructure/Beatport2Rss.Infrastructure.csproj" />
-    <Project Path="src/Beatport2Rss.Jobs/Beatport2Rss.Jobs.csproj" />
-    <Project Path="src/Beatport2Rss.SharedKernel/Beatport2Rss.SharedKernel.csproj" />
-    <Project Path="src/Beatport2Rss.WebApi/Beatport2Rss.WebApi.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Beatport2Rss.Application.UnitTests/Beatport2Rss.Application.UnitTests.csproj" />
-    <Project Path="tests/Beatport2Rss.ArchitectureTests/Beatport2Rss.ArchitectureTests.csproj" />
-    <Project Path="tests/Beatport2Rss.Infrastructure.IntegrationTests/Beatport2Rss.Infrastructure.IntegrationTests.csproj" />
-    <Project Path="tests/Beatport2Rss.Infrastructure.UnitTests/Beatport2Rss.Infrastructure.UnitTests.csproj" />
+  <Folder Name="/services/Interceptor/src/">
+    <Project Path="services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
     <Project Path="tools/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
   </Folder>
-
 </Solution>

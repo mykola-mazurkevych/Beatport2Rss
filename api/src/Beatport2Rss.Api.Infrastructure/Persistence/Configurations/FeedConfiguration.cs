@@ -1,0 +1,80 @@
+using Beatport2Rss.Api.Domain.Common.ValueObjects;
+using Beatport2Rss.Api.Domain.Feeds;
+using Beatport2Rss.Api.Domain.Subscriptions;
+using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace Beatport2Rss.Api.Infrastructure.Persistence.Configurations;
+
+internal sealed class FeedConfiguration :
+    IEntityTypeConfiguration<Feed>
+{
+    public void Configure(EntityTypeBuilder<Feed> builder)
+    {
+        builder.ToTable(nameof(Beatport2RssDbContext.Feeds));
+
+        builder.HasKey(feed => feed.Id);
+
+        builder.Property(feed => feed.Id)
+            .IsRequired();
+
+        builder.Property(feed => feed.CreatedAt)
+            .IsRequired();
+
+        builder.Property(feed => feed.Name)
+            .HasMaxLength(FeedName.MaxLength)
+            .IsRequired();
+
+        builder.Property(feed => feed.Slug)
+            .HasMaxLength(Slug.MaxLength)
+            .IsRequired();
+
+        builder.Property(feed => feed.Status)
+            .IsEnum();
+
+        builder.Property(feed => feed.UserId)
+            .IsRequired();
+
+        builder.OwnsMany(
+            feed => feed.Subscriptions,
+            navigationBuilder =>
+            {
+                navigationBuilder.ToTable(nameof(Beatport2RssDbContext.FeedSubscriptions));
+
+                navigationBuilder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
+
+                navigationBuilder.Property(feedSubscription => feedSubscription.FeedId)
+                    .IsRequired();
+
+                navigationBuilder.Property(feedSubscription => feedSubscription.SubscriptionId)
+                    .IsRequired();
+
+                navigationBuilder
+                    .WithOwner()
+                    .HasForeignKey(feedSubscription => feedSubscription.FeedId);
+
+                navigationBuilder
+                    .HasOne<Subscription>()
+                    .WithMany()
+                    .HasForeignKey(feedSubscription => feedSubscription.SubscriptionId);
+
+                navigationBuilder.HasIndex(feedSubscription => feedSubscription.SubscriptionId);
+            });
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(feed => feed.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(feed => new { feed.UserId, feed.Name })
+            .IsUnique();
+
+        builder.HasIndex(feed => new { feed.UserId, feed.Slug });
+
+        builder.HasIndex(feed => feed.Slug)
+            .IsUnique();
+    }
+}

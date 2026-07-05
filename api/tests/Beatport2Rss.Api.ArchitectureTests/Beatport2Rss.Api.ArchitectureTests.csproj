@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NetArchTest.Rules" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.SharedKernel\Beatport2Rss.Common.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Api\Beatport2Rss.Api.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Api.Application\Beatport2Rss.Api.Application.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Api.Domain\Beatport2Rss.Api.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Api.Infrastructure\Beatport2Rss.Api.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

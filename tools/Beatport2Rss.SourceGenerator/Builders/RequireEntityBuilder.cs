@@ -19,7 +19,7 @@ internal sealed class RequireEntityBuilder(
 
     private readonly HashSet<string> _namespaces =
     [
-        "Beatport2Rss.Application.Interfaces.Persistence.Repositories",
+        "Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories",
         "FluentValidation",
         "Mediator",
     ];
@@ -65,7 +65,7 @@ internal sealed class RequireEntityBuilder(
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.Append("namespace Beatport2Rss.Application.Behaviors;");
+        sourceTextBuilder.Append("namespace Beatport2Rss.Api.Application.Behaviors;");
         sourceTextBuilder.Append(_builder);
 
         return SourceText.From(sourceTextBuilder.ToString(), Encoding.UTF8);

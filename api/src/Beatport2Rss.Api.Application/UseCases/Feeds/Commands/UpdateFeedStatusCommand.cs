@@ -1,0 +1,37 @@
+using Beatport2Rss.Api.Application.Interfaces.Messages;
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Domain.Common.ValueObjects;
+using Beatport2Rss.Api.Domain.Users;
+
+using FluentResults;
+
+using Mediator;
+
+namespace Beatport2Rss.Api.Application.UseCases.Feeds.Commands;
+
+public sealed record UpdateFeedStatusCommand(
+    UserId UserId,
+    Slug FeedSlug,
+    bool IsActive) :
+    ICommand<Result>, IRequireActiveUser, IRequireFeed;
+
+internal sealed class UpdateFeedStatusCommandHandler(
+    IFeedCommandRepository feedCommandRepository,
+    IUnitOfWork unitOfWork) :
+    ICommandHandler<UpdateFeedStatusCommand, Result>
+{
+    public async ValueTask<Result> Handle(
+        UpdateFeedStatusCommand command,
+        CancellationToken cancellationToken)
+    {
+        var feed = await feedCommandRepository.LoadAsync(command.UserId, command.FeedSlug, cancellationToken);
+
+        feed.UpdateStatus(command.IsActive);
+
+        feedCommandRepository.Update(feed);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Ok();
+    }
+}
