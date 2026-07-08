@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Api.Application.Interfaces.Persistence;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
 
 public interface IUnitOfWork
 {

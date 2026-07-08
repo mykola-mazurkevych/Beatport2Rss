@@ -3,7 +3,6 @@
 using System.Text;
 using System.Text.Json;
 
-using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
@@ -21,6 +20,7 @@ using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
+using Beatport2Rss.Common.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +127,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
+                .AddUnitOfWork<ApiDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SessionQueryModels.AsNoTracking())
@@ -138,7 +139,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Tags)
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().UserQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users)
-                .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()

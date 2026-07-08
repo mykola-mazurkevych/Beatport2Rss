@@ -1,11 +1,11 @@
 using Beatport2Rss.Api.Application.Extensions;
 using Beatport2Rss.Api.Application.Interfaces.Messages;
-using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 
 using FluentResults;
