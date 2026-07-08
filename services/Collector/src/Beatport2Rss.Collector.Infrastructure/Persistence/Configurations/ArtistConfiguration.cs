@@ -11,7 +11,7 @@ internal sealed class ArtistConfiguration :
 {
     public void Configure(EntityTypeBuilder<Artist> builder)
     {
-        builder.ToTable(nameof(ReleaseCollectorDbContext.Artists));
+        builder.ToTable(nameof(CollectorDbContext.Artists));
 
         builder.HasKey(artist => artist.Id);
 

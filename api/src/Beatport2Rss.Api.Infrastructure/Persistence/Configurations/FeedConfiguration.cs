@@ -14,7 +14,7 @@ internal sealed class FeedConfiguration :
 {
     public void Configure(EntityTypeBuilder<Feed> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Feeds));
+        builder.ToTable(nameof(ApiDbContext.Feeds));
 
         builder.HasKey(feed => feed.Id);
 
@@ -42,7 +42,7 @@ internal sealed class FeedConfiguration :
             feed => feed.Subscriptions,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(Beatport2RssDbContext.FeedSubscriptions));
+                navigationBuilder.ToTable(nameof(ApiDbContext.FeedSubscriptions));
 
                 navigationBuilder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
 

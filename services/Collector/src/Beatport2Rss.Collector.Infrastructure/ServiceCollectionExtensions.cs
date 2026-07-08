@@ -17,11 +17,13 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddTransient(provider => provider.GetRequiredService<ReleaseCollectorDbContext>().GetService<IMigrator>());
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().GetService<IMigrator>());
 
         private IServiceCollection AddDbContext(IConfiguration configuration) =>
             services
-                .AddDbContext<ReleaseCollectorDbContext>(builder => builder
-                    .UseNpgsql(configuration.GetConnectionString(nameof(ReleaseCollectorDbContext))));
+                .AddDbContext<CollectorDbContext>(builder => builder
+                    .UseNpgsql(
+                        configuration.GetConnectionString(nameof(CollectorDbContext)),
+                        options => options.MigrationsHistoryTable("__EFMigrationsHistory", CollectorDbContext.Schema)));
     }
 }

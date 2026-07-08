@@ -54,7 +54,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().GetService<IMigrator>());
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().GetService<IMigrator>());
 
         private IServiceCollection AddBeatportServices(IConfiguration configuration) =>
             services
@@ -63,8 +63,10 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddDbContext(IConfiguration configuration) =>
             services
-                .AddDbContext<Beatport2RssDbContext>(builder => builder
-                    .UseNpgsql(configuration.GetConnectionString(nameof(Beatport2RssDbContext)))
+                .AddDbContext<ApiDbContext>(builder => builder
+                    .UseNpgsql(
+                        configuration.GetConnectionString(nameof(ApiDbContext)),
+                        options => options.MigrationsHistoryTable("__EFMigrationsHistory", ApiDbContext.Schema))
                     .UseSeeding((dbContext, _) =>
                     {
                         CountriesSeeder.Seed(dbContext.Set<Country>());
@@ -125,17 +127,17 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().FeedQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Feeds)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SessionQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Sessions)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SubscriptionQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Subscriptions)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().SubscriptionTagQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().TagQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Tags)
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().UserQueryModels.AsNoTracking())
-                .AddTransient(provider => provider.GetRequiredService<Beatport2RssDbContext>().Users)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SessionQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Sessions)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SubscriptionQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SubscriptionTagQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().TagQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Tags)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().UserQueryModels.AsNoTracking())
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users)
                 .AddTransient<IUnitOfWork, UnitOfWork>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()

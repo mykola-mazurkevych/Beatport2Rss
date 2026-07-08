@@ -14,7 +14,7 @@ internal sealed class TrackConfiguration :
 {
     public void Configure(EntityTypeBuilder<Track> builder)
     {
-        builder.ToTable(nameof(ReleaseCollectorDbContext.Tracks));
+        builder.ToTable(nameof(CollectorDbContext.Tracks));
 
         builder.HasKey(track => track.Id);
 
@@ -56,7 +56,7 @@ internal sealed class TrackConfiguration :
             track => track.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.TrackArtists));
+                navigationBuilder.ToTable(nameof(CollectorDbContext.TrackArtists));
 
                 navigationBuilder.HasKey(trackArtist => new { trackArtist.TrackId, trackArtist.ArtistId, trackArtist.Type });
 

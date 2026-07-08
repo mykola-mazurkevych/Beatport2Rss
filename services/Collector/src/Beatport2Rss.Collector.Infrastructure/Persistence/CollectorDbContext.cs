@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Collector.Infrastructure.Persistence;
 
-internal sealed class ReleaseCollectorDbContext(DbContextOptions<ReleaseCollectorDbContext> options) :
+internal sealed class CollectorDbContext(DbContextOptions<CollectorDbContext> options) :
     DbContext(options)
 {
-    private const string SchemaName = "collector";
+    internal const string Schema = "collector";
 
     public DbSet<Artist> Artists => Set<Artist>();
     public DbSet<Label> Labels => Set<Label>();
@@ -29,8 +29,8 @@ internal sealed class ReleaseCollectorDbContext(DbContextOptions<ReleaseCollecto
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasDefaultSchema(SchemaName);
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ReleaseCollectorDbContext).Assembly);
+        modelBuilder.HasDefaultSchema(Schema);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CollectorDbContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

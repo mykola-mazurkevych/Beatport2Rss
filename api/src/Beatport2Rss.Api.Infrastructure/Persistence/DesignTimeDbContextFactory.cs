@@ -9,20 +9,19 @@ using Microsoft.Extensions.Configuration;
 namespace Beatport2Rss.Api.Infrastructure.Persistence;
 
 internal sealed class DesignTimeDbContextFactory :
-    IDesignTimeDbContextFactory<Beatport2RssDbContext>
+    IDesignTimeDbContextFactory<ApiDbContext>
 {
-    public Beatport2RssDbContext CreateDbContext(string[] args)
+    public ApiDbContext CreateDbContext(string[] args)
     {
         var configurationRoot = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddUserSecrets(Assembly.GetExecutingAssembly(), optional: true)
             .Build();
 
-        var dbContextOptionsBuilder = new DbContextOptionsBuilder<Beatport2RssDbContext>();
-        var connectionString = configurationRoot.GetConnectionString(nameof(Beatport2RssDbContext));
-
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<ApiDbContext>();
+        var connectionString = configurationRoot.GetConnectionString(nameof(ApiDbContext));
         dbContextOptionsBuilder.UseNpgsql(connectionString);
 
-        return new Beatport2RssDbContext(dbContextOptionsBuilder.Options);
+        return new ApiDbContext(dbContextOptionsBuilder.Options);
     }
 }

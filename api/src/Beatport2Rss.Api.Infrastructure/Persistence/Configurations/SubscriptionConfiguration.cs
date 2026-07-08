@@ -14,7 +14,7 @@ internal sealed class SubscriptionConfiguration :
 {
     public void Configure(EntityTypeBuilder<Subscription> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Subscriptions));
+        builder.ToTable(nameof(ApiDbContext.Subscriptions));
 
         builder.HasKey(subscription => subscription.Id);
 
@@ -57,7 +57,7 @@ internal sealed class SubscriptionConfiguration :
             subscription => subscription.Tags,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(Beatport2RssDbContext.SubscriptionTags));
+                navigationBuilder.ToTable(nameof(ApiDbContext.SubscriptionTags));
 
                 navigationBuilder.HasKey(subscriptionTag => new { subscriptionTag.SubscriptionId, subscriptionTag.TagId });
 

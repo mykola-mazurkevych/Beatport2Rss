@@ -11,7 +11,7 @@ internal sealed class LabelConfiguration :
 {
     public void Configure(EntityTypeBuilder<Label> builder)
     {
-        builder.ToTable(nameof(ReleaseCollectorDbContext.Labels));
+        builder.ToTable(nameof(CollectorDbContext.Labels));
 
         builder.HasKey(label => label.Id);
 

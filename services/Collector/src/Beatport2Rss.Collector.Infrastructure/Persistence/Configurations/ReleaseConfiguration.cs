@@ -14,7 +14,7 @@ internal sealed class ReleaseConfiguration :
 {
     public void Configure(EntityTypeBuilder<Release> builder)
     {
-        builder.ToTable(nameof(ReleaseCollectorDbContext.Releases));
+        builder.ToTable(nameof(CollectorDbContext.Releases));
 
         builder.HasKey(release => release.Id);
 
@@ -53,7 +53,7 @@ internal sealed class ReleaseConfiguration :
             release => release.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(ReleaseCollectorDbContext.ReleaseArtists));
+                navigationBuilder.ToTable(nameof(CollectorDbContext.ReleaseArtists));
 
                 navigationBuilder.HasKey(releaseArtist => new { releaseArtist.ReleaseId, releaseArtist.ArtistId, releaseArtist.Type });
 

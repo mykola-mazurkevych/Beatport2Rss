@@ -10,7 +10,7 @@ internal sealed class CountryConfiguration :
 {
     public void Configure(EntityTypeBuilder<Country> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Countries));
+        builder.ToTable(nameof(ApiDbContext.Countries));
 
         builder.HasKey(country => country.Id);
 

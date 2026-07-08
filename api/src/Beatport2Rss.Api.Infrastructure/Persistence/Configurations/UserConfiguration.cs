@@ -12,7 +12,7 @@ internal sealed class UserConfiguration :
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Users));
+        builder.ToTable(nameof(ApiDbContext.Users));
 
         builder.HasKey(user => user.Id);
 

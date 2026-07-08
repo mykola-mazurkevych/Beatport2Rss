@@ -11,7 +11,7 @@ internal sealed class SessionConfiguration :
 {
     public void Configure(EntityTypeBuilder<Session> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Sessions));
+        builder.ToTable(nameof(ApiDbContext.Sessions));
 
         builder.HasKey(session => session.Id);
 

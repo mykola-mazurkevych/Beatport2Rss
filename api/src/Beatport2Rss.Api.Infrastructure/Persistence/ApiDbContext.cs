@@ -11,9 +11,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence;
 
-internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbContext> options) :
+internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     DbContext(options)
 {
+    internal const string Schema = "api";
+
     public DbSet<Country> Countries => Set<Country>();
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
@@ -39,7 +41,8 @@ internal sealed class Beatport2RssDbContext(DbContextOptions<Beatport2RssDbConte
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(Beatport2RssDbContext).Assembly);
+        modelBuilder.HasDefaultSchema(Schema);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApiDbContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
     }

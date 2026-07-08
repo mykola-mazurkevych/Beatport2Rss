@@ -12,7 +12,7 @@ internal sealed class TagConfiguration :
 {
     public void Configure(EntityTypeBuilder<Tag> builder)
     {
-        builder.ToTable(nameof(Beatport2RssDbContext.Tags));
+        builder.ToTable(nameof(ApiDbContext.Tags));
 
         builder.HasKey(tag => tag.Id);
 
