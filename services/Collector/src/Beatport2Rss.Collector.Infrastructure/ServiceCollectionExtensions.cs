@@ -1,8 +1,8 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
 using Beatport2Rss.Collector.Infrastructure.Persistence;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +24,6 @@ public static class ServiceCollectionExtensions
                 .AddDbContext<CollectorDbContext>(builder => builder
                     .UseNpgsql(
                         configuration.GetConnectionString(nameof(CollectorDbContext)),
-                        options => options.MigrationsHistoryTable("__EFMigrationsHistory", CollectorDbContext.Schema)));
+                        CollectorDbContext.Schema));
     }
 }

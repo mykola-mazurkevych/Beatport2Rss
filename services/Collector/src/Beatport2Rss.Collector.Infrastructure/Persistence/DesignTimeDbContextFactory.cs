@@ -2,6 +2,8 @@
 
 using System.Reflection;
 
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -20,7 +22,7 @@ internal sealed class DesignTimeDbContextFactory :
 
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<CollectorDbContext>();
         var connectionString = configurationRoot.GetConnectionString(nameof(CollectorDbContext));
-        dbContextOptionsBuilder.UseNpgsql(connectionString);
+        dbContextOptionsBuilder.UseNpgsql(connectionString, CollectorDbContext.Schema);
 
         return new CollectorDbContext(dbContextOptionsBuilder.Options);
     }

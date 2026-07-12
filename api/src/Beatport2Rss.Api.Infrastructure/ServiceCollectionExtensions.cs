@@ -21,6 +21,7 @@ using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -66,7 +67,7 @@ public static class ServiceCollectionExtensions
                 .AddDbContext<ApiDbContext>(builder => builder
                     .UseNpgsql(
                         configuration.GetConnectionString(nameof(ApiDbContext)),
-                        options => options.MigrationsHistoryTable("__EFMigrationsHistory", ApiDbContext.Schema))
+                        ApiDbContext.Schema)
                     .UseSeeding((dbContext, _) =>
                     {
                         CountriesSeeder.Seed(dbContext.Set<Country>());

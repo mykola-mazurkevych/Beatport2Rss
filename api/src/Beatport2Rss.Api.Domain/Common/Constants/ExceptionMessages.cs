@@ -2,9 +2,6 @@ namespace Beatport2Rss.Api.Domain.Common.Constants;
 
 public static class ExceptionMessages
 {
-    public const string BeatportAccessTokenEmpty = "AccessToken cannot be empty";
-    public const string BeatportAccessTokenTooLong = "AccessToken is too long";
-
     public const string BeatportIdInvalid = "BeatportId must be positive";
 
     public const string BeatportSlugEmpty = "BeatportSlug cannot be empty";
@@ -44,8 +41,6 @@ public static class ExceptionMessages
 
     public const string TagNameEmpty = "TagName cannot be empty";
     public const string TagNameTooLong = "TagName is too long";
-
-    public const string TokenIdEmpty = "TokenId cannot be empty";
 
     public const string UserIdEmpty = "UserId cannot be empty";
 }

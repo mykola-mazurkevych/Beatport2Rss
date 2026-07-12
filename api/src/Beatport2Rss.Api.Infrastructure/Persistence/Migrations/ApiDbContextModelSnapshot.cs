@@ -116,11 +116,9 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Api.Domain.Subscriptions.Subscription", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
@@ -129,11 +127,6 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
-
-                    b.Property<string>("BeatportType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("CountryCode")
                         .HasColumnType("character varying(2)");
@@ -156,6 +149,11 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BeatportSlug");
@@ -165,7 +163,7 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.HasIndex("BeatportType", "BeatportId")
+                    b.HasIndex("Type", "BeatportId")
                         .IsUnique();
 
                     b.ToTable("Subscriptions", "api");
@@ -323,8 +321,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Api.Infrastructure.Persistence.QueryModels.SubscriptionQueryModel", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
@@ -332,11 +330,6 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.Property<string>("BeatportSlug")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<string>("BeatportType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Country")
                         .HasColumnType("text");
@@ -359,6 +352,11 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.Property<int>("SubscribersCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.HasKey("Id");
 
                     b.ToTable((string)null);
@@ -368,8 +366,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Api.Infrastructure.Persistence.QueryModels.SubscriptionTagQueryModel", b =>
                 {
-                    b.Property<int>("SubscriptionId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("SubscriptionId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("TagId")
                         .HasColumnType("integer");
@@ -477,8 +475,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                             b1.Property<Guid>("FeedId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<int>("SubscriptionId")
-                                .HasColumnType("integer");
+                            b1.Property<Guid>("SubscriptionId")
+                                .HasColumnType("uuid");
 
                             b1.HasKey("FeedId", "SubscriptionId");
 
@@ -516,8 +514,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
                     b.OwnsMany("Beatport2Rss.Api.Domain.Subscriptions.SubscriptionTag", "Tags", b1 =>
                         {
-                            b1.Property<int>("SubscriptionId")
-                                .HasColumnType("integer");
+                            b1.Property<Guid>("SubscriptionId")
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("TagId")
                                 .HasColumnType("integer");

@@ -20,7 +20,7 @@ internal static class CreateSubscriptionEndpointHandler
         CancellationToken cancellationToken)
     {
         var command = new CreateSubscriptionCommand(
-            request.BeatportType,
+            request.Type,
             request.BeatportId,
             request.CountryCode);
         var result = await mediator.Send(command, cancellationToken);

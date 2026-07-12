@@ -18,11 +18,10 @@ internal sealed class SubscriptionQueryModelConfiguration :
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Id);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.CreatedAt);
 
+        builder.Property(subscriptionQueryModel => subscriptionQueryModel.Type).IsEnum();
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Name);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.Slug);
 
-        builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportType)
-            .IsEnum();
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportId);
         builder.Property(subscriptionQueryModel => subscriptionQueryModel.BeatportSlug);
 

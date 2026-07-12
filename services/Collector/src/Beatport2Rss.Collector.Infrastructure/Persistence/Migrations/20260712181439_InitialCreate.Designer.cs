@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CollectorDbContext))]
-    [Migration("20260708044309_InitialCreate")]
+    [Migration("20260712181439_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

@@ -1,6 +1,3 @@
-// ReSharper disable PropertyCanBeMadeInitOnly.Local
-// ReSharper disable UnusedAutoPropertyAccessor.Local
-
 using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Tags;
@@ -21,10 +18,10 @@ public sealed class Subscription :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    public SubscriptionType Type { get; private set; }
     public SubscriptionName Name { get; private set; }
     public Slug Slug { get; private set; }
 
-    public BeatportSubscriptionType BeatportType { get; private set; }
     public BeatportId BeatportId { get; private set; }
     public BeatportSlug BeatportSlug { get; private set; }
 
@@ -36,20 +33,22 @@ public sealed class Subscription :
         _tags.AsReadOnly();
 
     public static Subscription Create(
+        SubscriptionId id,
         DateTimeOffset createdAt,
+        SubscriptionType type,
         SubscriptionName name,
         Slug slug,
-        BeatportSubscriptionType beatportType,
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         Uri imageUri,
         CountryCode? countryCode) =>
         new()
         {
+            Id = id,
             CreatedAt = createdAt,
+            Type = type,
             Name = name,
             Slug = slug,
-            BeatportType = beatportType,
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             ImageUri = imageUri,

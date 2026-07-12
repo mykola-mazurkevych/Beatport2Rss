@@ -42,9 +42,9 @@ internal sealed class ListSubscriptionsQueryHandler(
         var subscriptionPaginableDtos = page.Dtos
             .Select(subscriptionPaginableReadModel => new SubscriptionPaginableDto(
                 subscriptionPaginableReadModel.Id,
+                subscriptionPaginableReadModel.Type,
                 subscriptionPaginableReadModel.Name,
                 subscriptionPaginableReadModel.Slug,
-                subscriptionPaginableReadModel.BeatportType,
                 beatportUriBuilder.Build(
                     subscriptionPaginableReadModel.BeatportId.Value,
                     subscriptionPaginableReadModel.BeatportSlug.Value),

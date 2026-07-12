@@ -8,9 +8,9 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
 internal sealed record SubscriptionQueryModel(
     SubscriptionId Id,
     DateTimeOffset CreatedAt,
+    SubscriptionType Type,
     SubscriptionName Name,
     Slug Slug,
-    BeatportSubscriptionType BeatportType,
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,
     Uri ImageUri,

@@ -6,7 +6,7 @@ using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Common.ValueObjects;
+namespace Beatport2Rss.Api.Domain.Subscriptions;
 
 public readonly record struct BeatportSlug :
     IValueObject

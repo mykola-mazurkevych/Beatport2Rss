@@ -34,12 +34,11 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                 schema: "api",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    BeatportType = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     BeatportId = table.Column<int>(type: "integer", nullable: false),
                     BeatportSlug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     ImageUri = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
@@ -160,7 +159,7 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                 columns: table => new
                 {
                     FeedId = table.Column<Guid>(type: "uuid", nullable: false),
-                    SubscriptionId = table.Column<int>(type: "integer", nullable: false)
+                    SubscriptionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -186,7 +185,7 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                 schema: "api",
                 columns: table => new
                 {
-                    SubscriptionId = table.Column<int>(type: "integer", nullable: false),
+                    SubscriptionId = table.Column<Guid>(type: "uuid", nullable: false),
                     TagId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -247,13 +246,6 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                 column: "BeatportSlug");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Subscriptions_BeatportType_BeatportId",
-                schema: "api",
-                table: "Subscriptions",
-                columns: new[] { "BeatportType", "BeatportId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Subscriptions_CountryCode",
                 schema: "api",
                 table: "Subscriptions",
@@ -264,6 +256,13 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                 schema: "api",
                 table: "Subscriptions",
                 column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subscriptions_Type_BeatportId",
+                schema: "api",
+                table: "Subscriptions",
+                columns: new[] { "Type", "BeatportId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

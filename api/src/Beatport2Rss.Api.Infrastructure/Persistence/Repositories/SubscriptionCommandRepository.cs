@@ -13,12 +13,12 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
 
     public Task<bool> ExistsAsync(
-        BeatportSubscriptionType beatportType,
+        SubscriptionType type,
         BeatportId beatportId,
         CancellationToken cancellationToken = default) =>
         ExistsAsync(
             subscription =>
-                subscription.BeatportType == beatportType &&
+                subscription.Type == type &&
                 subscription.BeatportId == beatportId,
             cancellationToken);
 

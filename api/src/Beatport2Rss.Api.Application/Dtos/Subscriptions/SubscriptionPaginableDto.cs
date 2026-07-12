@@ -6,9 +6,9 @@ namespace Beatport2Rss.Api.Application.Dtos.Subscriptions;
 
 public sealed record SubscriptionPaginableDto(
     SubscriptionId Id,
+    SubscriptionType Type,
     SubscriptionName Name,
     Slug Slug,
-    BeatportSubscriptionType BeatportType,
     Uri BeatportUri,
     Uri ImageUri,
     CountryName? Country,

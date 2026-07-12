@@ -40,9 +40,9 @@ internal sealed class GetSubscriptionQueryHandler(
 
         return new SubscriptionDto(
             subscriptionDetails.Id,
+            subscriptionDetails.Type,
             subscriptionDetails.Name,
             subscriptionDetails.Slug,
-            subscriptionDetails.BeatportType,
             beatportUriBuilder.Build(
                 subscriptionDetails.BeatportId.Value,
                 subscriptionDetails.BeatportSlug.Value),

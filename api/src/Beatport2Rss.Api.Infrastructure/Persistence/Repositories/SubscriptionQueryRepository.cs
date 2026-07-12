@@ -20,9 +20,9 @@ internal sealed class SubscriptionQueryRepository(
         {
             Id = subscriptionQueryModel.Id,
             CreatedAt = subscriptionQueryModel.CreatedAt,
+            Type = subscriptionQueryModel.Type,
             Name = subscriptionQueryModel.Name,
             Slug = subscriptionQueryModel.Slug,
-            BeatportType = subscriptionQueryModel.BeatportType,
             BeatportId = subscriptionQueryModel.BeatportId,
             BeatportSlug = subscriptionQueryModel.BeatportSlug,
             ImageUri = subscriptionQueryModel.ImageUri,
@@ -60,9 +60,9 @@ internal sealed class SubscriptionQueryRepository(
             subscriptionQueryModel => subscriptionQueryModel.Slug == slug,
             subscriptionQueryModel => new SubscriptionDetailsReadModel(
                 subscriptionQueryModel.Id,
+                subscriptionQueryModel.Type,
                 subscriptionQueryModel.Name,
                 subscriptionQueryModel.Slug,
-                subscriptionQueryModel.BeatportType,
                 subscriptionQueryModel.BeatportId,
                 subscriptionQueryModel.BeatportSlug,
                 subscriptionQueryModel.ImageUri,

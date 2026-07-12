@@ -4,10 +4,10 @@ using Beatport2Rss.Api.Domain.Subscriptions;
 namespace Beatport2Rss.Api.Endpoints.Subscriptions.Responses;
 
 internal sealed record SubscriptionPaginableResponse(
-    int Id,
+    Guid Id,
+    SubscriptionType Type,
     string Name,
     string Slug,
-    BeatportSubscriptionType BeatportType,
     Uri BeatportUri,
     Uri ImageUri,
     string? Country,
@@ -16,9 +16,9 @@ internal sealed record SubscriptionPaginableResponse(
 {
     public static SubscriptionPaginableResponse Create(SubscriptionPaginableDto dto) =>
         new(dto.Id.Value,
+            dto.Type,
             dto.Name.Value,
             dto.Slug.Value,
-            dto.BeatportType,
             dto.BeatportUri,
             dto.ImageUri,
             dto.Country?.Value,

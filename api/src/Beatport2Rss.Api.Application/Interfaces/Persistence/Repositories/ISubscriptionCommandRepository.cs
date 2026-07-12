@@ -6,7 +6,7 @@ namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 public interface ISubscriptionCommandRepository
 {
     Task<bool> ExistsAsync(
-        BeatportSubscriptionType beatportType,
+        SubscriptionType type,
         BeatportId beatportId,
         CancellationToken cancellationToken = default);
 

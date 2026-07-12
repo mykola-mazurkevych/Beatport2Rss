@@ -1,9 +1,8 @@
 namespace Beatport2Rss.Api.Domain.Subscriptions;
 
-public enum BeatportEntityType
+public enum SubscriptionType
 {
+
     Artist,
-    Remixer,
     Label,
-    Release,
 }
