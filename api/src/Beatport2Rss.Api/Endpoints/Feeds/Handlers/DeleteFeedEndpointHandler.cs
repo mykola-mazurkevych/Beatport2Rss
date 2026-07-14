@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Application.UseCases.Feeds.Commands;
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Extensions;
+using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Mediator;
 

@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
+using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Slugify;
 

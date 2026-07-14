@@ -1,8 +1,8 @@
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Subscriptions;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

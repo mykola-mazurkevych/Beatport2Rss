@@ -1,7 +1,7 @@
 using Beatport2Rss.Api.Application.UseCases.Tags.Queries;
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Endpoints.Tags.Responses;
 using Beatport2Rss.Api.Extensions;
+using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Mediator;
 

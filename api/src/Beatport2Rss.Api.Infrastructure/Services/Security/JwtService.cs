@@ -6,7 +6,6 @@ using System.Text;
 using Beatport2Rss.Api.Application.Interfaces.Models;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Infrastructure.Options;
 

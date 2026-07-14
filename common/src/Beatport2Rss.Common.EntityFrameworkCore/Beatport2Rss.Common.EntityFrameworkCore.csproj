@@ -5,4 +5,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Beatport2Rss.Common.SharedKernel\Beatport2Rss.Common.SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>

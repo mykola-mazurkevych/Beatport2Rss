@@ -1,4 +1,4 @@
-using Beatport2Rss.Api.Domain.Common.ValueObjects;
+using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 namespace Beatport2Rss.Api.Endpoints.Feeds.Requests;
 

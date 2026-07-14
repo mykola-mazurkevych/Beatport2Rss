@@ -1,12 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Common.ValueObjects;
+namespace Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 public readonly record struct Slug :
     IValueObject, IParsable<Slug>
@@ -21,8 +20,8 @@ public readonly record struct Slug :
 
     public static Slug Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.SlugEmpty))
-            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.SlugTooLong)));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException("Slug cannot be empty"))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException("Slug is too long")));
 
     public static Slug Parse(string s, IFormatProvider? provider) =>
         Create(s);

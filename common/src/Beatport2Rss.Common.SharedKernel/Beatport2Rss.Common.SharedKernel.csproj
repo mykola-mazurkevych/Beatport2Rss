@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentResults" />
+    <PackageReference Include="Light.GuardClauses" />
   </ItemGroup>
 
 </Project>
