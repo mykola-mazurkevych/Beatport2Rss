@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -19,8 +18,8 @@ public readonly record struct RefreshToken :
 
     public static RefreshToken Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.RefreshTokenEmpty))
-            .MustHaveLength(Length, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.RefreshTokenInvalidLength)));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException($"{nameof(RefreshToken)} cannot be empty"))
+            .MustHaveLength(Length, (_, _) => new InvalidValueObjectValueException($"{nameof(RefreshToken)} must be {Length} characters long")));
 
     public bool Equals(RefreshToken other) => StringComparer.Ordinal.Equals(Value, other.Value);
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);

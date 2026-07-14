@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -18,7 +17,7 @@ public readonly record struct RefreshTokenHash :
     public IReadOnlyCollection<byte> Value => _value.AsReadOnly();
 
     public static RefreshTokenHash Create([NotNull] byte[]? value) =>
-        new(value.MustNotBeNullOrEmpty(_ => new InvalidValueObjectValueException(ExceptionMessages.RefreshTokenHashEmpty)));
+        new(value.MustNotBeNullOrEmpty(_ => new InvalidValueObjectValueException($"{nameof(RefreshTokenHash)} cannot be empty")));
 
     public bool Equals(RefreshTokenHash other) => Value.SequenceEqual(other.Value);
     public override int GetHashCode() => GetHashCodeInternal();

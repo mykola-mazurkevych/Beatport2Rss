@@ -1,4 +1,3 @@
-using Beatport2Rss.Collector.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -19,7 +18,7 @@ public readonly record struct TrackId :
     public static bool operator >=(TrackId left, TrackId right) => left.Value >= right.Value;
 
     public static TrackId Create(Guid value) =>
-        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.TrackIdEmpty)));
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(TrackId)} cannot be empty")));
 
     public int CompareTo(TrackId other) => Value.CompareTo(other.Value);
     public bool Equals(TrackId other) => Value == other.Value;

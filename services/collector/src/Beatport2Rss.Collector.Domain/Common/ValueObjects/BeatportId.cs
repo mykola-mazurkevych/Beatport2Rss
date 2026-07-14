@@ -1,6 +1,5 @@
 using System.Globalization;
 
-using Beatport2Rss.Collector.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -16,7 +15,7 @@ public readonly record struct BeatportId :
     public int Value { get; }
 
     public static BeatportId Create(int value) =>
-        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.BeatportIdInvalid)));
+        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException($"{nameof(BeatportId)} must be a positive value")));
 
     public bool Equals(BeatportId other) => Value == other.Value;
     public override int GetHashCode() => Value.GetHashCode();

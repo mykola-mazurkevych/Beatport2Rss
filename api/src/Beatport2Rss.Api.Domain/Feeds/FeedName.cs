@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -19,8 +18,8 @@ public readonly record struct FeedName :
 
     public static FeedName Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.FeedNameEmpty))
-            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.FeedNameTooLong)));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException($"{nameof(FeedName)} cannot be empty"))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException($"{nameof(FeedName)} is too long")));
 
     public bool Equals(FeedName other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);
     public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(Value);

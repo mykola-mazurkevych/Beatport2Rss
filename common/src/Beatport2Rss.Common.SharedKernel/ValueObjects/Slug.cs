@@ -20,8 +20,8 @@ public readonly record struct Slug :
 
     public static Slug Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException("Slug cannot be empty"))
-            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException("Slug is too long")));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException($"{nameof(Slug)} cannot be empty"))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException($"{nameof(Slug)} is too long")));
 
     public static Slug Parse(string s, IFormatProvider? provider) =>
         Create(s);

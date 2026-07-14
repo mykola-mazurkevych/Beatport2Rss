@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -20,9 +19,9 @@ public readonly record struct Password :
 
     public static Password Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.PasswordEmpty))
-            .MustBeLongerThanOrEqualTo(MinLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooShort))
-            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.PasswordTooLong)));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException($"{nameof(Password)} cannot be empty"))
+            .MustBeLongerThanOrEqualTo(MinLength, (_, _) => new InvalidValueObjectValueException($"{nameof(Password)} too short"))
+            .MustBeShorterThanOrEqualTo(MaxLength, (_, _) => new InvalidValueObjectValueException($"{nameof(Password)} too long")));
 
     public bool Equals(Password other) => StringComparer.Ordinal.Equals(Value, other.Value);
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(Value);

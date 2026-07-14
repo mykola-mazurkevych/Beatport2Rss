@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -24,8 +23,8 @@ public readonly record struct CountryCode :
 
     public static CountryCode Create([NotNull] string? value) =>
         new(value
-            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException(ExceptionMessages.CountryCodeEmpty))
-            .MustHaveLength(Length, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.CountryCodeIncorrectLength)));
+            .MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException($"{nameof(CountryCode)} cannot be empty"))
+            .MustHaveLength(Length, (_, _) => new InvalidValueObjectValueException($"{nameof(CountryCode)} must be {Length} characters long")));
 
     public int CompareTo(CountryCode other) => Value.CompareTo(other.Value, StringComparison.OrdinalIgnoreCase);
     public bool Equals(CountryCode other) => StringComparer.OrdinalIgnoreCase.Equals(Value, other.Value);

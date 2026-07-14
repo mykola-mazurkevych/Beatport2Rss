@@ -1,5 +1,4 @@
-﻿using Beatport2Rss.Api.Domain.Common.Constants;
-using Beatport2Rss.Common.SharedKernel.Exceptions;
+﻿using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
@@ -19,7 +18,7 @@ public readonly record struct FeedId :
     public static bool operator >=(FeedId left, FeedId right) => left.Value >= right.Value;
 
     public static FeedId Create(Guid value) =>
-        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.FeedIdEmpty)));
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(FeedId)} cannot be empty")));
 
     public int CompareTo(FeedId other) => Value.CompareTo(other.Value);
     public bool Equals(FeedId other) => Value == other.Value;

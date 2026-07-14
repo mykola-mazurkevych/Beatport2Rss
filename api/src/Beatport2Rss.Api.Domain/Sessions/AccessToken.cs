@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
@@ -19,7 +20,8 @@ public readonly record struct AccessToken :
     public AccessTokenType Type { get; }
 
     public static AccessToken Create([NotNull] string? value, AccessTokenType type) =>
-        new(value.MustNotBeNullOrWhiteSpace(), type.MustBeValidEnumValue());
+        new(value.MustNotBeNullOrWhiteSpace(_ => new InvalidValueObjectValueException("")),
+            type.MustBeValidEnumValue(_ => new InvalidValueObjectValueException("")));
 
     public static AccessToken Bearer([NotNull] string? value) =>
         Create(value, AccessTokenType.Bearer);

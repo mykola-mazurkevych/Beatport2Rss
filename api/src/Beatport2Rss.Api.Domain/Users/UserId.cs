@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -21,7 +20,7 @@ public readonly record struct UserId :
     public static bool operator >=(UserId left, UserId right) => left.Value >= right.Value;
 
     public static UserId Create(Guid value) =>
-        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.UserIdEmpty)));
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(UserId)} cannot be empty")));
 
     public static UserId Parse(string s, IFormatProvider? provider) =>
         Create(Guid.Parse(s, provider));

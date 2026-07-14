@@ -1,13 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-using Beatport2Rss.Api.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Common.ValueObjects;
+namespace Beatport2Rss.Api.Domain.Subscriptions;
 
 public readonly record struct BeatportId :
     IValueObject, IParsable<BeatportId>
@@ -18,7 +17,7 @@ public readonly record struct BeatportId :
     public int Value { get; }
 
     public static BeatportId Create(int value) =>
-        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException(ExceptionMessages.BeatportIdInvalid)));
+        new(value.MustBeGreaterThan(0, (_, _) => new InvalidValueObjectValueException($"{nameof(BeatportId)} must be a positive value")));
 
     public static BeatportId Parse(string s, IFormatProvider? provider) =>
         Create(int.Parse(s, provider));

@@ -1,4 +1,3 @@
-using Beatport2Rss.Collector.Domain.Common.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -14,7 +13,7 @@ public readonly record struct ArtistId :
     public Guid Value { get; }
 
     public static ArtistId Create(Guid value) =>
-        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException(ExceptionMessages.ArtistIdEmpty)));
+        new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(ArtistId)} cannot be empty")));
 
     public static bool operator <(ArtistId left, ArtistId right) => left.Value < right.Value;
     public static bool operator >(ArtistId left, ArtistId right) => left.Value > right.Value;
