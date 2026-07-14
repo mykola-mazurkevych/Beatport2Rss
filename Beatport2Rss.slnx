@@ -32,16 +32,16 @@
     <File Path="docker/docker-compose.yml" />
   </Folder>
   <Folder Name="/services/" />
-  <Folder Name="/services/Collector/" />
-  <Folder Name="/services/Collector/src/">
-    <Project Path="services/Collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
-    <Project Path="services/Collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
+  <Folder Name="/services/collector/" />
+  <Folder Name="/services/collector/src/">
+    <Project Path="services/collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
+    <Project Path="services/collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/services/Interceptor/">
-    <File Path="services/Interceptor/README.md" />
+  <Folder Name="/services/interceptor/">
+    <File Path="services/interceptor/README.md" />
   </Folder>
-  <Folder Name="/services/Interceptor/src/">
-    <Project Path="services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
+  <Folder Name="/services/interceptor/src/">
+    <Project Path="services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
