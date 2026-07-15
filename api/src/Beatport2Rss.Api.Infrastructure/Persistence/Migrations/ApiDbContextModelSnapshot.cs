@@ -171,11 +171,9 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Api.Domain.Tags.Tag", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -369,8 +367,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("SubscriptionId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("TagId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -392,8 +390,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Api.Infrastructure.Persistence.QueryModels.TagQueryModel", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -517,8 +515,8 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                             b1.Property<Guid>("SubscriptionId")
                                 .HasColumnType("uuid");
 
-                            b1.Property<int>("TagId")
-                                .HasColumnType("integer");
+                            b1.Property<Guid>("TagId")
+                                .HasColumnType("uuid");
 
                             b1.HasKey("SubscriptionId", "TagId");
 

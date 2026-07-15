@@ -50,7 +50,9 @@ internal sealed class CreateTagCommandHandler(
             return Result.Conflict($"Tag name '{tagName}' is already taken.");
         }
 
+        var tagId = TagId.Create(Guid.NewGuid());
         var tag = Tag.Create(
+            tagId,
             clock.UtcNow,
             command.UserId,
             tagName,
