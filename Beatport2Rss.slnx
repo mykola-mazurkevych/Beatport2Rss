@@ -37,9 +37,7 @@
     <Project Path="services/collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/services/interceptor/">
-    <File Path="services/interceptor/README.md" />
-  </Folder>
+  <Folder Name="/services/interceptor/" />
   <Folder Name="/services/interceptor/src/">
     <Project Path="services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
   </Folder>

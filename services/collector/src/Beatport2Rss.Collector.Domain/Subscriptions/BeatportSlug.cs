@@ -5,14 +5,15 @@ using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Collector.Domain.Common.ValueObjects;
+namespace Beatport2Rss.Collector.Domain.Subscriptions;
 
 public readonly record struct BeatportSlug :
     IValueObject
 {
     public const int MaxLength = 200;
 
-    private BeatportSlug(string value) => Value = value;
+    private BeatportSlug(string value) =>
+        Value = value;
 
     public string Value { get; }
 
