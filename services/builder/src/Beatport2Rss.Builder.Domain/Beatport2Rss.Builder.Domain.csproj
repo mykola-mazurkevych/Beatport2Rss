@@ -1,0 +1,5 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.SharedKernel\Beatport2Rss.Common.SharedKernel.csproj" />
+  </ItemGroup>
+</Project>

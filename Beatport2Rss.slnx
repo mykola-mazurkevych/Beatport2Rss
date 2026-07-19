@@ -32,6 +32,11 @@
     <File Path="docker/docker-compose.yml" />
   </Folder>
   <Folder Name="/services/" />
+  <Folder Name="/services/builder/" />
+  <Folder Name="/services/builder/src/">
+    <Project Path="services/builder/src/Beatport2Rss.Builder.Domain/Beatport2Rss.Builder.Domain.csproj" />
+    <Project Path="services/builder/src/Beatport2Rss.Builder.Infrastructure/Beatport2Rss.Builder.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/services/collector/" />
   <Folder Name="/services/collector/src/">
     <Project Path="services/collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
