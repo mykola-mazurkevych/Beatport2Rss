@@ -11,6 +11,7 @@ public sealed record FeedPaginableReadModel :
     public required DateTimeOffset CreatedAt { get; init; }
     public required FeedName Name { get; init; }
     public required Slug Slug { get; init; }
+    public required AuthorName? AuthorName { get; init; }
     public required bool IsActive { get; init; }
     public required int SubscriptionsCount { get; init; }
 }

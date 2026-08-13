@@ -11,6 +11,7 @@ internal sealed record FeedQueryModel(
     UserId UserId,
     FeedName Name,
     Slug Slug,
+    AuthorName? AuthorName,
     bool IsActive,
     int SubscriptionsCount) :
     IQueryModel<FeedId>;

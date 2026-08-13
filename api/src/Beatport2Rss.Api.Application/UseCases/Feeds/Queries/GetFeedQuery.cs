@@ -29,6 +29,7 @@ internal sealed class GetFeedQueryHandler(
             feedDetails.Id,
             feedDetails.Name,
             feedDetails.Slug,
+            feedDetails.AuthorName,
             feedDetails.IsActive,
             feedDetails.CreatedAt,
             feedDetails.SubscriptionsCount);

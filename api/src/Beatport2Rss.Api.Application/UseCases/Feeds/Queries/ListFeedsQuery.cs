@@ -50,6 +50,7 @@ internal sealed class ListFeedsQueryHandler(
                 feedPaginableReadModel.Id,
                 feedPaginableReadModel.Name,
                 feedPaginableReadModel.Slug,
+                feedPaginableReadModel.AuthorName,
                 feedPaginableReadModel.IsActive,
                 feedPaginableReadModel.CreatedAt,
                 feedPaginableReadModel.SubscriptionsCount))

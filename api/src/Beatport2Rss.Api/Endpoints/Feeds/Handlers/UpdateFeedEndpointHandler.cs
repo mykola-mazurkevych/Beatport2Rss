@@ -24,6 +24,7 @@ internal static class UpdateFeedEndpointHandler
             context.User.Id,
             slug,
             request.Name,
+            request.AuthorName,
             request.UpdateSlug,
             request.IsActive);
         var result = await mediator.Send(command, cancellationToken);

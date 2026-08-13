@@ -22,6 +22,7 @@ public sealed class Feed :
 
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
+    public AuthorName? AuthorName { get; private set; }
 
     public FeedStatus Status { get; private set; }
 
@@ -34,6 +35,7 @@ public sealed class Feed :
         UserId userId,
         FeedName name,
         Slug slug,
+        AuthorName? authorName,
         bool isActive) =>
         new()
         {
@@ -42,6 +44,7 @@ public sealed class Feed :
             UserId = userId,
             Name = name,
             Slug = slug,
+            AuthorName = authorName,
             Status = isActive ? FeedStatus.Active : FeedStatus.Inactive,
         };
 
@@ -50,6 +53,9 @@ public sealed class Feed :
 
     public void UpdateSlug(Slug slug) =>
         Slug = slug;
+
+    public void UpdateAuthorName(AuthorName? authorName) =>
+        AuthorName = authorName;
 
     public void UpdateStatus(bool isActive) =>
         Status = isActive ? FeedStatus.Active : FeedStatus.Inactive;

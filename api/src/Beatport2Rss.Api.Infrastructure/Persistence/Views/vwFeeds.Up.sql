@@ -1,10 +1,11 @@
 CREATE VIEW "vwFeeds" AS
 SELECT
-    F."Id"        AS "Id",
-    F."CreatedAt" AS "CreatedAt",
-    F."UserId"    AS "UserId",
-    F."Name"      AS "Name",
-    F."Slug"      AS "Slug",
+    F."Id"                               AS "Id",
+    F."CreatedAt"                        AS "CreatedAt",
+    F."UserId"                           AS "UserId",
+    F."Name"                             AS "Name",
+    F."Slug"                             AS "Slug",
+    F."AuthorName"                       AS "AuthorName",
     F."Status" = 'Active'                AS "IsActive",
     COALESCE(FS."SubscriptionsCount", 0) AS "SubscriptionsCount"
 FROM "Feeds" AS F

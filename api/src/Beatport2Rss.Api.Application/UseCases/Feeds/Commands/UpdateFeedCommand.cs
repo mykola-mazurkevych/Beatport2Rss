@@ -20,6 +20,7 @@ public sealed record UpdateFeedCommand(
     UserId UserId,
     Slug FeedSlug,
     string? Name,
+    string? AuthorName,
     bool UpdateSlug,
     bool IsActive) :
     ICommand<Result<Slug>>, IRequireUser, IRequireFeed;
@@ -30,6 +31,7 @@ internal sealed class UpdateFeedCommandValidator :
     public UpdateFeedCommandValidator()
     {
         RuleFor(c => c.Name).IsFeedName();
+        RuleFor(c => c.AuthorName).NotEmpty().MaximumLength(AuthorName.MaxLength).When(c => c.AuthorName is not null);
     }
 }
 
@@ -46,6 +48,7 @@ internal sealed class UpdateFeedCommandHandler(
         var feed = await feedCommandRepository.LoadAsync(command.UserId, command.FeedSlug, cancellationToken);
 
         var feedName = FeedName.Create(command.Name);
+        var authorName = command.AuthorName is null ? (AuthorName?)null : AuthorName.Create(command.AuthorName);
         var slug = command.UpdateSlug
             ? slugGenerator.Generate(feedName.Value)
             : feed.Slug;
@@ -57,6 +60,7 @@ internal sealed class UpdateFeedCommandHandler(
 
         feed.UpdateName(feedName);
         feed.UpdateSlug(slug);
+        feed.UpdateAuthorName(authorName);
         feed.UpdateStatus(command.IsActive);
 
         feedCommandRepository.Update(feed);

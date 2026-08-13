@@ -21,6 +21,7 @@ internal static class CreateFeedEndpointHandler
         var command = new CreateFeedCommand(
             context.User.Id,
             request.Name,
+            request.AuthorName,
             request.IsActive);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(() => Results.CreatedAtRoute(FeedEndpointNames.Get, routeValues: new { slug = result.Value }), context);

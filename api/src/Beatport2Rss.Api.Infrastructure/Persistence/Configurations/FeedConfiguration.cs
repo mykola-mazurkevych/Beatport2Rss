@@ -32,6 +32,10 @@ internal sealed class FeedConfiguration :
             .HasMaxLength(Slug.MaxLength)
             .IsRequired();
 
+        builder.Property(feed => feed.AuthorName)
+            .HasMaxLength(AuthorName.MaxLength)
+            .IsRequired(false);
+
         builder.Property(feed => feed.Status)
             .IsEnum();
 

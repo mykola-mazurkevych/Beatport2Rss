@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BuilderDbContext))]
-    [Migration("20260813200051_InitialCreate")]
+    [Migration("20260813203748_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,7 +33,6 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("AuthorName")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 

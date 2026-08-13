@@ -33,7 +33,7 @@ internal sealed class FeedConfiguration :
 
         builder.Property(feed => feed.AuthorName)
             .HasMaxLength(AuthorName.MaxLength)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.OwnsMany(
             feed => feed.Subscriptions,

@@ -23,6 +23,7 @@ internal sealed class FeedQueryRepository(
                 CreatedAt = feedQueryModel.CreatedAt,
                 Name = feedQueryModel.Name,
                 Slug = feedQueryModel.Slug,
+                AuthorName = feedQueryModel.AuthorName,
                 IsActive = feedQueryModel.IsActive,
                 SubscriptionsCount = feedQueryModel.SubscriptionsCount
             });
@@ -49,6 +50,7 @@ internal sealed class FeedQueryRepository(
                 feedQueryModel.Id,
                 feedQueryModel.Name,
                 feedQueryModel.Slug,
+                feedQueryModel.AuthorName,
                 feedQueryModel.IsActive,
                 feedQueryModel.CreatedAt,
                 feedQueryModel.SubscriptionsCount),

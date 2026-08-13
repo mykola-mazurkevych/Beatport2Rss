@@ -23,7 +23,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    AuthorName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
+                    AuthorName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {

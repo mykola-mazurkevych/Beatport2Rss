@@ -19,7 +19,7 @@ public sealed class Feed :
 
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
-    public AuthorName AuthorName { get; private set; }
+    public AuthorName? AuthorName { get; private set; }
 
     public IReadOnlySet<FeedSubscription> Subscriptions =>
         _subscriptions.AsReadOnly();
@@ -29,7 +29,7 @@ public sealed class Feed :
         DateTimeOffset createdAt,
         FeedName name,
         Slug slug,
-        AuthorName authorName) =>
+        AuthorName? authorName) =>
         new()
         {
             Id = id,

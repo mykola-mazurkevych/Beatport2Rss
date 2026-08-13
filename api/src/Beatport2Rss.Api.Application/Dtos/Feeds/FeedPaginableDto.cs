@@ -7,6 +7,7 @@ public sealed record FeedPaginableDto(
     FeedId Id,
     FeedName Name,
     Slug Slug,
+    AuthorName? AuthorName,
     bool IsActive,
     DateTimeOffset CreatedAt,
     int SubscriptionsCount);

@@ -19,6 +19,7 @@ internal sealed class FeedQueryModelConfiguration :
         builder.Property(feedQueryModel => feedQueryModel.UserId);
         builder.Property(feedQueryModel => feedQueryModel.Name);
         builder.Property(feedQueryModel => feedQueryModel.Slug);
+        builder.Property(feedQueryModel => feedQueryModel.AuthorName);
         builder.Property(feedQueryModel => feedQueryModel.IsActive);
         builder.Property(feedQueryModel => feedQueryModel.SubscriptionsCount);
     }

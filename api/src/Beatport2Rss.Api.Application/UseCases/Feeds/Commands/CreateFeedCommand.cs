@@ -19,6 +19,7 @@ namespace Beatport2Rss.Api.Application.UseCases.Feeds.Commands;
 public sealed record CreateFeedCommand(
     UserId UserId,
     string? Name,
+    string? AuthorName,
     bool IsActive) :
     ICommand<Result<Slug>>, IRequireValidation, IRequireActiveUser;
 
@@ -28,6 +29,7 @@ internal sealed class CreateFeedCommandValidator :
     public CreateFeedCommandValidator()
     {
         RuleFor(c => c.Name).IsFeedName();
+        RuleFor(c => c.AuthorName).NotEmpty().MaximumLength(AuthorName.MaxLength).When(c => c.AuthorName is not null);
     }
 }
 
@@ -44,6 +46,7 @@ internal sealed class CreateFeedCommandHandler(
     {
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
+        var authorName = command.AuthorName is null ? (AuthorName?)null : AuthorName.Create(command.AuthorName);
         var slug = slugGenerator.Generate(feedName.Value);
 
         if (await feedCommandRepository.ExistsAsync(command.UserId, feedName, cancellationToken))
@@ -57,6 +60,7 @@ internal sealed class CreateFeedCommandHandler(
             command.UserId,
             feedName,
             slug,
+            authorName,
             command.IsActive);
 
         await feedCommandRepository.AddAsync(feed, cancellationToken);

@@ -7,6 +7,7 @@ public sealed record FeedDto(
     FeedId Id,
     FeedName Name,
     Slug Slug,
+    AuthorName? AuthorName,
     bool IsActive,
     DateTimeOffset CreatedAt,
     int SubscriptionsCount);
