@@ -10,21 +10,21 @@ COPY ["Directory.Packages.props", "."]
 COPY ["nuget.config", "."]
 
 # Copy the Interceptor project and its dependencies
-COPY ["services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj", "services/Interceptor/src/Beatport2Rss.Interceptor/"]
+COPY ["services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj", "services/interceptor/src/Beatport2Rss.Interceptor/"]
 COPY ["common/protos/", "common/protos/"]
 
 # Restore dependencies
-RUN dotnet restore "services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj"
+RUN dotnet restore "services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj"
 
 # Copy source code
-COPY ["services/Interceptor/src/", "services/Interceptor/src/"]
+COPY ["services/interceptor/src/", "services/interceptor/src/"]
 
 # Build the project
-RUN dotnet build "services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" -c Release -o /app/build
+RUN dotnet build "services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "services/Interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" -c Release -o /app/publish
+RUN dotnet publish "services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime

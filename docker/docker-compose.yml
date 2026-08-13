@@ -42,7 +42,7 @@ services:
   interceptor:
     build:
       context: ..
-      dockerfile: services/Interceptor/src/Beatport2Rss.Interceptor/Dockerfile
+      dockerfile: services/interceptor/src/Beatport2Rss.Interceptor/Dockerfile
     container_name: interceptor
     ports:
       - "5000:5000"
