@@ -32,9 +32,6 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.BeatportId)
             .IsRequired();
 
-        builder.Property(subscription => subscription.BeatportUri)
-            .IsUri();
-
         builder.HasIndex(subscription => new { subscription.Type, subscription.BeatportId })
             .IsUnique();
     }

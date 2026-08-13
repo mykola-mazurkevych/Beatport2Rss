@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BuilderDbContext))]
-    [Migration("20260813203748_InitialCreate")]
+    [Migration("20260813210045_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -110,11 +110,6 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("BeatportUri")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

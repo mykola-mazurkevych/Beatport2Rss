@@ -108,11 +108,6 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("BeatportUri")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 

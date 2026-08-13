@@ -18,15 +18,13 @@ public sealed class Subscription :
     public SubscriptionName Name { get; private set; }
 
     public BeatportId BeatportId { get; private set; }
-    public Uri BeatportUri { get; private set; } = null!;
 
     public static Subscription Create(
         SubscriptionId id,
         DateTimeOffset createdAt,
         SubscriptionType type,
         SubscriptionName name,
-        BeatportId beatportId,
-        Uri beatportUri) =>
+        BeatportId beatportId) =>
         new()
         {
             Id = id,
@@ -34,6 +32,5 @@ public sealed class Subscription :
             Type = type,
             Name = name,
             BeatportId = beatportId,
-            BeatportUri = beatportUri,
         };
 }

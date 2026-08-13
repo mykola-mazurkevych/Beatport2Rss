@@ -39,8 +39,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    BeatportId = table.Column<int>(type: "integer", nullable: false),
-                    BeatportUri = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    BeatportId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
