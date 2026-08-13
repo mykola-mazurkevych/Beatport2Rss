@@ -1,6 +1,5 @@
-using Beatport2Rss.Builder.Domain.Artists;
-using Beatport2Rss.Builder.Domain.Labels;
 using Beatport2Rss.Builder.Domain.Releases;
+using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;
@@ -54,7 +53,7 @@ internal sealed class ReleaseConfiguration :
             release => release.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(BuilderDbContext.ReleaseArtists));
+                navigationBuilder.ToTable("ReleaseArtists");
 
                 navigationBuilder.HasKey(releaseArtist => new { releaseArtist.ReleaseId, releaseArtist.ArtistId, releaseArtist.Type });
 
@@ -70,14 +69,14 @@ internal sealed class ReleaseConfiguration :
                 navigationBuilder.WithOwner()
                     .HasForeignKey(releaseArtist => releaseArtist.ReleaseId);
 
-                navigationBuilder.HasOne<Artist>()
+                navigationBuilder.HasOne<Subscription>()
                     .WithMany()
                     .HasForeignKey(releaseArtist => releaseArtist.ArtistId);
 
                 navigationBuilder.HasIndex(releaseArtist => releaseArtist.ArtistId);
             });
 
-        builder.HasOne<Label>()
+        builder.HasOne<Subscription>()
             .WithMany()
             .HasForeignKey(release => release.LabelId);
 

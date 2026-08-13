@@ -15,35 +15,63 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 name: "builder");
 
             migrationBuilder.CreateTable(
-                name: "Artists",
+                name: "Feeds",
                 schema: "builder",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    BeatportId = table.Column<int>(type: "integer", nullable: false),
-                    BeatportUri = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    Slug = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    AuthorName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Artists", x => x.Id);
+                    table.PrimaryKey("PK_Feeds", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Labels",
+                name: "Subscriptions",
                 schema: "builder",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     BeatportId = table.Column<int>(type: "integer", nullable: false),
                     BeatportUri = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Labels", x => x.Id);
+                    table.PrimaryKey("PK_Subscriptions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FeedSubscriptions",
+                schema: "builder",
+                columns: table => new
+                {
+                    FeedId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SubscriptionId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FeedSubscriptions", x => new { x.FeedId, x.SubscriptionId });
+                    table.ForeignKey(
+                        name: "FK_FeedSubscriptions_Feeds_FeedId",
+                        column: x => x.FeedId,
+                        principalSchema: "builder",
+                        principalTable: "Feeds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_FeedSubscriptions_Subscriptions_SubscriptionId",
+                        column: x => x.SubscriptionId,
+                        principalSchema: "builder",
+                        principalTable: "Subscriptions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,10 +93,10 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_Releases", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Releases_Labels_LabelId",
+                        name: "FK_Releases_Subscriptions_LabelId",
                         column: x => x.LabelId,
                         principalSchema: "builder",
-                        principalTable: "Labels",
+                        principalTable: "Subscriptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -86,17 +114,17 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_ReleaseArtists", x => new { x.ReleaseId, x.ArtistId, x.Type });
                     table.ForeignKey(
-                        name: "FK_ReleaseArtists_Artists_ArtistId",
-                        column: x => x.ArtistId,
-                        principalSchema: "builder",
-                        principalTable: "Artists",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_ReleaseArtists_Releases_ReleaseId",
                         column: x => x.ReleaseId,
                         principalSchema: "builder",
                         principalTable: "Releases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ReleaseArtists_Subscriptions_ArtistId",
+                        column: x => x.ArtistId,
+                        principalSchema: "builder",
+                        principalTable: "Subscriptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -142,10 +170,10 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 {
                     table.PrimaryKey("PK_TrackArtists", x => new { x.TrackId, x.ArtistId, x.Type });
                     table.ForeignKey(
-                        name: "FK_TrackArtists_Artists_ArtistId",
+                        name: "FK_TrackArtists_Subscriptions_ArtistId",
                         column: x => x.ArtistId,
                         principalSchema: "builder",
-                        principalTable: "Artists",
+                        principalTable: "Subscriptions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -158,18 +186,10 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Artists_BeatportId",
+                name: "IX_FeedSubscriptions_SubscriptionId",
                 schema: "builder",
-                table: "Artists",
-                column: "BeatportId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Labels_BeatportId",
-                schema: "builder",
-                table: "Labels",
-                column: "BeatportId",
-                unique: true);
+                table: "FeedSubscriptions",
+                column: "SubscriptionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReleaseArtists_ArtistId",
@@ -189,6 +209,13 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 schema: "builder",
                 table: "Releases",
                 column: "LabelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Subscriptions_Type_BeatportId",
+                schema: "builder",
+                table: "Subscriptions",
+                columns: new[] { "Type", "BeatportId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrackArtists_ArtistId",
@@ -214,6 +241,10 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "FeedSubscriptions",
+                schema: "builder");
+
+            migrationBuilder.DropTable(
                 name: "ReleaseArtists",
                 schema: "builder");
 
@@ -222,7 +253,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 schema: "builder");
 
             migrationBuilder.DropTable(
-                name: "Artists",
+                name: "Feeds",
                 schema: "builder");
 
             migrationBuilder.DropTable(
@@ -234,7 +265,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                 schema: "builder");
 
             migrationBuilder.DropTable(
-                name: "Labels",
+                name: "Subscriptions",
                 schema: "builder");
         }
     }

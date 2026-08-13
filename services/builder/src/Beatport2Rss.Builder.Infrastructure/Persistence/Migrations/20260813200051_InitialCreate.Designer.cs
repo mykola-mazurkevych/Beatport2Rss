@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(BuilderDbContext))]
-    [Migration("20260719175524_InitialCreate")]
+    [Migration("20260813200051_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -26,19 +26,16 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Artists.Artist", b =>
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Feeds.Feed", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("BeatportId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("BeatportUri")
+                    b.Property<string>("AuthorName")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -48,42 +45,14 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("BeatportId")
-                        .IsUnique();
-
-                    b.ToTable("Artists", "builder");
-                });
-
-            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Labels.Label", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("BeatportId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("BeatportUri")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BeatportId")
-                        .IsUnique();
-
-                    b.ToTable("Labels", "builder");
+                    b.ToTable("Feeds", "builder");
                 });
 
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Releases.Release", b =>
@@ -132,6 +101,41 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.HasIndex("LabelId");
 
                     b.ToTable("Releases", "builder");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("BeatportUri")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Type", "BeatportId")
+                        .IsUnique();
+
+                    b.ToTable("Subscriptions", "builder");
                 });
 
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Tracks.Track", b =>
@@ -185,9 +189,38 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.ToTable("Tracks", "builder");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Feeds.Feed", b =>
+                {
+                    b.OwnsMany("Beatport2Rss.Builder.Domain.Feeds.FeedSubscription", "Subscriptions", b1 =>
+                        {
+                            b1.Property<Guid>("FeedId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("SubscriptionId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("FeedId", "SubscriptionId");
+
+                            b1.HasIndex("SubscriptionId");
+
+                            b1.ToTable("FeedSubscriptions", "builder");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FeedId");
+
+                            b1.HasOne("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", null)
+                                .WithMany()
+                                .HasForeignKey("SubscriptionId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Subscriptions");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Releases.Release", b =>
                 {
-                    b.HasOne("Beatport2Rss.Builder.Domain.Labels.Label", null)
+                    b.HasOne("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", null)
                         .WithMany()
                         .HasForeignKey("LabelId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -211,7 +244,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
                             b1.ToTable("ReleaseArtists", "builder");
 
-                            b1.HasOne("Beatport2Rss.Builder.Domain.Artists.Artist", null)
+                            b1.HasOne("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", null)
                                 .WithMany()
                                 .HasForeignKey("ArtistId")
                                 .OnDelete(DeleteBehavior.Cascade)
@@ -250,7 +283,7 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
                             b1.ToTable("TrackArtists", "builder");
 
-                            b1.HasOne("Beatport2Rss.Builder.Domain.Artists.Artist", null)
+                            b1.HasOne("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", null)
                                 .WithMany()
                                 .HasForeignKey("ArtistId")
                                 .OnDelete(DeleteBehavior.Cascade)

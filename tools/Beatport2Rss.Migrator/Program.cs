@@ -21,6 +21,7 @@ var configurationRoot = new ConfigurationBuilder()
 var serviceCollection = new ServiceCollection();
 
 Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
 Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
 
 var serviceProvider =serviceCollection 

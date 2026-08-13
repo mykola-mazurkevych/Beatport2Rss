@@ -1,5 +1,5 @@
-using Beatport2Rss.Builder.Domain.Artists;
 using Beatport2Rss.Builder.Domain.Releases;
+using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
@@ -54,7 +54,7 @@ internal sealed class TrackConfiguration :
             track => track.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(nameof(BuilderDbContext.TrackArtists));
+                navigationBuilder.ToTable("TrackArtists");
 
                 navigationBuilder.HasKey(trackArtist => new { trackArtist.TrackId, trackArtist.ArtistId, trackArtist.Type });
 
@@ -71,7 +71,7 @@ internal sealed class TrackConfiguration :
                     .WithOwner()
                     .HasForeignKey(trackArtist => trackArtist.TrackId);
 
-                navigationBuilder.HasOne<Artist>()
+                navigationBuilder.HasOne<Subscription>()
                     .WithMany()
                     .HasForeignKey(trackArtist => trackArtist.ArtistId);
 

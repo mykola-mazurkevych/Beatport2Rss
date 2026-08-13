@@ -1,5 +1,5 @@
 using Beatport2Rss.Builder.Domain.Common.ValueObjects;
-using Beatport2Rss.Builder.Domain.Labels;
+using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -33,7 +33,7 @@ public sealed class Release :
     public ReleaseName Name { get; private set; }
     public DateOnly ReleaseDate { get; private set; }
 
-    public LabelId LabelId { get; private set; }
+    public SubscriptionId LabelId { get; private set; }
     public CatalogNumber CatalogNumber { get; private set; }
 
     public Uri ImageUri { get; private set; } = null!;
@@ -48,7 +48,7 @@ public sealed class Release :
         Uri beatportUri,
         ReleaseName name,
         DateOnly releaseDate,
-        LabelId labelId,
+        SubscriptionId labelId,
         CatalogNumber catalogNumber,
 
         Uri imageUri,
