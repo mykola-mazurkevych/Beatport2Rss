@@ -29,6 +29,8 @@
     <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.Beatport\Beatport2Rss.Common.Beatport.csproj" />
     <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.BeatportTokenProvider\Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.IntegrationEvents\Beatport2Rss.Common.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\..\..\common\src\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Api.Application\Beatport2Rss.Api.Application.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Api.Domain\Beatport2Rss.Api.Domain.csproj" />
   </ItemGroup>

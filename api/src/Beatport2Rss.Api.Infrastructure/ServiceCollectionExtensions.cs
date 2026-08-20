@@ -5,6 +5,7 @@ using System.Text.Json;
 
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
@@ -15,6 +16,7 @@ using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
+using Beatport2Rss.Api.Infrastructure.Services.Messaging;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
@@ -148,6 +150,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ISubscriptionQueryRepository, SubscriptionQueryRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
+                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
