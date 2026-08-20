@@ -24,6 +24,7 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.Messaging;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,8 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
+                .AddMessaging(configuration)
+                .AddHostedService<OutboxDispatcher>()
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()

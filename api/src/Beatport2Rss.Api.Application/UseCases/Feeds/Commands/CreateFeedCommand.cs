@@ -2,9 +2,11 @@ using Beatport2Rss.Api.Application.Extensions;
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
+using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents.V1;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
@@ -37,6 +39,7 @@ internal sealed class CreateFeedCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
     IFeedCommandRepository feedCommandRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateFeedCommand, Result<Slug>>
 {
@@ -46,7 +49,9 @@ internal sealed class CreateFeedCommandHandler(
     {
         var feedId = FeedId.Create(Guid.CreateVersion7());
         var feedName = FeedName.Create(command.Name);
-        var authorName = command.AuthorName is null ? (AuthorName?)null : AuthorName.Create(command.AuthorName);
+        var authorName = command.AuthorName is null
+            ? (AuthorName?)null
+            : AuthorName.Create(command.AuthorName);
         var slug = slugGenerator.Generate(feedName.Value);
 
         if (await feedCommandRepository.ExistsAsync(command.UserId, feedName, cancellationToken))
@@ -62,8 +67,18 @@ internal sealed class CreateFeedCommandHandler(
             slug,
             authorName,
             command.IsActive);
-
         await feedCommandRepository.AddAsync(feed, cancellationToken);
+
+        var feedCreated = new FeedCreatedV1(
+            EventId: Guid.CreateVersion7(),
+            OccurredAt: clock.UtcNow,
+            feed.Id.Value,
+            feed.Name.Value,
+            feed.Slug.Value,
+            feed.AuthorName?.Value,
+            feed.Status == FeedStatus.Active);
+        integrationEventOutbox.Enqueue(feedCreated);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return slug;
