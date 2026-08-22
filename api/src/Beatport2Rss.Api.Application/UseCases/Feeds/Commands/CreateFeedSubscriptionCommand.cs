@@ -1,7 +1,10 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
+using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents.V1;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
@@ -18,8 +21,10 @@ public sealed record CreateFeedSubscriptionCommand(
     ICommand<Result>, IRequireActiveUser, IRequireFeed, IRequireSubscription;
 
 internal sealed class CreateFeedSubscriptionCommandHandler(
+    IClock clock,
     IFeedCommandRepository feedCommandRepository,
     ISubscriptionQueryRepository subscriptionQueryRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateFeedSubscriptionCommand, Result>
 {
@@ -36,8 +41,15 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
         }
 
         feed.AddSubscription(subscriptionId);
-
         feedCommandRepository.Update(feed);
+
+        var feedSubscriptionCreated = new FeedSubscriptionCreatedV1(
+            EventId: Guid.CreateVersion7(),
+            OccurredAt: clock.UtcNow,
+            FeedId: feed.Id.Value,
+            SubscriptionId: subscriptionId.Value);
+        integrationEventOutbox.Enqueue(feedSubscriptionCreated);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
