@@ -7,5 +7,5 @@ public sealed record FeedUpdatedV1(
     string Name,
     string Slug,
     string? AuthorName,
-    bool IsActive) :
+    string Status) :
     IIntegrationEvent;

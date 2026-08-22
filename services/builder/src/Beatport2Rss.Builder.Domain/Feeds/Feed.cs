@@ -21,6 +21,8 @@ public sealed class Feed :
     public Slug Slug { get; private set; }
     public AuthorName? AuthorName { get; private set; }
 
+    public FeedStatus Status { get; private set; }
+
     public IReadOnlySet<FeedSubscription> Subscriptions =>
         _subscriptions.AsReadOnly();
 
@@ -29,7 +31,8 @@ public sealed class Feed :
         DateTimeOffset createdAt,
         FeedName name,
         Slug slug,
-        AuthorName? authorName) =>
+        AuthorName? authorName,
+        FeedStatus status) =>
         new()
         {
             Id = id,
@@ -37,6 +40,7 @@ public sealed class Feed :
             Name = name,
             Slug = slug,
             AuthorName = authorName,
+            Status = status,
         };
 
     public void UpdateName(FeedName name) =>
@@ -44,6 +48,12 @@ public sealed class Feed :
 
     public void UpdateSlug(Slug slug) =>
         Slug = slug;
+
+    public void UpdateAuthorName(AuthorName? authorName) =>
+        AuthorName = authorName;
+
+    public void UpdateStatus(FeedStatus status) =>
+        Status = status;
 
     public void AddSubscription(SubscriptionId subscriptionId) =>
         _subscriptions.Add(FeedSubscription.Create(Id, subscriptionId));

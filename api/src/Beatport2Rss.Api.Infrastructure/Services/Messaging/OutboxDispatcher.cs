@@ -107,8 +107,7 @@ internal sealed partial class OutboxDispatcher(
             cancellationTokenParameter);
 
         return Expression
-            .Lambda<Func<IPublisher, object, CancellationToken, Task>>(
-                call, publisherParameter, messageParameter, cancellationTokenParameter)
+            .Lambda<Func<IPublisher, object, CancellationToken, Task>>(call, publisherParameter, messageParameter, cancellationTokenParameter)
             .Compile();
     }
 

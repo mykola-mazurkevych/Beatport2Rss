@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,9 @@ internal sealed class FeedConfiguration :
         builder.Property(feed => feed.AuthorName)
             .HasMaxLength(AuthorName.MaxLength)
             .IsRequired(false);
+
+        builder.Property(feed => feed.Status)
+            .IsEnum();
 
         builder.OwnsMany(
             feed => feed.Subscriptions,

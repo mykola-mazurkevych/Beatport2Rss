@@ -46,6 +46,7 @@ internal sealed class RabbitMqPublisher(
 
         var properties = model.CreateBasicProperties();
         properties.Persistent = true;
+        properties.Type = messageTypeName;
 
         var body = JsonSerializer.SerializeToUtf8Bytes(message, _jsonSerializerOptions);
         model.BasicPublish(string.Empty, queueName, mandatory: false, properties, body);
@@ -89,26 +90,7 @@ internal sealed class RabbitMqPublisher(
 
         try
         {
-            var deadLetterQueueName = $"{queueName}-{_queueOptions.DeadLetterSuffix}";
-            model.QueueDeclare(
-                deadLetterQueueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
-
-            var arguments = new Dictionary<string, object>
-            {
-                ["x-dead-letter-exchange"] = string.Empty,
-                ["x-dead-letter-routing-key"] = deadLetterQueueName,
-            };
-
-            model.QueueDeclare(
-                queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments);
+            RabbitMqTopology.DeclareQueueWithDeadLetter(model, queueName, _queueOptions.DeadLetterSuffix);
         }
         catch
         {
