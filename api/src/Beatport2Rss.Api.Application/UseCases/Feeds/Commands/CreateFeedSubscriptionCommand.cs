@@ -4,7 +4,7 @@ using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1;
+using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
@@ -46,8 +46,8 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
         var feedSubscriptionCreated = new FeedSubscriptionCreatedV1(
             EventId: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
-            FeedId: feed.Id.Value,
-            SubscriptionId: subscriptionId.Value);
+            feed.Id.Value,
+            subscriptionId.Value);
         integrationEventOutbox.Enqueue(feedSubscriptionCreated);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

@@ -6,7 +6,7 @@ using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1;
+using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
@@ -73,6 +73,7 @@ internal sealed class CreateFeedCommandHandler(
             EventId: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
+            feed.UserId.Value,
             feed.Name.Value,
             feed.Slug.Value,
             feed.AuthorName?.Value,
