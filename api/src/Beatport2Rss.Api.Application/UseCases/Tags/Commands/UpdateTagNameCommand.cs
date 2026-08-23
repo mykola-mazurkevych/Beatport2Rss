@@ -1,10 +1,12 @@
 ﻿using Beatport2Rss.Api.Application.Extensions;
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents.V1.Tags;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
@@ -33,8 +35,10 @@ internal sealed class UpdateTagNameCommandValidator :
 }
 
 internal sealed class UpdateTagNameCommandHandler(
+    IClock clock,
     ISlugGenerator slugGenerator,
     ITagCommandRepository tagCommandRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<UpdateTagNameCommand, Result<Slug>>
 {
@@ -54,8 +58,15 @@ internal sealed class UpdateTagNameCommandHandler(
 
         tag.UpdateName(tagName);
         tag.UpdateSlug(slug);
-
         tagCommandRepository.Update(tag);
+
+        var tagUpdated = new TagUpdatedV1(
+            EventId: Guid.CreateVersion7(),
+            OccurredAt: clock.UtcNow,
+            tag.Id.Value,
+            tag.Name.Value);
+        integrationEventOutbox.Enqueue(tagUpdated);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return tag.Slug;
