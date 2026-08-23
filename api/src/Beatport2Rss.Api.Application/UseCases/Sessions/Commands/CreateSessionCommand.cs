@@ -66,7 +66,7 @@ internal sealed class CreateSessionCommandHandler(
 
         var session = Session.Create(
             sessionId,
-            clock.UtcNow,
+            createdAt: clock.UtcNow,
             userAuthDetails.Id,
             refreshTokenHash,
             expiresAt,

@@ -45,6 +45,7 @@ internal sealed class CreateTagCommandHandler(
         CreateTagCommand command,
         CancellationToken cancellationToken)
     {
+        var tagId = TagId.Create(Guid.NewGuid());
         var tagName = TagName.Create(command.Name);
         var slug = slugGenerator.Generate(tagName.Value);
 
@@ -54,8 +55,8 @@ internal sealed class CreateTagCommandHandler(
         }
 
         var tag = Tag.Create(
-            TagId.Create(Guid.NewGuid()),
-            clock.UtcNow,
+            tagId,
+            createdAt: clock.UtcNow,
             command.UserId,
             tagName,
             slug);

@@ -114,7 +114,7 @@ internal sealed class CreateSubscriptionCommandHandler(
             { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 SubscriptionId.Create(Guid.CreateVersion7()),
-                clock.UtcNow,
+                createdAt: clock.UtcNow,
                 SubscriptionType.Artist,
                 SubscriptionName.Create(artistResult.Value.Name),
                 slugGenerator.Generate(artistResult.Value.Name),
@@ -138,7 +138,7 @@ internal sealed class CreateSubscriptionCommandHandler(
             { Value: null } => Result.Unprocessable("Not found."),
             _ => Subscription.Create(
                 SubscriptionId.Create(Guid.CreateVersion7()),
-                clock.UtcNow,
+                createdAt: clock.UtcNow,
                 SubscriptionType.Label,
                 SubscriptionName.Create(labelResult.Value.Name),
                 slugGenerator.Generate(labelResult.Value.Name),

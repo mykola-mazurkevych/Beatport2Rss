@@ -61,7 +61,7 @@ internal sealed class CreateFeedCommandHandler(
 
         var feed = Feed.Create(
             feedId,
-            clock.UtcNow,
+            createdAt: clock.UtcNow,
             command.UserId,
             feedName,
             slug,
