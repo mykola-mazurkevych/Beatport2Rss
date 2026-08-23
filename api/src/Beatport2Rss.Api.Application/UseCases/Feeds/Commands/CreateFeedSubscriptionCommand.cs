@@ -48,7 +48,7 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
             subscriptionId.Value);
-        integrationEventOutbox.Enqueue(feedSubscriptionCreated);
+        await integrationEventOutbox.EnqueueAsync(feedSubscriptionCreated, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

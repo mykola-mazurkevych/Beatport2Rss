@@ -67,7 +67,7 @@ internal sealed class CreateTagCommandHandler(
             tag.Id.Value,
             tag.UserId.Value,
             tag.Name.Value);
-        integrationEventOutbox.Enqueue(tagCreated);
+        await integrationEventOutbox.EnqueueAsync(tagCreated, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

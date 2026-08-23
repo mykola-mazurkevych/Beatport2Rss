@@ -65,7 +65,7 @@ internal sealed class UpdateTagNameCommandHandler(
             OccurredAt: clock.UtcNow,
             tag.Id.Value,
             tag.Name.Value);
-        integrationEventOutbox.Enqueue(tagUpdated);
+        await integrationEventOutbox.EnqueueAsync(tagUpdated, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

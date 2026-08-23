@@ -4,6 +4,8 @@ namespace Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 
 public interface IIntegrationEventOutbox
 {
-    void Enqueue<TIntegrationEvent>(TIntegrationEvent integrationEvent)
+    Task EnqueueAsync<TIntegrationEvent>(
+        TIntegrationEvent integrationEvent,
+        CancellationToken cancellationToken = default)
         where TIntegrationEvent : IIntegrationEvent;
 }

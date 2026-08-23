@@ -36,7 +36,7 @@ internal sealed class DeleteTagCommandHandler(
             EventId: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value);
-        integrationEventOutbox.Enqueue(tagDeleted);
+        await integrationEventOutbox.EnqueueAsync(tagDeleted, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

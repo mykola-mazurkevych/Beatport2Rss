@@ -12,7 +12,9 @@ internal sealed class IntegrationEventOutbox(
     JsonSerializerOptions jsonSerializerOptions) :
     IIntegrationEventOutbox
 {
-    public void Enqueue<TIntegrationEvent>(TIntegrationEvent integrationEvent)
+    public Task EnqueueAsync<TIntegrationEvent>(
+        TIntegrationEvent integrationEvent,
+        CancellationToken cancellationToken = default)
         where TIntegrationEvent : IIntegrationEvent
     {
         var message = OutboxMessage.Create(
@@ -20,6 +22,6 @@ internal sealed class IntegrationEventOutbox(
             integrationEvent.OccurredAt,
             type: typeof(TIntegrationEvent).Name,
             payload: JsonSerializer.Serialize(integrationEvent, jsonSerializerOptions));
-        dbContext.OutboxMessages.Add(message);
+        return dbContext.OutboxMessages.AddAsync(message, cancellationToken).AsTask();
     }
 }

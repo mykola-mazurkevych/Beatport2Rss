@@ -36,7 +36,7 @@ internal sealed class DeleteFeedCommandHandler(
             EventId: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value);
-        integrationEventOutbox.Enqueue(feedDeleted);
+        await integrationEventOutbox.EnqueueAsync(feedDeleted, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
