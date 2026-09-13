@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Api.Infrastructure.Services.Messaging;
 
-internal sealed partial class OutboxDispatcher(
+internal sealed class OutboxDispatcher(
     IServiceScopeFactory serviceScopeFactory,
     IPublisher publisher,
     IClock clock,
@@ -63,7 +63,7 @@ internal sealed partial class OutboxDispatcher(
             }
             catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
             {
-                LogPublishFailure(logger, exception, message.Id, message.Type);
+                OutboxDispatcherLogMessages.LogPublishFailure(logger, exception, message.Id, message.Type);
                 message.MarkFailed(exception.Message);
             }
         }
@@ -111,6 +111,10 @@ internal sealed partial class OutboxDispatcher(
             .Compile();
     }
 
-    [LoggerMessage(LogLevel.Error, "Unable to publish outbox message {OutboxMessageId} of type {OutboxMessageType}")]
-    private static partial void LogPublishFailure(ILogger logger, Exception exception, Guid outboxMessageId, string outboxMessageType);
+}
+
+internal static partial class OutboxDispatcherLogMessages
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to publish outbox message {OutboxMessageId} of type {OutboxMessageType}")]
+    public static partial void LogPublishFailure(ILogger logger, Exception exception, Guid outboxMessageId, string outboxMessageType);
 }

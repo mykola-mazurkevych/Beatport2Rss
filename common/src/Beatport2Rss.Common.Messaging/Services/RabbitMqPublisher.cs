@@ -11,7 +11,7 @@ using RabbitMQ.Client;
 namespace Beatport2Rss.Common.Messaging.Services;
 
 internal sealed class RabbitMqPublisher(
-    IConnectionFactory connectionFactory,
+    IRabbitMqConnectionFactory connectionFactory,
     IOptions<QueueOptions> queueOptions,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IPublisher, IDisposable, IAsyncDisposable
@@ -23,7 +23,7 @@ internal sealed class RabbitMqPublisher(
     private readonly QueueOptions _queueOptions = queueOptions.Value;
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
 
-    private readonly ConcurrentDictionary<string, byte> _declaredQueues = [];
+    private readonly ConcurrentDictionary<string, byte> _declaredExchanges = [];
     private bool _disposed;
 
     public Task PublishAsync<TMessage>(
@@ -35,21 +35,21 @@ internal sealed class RabbitMqPublisher(
 
         var messageTypeName = typeof(TMessage).Name;
 
-        if (!_queueOptions.Queues.TryGetValue(messageTypeName, out var queueName))
+        if (!_queueOptions.RoutingKeys.TryGetValue(messageTypeName, out var routingKey))
         {
-            throw new InvalidOperationException($"No queue configured for message type '{messageTypeName}'.");
+            throw new InvalidOperationException($"No routing key configured for message type '{messageTypeName}'.");
         }
 
         using var model = _connection.Value.CreateModel();
 
-        DeclareQueues(model, queueName);
+        DeclareExchange(model, _queueOptions.ExchangeName);
 
         var properties = model.CreateBasicProperties();
         properties.Persistent = true;
         properties.Type = messageTypeName;
 
         var body = JsonSerializer.SerializeToUtf8Bytes(message, _jsonSerializerOptions);
-        model.BasicPublish(string.Empty, queueName, mandatory: false, properties, body);
+        model.BasicPublish(_queueOptions.ExchangeName, routingKey, mandatory: false, properties, body);
 
         return Task.CompletedTask;
     }
@@ -81,20 +81,20 @@ internal sealed class RabbitMqPublisher(
         _disposed = true;
     }
 
-    private void DeclareQueues(IModel model, string queueName)
+    private void DeclareExchange(IModel model, string exchangeName)
     {
-        if (!_declaredQueues.TryAdd(queueName, 0))
+        if (!_declaredExchanges.TryAdd(exchangeName, 0))
         {
             return;
         }
 
         try
         {
-            RabbitMqTopology.DeclareQueueWithDeadLetter(model, queueName, _queueOptions.DeadLetterSuffix);
+            RabbitMqTopology.DeclareExchange(model, exchangeName);
         }
         catch
         {
-            _declaredQueues.TryRemove(queueName, out _);
+            _declaredExchanges.TryRemove(exchangeName, out _);
             throw;
         }
     }

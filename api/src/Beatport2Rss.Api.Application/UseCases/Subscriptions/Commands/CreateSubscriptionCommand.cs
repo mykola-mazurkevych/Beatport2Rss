@@ -1,6 +1,7 @@
 using Beatport2Rss.Api.Application.Dtos.Subscriptions;
 using Beatport2Rss.Api.Application.Extensions;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Subscriptions;
@@ -8,6 +9,7 @@ using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents.V1.Subscriptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 
@@ -42,6 +44,7 @@ internal sealed class CreateSubscriptionCommandHandler(
     ISlugGenerator slugGenerator,
     IBeatportTokenProvider tokenProvider,
     ISubscriptionCommandRepository subscriptionCommandRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateSubscriptionCommand, Result<SubscriptionDto>>
 {
@@ -87,6 +90,16 @@ internal sealed class CreateSubscriptionCommandHandler(
         }
 
         var subscription = await subscriptionCommandRepository.AddAsync(subscriptionResult.Value, cancellationToken);
+
+        var subscriptionCreated = new SubscriptionCreatedV1(
+            EventId: Guid.CreateVersion7(),
+            OccurredAt: clock.UtcNow,
+            subscription.Id.Value,
+            (int)subscription.Type,
+            subscription.BeatportId.Value,
+            subscription.BeatportSlug.Value);
+        await integrationEventOutbox.EnqueueAsync(subscriptionCreated, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new SubscriptionDto(

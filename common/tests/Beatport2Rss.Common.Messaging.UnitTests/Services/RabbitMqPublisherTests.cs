@@ -2,6 +2,7 @@
 
 using System.Text.Json;
 
+using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Messaging.Options;
 using Beatport2Rss.Common.Messaging.Services;
 
@@ -17,37 +18,37 @@ namespace Beatport2Rss.Common.Messaging.UnitTests.Services;
 
 public sealed class RabbitMqPublisherTests
 {
-    private const string QueueName = "test-queue";
+    private const string ExchangeName = "beatport2rss.events";
+    private const string RoutingKey = "test.created";
     private const string DeadLetterSuffix = "dead-letter";
-    private const string DeadLetterQueueName = $"{QueueName}-{DeadLetterSuffix}";
 
-    private readonly Mock<IConnectionFactory> _connectionFactoryMock = new();
     private readonly Mock<IConnection> _connectionMock = new();
     private readonly Mock<IModel> _modelMock = new();
 
     private readonly QueueOptions _queueOptions = new()
     {
         DeadLetterSuffix = DeadLetterSuffix,
-        Queues = new Dictionary<string, string>
+        ExchangeName = ExchangeName,
+        Queues = new Dictionary<string, string>(),
+        RoutingKeys = new Dictionary<string, string>
         {
-            [nameof(TestMessage)] = QueueName,
+            [nameof(TestMessage)] = RoutingKey,
         },
     };
 
     public RabbitMqPublisherTests()
     {
-        _connectionFactoryMock.Setup(f => f.CreateConnection()).Returns(_connectionMock.Object);
         _connectionMock.Setup(c => c.CreateModel()).Returns(_modelMock.Object);
         _modelMock.Setup(m => m.CreateBasicProperties()).Returns(new Mock<IBasicProperties>().Object);
     }
 
     private RabbitMqPublisher CreatePublisher() =>
-        new(_connectionFactoryMock.Object,
+        new(new TestRabbitMqConnectionFactory(_connectionMock.Object),
             MicrosoftOptions.Create(_queueOptions),
             MicrosoftOptions.Create(new JsonSerializerOptions()));
 
     [Fact]
-    public async Task PublishAsync_WhenQueueIsConfigured_ShouldPublishToCorrectQueue()
+    public async Task PublishAsync_WhenRoutingKeyIsConfigured_ShouldPublishToTopicExchange()
     {
         await using var publisher = CreatePublisher();
 
@@ -55,8 +56,8 @@ public sealed class RabbitMqPublisherTests
 
         _modelMock.Verify(
             m => m.BasicPublish(
-                exchange: string.Empty,
-                QueueName,
+                exchange: ExchangeName,
+                routingKey: RoutingKey,
                 mandatory: It.IsAny<bool>(),
                 basicProperties: It.IsAny<IBasicProperties>(),
                 body: It.IsAny<ReadOnlyMemory<byte>>()),
@@ -64,7 +65,7 @@ public sealed class RabbitMqPublisherTests
     }
 
     [Fact]
-    public async Task PublishAsync_WhenQueueIsNotConfigured_ShouldThrowInvalidOperationException()
+    public async Task PublishAsync_WhenRoutingKeyIsNotConfigured_ShouldThrowInvalidOperationException()
     {
         await using var publisher = CreatePublisher();
 
@@ -72,39 +73,24 @@ public sealed class RabbitMqPublisherTests
     }
 
     [Fact]
-    public async Task PublishAsync_WhenCalledFirstTime_ShouldDeclareQueueAndDeadLetterQueue()
+    public async Task PublishAsync_WhenCalledFirstTime_ShouldDeclareTopicExchange()
     {
         await using var publisher = CreatePublisher();
 
         await publisher.PublishAsync(new TestMessage("hello"), TestContext.Current.CancellationToken);
 
         _modelMock.Verify(
-            m => m.QueueDeclare(
-                DeadLetterQueueName,
+            m => m.ExchangeDeclare(
+                ExchangeName,
+                ExchangeType.Topic,
                 durable: true,
-                exclusive: false,
                 autoDelete: false,
                 arguments: null),
-            Times.Once);
-
-        _modelMock.Verify(
-            m => m.QueueDeclare(
-                QueueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: It.Is<IDictionary<string, object>>(a =>
-                    a.ContainsKey("x-dead-letter-exchange") &&
-                    a["x-dead-letter-exchange"] is string &&
-                    (string)a["x-dead-letter-exchange"] == string.Empty &&
-                    a.ContainsKey("x-dead-letter-routing-key") &&
-                    a["x-dead-letter-routing-key"] is string &&
-                    (string)a["x-dead-letter-routing-key"] == DeadLetterQueueName)),
             Times.Once);
     }
 
     [Fact]
-    public async Task PublishAsync_WhenCalledMultipleTimes_ShouldDeclareQueuesOnlyOnce()
+    public async Task PublishAsync_WhenCalledMultipleTimes_ShouldDeclareExchangeOnlyOnce()
     {
         await using var publisher = CreatePublisher();
 
@@ -113,16 +99,23 @@ public sealed class RabbitMqPublisherTests
         await publisher.PublishAsync(new TestMessage("third"), TestContext.Current.CancellationToken);
 
         _modelMock.Verify(
-            m => m.QueueDeclare(
-                queue: It.IsAny<string>(),
+            m => m.ExchangeDeclare(
+                exchange: It.IsAny<string>(),
+                type: It.IsAny<string>(),
                 durable: It.IsAny<bool>(),
-                exclusive: It.IsAny<bool>(),
                 autoDelete: It.IsAny<bool>(),
                 arguments: It.IsAny<IDictionary<string, object>>()),
-            Times.Exactly(2));
+            Times.Once);
     }
 
     private sealed record TestMessage(string Value);
 
     private sealed record UnknownMessage;
+
+    private sealed class TestRabbitMqConnectionFactory(IConnection connection) :
+        IRabbitMqConnectionFactory
+    {
+        public IConnection CreateConnection() =>
+            connection;
+    }
 }
