@@ -5,13 +5,17 @@ using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
 using Beatport2Rss.Common.IntegrationEvents;
 
+using Microsoft.Extensions.Options;
+
 namespace Beatport2Rss.Api.Infrastructure.Services.Messaging;
 
 internal sealed class IntegrationEventOutbox(
     ApiDbContext dbContext,
-    JsonSerializerOptions jsonSerializerOptions) :
+    IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IIntegrationEventOutbox
 {
+    private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
+
     public Task EnqueueAsync<TIntegrationEvent>(
         TIntegrationEvent integrationEvent,
         CancellationToken cancellationToken = default)
@@ -21,7 +25,7 @@ internal sealed class IntegrationEventOutbox(
             integrationEvent.EventId,
             integrationEvent.OccurredAt,
             type: typeof(TIntegrationEvent).Name,
-            payload: JsonSerializer.Serialize(integrationEvent, jsonSerializerOptions));
+            payload: JsonSerializer.Serialize(integrationEvent, _jsonSerializerOptions));
         return dbContext.OutboxMessages.AddAsync(message, cancellationToken).AsTask();
     }
 }

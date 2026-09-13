@@ -90,6 +90,44 @@ services:
       retries: 3
       start_period: 10s
 
+  api:
+    build:
+      context: ..
+      dockerfile: api/src/Beatport2Rss.Api/Dockerfile
+    container_name: api
+    ports:
+      - "${API_PORT}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
+      - BeatportTokenProviderOptions__TokenInterceptorGrpcUri=${INTERCEPTOR_GRPC_URI}
+      - BeatportCredentials__Username=${BEATPORT_USERNAME}
+      - BeatportCredentials__Password=${BEATPORT_PASSWORD}
+      - RabbitMqOptions__HostName=${RABBITMQ_HOSTNAME}
+      - RabbitMqOptions__Port=${RABBITMQ_PORT}
+      - RabbitMqOptions__UserName=${RABBITMQ_USERNAME}
+      - RabbitMqOptions__Password=${RABBITMQ_PASSWORD}
+      - RabbitMqOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
+      - JwtOptions__Issuer=${JWT_ISSUER}
+      - JwtOptions__Audience=${JWT_AUDIENCE}
+      - JwtOptions__SigningKey=${JWT_SIGNING_KEY}
+      - JwtOptions__ExpiresIn=${JWT_EXPIRES_IN}
+      - RefreshTokenOptions__ExpiresIn=${REFRESH_TOKEN_EXPIRES_IN}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      interceptor:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
 volumes:
   postgresql-data:
   rabbitmq-data:
