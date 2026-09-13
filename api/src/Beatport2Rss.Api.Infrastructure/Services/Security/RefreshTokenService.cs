@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 
-using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Infrastructure.Options;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;

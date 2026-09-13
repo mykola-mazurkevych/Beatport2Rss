@@ -4,10 +4,10 @@ using System.Security.Claims;
 using System.Text;
 
 using Beatport2Rss.Api.Application.Interfaces.Models;
-using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Infrastructure.Options;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

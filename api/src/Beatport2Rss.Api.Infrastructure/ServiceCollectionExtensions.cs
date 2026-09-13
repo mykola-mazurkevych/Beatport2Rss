@@ -25,6 +25,7 @@ using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.Messaging;
+using Beatport2Rss.Common.Miscellaneous;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +54,7 @@ public static class ServiceCollectionExtensions
                 .AddHttpClient()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscServices()
+                .AddMiscellaneous()
                 .AddPaging()
                 .AddPersistence(configuration)
                 .AddSecurityServices();
@@ -121,7 +123,6 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddMiscServices() =>
             services
-                .AddSingleton<IClock, Clock>()
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
 

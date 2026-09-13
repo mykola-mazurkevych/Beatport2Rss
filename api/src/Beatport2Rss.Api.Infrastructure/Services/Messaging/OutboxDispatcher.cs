@@ -3,11 +3,11 @@ using System.Collections.Frozen;
 using System.Linq.Expressions;
 using System.Text.Json;
 
-using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.Messaging.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

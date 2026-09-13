@@ -23,6 +23,7 @@
     <Project Path="common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/common/tests/">

@@ -8,6 +8,7 @@ using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 
 using FluentResults;

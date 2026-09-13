@@ -7,6 +7,7 @@ using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
