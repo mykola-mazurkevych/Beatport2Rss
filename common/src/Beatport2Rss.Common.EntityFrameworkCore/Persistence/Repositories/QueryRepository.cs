@@ -4,9 +4,9 @@ using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
-internal abstract class QueryRepository<TQueryModel, TId>(
+public abstract class QueryRepository<TQueryModel, TId>(
     IQueryable<TQueryModel> queryModels)
     where TQueryModel : IQueryModel<TId>
     where TId : struct, IId<TId>

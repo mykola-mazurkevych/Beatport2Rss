@@ -5,7 +5,7 @@ using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents.V1.Tags;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;

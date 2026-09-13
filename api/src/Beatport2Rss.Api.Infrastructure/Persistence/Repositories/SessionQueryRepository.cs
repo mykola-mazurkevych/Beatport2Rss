@@ -3,6 +3,7 @@ using Beatport2Rss.Api.Application.ReadModels.Sessions;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;

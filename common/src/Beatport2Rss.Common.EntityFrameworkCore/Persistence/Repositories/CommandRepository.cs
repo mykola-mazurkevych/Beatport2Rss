@@ -4,9 +4,9 @@ using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
-internal abstract class CommandRepository<TAggregateRoot, TId>(DbSet<TAggregateRoot> dbSet)
+public abstract class CommandRepository<TAggregateRoot, TId>(DbSet<TAggregateRoot> dbSet)
     where TAggregateRoot : class, IAggregateRoot<TId>
     where TId : struct, IId<TId>
 {

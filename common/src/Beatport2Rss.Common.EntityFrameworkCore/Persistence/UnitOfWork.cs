@@ -1,8 +1,8 @@
-using Beatport2Rss.Common.EntityFrameworkCore.Interfaces;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Common.EntityFrameworkCore.Services;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Persistence;
 
 internal sealed class UnitOfWork(DbContext dbContext) :
     IUnitOfWork
