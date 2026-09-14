@@ -1,4 +1,4 @@
-CREATE VIEW "vwUsers" AS
+CREATE VIEW "api"."vwUsers" AS
 SELECT
     U."Id" AS "Id",
     U."CreatedAt" AS "CreatedAt",
@@ -11,13 +11,13 @@ SELECT
     U."Status" = 'Active' AS "IsActive",
     COALESCE(F."FeedsCount", 0) AS "FeedsCount",
     COALESCE(T."TagsCount", 0) AS "TagsCount"
-FROM "Users" AS U
+FROM "api"."Users" AS U
     LEFT JOIN
     (
         SELECT
             F."UserId" AS "UserId",
             COUNT(*)::integer AS "FeedsCount"
-        FROM "Feeds" AS F
+        FROM "api"."Feeds" AS F
         GROUP BY F."UserId"
     ) AS F
         ON F."UserId" = U."Id"
@@ -26,7 +26,7 @@ FROM "Users" AS U
         SELECT
             T."UserId" AS "UserId",
             COUNT(*)::integer AS "TagsCount"
-        FROM "Tags" AS T
+        FROM "api"."Tags" AS T
         GROUP BY T."UserId"
     ) AS T
         ON T."UserId" = U."Id";

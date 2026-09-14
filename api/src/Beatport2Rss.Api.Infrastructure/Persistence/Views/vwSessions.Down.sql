@@ -1,1 +1,1 @@
-DROP VIEW "vwSessions";
+DROP VIEW IF EXISTS "api"."vwSessions";

@@ -1,4 +1,4 @@
-CREATE VIEW "vwSessions" AS
+CREATE VIEW "api"."vwSessions" AS
 SELECT
     S."Id"                    AS "Id",
     S."CreatedAt"             AS "CreatedAt",
@@ -9,5 +9,5 @@ SELECT
     S."UserAgent"             AS "UserAgent",
     S."IpAddress"             AS "IpAddress",
     S."RefreshTokenExpiresAt" AS "RefreshTokenExpiresAt"
-FROM "Sessions" AS S
-    INNER JOIN "Users" AS U ON U."Id" = S."UserId";
+FROM "api"."Sessions" AS S
+    INNER JOIN "api"."Users" AS U ON U."Id" = S."UserId";

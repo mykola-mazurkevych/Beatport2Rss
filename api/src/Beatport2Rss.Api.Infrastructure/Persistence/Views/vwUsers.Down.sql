@@ -1,1 +1,1 @@
-DROP VIEW "vwUsers";
+DROP VIEW IF EXISTS "api"."vwUsers";

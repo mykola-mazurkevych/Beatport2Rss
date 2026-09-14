@@ -23,6 +23,11 @@ public static class ServiceCollectionExtensions
             {
                 var options = provider.GetRequiredService<IOptions<BeatportOptions>>().Value;
                 httpClient.BaseAddress = new Uri(options.ApiV4BaseUri.ToString().TrimEnd('/') + '/');
+                httpClient.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AllowAutoRedirect = false,
             });
 
             return services;

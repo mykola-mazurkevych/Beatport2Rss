@@ -25,8 +25,12 @@ internal sealed class BeatportV4Client(
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{GetSegment<TBeatportDto>()}/{id}", UriKind.Relative));
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{GetSegment<TBeatportDto>()}/{id}/", UriKind.Relative));
+        request.Version = HttpVersion.Version11;
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Beatport2Rss", "1.0"));
 
         using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
         switch (response.StatusCode)
@@ -38,7 +42,10 @@ internal sealed class BeatportV4Client(
                 var forbiddenResult = await response.Content.ReadFromJsonAsync<ForbiddenResult>(_jsonSerializerOptions, cancellationToken).ConfigureAwait(false);
                 return Result.Fail(forbiddenResult?.Detail ?? "Forbidden");
             default:
-                return Result.Fail($"Beatport API return {response.StatusCode} status code");
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                return Result.Fail(string.IsNullOrWhiteSpace(responseBody)
+                    ? $"Beatport API returned {response.StatusCode} status code"
+                    : $"Beatport API returned {response.StatusCode} status code: {responseBody}");
         }
     }
 
