@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Api.Infrastructure.Services.Messaging;
 
-internal sealed partial class OutboxDispatcher(
+internal sealed class OutboxDispatcher(
     IServiceScopeFactory serviceScopeFactory,
     IPublisher publisher,
     IClock clock,
@@ -34,6 +34,7 @@ internal sealed partial class OutboxDispatcher(
         .ToFrozenDictionary(type => type.Name);
 
     private static readonly ConcurrentDictionary<Type, Func<IPublisher, object, CancellationToken, Task>> PublishDispatchers = new();
+    private static readonly JsonSerializerOptions DeserializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -63,7 +64,7 @@ internal sealed partial class OutboxDispatcher(
             }
             catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
             {
-                LogPublishFailure(logger, exception, message.Id, message.Type);
+                OutboxDispatcherLogMessages.LogPublishFailure(logger, exception, message.Id, message.Type);
                 message.MarkFailed(exception.Message);
             }
         }
@@ -87,7 +88,7 @@ internal sealed partial class OutboxDispatcher(
     }
 
     private static object Deserialize(OutboxMessage message, Type eventType) =>
-        JsonSerializer.Deserialize(message.Payload.RootElement.GetRawText(), eventType) ??
+        JsonSerializer.Deserialize(message.Payload.RootElement.GetRawText(), eventType, DeserializerOptions) ??
         throw new InvalidOperationException($"Cannot deserialize outbox message '{message.Id}'.");
 
     private static Func<IPublisher, object, CancellationToken, Task> CreatePublishDispatcher(Type eventType)
@@ -111,6 +112,10 @@ internal sealed partial class OutboxDispatcher(
             .Compile();
     }
 
-    [LoggerMessage(LogLevel.Error, "Unable to publish outbox message {OutboxMessageId} of type {OutboxMessageType}")]
-    private static partial void LogPublishFailure(ILogger logger, Exception exception, Guid outboxMessageId, string outboxMessageType);
+}
+
+internal static partial class OutboxDispatcherLogMessages
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to publish outbox message {OutboxMessageId} of type {OutboxMessageType}")]
+    public static partial void LogPublishFailure(ILogger logger, Exception exception, Guid outboxMessageId, string outboxMessageType);
 }
