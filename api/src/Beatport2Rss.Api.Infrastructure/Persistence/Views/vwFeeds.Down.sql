@@ -1,1 +1,1 @@
-DROP VIEW "vwFeeds";
+DROP VIEW IF EXISTS "api"."vwFeeds";

@@ -1,1 +1,1 @@
-DROP VIEW "vwSubscriptionTags";
+DROP VIEW IF EXISTS "api"."vwSubscriptionTags";

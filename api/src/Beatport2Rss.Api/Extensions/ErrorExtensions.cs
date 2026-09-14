@@ -19,6 +19,7 @@ internal static class ErrorExtensions
                 NotFoundError notFound => notFound.ToAspNetCoreResult(context),
                 ValidationError validation => validation.ToAspNetCoreResult(context),
                 UnauthorizedError unauthorized => unauthorized.ToAspNetCoreResult(context),
+                UnprocessableError unprocessable => unprocessable.ToAspNetCoreResult(context),
                 _ => Results.Problem(
                     detail: "Unhandled error",
                     instance: context.Request.Path,
@@ -27,6 +28,18 @@ internal static class ErrorExtensions
                     type: "https://datatracker.ietf.org/doc/html/rfc9110#status.500",
                     extensions: new Dictionary<string, object?> { { ResponseExtensionNames.TraceId, context.TraceIdentifier } })
             };
+    }
+
+    extension(UnprocessableError unprocessable)
+    {
+        private IResult ToAspNetCoreResult(HttpContext context) =>
+            Results.Problem(
+                detail: unprocessable.Message,
+                instance: context.Request.Path,
+                statusCode: (int)HttpStatusCode.UnprocessableEntity,
+                title: "Unprocessable Entity",
+                type: "https://datatracker.ietf.org/doc/html/rfc9110#status.422",
+                extensions: new Dictionary<string, object?> { { ResponseExtensionNames.TraceId, context.TraceIdentifier } });
     }
 
     extension(ConflictError conflict)

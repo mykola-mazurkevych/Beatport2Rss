@@ -16,11 +16,6 @@ public static class ServiceCollectionExtensions
             where TDbContext : DbContext =>
             services.AddTransient<IUnitOfWork, UnitOfWork>(provider =>
             {
-                var unitOfWork = provider.GetService<IUnitOfWork>();
-                if (unitOfWork is not null)
-                {
-                    throw new InvalidOperationException("Unit of work service is already registered");
-                }
                 var dbContext = provider.GetRequiredService<TDbContext>();
                 return new UnitOfWork(dbContext);
             });
