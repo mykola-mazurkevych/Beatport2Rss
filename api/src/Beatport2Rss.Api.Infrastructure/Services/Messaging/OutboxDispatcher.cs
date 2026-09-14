@@ -34,6 +34,7 @@ internal sealed class OutboxDispatcher(
         .ToFrozenDictionary(type => type.Name);
 
     private static readonly ConcurrentDictionary<Type, Func<IPublisher, object, CancellationToken, Task>> PublishDispatchers = new();
+    private static readonly JsonSerializerOptions DeserializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -87,7 +88,7 @@ internal sealed class OutboxDispatcher(
     }
 
     private static object Deserialize(OutboxMessage message, Type eventType) =>
-        JsonSerializer.Deserialize(message.Payload.RootElement.GetRawText(), eventType) ??
+        JsonSerializer.Deserialize(message.Payload.RootElement.GetRawText(), eventType, DeserializerOptions) ??
         throw new InvalidOperationException($"Cannot deserialize outbox message '{message.Id}'.");
 
     private static Func<IPublisher, object, CancellationToken, Task> CreatePublishDispatcher(Type eventType)
