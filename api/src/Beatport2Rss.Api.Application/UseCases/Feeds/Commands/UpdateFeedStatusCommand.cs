@@ -36,7 +36,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
         feedCommandRepository.Update(feed);
 
         var feedUpdated = new FeedUpdatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
             feed.Name.Value,

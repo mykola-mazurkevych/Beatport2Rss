@@ -92,7 +92,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         var subscription = await subscriptionCommandRepository.AddAsync(subscriptionResult.Value, cancellationToken);
 
         var subscriptionCreated = new SubscriptionCreatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             subscription.Id.Value,
             (int)subscription.Type,

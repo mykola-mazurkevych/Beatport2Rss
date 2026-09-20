@@ -1,7 +1,7 @@
 namespace Beatport2Rss.Common.IntegrationEvents.V1.Subscriptions;
 
 public sealed record SubscriptionCreatedV1(
-    Guid EventId,
+    Guid Id,
     DateTimeOffset OccurredAt,
     Guid SubscriptionId,
     int Type,

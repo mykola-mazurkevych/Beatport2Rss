@@ -62,7 +62,7 @@ internal sealed class UpdateTagNameCommandHandler(
         tagCommandRepository.Update(tag);
 
         var tagUpdated = new TagUpdatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value,
             tag.Name.Value);

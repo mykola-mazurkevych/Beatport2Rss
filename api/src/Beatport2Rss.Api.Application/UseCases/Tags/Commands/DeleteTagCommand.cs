@@ -33,7 +33,7 @@ internal sealed class DeleteTagCommandHandler(
         tagCommandRepository.Delete(tag);
 
         var tagDeleted = new TagDeletedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value);
         await integrationEventOutbox.EnqueueAsync(tagDeleted, cancellationToken);
