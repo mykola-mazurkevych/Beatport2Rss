@@ -2,7 +2,7 @@ using System.Text.Json;
 
 using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Infrastructure.Persistence;
-using Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
+using Beatport2Rss.Common.EntityFrameworkCore.Entities;
 using Beatport2Rss.Common.IntegrationEvents;
 
 using Microsoft.Extensions.Options;
@@ -22,7 +22,7 @@ internal sealed class IntegrationEventOutbox(
         where TIntegrationEvent : IIntegrationEvent
     {
         var message = OutboxMessage.Create(
-            integrationEvent.EventId,
+            integrationEvent.Id,
             integrationEvent.OccurredAt,
             type: typeof(TIntegrationEvent).Name,
             payload: JsonSerializer.Serialize(integrationEvent, _jsonSerializerOptions));

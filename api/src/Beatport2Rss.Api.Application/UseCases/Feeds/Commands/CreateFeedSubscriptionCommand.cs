@@ -44,7 +44,7 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
         feedCommandRepository.Update(feed);
 
         var feedSubscriptionCreated = new FeedSubscriptionCreatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
             subscriptionId.Value);

@@ -64,7 +64,7 @@ internal sealed class CreateTagCommandHandler(
         await tagCommandRepository.AddAsync(tag, cancellationToken);
 
         var tagCreated = new TagCreatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value,
             tag.UserId.Value,

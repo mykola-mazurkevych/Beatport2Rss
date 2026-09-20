@@ -1,4 +1,4 @@
-using Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
+using Beatport2Rss.Common.EntityFrameworkCore.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -11,7 +11,7 @@ internal sealed class OutboxMessageConfiguration :
     public void Configure(EntityTypeBuilder<OutboxMessage> builder)
     {
         builder.ToTable(
-            nameof(ApiDbContext.OutboxMessages),
+            name: nameof(ApiDbContext.OutboxMessages),
             schema: ApiDbContext.OutboxSchema);
 
         builder.HasKey(message => message.Id);

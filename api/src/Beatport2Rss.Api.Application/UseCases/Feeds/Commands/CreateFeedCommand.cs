@@ -71,7 +71,7 @@ internal sealed class CreateFeedCommandHandler(
         await feedCommandRepository.AddAsync(feed, cancellationToken);
 
         var feedCreated = new FeedCreatedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
             feed.UserId.Value,

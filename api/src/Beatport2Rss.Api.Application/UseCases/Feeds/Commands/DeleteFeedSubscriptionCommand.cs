@@ -44,7 +44,7 @@ internal sealed class DeleteFeedSubscriptionCommandHandler(
         feedCommandRepository.Update(feed);
 
         var feedSubscriptionDeleted = new FeedSubscriptionDeletedV1(
-            EventId: Guid.CreateVersion7(),
+            Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             FeedId: feed.Id.Value,
             SubscriptionId: subscriptionId.Value);

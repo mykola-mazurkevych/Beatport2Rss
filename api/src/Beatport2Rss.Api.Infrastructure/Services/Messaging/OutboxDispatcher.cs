@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Infrastructure.Persistence;
-using Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
+using Beatport2Rss.Common.EntityFrameworkCore.Entities;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;

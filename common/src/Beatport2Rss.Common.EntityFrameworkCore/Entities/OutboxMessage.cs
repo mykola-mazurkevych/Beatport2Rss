@@ -1,8 +1,8 @@
 using System.Text.Json;
 
-namespace Beatport2Rss.Api.Infrastructure.Persistence.Outbox;
+namespace Beatport2Rss.Common.EntityFrameworkCore.Entities;
 
-internal sealed class OutboxMessage
+public sealed class OutboxMessage
 {
     private OutboxMessage()
     {
@@ -10,8 +10,10 @@ internal sealed class OutboxMessage
 
     public Guid Id { get; private set; }
     public DateTimeOffset OccurredAt { get; private set; }
+
     public string Type { get; private set; } = null!;
     public JsonDocument Payload { get; private set; } = null!;
+
     public DateTimeOffset? PublishedAt { get; private set; }
     public int PublishAttempts { get; private set; }
     public string? LastError { get; private set; }
