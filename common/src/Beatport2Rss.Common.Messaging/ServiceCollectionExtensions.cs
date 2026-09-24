@@ -23,6 +23,11 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
                 .AddTransient<IOutboxMessageRepository, OutboxMessageRepository>();
 
+        public IServiceCollection AddInboxDbContext<TInboxDbContext>()
+            where TInboxDbContext : class, IInboxDbContext =>
+            services
+                .AddTransient<IInboxDbContext, TInboxDbContext>();
+
         public IServiceCollection AddOutboxDbContext<TOutboxDbContext>()
             where TOutboxDbContext : class, IOutboxDbContext =>
             services
