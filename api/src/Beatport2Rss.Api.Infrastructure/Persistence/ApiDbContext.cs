@@ -49,6 +49,8 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApiDbContext).Assembly);
 
+        modelBuilder.Entity<OutboxMessage>().Metadata.SetSchema(OutboxSchema);
+
         base.OnModelCreating(modelBuilder);
     }
 }
