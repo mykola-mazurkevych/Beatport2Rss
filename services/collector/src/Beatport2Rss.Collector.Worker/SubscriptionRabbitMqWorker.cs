@@ -1,7 +1,7 @@
 using Beatport2Rss.Collector.Application.UseCases.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.V1.Subscriptions;
-using Beatport2Rss.Common.Messaging.Interfaces;
+using Beatport2Rss.Common.RabbitMQ.Interfaces;
 
 using Mediator;
 
