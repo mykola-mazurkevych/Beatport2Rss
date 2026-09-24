@@ -1,10 +1,10 @@
 using System.Text.Json;
 
-namespace Beatport2Rss.Common.EntityFrameworkCore.Entities;
+namespace Beatport2Rss.Common.Messaging.Persistence.Entities;
 
-public sealed class OutboxMessage
+public sealed class InboxMessage
 {
-    private OutboxMessage()
+    private InboxMessage()
     {
     }
 
@@ -13,33 +13,36 @@ public sealed class OutboxMessage
 
     public string Type { get; private set; } = null!;
     public JsonDocument Payload { get; private set; } = null!;
-
-    public DateTimeOffset? PublishedAt { get; private set; }
-    public int PublishAttempts { get; private set; }
+    
+    public DateTimeOffset ReceivedAt { get; private set; }
+    public DateTimeOffset? ProcessedAt { get; private set; }
+    public int ProcessAttempts { get; private set; }
     public string? LastError { get; private set; }
 
-    public static OutboxMessage Create(
+    public static InboxMessage Create(
         Guid id,
         DateTimeOffset occurredAt,
         string type,
-        string payload) =>
+        string payload,
+        DateTimeOffset receivedAt) =>
         new()
         {
             Id = id,
             OccurredAt = occurredAt,
             Type = type,
             Payload = JsonDocument.Parse(payload),
+            ReceivedAt = receivedAt,
         };
-
-    public void MarkPublished(DateTimeOffset publishedAt)
+    
+    public void MarkProcessed(DateTimeOffset processedAt)
     {
-        PublishedAt = publishedAt;
+        ProcessedAt = processedAt;
         LastError = null;
     }
 
     public void MarkFailed(string error)
     {
-        PublishAttempts++;
+        ProcessAttempts++;
         LastError = error;
     }
 }

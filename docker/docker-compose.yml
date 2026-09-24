@@ -75,11 +75,11 @@ services:
       - BeatportTokenProviderOptions__TokenInterceptorGrpcUri=${INTERCEPTOR_GRPC_URI}
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
-      - RabbitMqOptions__HostName=${RABBITMQ_HOSTNAME}
-      - RabbitMqOptions__Port=${RABBITMQ_PORT}
-      - RabbitMqOptions__UserName=${RABBITMQ_USERNAME}
-      - RabbitMqOptions__Password=${RABBITMQ_PASSWORD}
-      - RabbitMqOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
+      - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}
+      - RabbitMQOptions__Port=${RABBITMQ_PORT}
+      - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQOptions__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
       - JwtOptions__Issuer=${JWT_ISSUER}
       - JwtOptions__Audience=${JWT_AUDIENCE}
       - JwtOptions__SigningKey=${JWT_SIGNING_KEY}

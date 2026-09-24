@@ -1,4 +1,4 @@
-using Beatport2Rss.Common.EntityFrameworkCore.Entities;
+using Beatport2Rss.Common.Messaging.Persistence.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

@@ -1,16 +1,16 @@
 using System.Text.Json;
 
-using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
-using Beatport2Rss.Api.Infrastructure.Persistence;
-using Beatport2Rss.Common.EntityFrameworkCore.Entities;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.Messaging.Interfaces;
+using Beatport2Rss.Common.Messaging.Persistence.Entities;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces.Repositories;
 
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Api.Infrastructure.Services.Messaging;
+namespace Beatport2Rss.Common.Messaging.Services;
 
 internal sealed class IntegrationEventOutbox(
-    ApiDbContext dbContext,
+    IOutboxMessageRepository outboxMessageRepository,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IIntegrationEventOutbox
 {
@@ -21,11 +21,11 @@ internal sealed class IntegrationEventOutbox(
         CancellationToken cancellationToken = default)
         where TIntegrationEvent : IIntegrationEvent
     {
-        var message = OutboxMessage.Create(
+        var outboxMessage = OutboxMessage.Create(
             integrationEvent.Id,
             integrationEvent.OccurredAt,
             type: typeof(TIntegrationEvent).Name,
             payload: JsonSerializer.Serialize(integrationEvent, _jsonSerializerOptions));
-        return dbContext.OutboxMessages.AddAsync(message, cancellationToken).AsTask();
+        return outboxMessageRepository.AddAsync(outboxMessage, cancellationToken);
     }
 }

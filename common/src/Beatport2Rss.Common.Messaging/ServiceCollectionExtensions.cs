@@ -2,13 +2,13 @@
 
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Messaging.Options;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces.Repositories;
+using Beatport2Rss.Common.Messaging.Persistence.Repositories;
 using Beatport2Rss.Common.Messaging.Services;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-
-using RabbitMQ.Client;
 
 namespace Beatport2Rss.Common.Messaging;
 
@@ -19,27 +19,17 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMessaging(IConfiguration configuration) =>
             services
                 .ConfigureOptions(configuration)
-                .AddConnectionFactory()
-                .AddSingleton<IPublisher, RabbitMqPublisher>();
+                .AddSingleton<IOutboxDispatcher, OutboxDispatcher>()
+                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
+                .AddTransient<IOutboxMessageRepository, OutboxMessageRepository>();
+
+        public IServiceCollection AddOutboxDbContext<TOutboxDbContext>()
+            where TOutboxDbContext : class, IOutboxDbContext =>
+            services
+                .AddTransient<IOutboxDbContext, TOutboxDbContext>();
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<RabbitMqOptions>(options => configuration.GetSection(nameof(RabbitMqOptions)).Bind(options))
-                .Configure<QueueOptions>(options => configuration.GetSection(nameof(QueueOptions)).Bind(options));
-
-        private IServiceCollection AddConnectionFactory() =>
-            services.AddSingleton<IConnectionFactory>(provider =>
-            {
-                var options = provider.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
-                return new ConnectionFactory
-                {
-                    HostName = options.HostName,
-                    Port = options.Port,
-                    UserName = options.UserName,
-                    Password = options.Password,
-                    VirtualHost = options.VirtualHost,
-                    DispatchConsumersAsync = true,
-                };
-            });
+                .Configure<OutboxDispatcherOptions>(options => configuration.GetSection(nameof(OutboxDispatcherOptions)).Bind(options));
     }
 }

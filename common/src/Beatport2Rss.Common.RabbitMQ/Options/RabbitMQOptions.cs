@@ -1,6 +1,6 @@
-namespace Beatport2Rss.Common.Messaging.Options;
+namespace Beatport2Rss.Common.RabbitMQ.Options;
 
-public sealed record RabbitMqOptions
+public sealed record RabbitMQOptions
 {
     public required string HostName { get; init; }
     public required int Port { get; init; }
