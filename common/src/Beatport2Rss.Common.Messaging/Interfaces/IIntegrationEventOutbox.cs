@@ -1,6 +1,6 @@
 using Beatport2Rss.Common.IntegrationEvents;
 
-namespace Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
+namespace Beatport2Rss.Common.Messaging.Interfaces;
 
 public interface IIntegrationEventOutbox
 {

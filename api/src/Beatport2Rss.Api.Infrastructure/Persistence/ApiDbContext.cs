@@ -5,15 +5,16 @@ using Beatport2Rss.Api.Domain.Subscriptions;
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
-using Beatport2Rss.Common.EntityFrameworkCore.Entities;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.Messaging.Persistence.Entities;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence;
 
 internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
-    DbContext(options)
+    DbContext(options), IOutboxDbContext
 {
     internal const string Schema = "api";
     internal const string OutboxSchema = "api_outbox";

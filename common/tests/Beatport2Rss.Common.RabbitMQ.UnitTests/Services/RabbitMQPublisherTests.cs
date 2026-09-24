@@ -2,11 +2,9 @@
 
 using System.Text.Json;
 
-using Beatport2Rss.Common.Messaging.Interfaces;
-using Beatport2Rss.Common.Messaging.Options;
-using Beatport2Rss.Common.Messaging.Services;
-
-using MicrosoftOptions = Microsoft.Extensions.Options.Options;
+using Beatport2Rss.Common.RabbitMQ.Interfaces;
+using Beatport2Rss.Common.RabbitMQ.Options;
+using Beatport2Rss.Common.RabbitMQ.Services;
 
 using Moq;
 
@@ -14,9 +12,9 @@ using RabbitMQ.Client;
 
 using Xunit;
 
-namespace Beatport2Rss.Common.Messaging.UnitTests.Services;
+namespace Beatport2Rss.Common.RabbitMQ.UnitTests.Services;
 
-public sealed class RabbitMqPublisherTests
+public sealed class RabbitMQPublisherTests
 {
     private const string ExchangeName = "beatport2rss.events";
     private const string RoutingKey = "test.created";
@@ -30,22 +28,19 @@ public sealed class RabbitMqPublisherTests
         DeadLetterSuffix = DeadLetterSuffix,
         ExchangeName = ExchangeName,
         Queues = new Dictionary<string, string>(),
-        RoutingKeys = new Dictionary<string, string>
-        {
-            [nameof(TestMessage)] = RoutingKey,
-        },
+        RoutingKeys = new Dictionary<string, string> { [nameof(TestMessage)] = RoutingKey, },
     };
 
-    public RabbitMqPublisherTests()
+    public RabbitMQPublisherTests()
     {
         _connectionMock.Setup(c => c.CreateModel()).Returns(_modelMock.Object);
         _modelMock.Setup(m => m.CreateBasicProperties()).Returns(new Mock<IBasicProperties>().Object);
     }
 
-    private RabbitMqPublisher CreatePublisher() =>
-        new(new TestRabbitMqConnectionFactory(_connectionMock.Object),
-            MicrosoftOptions.Create(_queueOptions),
-            MicrosoftOptions.Create(new JsonSerializerOptions()));
+    private RabbitMQPublisher CreatePublisher() =>
+        new(new TestRabbitMQConnectionFactory(_connectionMock.Object),
+            Microsoft.Extensions.Options.Options.Create(_queueOptions),
+            Microsoft.Extensions.Options.Options.Create(new JsonSerializerOptions()));
 
     [Fact]
     public async Task PublishAsync_WhenRoutingKeyIsConfigured_ShouldPublishToTopicExchange()
@@ -112,8 +107,8 @@ public sealed class RabbitMqPublisherTests
 
     private sealed record UnknownMessage;
 
-    private sealed class TestRabbitMqConnectionFactory(IConnection connection) :
-        IRabbitMqConnectionFactory
+    private sealed class TestRabbitMQConnectionFactory(IConnection connection) :
+        IRabbitMQConnectionFactory
     {
         public IConnection CreateConnection() =>
             connection;

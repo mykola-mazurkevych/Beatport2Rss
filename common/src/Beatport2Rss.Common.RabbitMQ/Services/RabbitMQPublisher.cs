@@ -1,17 +1,18 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 
-using Beatport2Rss.Common.Messaging.Interfaces;
-using Beatport2Rss.Common.Messaging.Options;
+using Beatport2Rss.Common.RabbitMQ.Extensions;
+using Beatport2Rss.Common.RabbitMQ.Interfaces;
+using Beatport2Rss.Common.RabbitMQ.Options;
 
 using Microsoft.Extensions.Options;
 
 using RabbitMQ.Client;
 
-namespace Beatport2Rss.Common.Messaging.Services;
+namespace Beatport2Rss.Common.RabbitMQ.Services;
 
-internal sealed class RabbitMqPublisher(
-    IRabbitMqConnectionFactory connectionFactory,
+internal sealed class RabbitMQPublisher(
+    IRabbitMQConnectionFactory connectionFactory,
     IOptions<QueueOptions> queueOptions,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IPublisher, IDisposable, IAsyncDisposable
@@ -24,16 +25,17 @@ internal sealed class RabbitMqPublisher(
     private readonly JsonSerializerOptions _jsonSerializerOptions = jsonSerializerOptions.Value;
 
     private readonly ConcurrentDictionary<string, byte> _declaredExchanges = [];
+
     private bool _disposed;
 
-    public Task PublishAsync<TMessage>(
-        TMessage message,
+    public Task PublishAsync(
+        object message,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         cancellationToken.ThrowIfCancellationRequested();
 
-        var messageTypeName = typeof(TMessage).Name;
+        var messageTypeName = message.GetType().Name;
 
         if (!_queueOptions.RoutingKeys.TryGetValue(messageTypeName, out var routingKey))
         {
@@ -44,22 +46,22 @@ internal sealed class RabbitMqPublisher(
 
         DeclareExchange(model, _queueOptions.ExchangeName);
 
-        var properties = model.CreateBasicProperties();
-        properties.Persistent = true;
-        properties.Type = messageTypeName;
+        var basicProperties = model.CreateBasicProperties();
+        basicProperties.Persistent = true;
+        basicProperties.Type = messageTypeName;
 
         var body = JsonSerializer.SerializeToUtf8Bytes(message, _jsonSerializerOptions);
-        model.BasicPublish(_queueOptions.ExchangeName, routingKey, mandatory: false, properties, body);
+        model.BasicPublish(_queueOptions.ExchangeName, routingKey, mandatory: false, basicProperties, body);
 
         return Task.CompletedTask;
     }
 
     public void Dispose() =>
-        Dispose(true);
+        Dispose(disposing: true);
 
     public ValueTask DisposeAsync()
     {
-        Dispose(true);
+        Dispose(disposing: true);
         return ValueTask.CompletedTask;
     }
 
@@ -90,7 +92,7 @@ internal sealed class RabbitMqPublisher(
 
         try
         {
-            RabbitMqTopology.DeclareExchange(model, exchangeName);
+            model.DeclareExchange(exchangeName);
         }
         catch
         {

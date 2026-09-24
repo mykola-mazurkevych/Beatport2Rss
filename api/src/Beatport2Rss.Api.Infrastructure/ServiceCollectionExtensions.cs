@@ -5,10 +5,10 @@ using System.Text.Json;
 
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
-using Beatport2Rss.Api.Application.Interfaces.Services.Messaging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
+using Beatport2Rss.Api.Infrastructure.BackgroundServices;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
 using Beatport2Rss.Api.Infrastructure.Options;
@@ -16,7 +16,6 @@ using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
-using Beatport2Rss.Api.Infrastructure.Services.Messaging;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
@@ -26,6 +25,7 @@ using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.Messaging;
 using Beatport2Rss.Common.Miscellaneous;
+using Beatport2Rss.Common.RabbitMQ;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -47,16 +47,17 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
-                .AddMessaging(configuration)
-                .AddHostedService<OutboxDispatcher>()
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
+                .AddHostedService<OutboxBackgroundService>()
                 .AddHttpClient()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
-                .AddMiscServices()
+                .AddMessaging(configuration)
                 .AddMiscellaneous()
+                .AddMiscServices()
                 .AddPaging()
                 .AddPersistence(configuration)
+                .AddRabbitMQ(configuration)
                 .AddSecurityServices();
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
@@ -134,6 +135,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
+                .AddOutboxDbContext<ApiDbContext>()
                 .AddUnitOfWork<ApiDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
@@ -154,7 +156,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ISubscriptionQueryRepository, SubscriptionQueryRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
-                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 

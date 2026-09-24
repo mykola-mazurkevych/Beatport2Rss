@@ -2,6 +2,9 @@
 
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Messaging.Options;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces;
+using Beatport2Rss.Common.Messaging.Persistence.Interfaces.Repositories;
+using Beatport2Rss.Common.Messaging.Persistence.Repositories;
 using Beatport2Rss.Common.Messaging.Services;
 
 using Microsoft.Extensions.Configuration;
@@ -16,17 +19,17 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddMessaging(IConfiguration configuration) =>
             services
                 .ConfigureOptions(configuration)
-                .AddRabbitMq();
+                .AddSingleton<IOutboxDispatcher, OutboxDispatcher>()
+                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
+                .AddTransient<IOutboxMessageRepository, OutboxMessageRepository>();
 
-        private IServiceCollection AddRabbitMq() =>
+        public IServiceCollection AddOutboxDbContext<TOutboxDbContext>()
+            where TOutboxDbContext : class, IOutboxDbContext =>
             services
-                .AddSingleton<IRabbitMqConnectionFactory, RabbitMqConnectionFactory>()
-                .AddSingleton<IPublisher, RabbitMqPublisher>()
-                .AddTransient(typeof(IConsumer<>), typeof(RabbitMqConsumer<>));
+                .AddTransient<IOutboxDbContext, TOutboxDbContext>();
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<RabbitMqOptions>(options => configuration.GetSection(nameof(RabbitMqOptions)).Bind(options))
-                .Configure<QueueOptions>(options => configuration.GetSection(nameof(QueueOptions)).Bind(options));
+                .Configure<OutboxDispatcherOptions>(options => configuration.GetSection(nameof(OutboxDispatcherOptions)).Bind(options));
     }
 }

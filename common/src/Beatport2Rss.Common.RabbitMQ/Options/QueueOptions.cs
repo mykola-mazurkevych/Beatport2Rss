@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Common.Messaging.Options;
+namespace Beatport2Rss.Common.RabbitMQ.Options;
 
 public sealed record QueueOptions
 {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Common.RabbitMQ\Beatport2Rss.Common.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>
