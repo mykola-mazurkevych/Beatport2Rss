@@ -26,6 +26,7 @@
     <Project Path="common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.RabbitMQ/Beatport2Rss.Common.RabbitMQ.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Validation/Beatport2Rss.Common.Validation.csproj" />
   </Folder>
   <Folder Name="/common/tests/">
     <Project Path="common/tests/Beatport2Rss.Common.RabbitMQ.UnitTests/Beatport2Rss.Common.RabbitMQ.UnitTests.csproj" />

@@ -1,5 +1,4 @@
 ﻿using Beatport2Rss.Api.Application.Dtos.Tags;
-using Beatport2Rss.Api.Application.Extensions;
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
@@ -10,6 +9,7 @@ using Beatport2Rss.Common.IntegrationEvents.V1.Tags;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
+using Beatport2Rss.Common.Validation.Extensions;
 
 using FluentResults;
 

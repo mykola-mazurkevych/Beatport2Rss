@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Domain.Countries;
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Api.Domain.Users;
@@ -6,7 +7,7 @@ namespace Beatport2Rss.Api.Domain.Users;
 public sealed class User :
     IAggregateRoot<UserId>
 {
-    public const int NameLength = 100;
+    public const int NameLength = MaxLengthConstants.Name;
 
     private User()
     {

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -10,8 +11,8 @@ namespace Beatport2Rss.Api.Domain.Users;
 public readonly record struct Password :
     IValueObject
 {
-    public const int MinLength = 8;
-    public const int MaxLength = 100;
+    public const int MinLength = MinLengthConstants.Password;
+    public const int MaxLength = MaxLengthConstants.Password;
 
     private Password(string value) => Value = value;
 

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -10,7 +11,7 @@ namespace Beatport2Rss.Api.Domain.Users;
 public readonly record struct PasswordHash :
     IValueObject
 {
-    public const int MaxLength = 500;
+    public const int MaxLength = MaxLengthConstants.PasswordHash;
 
     private PasswordHash(string value) => Value = value;
 

@@ -1,69 +1,67 @@
+#pragma warning disable CA1034 // Nested types should not be visible
+
 using System.Net;
 
-using Beatport2Rss.Api.Domain.Countries;
-using Beatport2Rss.Api.Domain.Feeds;
-using Beatport2Rss.Api.Domain.Sessions;
-using Beatport2Rss.Api.Domain.Tags;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.SharedKernel.Constants;
 
 using FluentValidation;
 
-namespace Beatport2Rss.Api.Application.Extensions;
+namespace Beatport2Rss.Common.Validation.Extensions;
 
-internal static class RuleBuilderExtensions
+public static class RuleBuilderExtensions
 {
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
         public void IsCountryCode() =>
             ruleBuilder
-                .IsNotTooLong(CountryCode.Length, "Country code must be ad most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.CountryCode, "Country code must be ad most {MaxLength} characters long.");
 
         public void IsEmailAddress() =>
             ruleBuilder
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Email address is required.")
-                .IsNotTooLong(EmailAddress.MaxLength, "Email address must be at most {MaxLength} characters long.")
+                .IsNotTooLong(MaxLengthConstants.EmailAddress, "Email address must be at most {MaxLength} characters long.")
                 .EmailAddress().WithMessage("A valid email address is required.");
 
         public void IsFeedName() =>
             ruleBuilder
                 .IsNotEmpty("Feed name is required.")
-                .IsNotTooLong(FeedName.MaxLength, "Feed name must be at most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.FeedName, "Feed name must be at most {MaxLength} characters long.");
 
         public void IsFirstName() =>
             ruleBuilder
-                .IsNotTooLong(User.NameLength, "First name must be at most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.Name, "First name must be at most {MaxLength} characters long.");
 
         public void IsIpAddress() =>
             ruleBuilder
-                .IsNotTooLong(Session.IpAddressMaxLength, "IP address must be at most {MaxLength} characters long.")
+                .IsNotTooLong(MaxLengthConstants.IpAddress, "IP address must be at most {MaxLength} characters long.")
                 .Must(s => IPAddress.TryParse(s, out _)).WithMessage("IP address is not valid.");
 
         public void IsLastName() =>
             ruleBuilder
-                .IsNotTooLong(User.NameLength, "Last name must be at most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.Name, "Last name must be at most {MaxLength} characters long.");
 
         public void IsPassword() =>
             ruleBuilder
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Password is required.")
-                .IsNotTooShort(Password.MinLength, "Password must be at least {MinLength} characters long.")
-                .IsNotTooLong(Password.MaxLength, "Password must be at most {MaxLength} characters long.");
+                .IsNotTooShort(MinLengthConstants.Password, "Password must be at least {MinLength} characters long.")
+                .IsNotTooLong(MaxLengthConstants.Password, "Password must be at most {MaxLength} characters long.");
 
         public void IsRefreshToken() =>
             ruleBuilder
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Refresh token is required.")
-                .IsExactlyLong(RefreshToken.Length, "Refresh token must be exactly {TotalLength} characters long.");
+                .IsExactlyLong(ExactLengthConstants.RefreshToken, "Refresh token must be exactly {TotalLength} characters long.");
 
         public void IsTagName() =>
             ruleBuilder
                 .IsNotEmpty("Tag name is required.")
-                .IsNotTooLong(TagName.MaxLength, "Tag name must be at most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.TagName, "Tag name must be at most {MaxLength} characters long.");
 
         public void IsUserAgent() =>
             ruleBuilder
-                .IsNotTooLong(Session.UserAgentMaxLength, "User agent must be at most {MaxLength} characters long.");
+                .IsNotTooLong(MaxLengthConstants.UserAgent, "User agent must be at most {MaxLength} characters long.");
     }
 
     extension<T>(IRuleBuilder<T, string?> ruleBuilder)
