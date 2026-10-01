@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -10,7 +11,7 @@ namespace Beatport2Rss.Api.Domain.Countries;
 public readonly record struct CountryCode :
     IId<CountryCode>
 {
-    public const int Length = 2;
+    public const int Length = MaxLengthConstants.CountryCode;
 
     private CountryCode(string value) => Value = value;
 

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -10,7 +11,7 @@ namespace Beatport2Rss.Api.Domain.Sessions;
 public readonly record struct RefreshToken :
     IValueObject
 {
-    public const int Length = 43;
+    public const int Length = ExactLengthConstants.RefreshToken;
 
     private RefreshToken(string value) => Value = value;
 

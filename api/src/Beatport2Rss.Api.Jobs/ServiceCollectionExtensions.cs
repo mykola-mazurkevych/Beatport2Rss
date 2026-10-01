@@ -1,6 +1,6 @@
 ﻿#pragma warning disable CA1034 // Nested types should not be visible
 
-using Beatport2Rss.Jobs.Jobs;
+using Beatport2Rss.Api.Jobs.Jobs;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,11 +16,10 @@ public static class ServiceCollectionExtensions
             services
                 .AddQuartz(configurator =>
                 {
-                    var jobKey = new JobKey(nameof(DeleteExpiredSessionsJob));
-
+                    var deleteExpiredSessionsJobKey = new JobKey(nameof(DeleteExpiredSessionsJob));
                     configurator
-                        .AddJob<DeleteExpiredSessionsJob>(jobKey, _ => { })
-                        .AddTrigger(trigger => trigger.ForJob(jobKey).StartNow().WithSimpleSchedule(builder => builder.WithIntervalInHours(24).RepeatForever()));
+                        .AddJob<DeleteExpiredSessionsJob>(deleteExpiredSessionsJobKey)
+                        .AddTrigger(trigger => trigger.ForJob(deleteExpiredSessionsJobKey).StartNow().WithSimpleSchedule(builder => builder.WithIntervalInHours(24).RepeatForever()));
                 })
                 .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
     }

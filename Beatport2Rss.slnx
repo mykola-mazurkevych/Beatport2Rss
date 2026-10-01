@@ -26,6 +26,7 @@
     <Project Path="common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.RabbitMQ/Beatport2Rss.Common.RabbitMQ.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Validation/Beatport2Rss.Common.Validation.csproj" />
   </Folder>
   <Folder Name="/common/tests/">
     <Project Path="common/tests/Beatport2Rss.Common.RabbitMQ.UnitTests/Beatport2Rss.Common.RabbitMQ.UnitTests.csproj" />
@@ -37,8 +38,11 @@
   <Folder Name="/services/" />
   <Folder Name="/services/builder/" />
   <Folder Name="/services/builder/src/">
+    <Project Path="services/builder/src/Beatport2Rss.Builder.Application/Beatport2Rss.Builder.Application.csproj" />
     <Project Path="services/builder/src/Beatport2Rss.Builder.Domain/Beatport2Rss.Builder.Domain.csproj" />
     <Project Path="services/builder/src/Beatport2Rss.Builder.Infrastructure/Beatport2Rss.Builder.Infrastructure.csproj" />
+    <Project Path="services/builder/src/Beatport2Rss.Builder.Jobs/Beatport2Rss.Builder.Jobs.csproj" />
+    <Project Path="services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj" />
   </Folder>
   <Folder Name="/services/collector/" />
   <Folder Name="/services/collector/src/">
@@ -52,8 +56,12 @@
   <Folder Name="/services/interceptor/src/">
     <Project Path="services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
   </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
-    <Project Path="tools/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/src/">
+    <Project Path="tools/src/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
+    <Project Path="tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
+  </Folder>
+  <Folder Name="/tools/tests/">
+    <Project Path="tools/tests/Beatport2Rss.SourceGenerator.UnitTests/Beatport2Rss.SourceGenerator.UnitTests.csproj" />
   </Folder>
 </Solution>

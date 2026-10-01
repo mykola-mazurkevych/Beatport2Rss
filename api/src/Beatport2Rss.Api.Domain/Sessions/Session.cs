@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Api.Domain.Sessions;
@@ -6,8 +7,8 @@ namespace Beatport2Rss.Api.Domain.Sessions;
 public sealed class Session :
     IAggregateRoot<SessionId>
 {
-    public const int UserAgentMaxLength = 1024;
-    public const int IpAddressMaxLength = 45;
+    public const int UserAgentMaxLength = MaxLengthConstants.UserAgent;
+    public const int IpAddressMaxLength = MaxLengthConstants.IpAddress;
 
     private Session()
     {

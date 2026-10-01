@@ -10,25 +10,26 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Beatport2Rss.SourceGenerator.Builders;
 
-internal sealed class RequireEntityBuilder(
-    string supportedSymbolName,
-    string entityName) :
+internal sealed class RequireValidationBuilder(string targetNamespace) :
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.IRequireValidation";
 
     private readonly HashSet<string> _namespaces =
     [
-        "Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories",
         "FluentValidation",
         "Mediator",
     ];
 
     public string HintName =>
-        $"Require{entityName}Behaviors.g.cs";
+        $"{targetNamespace}.RequireValidationBehaviors.g.cs";
 
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, supportedSymbolName, StringComparison.OrdinalIgnoreCase);
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public void Append(MessageInfo info)
     {
@@ -40,8 +41,8 @@ internal sealed class RequireEntityBuilder(
         _builder.AppendLine();
         _builder.AppendLine();
 
-        _builder.AppendLine($"internal sealed class {info.Name}Require{entityName}Behavior(I{entityName}QueryRepository repository) :");
-        _builder.Append($"    Require{entityName}Behavior<{info.Name}, {resultSymbolName}");
+        _builder.AppendLine($"internal sealed class {info.Name}RequireValidationBehavior(IValidator<{info.Name}> validator) :");
+        _builder.Append($"    RequireValidationBehavior<{info.Name}, {resultSymbolName}");
 
         if (resultSymbol.IsGenericType)
         {
@@ -49,7 +50,7 @@ internal sealed class RequireEntityBuilder(
             _builder.Append($", {valueSymbolName}");
         }
 
-        _builder.AppendLine(">(repository),");
+        _builder.AppendLine(">(validator),");
         _builder.AppendLine($"    IPipelineBehavior<{info.Name}, {resultSymbolName}>");
 
         _builder.AppendLine("{");
@@ -65,7 +66,7 @@ internal sealed class RequireEntityBuilder(
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.Append("namespace Beatport2Rss.Api.Application.Behaviors;");
+        sourceTextBuilder.Append($"namespace {targetNamespace}.Behaviors;");
         sourceTextBuilder.Append(_builder);
 
         return SourceText.From(sourceTextBuilder.ToString(), Encoding.UTF8);

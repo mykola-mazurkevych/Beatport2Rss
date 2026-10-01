@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -11,8 +12,8 @@ public readonly record struct Slug :
     IValueObject, IParsable<Slug>
 {
     public const char Delimiter = '-';
-    public const int SuffixLength = 4;
-    public const int MaxLength = 200;
+    public const int SuffixLength = ExactLengthConstants.SlugSuffix;
+    public const int MaxLength = MaxLengthConstants.Slug;
 
     private Slug(string value) => Value = value;
 

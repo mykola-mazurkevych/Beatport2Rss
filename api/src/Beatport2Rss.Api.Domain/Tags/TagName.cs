@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
+using Beatport2Rss.Common.SharedKernel.Constants;
 using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
@@ -10,7 +11,7 @@ namespace Beatport2Rss.Api.Domain.Tags;
 public readonly record struct TagName :
     IValueObject
 {
-    public const int MaxLength = 200;
+    public const int MaxLength = MaxLengthConstants.TagName;
 
     private TagName(string value) => Value = value;
 
