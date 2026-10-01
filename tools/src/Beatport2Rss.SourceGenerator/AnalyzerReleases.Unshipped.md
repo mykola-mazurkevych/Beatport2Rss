@@ -2,4 +2,4 @@
 
 Rule ID     | Category                     | Severity | Notes
 ------------|------------------------------|----------|----------------------------------------------------
-BP2RSSSG001 | Beatport2Rss.SourceGenerator | Error    | Interface is not supported by the source generator.
+BP2RSSSG002 | Beatport2Rss.SourceGenerator | Error    | Generation target must be declared static.

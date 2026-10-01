@@ -2,7 +2,6 @@
 
 using System.Text;
 
-using Beatport2Rss.SourceGenerator.Extensions;
 using Beatport2Rss.SourceGenerator.Models;
 
 using Microsoft.CodeAnalysis;
@@ -10,38 +9,34 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Beatport2Rss.SourceGenerator.Builders;
 
-internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
-    string supportedSymbolName,
-    string entityName) :
+internal sealed class ServiceCollectionExtensionValidatorsBuilder(string targetNamespace, string targetTypeName, string targetModifiers) :
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.IRequireValidation";
 
     private readonly HashSet<string> _namespaces =
     [
-        "Beatport2Rss.Api.Application.Behaviors",
-        "FluentResults",
         "FluentValidation",
-        "Mediator",
         "Microsoft.Extensions.DependencyInjection",
     ];
 
     public string HintName =>
-        $"ServiceCollectionExtensions.Require{entityName}Behaviors.g.cs";
-
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, supportedSymbolName, StringComparison.OrdinalIgnoreCase);
+        $"{targetNamespace}.{targetTypeName}.Validators.g.cs";
 
     public void Append(MessageInfo info)
     {
         _namespaces.Add(info.Namespace);
 
-        var resultSymbol = info.Interfaces.Single(i => i is { Name: "ICommand" or "IQuery" }).TypeArguments.OfType<INamedTypeSymbol>().Single();
-        var resultSymbolName = resultSymbol.GenerateName(_namespaces);
-
         _builder.AppendLine();
-        _builder.Append($"            .AddTransient<IPipelineBehavior<{info.Name}, {resultSymbolName}>, {info.Name}Require{entityName}Behavior>()");
+        _builder.Append($"            .AddSingleton<IValidator<{info.Name}>, {info.Name}Validator>()");
     }
+
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public SourceText ToSourceText()
     {
@@ -52,10 +47,10 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
         }
 
         sourceTextBuilder.AppendLine();
-        sourceTextBuilder.AppendLine("namespace Beatport2Rss.Api.Application;");
-        sourceTextBuilder.AppendLine("public static partial class ServiceCollectionExtensions");
+        sourceTextBuilder.AppendLine($"namespace {targetNamespace};");
+        sourceTextBuilder.AppendLine($"{targetModifiers} class {targetTypeName}");
         sourceTextBuilder.AppendLine("{");
-        sourceTextBuilder.AppendLine($"    private static partial IServiceCollection AddRequire{entityName}Behaviors(this IServiceCollection services) =>");
+        sourceTextBuilder.AppendLine("    private static partial IServiceCollection AddValidators(this IServiceCollection services) =>");
         sourceTextBuilder.Append("        services");
         sourceTextBuilder.Append(_builder);
         sourceTextBuilder.AppendLine(";");
