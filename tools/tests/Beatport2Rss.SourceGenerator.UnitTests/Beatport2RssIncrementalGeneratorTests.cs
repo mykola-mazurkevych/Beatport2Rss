@@ -10,10 +10,11 @@ namespace Beatport2Rss.SourceGenerator.UnitTests;
 public sealed class Beatport2RssIncrementalGeneratorTests
 {
     private static readonly ImmutableArray<MetadataReference> References =
-        ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
-            .Split(Path.PathSeparator)
-            .Select(path => (MetadataReference)MetadataReference.CreateFromFile(path))
-            .ToImmutableArray();
+    [
+        .. ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
+        .Split(Path.PathSeparator)
+        .Select(path => (MetadataReference)MetadataReference.CreateFromFile(path))
+    ];
 
     [Fact]
     public void GeneratesNoFeatureSourcesWithoutOptInAttributes()
@@ -25,7 +26,8 @@ public sealed class Beatport2RssIncrementalGeneratorTests
             }
             """);
 
-        Assert.All(generatedSources, source => Assert.Equal("GenerationAttributes.g.cs", source.HintName));
+        Assert.Empty(generatedSources.Errors);
+        Assert.All(generatedSources.GeneratedSources, source => Assert.Equal("GenerationAttributes.g.cs", source.HintName));
     }
 
     [Theory]
@@ -42,8 +44,9 @@ public sealed class Beatport2RssIncrementalGeneratorTests
         string unselectedMethod)
     {
         var generatedSources = Generate(CreateSource(attributeName, markerInterface));
-        var generatedText = string.Join(Environment.NewLine, generatedSources.Select(source => source.SourceText.ToString()));
+        var generatedText = string.Join(Environment.NewLine, generatedSources.GeneratedSources.Select(source => source.SourceText.ToString()));
 
+        Assert.Empty(generatedSources.Errors);
         Assert.Contains($"Add{featureName}", generatedText, StringComparison.Ordinal);
         Assert.Contains(expectedMethod, generatedText, StringComparison.Ordinal);
         Assert.DoesNotContain(unselectedMethod, generatedText, StringComparison.Ordinal);
@@ -56,12 +59,7 @@ public sealed class Beatport2RssIncrementalGeneratorTests
     {
         var generatedSources = Generate("""
             using Beatport2Rss.SourceGenerator;
-
-            namespace Mediator
-            {
-                public interface IMessage { }
-                public interface ICommand<TResult> : IMessage { }
-            }
+            using Microsoft.Extensions.DependencyInjection;
 
             namespace Demo.Application
             {
@@ -69,52 +67,157 @@ public sealed class Beatport2RssIncrementalGeneratorTests
                 public interface IRequireFeed { }
                 public sealed record Result;
                 public sealed record Request : Mediator.ICommand<Result>, IRequireValidation, IRequireFeed;
+                internal sealed class RequestValidator : FluentValidation.IValidator<Request> { }
 
                 [GenerateValidators]
                 [GenerateRequireFeedBehaviors]
-                public static partial class ServiceCollectionExtensions { }
+                public static partial class ServiceCollectionExtensions
+                {
+                    private static partial IServiceCollection AddValidators(this IServiceCollection services);
+                    private static partial IServiceCollection AddRequireFeedBehaviors(this IServiceCollection services);
+                }
             }
             """);
-        var generatedText = string.Join(Environment.NewLine, generatedSources.Select(source => source.SourceText.ToString()));
+        var generatedText = string.Join(Environment.NewLine, generatedSources.GeneratedSources.Select(source => source.SourceText.ToString()));
 
+        Assert.Empty(generatedSources.Errors);
         Assert.Contains("AddValidators", generatedText, StringComparison.Ordinal);
         Assert.Contains("AddRequireFeedBehaviors", generatedText, StringComparison.Ordinal);
         Assert.DoesNotContain("AddRequireTagBehaviors", generatedText, StringComparison.Ordinal);
         Assert.Contains("namespace Demo.Application.Behaviors;", generatedText, StringComparison.Ordinal);
     }
 
-    private static ImmutableArray<GeneratedSourceResult> Generate(string source)
+    private static GeneratorTestRun Generate(string source)
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.CSharp14);
         var compilation = CSharpCompilation.Create(
             "GeneratorTests",
-            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            [CSharpSyntaxTree.ParseText(AddCompilationStubs(source), parseOptions)],
             References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new Beatport2RssIncrementalGenerator().AsSourceGenerator()],
             parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var generatorDiagnostics);
 
-        return driver.RunGenerators(compilation).GetRunResult().Results.Single().GeneratedSources;
+        var compilationErrors = outputCompilation.GetDiagnostics()
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var errors = generatorDiagnostics
+            .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+            .Concat(compilationErrors)
+            .ToImmutableArray();
+
+        return new GeneratorTestRun(driver.GetRunResult().Results.Single().GeneratedSources, errors);
     }
 
-    private static string CreateSource(string attributeName, string markerInterface) => $$"""
-        using Beatport2Rss.SourceGenerator;
-
-        namespace Mediator
+    private static string CreateSource(string attributeName, string markerInterface)
+    {
+        var methodName = attributeName switch
         {
-            public interface IMessage { }
-            public interface ICommand<TResult> : IMessage { }
-        }
+            "GenerateValidators" => "AddValidators",
+            "GenerateRequireUserBehaviors" => "AddRequireUserBehaviors",
+            "GenerateRequireFeedBehaviors" => "AddRequireFeedBehaviors",
+            "GenerateRequireTagBehaviors" => "AddRequireTagBehaviors",
+            "GenerateRequireSubscriptionBehaviors" => "AddRequireSubscriptionBehaviors",
+            _ => throw new ArgumentOutOfRangeException(nameof(attributeName)),
+        };
+
+        return $$"""
+        using Beatport2Rss.SourceGenerator;
+        using Microsoft.Extensions.DependencyInjection;
 
         namespace Demo.Application
         {
             public interface {{markerInterface}} { }
             public sealed record Result;
             public sealed record Request : Mediator.ICommand<Result>, {{markerInterface}};
+            internal sealed class RequestValidator : FluentValidation.IValidator<Request> { }
 
             [{{attributeName}}]
-            public static partial class ServiceCollectionExtensions { }
+            public static partial class ServiceCollectionExtensions
+            {
+                private static partial IServiceCollection {{methodName}}(this IServiceCollection services);
+            }
         }
         """;
+    }
+
+    private static string AddCompilationStubs(string source) => $$"""
+        {{source}}
+
+        namespace FluentResults
+        {
+            public class Result { }
+        }
+
+        namespace FluentValidation
+        {
+            public interface IValidator<TMessage> { }
+        }
+
+        namespace Mediator
+        {
+            public interface IMessage { }
+            public interface ICommand<TResult> : IMessage { }
+            public interface IPipelineBehavior<TMessage, TResult> { }
+        }
+
+        namespace Microsoft.Extensions.DependencyInjection
+        {
+            public interface IServiceCollection { }
+
+            public static class ServiceCollectionServiceExtensions
+            {
+                public static IServiceCollection AddTransient<TService, TImplementation>(this IServiceCollection services)
+                    where TImplementation : TService => services;
+
+                public static IServiceCollection AddSingleton<TService, TImplementation>(this IServiceCollection services)
+                    where TImplementation : TService => services;
+            }
+        }
+
+        namespace Demo.Application.Interfaces.Persistence.Repositories
+        {
+            public interface IUserQueryRepository { }
+            public interface IFeedQueryRepository { }
+            public interface ISubscriptionQueryRepository { }
+            public interface ITagQueryRepository { }
+        }
+
+        namespace Demo.Application.Behaviors
+        {
+            using Demo.Application.Interfaces.Persistence.Repositories;
+            using FluentValidation;
+
+            internal abstract class RequireUserBehavior<TMessage, TResult>
+            {
+                protected RequireUserBehavior(IUserQueryRepository repository) { }
+            }
+
+            internal abstract class RequireFeedBehavior<TMessage, TResult>
+            {
+                protected RequireFeedBehavior(IFeedQueryRepository repository) { }
+            }
+
+            internal abstract class RequireSubscriptionBehavior<TMessage, TResult>
+            {
+                protected RequireSubscriptionBehavior(ISubscriptionQueryRepository repository) { }
+            }
+
+            internal abstract class RequireTagBehavior<TMessage, TResult>
+            {
+                protected RequireTagBehavior(ITagQueryRepository repository) { }
+            }
+
+            internal abstract class RequireValidationBehavior<TMessage, TResult>
+            {
+                protected RequireValidationBehavior(IValidator<TMessage> validator) { }
+            }
+        }
+
+        """;
+
+    private sealed record GeneratorTestRun(
+        ImmutableArray<GeneratedSourceResult> GeneratedSources,
+        ImmutableArray<Diagnostic> Errors);
 }
