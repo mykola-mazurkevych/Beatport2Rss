@@ -10,6 +10,14 @@ namespace Beatport2Rss.Common.Validation.Extensions;
 
 public static class RuleBuilderExtensions
 {
+    extension<T>(IRuleBuilderInitial<T, int> ruleBuilder)
+    {
+        public void IsPositive() =>
+            ruleBuilder
+                .GreaterThan(0)
+                .WithMessage("'{PropertyName}' must be a positive value.");
+    }
+
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
         public void IsCountryCode() =>
@@ -76,6 +84,6 @@ public static class RuleBuilderExtensions
             ruleBuilder.MaximumLength(maximumLength).WithMessage(message);
 
         private IRuleBuilder<T, string?> IsNotTooShort(int minimumLength, string message) =>
-            ruleBuilder.MinimumLength(minimumLength).WithMessage(message).WithErrorCode("SOME-CODE");
+            ruleBuilder.MinimumLength(minimumLength).WithMessage(message).WithErrorCode("SOME-CODE"); // TODO: think about error codes
     }
 }

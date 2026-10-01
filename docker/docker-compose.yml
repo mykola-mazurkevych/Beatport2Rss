@@ -62,6 +62,22 @@ services:
       retries: 3
       start_period: 10s
 
+  builder:
+    build:
+      context: ..
+      dockerfile: services/builder/src/Beatport2Rss.Builder.Worker/Dockerfile
+    container_name: builder
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION}
+      - BuilderJobOptions__ReleasesRetentionInDays=${BUILDER_RELEASES_RETENTION_IN_DAYS}
+      - BuilderJobOptions__DeleteStaleReleasesCronSchedule=${BUILDER_DELETE_STALE_RELEASES_CRON}
+      - BuilderJobOptions__BuildRSSFeedJobCronSchedule=${BUILDER_BUILD_RSS_FEED_CRON}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   api:
     build:
       context: ..
