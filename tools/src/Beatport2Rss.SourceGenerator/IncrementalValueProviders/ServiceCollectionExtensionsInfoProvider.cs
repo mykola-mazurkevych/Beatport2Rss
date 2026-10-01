@@ -19,8 +19,7 @@ internal static class ServiceCollectionExtensionsInfoProvider
                     AttributeLists.Count: > 0,
                     Identifier.ValueText: "ServiceCollectionExtensions",
                 },
-                transform: static (context, cancellationToken) =>
-                    context.SemanticModel.GetDeclaredSymbol((ClassDeclarationSyntax)context.Node, cancellationToken) as INamedTypeSymbol)
+                transform: static (context, cancellationToken) => context.SemanticModel.GetDeclaredSymbol((ClassDeclarationSyntax)context.Node, cancellationToken))
             .Where(static symbol => symbol is not null)
             .Collect()
             .Select(static (symbols, _) =>
@@ -47,22 +46,23 @@ internal static class ServiceCollectionExtensionsInfoProvider
                         continue;
                     }
 
+                    var declarations = symbol.DeclaringSyntaxReferences
+                        .Select(reference => reference.GetSyntax())
+                        .OfType<ClassDeclarationSyntax>()
+                        .ToArray();
+                    var declaration = declarations[0];
+
                     targets.Add(new GenerationTargetInfo(
                         symbol.Name,
                         symbol.ContainingNamespace.ToDisplayString(),
-                        string.Join(
-                            " ",
-                            symbol.DeclaringSyntaxReferences
-                                .Select(reference => reference.GetSyntax())
-                                .OfType<ClassDeclarationSyntax>()
-                                .First()
-                                .Modifiers
-                                .Select(modifier => modifier.Text)),
+                        string.Join(" ", declaration.Modifiers.Select(modifier => modifier.Text)),
                         symbol.IsStatic,
-                        symbol.DeclaringSyntaxReferences
-                            .Select(reference => reference.GetSyntax())
-                            .OfType<ClassDeclarationSyntax>()
-                            .All(declaration => declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword))),
+                        declarations.All(part => part.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword))),
+                        symbol.ContainingType is null,
+                        symbol.Arity > 0,
+                        declarations.Any(part => part.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.FileKeyword))),
+                        symbol.ContainingNamespace.IsGlobalNamespace,
+                        declaration.GetLocation(),
                         features));
                 }
 

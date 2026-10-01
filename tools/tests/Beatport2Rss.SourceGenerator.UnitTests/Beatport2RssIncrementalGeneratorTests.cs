@@ -100,7 +100,7 @@ public sealed class Beatport2RssIncrementalGeneratorTests
     [Fact]
     public void ReportsDiagnosticAndSkipsGenerationForNonStaticTarget()
     {
-        var generatedSources = Generate("""
+        AssertInvalidTarget("""
             using Beatport2Rss.SourceGenerator;
 
             namespace Demo.Application
@@ -109,15 +109,12 @@ public sealed class Beatport2RssIncrementalGeneratorTests
                 public partial class ServiceCollectionExtensions { }
             }
             """);
-
-        Assert.Contains(generatedSources.Errors, diagnostic => diagnostic.Id == "BP2RSSSG002");
-        Assert.All(generatedSources.GeneratedSources, source => Assert.Equal("GenerationAttributes.g.cs", source.HintName));
     }
 
     [Fact]
     public void ReportsDiagnosticAndSkipsGenerationForNonPartialTarget()
     {
-        var generatedSources = Generate("""
+        AssertInvalidTarget("""
             using Beatport2Rss.SourceGenerator;
 
             namespace Demo.Application
@@ -126,9 +123,62 @@ public sealed class Beatport2RssIncrementalGeneratorTests
                 public static class ServiceCollectionExtensions { }
             }
             """);
+    }
 
-        Assert.Contains(generatedSources.Errors, diagnostic => diagnostic.Id == "BP2RSSSG002");
-        Assert.All(generatedSources.GeneratedSources, source => Assert.Equal("GenerationAttributes.g.cs", source.HintName));
+    [Fact]
+    public void ReportsDiagnosticAndSkipsGenerationForGenericTarget()
+    {
+        AssertInvalidTarget("""
+            using Beatport2Rss.SourceGenerator;
+
+            namespace Demo.Application
+            {
+                [GenerateValidators]
+                public static partial class ServiceCollectionExtensions<T> { }
+            }
+            """);
+    }
+
+    [Fact]
+    public void ReportsDiagnosticAndSkipsGenerationForNestedTarget()
+    {
+        AssertInvalidTarget("""
+            using Beatport2Rss.SourceGenerator;
+
+            namespace Demo.Application
+            {
+                public class Outer
+                {
+                    [GenerateValidators]
+                    public static partial class ServiceCollectionExtensions { }
+                }
+            }
+            """);
+    }
+
+    [Fact]
+    public void ReportsDiagnosticAndSkipsGenerationForFileLocalTarget()
+    {
+        AssertInvalidTarget("""
+            using Beatport2Rss.SourceGenerator;
+
+            namespace Demo.Application
+            {
+                [GenerateValidators]
+                file static partial class ServiceCollectionExtensions { }
+            }
+            """);
+    }
+
+    [Fact]
+    public void ReportsDiagnosticAndSkipsGenerationForGlobalNamespaceTarget()
+    {
+        AssertInvalidTarget("""
+            using Beatport2Rss.SourceGenerator;
+
+            [GenerateValidators]
+            public static partial class ServiceCollectionExtensions { }
+            """);
     }
 
     [Fact]
@@ -179,6 +229,16 @@ public sealed class Beatport2RssIncrementalGeneratorTests
             .ToImmutableArray();
 
         return new GeneratorTestRun(driver.GetRunResult().Results.Single().GeneratedSources, errors);
+    }
+
+    private static void AssertInvalidTarget(string source)
+    {
+        var result = Generate(source);
+
+        var diagnostic = Assert.Single(result.Errors);
+        Assert.Equal("BP2RSSSG002", diagnostic.Id);
+        Assert.True(diagnostic.Location.IsInSource);
+        Assert.All(result.GeneratedSources, generatedSource => Assert.Equal("GenerationAttributes.g.cs", generatedSource.HintName));
     }
 
     private static string CreateSource(string attributeName, string markerInterface, string accessibility = "public")
