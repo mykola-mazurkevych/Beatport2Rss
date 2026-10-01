@@ -29,9 +29,6 @@ public sealed class OutboxMessage
     [MaxLength(4_000)]
     public string? LastError { get; private set; }
 
-    [NotMapped]
-    public bool IsPublished => PublishedAt.HasValue;
-
     public static OutboxMessage Create(
         Guid id,
         DateTimeOffset occurredAt,

@@ -14,7 +14,7 @@ internal sealed class OutboxMessageRepository(IOutboxDbContext dbContext) :
 
     public async Task<IEnumerable<OutboxMessage>> GetNotPublishedAsync(int batchSize, CancellationToken cancellationToken = default) =>
         (await dbContext.OutboxMessages
-            .Where(message => !message.IsPublished)
+            .Where(message => !message.PublishedAt.HasValue)
             .OrderBy(message => message.OccurredAt)
             .Take(batchSize)
             .ToListAsync(cancellationToken))
