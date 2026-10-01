@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Beatport2Rss.SourceGenerator.Models;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Beatport2Rss.SourceGenerator.IncrementalValueProviders;
@@ -58,6 +59,10 @@ internal static class ServiceCollectionExtensionsInfoProvider
                                 .Modifiers
                                 .Select(modifier => modifier.Text)),
                         symbol.IsStatic,
+                        symbol.DeclaringSyntaxReferences
+                            .Select(reference => reference.GetSyntax())
+                            .OfType<ClassDeclarationSyntax>()
+                            .All(declaration => declaration.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword))),
                         features));
                 }
 

@@ -59,7 +59,7 @@ public sealed class Beatport2RssIncrementalGenerator :
                 var (infos, targets) = source;
                 foreach (var target in targets)
                 {
-                    if (!target.IsStatic)
+                    if (!target.IsStatic || !target.IsPartial)
                     {
                         ctx.ReportDiagnostic(Diagnostic.Create(Diagnostics.InvalidTarget, location: null, target.TypeName));
                         continue;

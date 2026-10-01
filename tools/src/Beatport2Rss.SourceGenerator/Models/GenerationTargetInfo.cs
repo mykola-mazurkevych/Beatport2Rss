@@ -7,4 +7,5 @@ internal sealed record GenerationTargetInfo(
     string Namespace,
     string Modifiers,
     bool IsStatic,
+    bool IsPartial,
     ImmutableHashSet<GeneratedFeature> Features);
