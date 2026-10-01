@@ -98,6 +98,23 @@ public sealed class Beatport2RssIncrementalGeneratorTests
     }
 
     [Fact]
+    public void ReportsDiagnosticAndSkipsGenerationForNonStaticTarget()
+    {
+        var generatedSources = Generate("""
+            using Beatport2Rss.SourceGenerator;
+
+            namespace Demo.Application
+            {
+                [GenerateValidators]
+                public partial class ServiceCollectionExtensions { }
+            }
+            """);
+
+        Assert.Contains(generatedSources.Errors, diagnostic => diagnostic.Id == "BP2RSSSG002");
+        Assert.All(generatedSources.GeneratedSources, source => Assert.Equal("GenerationAttributes.g.cs", source.HintName));
+    }
+
+    [Fact]
     public void IgnoresSameNamedInterfaceFromDifferentNamespace()
     {
         var generatedSources = Generate("""
