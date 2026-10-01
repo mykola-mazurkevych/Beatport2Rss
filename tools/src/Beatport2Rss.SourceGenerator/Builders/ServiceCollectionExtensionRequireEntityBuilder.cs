@@ -14,10 +14,12 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
     string supportedSymbolName,
     string entityName,
     string targetNamespace,
-    string targetTypeName) :
+    string targetTypeName,
+    string targetModifiers) :
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.{supportedSymbolName}";
 
     private readonly HashSet<string> _namespaces =
     [
@@ -31,8 +33,11 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
     public string HintName =>
         $"{targetNamespace}.{targetTypeName}.Require{entityName}Behaviors.g.cs";
 
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, supportedSymbolName, StringComparison.OrdinalIgnoreCase);
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public void Append(MessageInfo info)
     {
@@ -55,7 +60,7 @@ internal sealed class ServiceCollectionExtensionRequireEntityBuilder(
 
         sourceTextBuilder.AppendLine();
         sourceTextBuilder.AppendLine($"namespace {targetNamespace};");
-        sourceTextBuilder.AppendLine($"public static partial class {targetTypeName}");
+        sourceTextBuilder.AppendLine($"{targetModifiers} class {targetTypeName}");
         sourceTextBuilder.AppendLine("{");
         sourceTextBuilder.AppendLine($"    private static partial IServiceCollection AddRequire{entityName}Behaviors(this IServiceCollection services) =>");
         sourceTextBuilder.Append("        services");

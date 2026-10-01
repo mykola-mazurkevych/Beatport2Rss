@@ -14,6 +14,7 @@ internal sealed class RequireValidationBuilder(string targetNamespace) :
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.IRequireValidation";
 
     private readonly HashSet<string> _namespaces =
     [
@@ -24,8 +25,11 @@ internal sealed class RequireValidationBuilder(string targetNamespace) :
     public string HintName =>
         $"{targetNamespace}.RequireValidationBehaviors.g.cs";
 
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, "IRequireValidation", StringComparison.OrdinalIgnoreCase);
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public void Append(MessageInfo info)
     {

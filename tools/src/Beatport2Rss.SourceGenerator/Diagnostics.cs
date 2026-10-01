@@ -4,10 +4,10 @@ namespace Beatport2Rss.SourceGenerator;
 
 internal static class Diagnostics
 {
-    internal static readonly DiagnosticDescriptor UnsupportedInterface = new(
-        id: "BP2RSSSG001",
-        title: "Unsupported interface",
-        messageFormat: "Interface '{0}' is not supported by the source generator",
+    internal static readonly DiagnosticDescriptor InvalidTarget = new(
+        id: "BP2RSSSG002",
+        title: "Invalid generation target",
+        messageFormat: "Generation target '{0}' must be declared static",
         category: "Beatport2Rss.SourceGenerator",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);

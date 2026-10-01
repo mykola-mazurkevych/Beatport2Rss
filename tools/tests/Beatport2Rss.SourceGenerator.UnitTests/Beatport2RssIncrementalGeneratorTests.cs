@@ -59,14 +59,14 @@ public sealed class Beatport2RssIncrementalGeneratorTests
     {
         var generatedSources = Generate("""
             using Beatport2Rss.SourceGenerator;
+            using Demo.Application.Interfaces.Messages;
             using Microsoft.Extensions.DependencyInjection;
 
             namespace Demo.Application
             {
-                public interface IRequireValidation { }
-                public interface IRequireFeed { }
                 public sealed record Result;
-                public sealed record Request : Mediator.ICommand<Result>, IRequireValidation, IRequireFeed;
+                public sealed record Request : Mediator.ICommand<Result>, IRequireValidation, IRequireFeed, IAudited;
+                public interface IAudited { }
                 internal sealed class RequestValidator : FluentValidation.IValidator<Request> { }
 
                 [GenerateValidators]
@@ -85,6 +85,43 @@ public sealed class Beatport2RssIncrementalGeneratorTests
         Assert.Contains("AddRequireFeedBehaviors", generatedText, StringComparison.Ordinal);
         Assert.DoesNotContain("AddRequireTagBehaviors", generatedText, StringComparison.Ordinal);
         Assert.Contains("namespace Demo.Application.Behaviors;", generatedText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PreservesInternalStaticTargetModifiers()
+    {
+        var generatedSources = Generate(CreateSource("GenerateValidators", "IRequireValidation", "internal"));
+        var generatedText = string.Join(Environment.NewLine, generatedSources.GeneratedSources.Select(source => source.SourceText.ToString()));
+
+        Assert.Empty(generatedSources.Errors);
+        Assert.Contains("internal static partial class ServiceCollectionExtensions", generatedText, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void IgnoresSameNamedInterfaceFromDifferentNamespace()
+    {
+        var generatedSources = Generate("""
+            using Beatport2Rss.SourceGenerator;
+            using Microsoft.Extensions.DependencyInjection;
+
+            namespace Demo.Application
+            {
+                public interface IRequireFeed { }
+                public sealed record Result;
+                public sealed record Request : Mediator.ICommand<Result>, IRequireFeed, IAudited;
+                public interface IAudited { }
+
+                [GenerateRequireFeedBehaviors]
+                public static partial class ServiceCollectionExtensions
+                {
+                    private static partial IServiceCollection AddRequireFeedBehaviors(this IServiceCollection services);
+                }
+            }
+            """);
+        var generatedText = string.Join(Environment.NewLine, generatedSources.GeneratedSources.Select(source => source.SourceText.ToString()));
+
+        Assert.Empty(generatedSources.Errors);
+        Assert.DoesNotContain("RequestRequireFeedBehavior", generatedText, StringComparison.Ordinal);
     }
 
     private static GeneratorTestRun Generate(string source)
@@ -110,7 +147,7 @@ public sealed class Beatport2RssIncrementalGeneratorTests
         return new GeneratorTestRun(driver.GetRunResult().Results.Single().GeneratedSources, errors);
     }
 
-    private static string CreateSource(string attributeName, string markerInterface)
+    private static string CreateSource(string attributeName, string markerInterface, string accessibility = "public")
     {
         var methodName = attributeName switch
         {
@@ -124,17 +161,18 @@ public sealed class Beatport2RssIncrementalGeneratorTests
 
         return $$"""
         using Beatport2Rss.SourceGenerator;
+        using Demo.Application.Interfaces.Messages;
         using Microsoft.Extensions.DependencyInjection;
 
         namespace Demo.Application
         {
-            public interface {{markerInterface}} { }
             public sealed record Result;
-            public sealed record Request : Mediator.ICommand<Result>, {{markerInterface}};
+            public sealed record Request : Mediator.ICommand<Result>, {{markerInterface}}, IAudited;
+            public interface IAudited { }
             internal sealed class RequestValidator : FluentValidation.IValidator<Request> { }
 
             [{{attributeName}}]
-            public static partial class ServiceCollectionExtensions
+            {{accessibility}} static partial class ServiceCollectionExtensions
             {
                 private static partial IServiceCollection {{methodName}}(this IServiceCollection services);
             }
@@ -153,6 +191,15 @@ public sealed class Beatport2RssIncrementalGeneratorTests
         namespace FluentValidation
         {
             public interface IValidator<TMessage> { }
+        }
+
+        namespace Demo.Application.Interfaces.Messages
+        {
+            public interface IRequireActiveUser { }
+            public interface IRequireFeed { }
+            public interface IRequireSubscription { }
+            public interface IRequireTag { }
+            public interface IRequireValidation { }
         }
 
         namespace Mediator

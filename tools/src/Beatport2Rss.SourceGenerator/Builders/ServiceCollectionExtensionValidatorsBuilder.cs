@@ -4,14 +4,16 @@ using System.Text;
 
 using Beatport2Rss.SourceGenerator.Models;
 
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Beatport2Rss.SourceGenerator.Builders;
 
-internal sealed class ServiceCollectionExtensionValidatorsBuilder(string targetNamespace, string targetTypeName) :
+internal sealed class ServiceCollectionExtensionValidatorsBuilder(string targetNamespace, string targetTypeName, string targetModifiers) :
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.IRequireValidation";
 
     private readonly HashSet<string> _namespaces =
     [
@@ -30,8 +32,11 @@ internal sealed class ServiceCollectionExtensionValidatorsBuilder(string targetN
         _builder.Append($"            .AddSingleton<IValidator<{info.Name}>, {info.Name}Validator>()");
     }
 
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, "IRequireValidation", StringComparison.OrdinalIgnoreCase);
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public SourceText ToSourceText()
     {
@@ -43,7 +48,7 @@ internal sealed class ServiceCollectionExtensionValidatorsBuilder(string targetN
 
         sourceTextBuilder.AppendLine();
         sourceTextBuilder.AppendLine($"namespace {targetNamespace};");
-        sourceTextBuilder.AppendLine($"public static partial class {targetTypeName}");
+        sourceTextBuilder.AppendLine($"{targetModifiers} class {targetTypeName}");
         sourceTextBuilder.AppendLine("{");
         sourceTextBuilder.AppendLine("    private static partial IServiceCollection AddValidators(this IServiceCollection services) =>");
         sourceTextBuilder.Append("        services");

@@ -17,6 +17,7 @@ internal sealed class RequireEntityBuilder(
     IBuilder
 {
     private readonly StringBuilder _builder = new();
+    private readonly string _supportedSymbolMetadataName = $"global::{targetNamespace}.Interfaces.Messages.{supportedSymbolName}";
 
     private readonly HashSet<string> _namespaces =
     [
@@ -28,8 +29,11 @@ internal sealed class RequireEntityBuilder(
     public string HintName =>
         $"{targetNamespace}.Require{entityName}Behaviors.g.cs";
 
-    public bool CanHandle(string symbolName) =>
-        string.Equals(symbolName, supportedSymbolName, StringComparison.OrdinalIgnoreCase);
+    public bool CanHandle(INamedTypeSymbol interfaceSymbol) =>
+        string.Equals(
+            interfaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            _supportedSymbolMetadataName,
+            StringComparison.Ordinal);
 
     public void Append(MessageInfo info)
     {

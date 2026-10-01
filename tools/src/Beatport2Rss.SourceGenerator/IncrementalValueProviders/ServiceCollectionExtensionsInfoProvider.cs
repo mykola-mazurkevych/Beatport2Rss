@@ -49,6 +49,15 @@ internal static class ServiceCollectionExtensionsInfoProvider
                     targets.Add(new GenerationTargetInfo(
                         symbol.Name,
                         symbol.ContainingNamespace.ToDisplayString(),
+                        string.Join(
+                            " ",
+                            symbol.DeclaringSyntaxReferences
+                                .Select(reference => reference.GetSyntax())
+                                .OfType<ClassDeclarationSyntax>()
+                                .First()
+                                .Modifiers
+                                .Select(modifier => modifier.Text)),
+                        symbol.IsStatic,
                         features));
                 }
 
