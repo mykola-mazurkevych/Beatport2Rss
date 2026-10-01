@@ -22,7 +22,7 @@ COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.Inte
 COPY ["common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj", "common/src/Beatport2Rss.Common.Messaging/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj", "common/src/Beatport2Rss.Common.Miscellaneous/"]
 COPY ["common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj", "common/src/Beatport2Rss.Common.SharedKernel/"]
-COPY ["tools/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj", "tools/Beatport2Rss.SourceGenerator/"]
+COPY ["tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj", "tools/src/Beatport2Rss.SourceGenerator/"]
 COPY ["common/protos/", "common/protos/"]
 
 # Restore dependencies
@@ -31,7 +31,7 @@ RUN dotnet restore "api/src/Beatport2Rss.Api/Beatport2Rss.Api.csproj"
 # Copy source code
 COPY ["api/src/", "api/src/"]
 COPY ["common/src/", "common/src/"]
-COPY ["tools/Beatport2Rss.SourceGenerator/", "tools/Beatport2Rss.SourceGenerator/"]
+COPY ["tools/src/Beatport2Rss.SourceGenerator/", "tools/src/Beatport2Rss.SourceGenerator/"]
 
 # Build the project
 RUN dotnet build "api/src/Beatport2Rss.Api/Beatport2Rss.Api.csproj" -c Release -o /app/build

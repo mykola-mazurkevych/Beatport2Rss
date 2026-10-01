@@ -24,8 +24,6 @@ public sealed class Beatport2RssIncrementalGenerator :
 //// #endif
 ////     }
 
-
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(static ctx =>

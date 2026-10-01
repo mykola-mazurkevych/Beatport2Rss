@@ -50,8 +50,12 @@
   <Folder Name="/services/interceptor/src/">
     <Project Path="services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />
   </Folder>
-  <Folder Name="/tools/">
-    <Project Path="tools/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
-    <Project Path="tools/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/src/">
+    <Project Path="tools/src/Beatport2Rss.Migrator/Beatport2Rss.Migrator.csproj" />
+    <Project Path="tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj" />
+  </Folder>
+  <Folder Name="/tools/tests/">
+    <Project Path="tools/tests/Beatport2Rss.SourceGenerator.UnitTests/Beatport2Rss.SourceGenerator.UnitTests.csproj" />
   </Folder>
 </Solution>

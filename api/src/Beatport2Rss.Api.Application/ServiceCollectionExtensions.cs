@@ -1,9 +1,16 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
+using Beatport2Rss.SourceGenerator;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Beatport2Rss.Api.Application;
 
+[GenerateRequireFeedBehaviors]
+[GenerateRequireSubscriptionBehaviors]
+[GenerateRequireTagBehaviors]
+[GenerateRequireUserBehaviors]
+[GenerateValidators]
 public static partial class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)

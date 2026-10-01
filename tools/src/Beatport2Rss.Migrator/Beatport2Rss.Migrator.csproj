@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\api\src\Beatport2Rss.Api.Infrastructure\Beatport2Rss.Api.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\services\builder\src\Beatport2Rss.Builder.Infrastructure\Beatport2Rss.Builder.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\services\collector\src\Beatport2Rss.Collector.Infrastructure\Beatport2Rss.Collector.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
