@@ -9,6 +9,7 @@ using Beatport2Rss.Common.RabbitMQ.Services;
 using Moq;
 
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 using Xunit;
 
@@ -53,10 +54,41 @@ public sealed class RabbitMQPublisherTests
             m => m.BasicPublish(
                 exchange: ExchangeName,
                 routingKey: RoutingKey,
-                mandatory: It.IsAny<bool>(),
+                mandatory: true,
                 basicProperties: It.IsAny<IBasicProperties>(),
                 body: It.IsAny<ReadOnlyMemory<byte>>()),
             Times.Once);
+        _modelMock.Verify(m => m.ConfirmSelect(), Times.Once);
+        _modelMock.Verify(m => m.WaitForConfirmsOrDie(It.IsAny<TimeSpan>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task PublishAsync_WhenMessageIsReturned_ShouldThrowInvalidOperationException()
+    {
+        _modelMock
+            .Setup(m => m.BasicPublish(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                true,
+                It.IsAny<IBasicProperties>(),
+                It.IsAny<ReadOnlyMemory<byte>>()))
+            .Callback<string, string, bool, IBasicProperties, ReadOnlyMemory<byte>>((exchange, routingKey, _, _, _) =>
+                _modelMock.Raise(
+                    m => m.BasicReturn += null,
+                    new BasicReturnEventArgs
+                    {
+                        Exchange = exchange,
+                        RoutingKey = routingKey,
+                        ReplyCode = 312,
+                        ReplyText = "NO_ROUTE",
+                    }));
+
+        await using var publisher = CreatePublisher();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => publisher.PublishAsync(new TestMessage("hello"), TestContext.Current.CancellationToken));
+
+        Assert.Contains("NO_ROUTE", exception.Message, StringComparison.Ordinal);
     }
 
     [Fact]
