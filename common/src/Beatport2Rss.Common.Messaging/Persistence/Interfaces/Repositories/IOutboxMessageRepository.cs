@@ -4,6 +4,6 @@ namespace Beatport2Rss.Common.Messaging.Persistence.Interfaces.Repositories;
 
 internal interface IOutboxMessageRepository
 {
-    Task AddAsync(OutboxMessage outboxMessage, CancellationToken cancellationToken = default);
+    Task<OutboxMessage> AddAsync(OutboxMessage outboxMessage, CancellationToken cancellationToken = default);
     Task<IEnumerable<OutboxMessage>> GetNotPublishedAsync(int batchSize, CancellationToken cancellationToken = default);
 }

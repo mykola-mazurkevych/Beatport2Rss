@@ -6,43 +6,47 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
-public abstract class CommandRepository<TAggregateRoot, TId>(DbSet<TAggregateRoot> dbSet)
-    where TAggregateRoot : class, IAggregateRoot<TId>
-    where TId : struct, IId<TId>
+public abstract class CommandRepository<TEntity>(DbSet<TEntity> entities)
+    where TEntity : class
 {
-    public Task<TAggregateRoot> LoadAsync(
-        Expression<Func<TAggregateRoot, bool>> predicate,
+    public Task<TEntity> LoadAsync(
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default) =>
-        dbSet.SingleAsync(predicate, cancellationToken);
+        entities.SingleAsync(predicate, cancellationToken);
 
-    public Task<TAggregateRoot?> FindAsync(
-        Expression<Func<TAggregateRoot, bool>> predicate,
+    public Task<TEntity?> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default) =>
-        dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
+        entities.SingleOrDefaultAsync(predicate, cancellationToken);
 
-    public async Task<IEnumerable<TAggregateRoot>> FindAllAsync(
-        Expression<Func<TAggregateRoot, bool>> predicate,
+    public async Task<IEnumerable<TEntity>> FindAllAsync(
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default) =>
-        (await dbSet.Where(predicate).ToListAsync(cancellationToken)).AsEnumerable();
+        (await entities.Where(predicate).ToListAsync(cancellationToken)).AsEnumerable();
 
     public Task<bool> ExistsAsync(
-        Expression<Func<TAggregateRoot, bool>> predicate,
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default) =>
-        dbSet.AnyAsync(predicate, cancellationToken);
+        entities.AnyAsync(predicate, cancellationToken);
 
-    public async Task<TAggregateRoot> AddAsync(
-        TAggregateRoot aggregateRoot,
+    public async Task<TEntity> AddAsync(
+        TEntity entity,
         CancellationToken cancellationToken = default) =>
-        (await dbSet.AddAsync(aggregateRoot, cancellationToken)).Entity;
+        (await entities.AddAsync(entity, cancellationToken)).Entity;
 
-    public void Update(TAggregateRoot aggregateRoot) =>
-        dbSet.Update(aggregateRoot);
+    public void Update(TEntity entity) =>
+        entities.Update(entity);
 
-    public void Delete(TAggregateRoot aggregateRoot) =>
-        dbSet.Remove(aggregateRoot);
+    public void Delete(TEntity entity) =>
+        entities.Remove(entity);
 
     public Task DeleteAsync(
-        Expression<Func<TAggregateRoot, bool>> predicate,
+        Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default) =>
-        dbSet.Where(predicate).ExecuteDeleteAsync(cancellationToken);
+        entities.Where(predicate).ExecuteDeleteAsync(cancellationToken);
 }
+
+public abstract class CommandRepository<TAggregateRoot, TId>(DbSet<TAggregateRoot> dbSet) :
+    CommandRepository<TAggregateRoot>(dbSet)
+    where TAggregateRoot : class, IAggregateRoot<TId>
+    where TId : struct, IId<TId>;
