@@ -20,18 +20,21 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureOptions(configuration)
                 .AddSingleton<IOutboxDispatcher, OutboxDispatcher>()
-                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>()
-                .AddTransient<IOutboxMessageRepository, OutboxMessageRepository>();
+                .AddTransient<IIntegrationEventOutbox, IntegrationEventOutbox>();
 
-        public IServiceCollection AddInboxDbContext<TInboxDbContext>()
+        public IServiceCollection AddInboxPersistence<TInboxDbContext>()
             where TInboxDbContext : class, IInboxDbContext =>
             services
-                .AddTransient<IInboxDbContext, TInboxDbContext>();
+                .AddTransient<IInboxDbContext, TInboxDbContext>()
+                .AddTransient(provider => provider.GetRequiredService<TInboxDbContext>().InboxMessages)
+                .AddTransient<IInboxMessageRepository, InboxMessageRepository>();
 
-        public IServiceCollection AddOutboxDbContext<TOutboxDbContext>()
+        public IServiceCollection AddOutboxPersistence<TOutboxDbContext>()
             where TOutboxDbContext : class, IOutboxDbContext =>
             services
-                .AddTransient<IOutboxDbContext, TOutboxDbContext>();
+                .AddTransient<IOutboxDbContext, TOutboxDbContext>()
+                .AddTransient(provider => provider.GetRequiredService<TOutboxDbContext>().OutboxMessages)
+                .AddTransient<IOutboxMessageRepository, OutboxMessageRepository>();
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services

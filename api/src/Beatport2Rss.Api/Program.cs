@@ -23,7 +23,7 @@ builder.Services
     .AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
-    .AddJobs()
+    .AddJobs(builder.Configuration)
     .AddProblemDetails(options => options.CustomizeProblemDetails = context => context.ProblemDetails.Extensions[ResponseExtensionNames.TraceId] = context.HttpContext.TraceIdentifier)
     .AddApiVersioning(options =>
     {

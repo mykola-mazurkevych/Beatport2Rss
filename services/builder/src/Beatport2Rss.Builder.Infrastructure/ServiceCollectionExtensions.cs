@@ -37,8 +37,8 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddInboxDbContext<BuilderDbContext>()
-                .AddOutboxDbContext<BuilderDbContext>()
+                .AddInboxPersistence<BuilderDbContext>()
+                .AddOutboxPersistence<BuilderDbContext>()
                 .AddUnitOfWork<BuilderDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>();

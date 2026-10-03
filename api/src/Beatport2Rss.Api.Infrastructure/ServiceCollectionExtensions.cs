@@ -135,7 +135,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddOutboxDbContext<ApiDbContext>()
+                .AddOutboxPersistence<ApiDbContext>()
                 .AddUnitOfWork<ApiDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
