@@ -73,6 +73,10 @@ services:
       - BuilderJobOptions__ReleasesRetentionInDays=${BUILDER_RELEASES_RETENTION_IN_DAYS}
       - BuilderJobOptions__DeleteStaleReleasesCronSchedule=${BUILDER_DELETE_STALE_RELEASES_CRON}
       - BuilderJobOptions__BuildRSSFeedJobCronSchedule=${BUILDER_BUILD_RSS_FEED_CRON}
+      - OutboxJobOptions__OutboxMessagesRetentionInDays=${OUTBOX_MESSAGES_RETENTION_IN_DAYS}
+      - OutboxJobOptions__DeleteStaleOutboxMessagesCronSchedule=${OUTBOX_DELETE_STALE_MESSAGES_CRON}
+      - InboxJobOptions__InboxMessagesRetentionInDays=${INBOX_MESSAGES_RETENTION_IN_DAYS}
+      - InboxJobOptions__DeleteStaleInboxMessagesCronSchedule=${INBOX_DELETE_STALE_MESSAGES_CRON}
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,6 +105,8 @@ services:
       - JwtOptions__SigningKey=${JWT_SIGNING_KEY}
       - JwtOptions__ExpiresIn=${JWT_EXPIRES_IN}
       - RefreshTokenOptions__ExpiresIn=${REFRESH_TOKEN_EXPIRES_IN}
+      - OutboxJobOptions__OutboxMessagesRetentionInDays=${OUTBOX_MESSAGES_RETENTION_IN_DAYS}
+      - OutboxJobOptions__DeleteStaleOutboxMessagesCronSchedule=${OUTBOX_DELETE_STALE_MESSAGES_CRON}
     depends_on:
       postgres:
         condition: service_healthy

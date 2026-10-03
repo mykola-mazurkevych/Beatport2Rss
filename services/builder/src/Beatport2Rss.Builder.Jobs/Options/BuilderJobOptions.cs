@@ -1,6 +1,6 @@
 namespace Beatport2Rss.Builder.Jobs.Options;
 
-public sealed record BuilderJobOptions
+internal sealed record BuilderJobOptions
 {
     public required int ReleasesRetentionInDays { get; init; }
 

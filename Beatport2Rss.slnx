@@ -22,6 +22,7 @@
     <Project Path="common/src/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Messaging.Jobs/Beatport2Rss.Common.Messaging.Jobs.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.RabbitMQ/Beatport2Rss.Common.RabbitMQ.csproj" />

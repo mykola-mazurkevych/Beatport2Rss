@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Beatport2Rss.Common.Messaging.Jobs" />
     <InternalsVisibleTo Include="Beatport2Rss.Common.Messaging.UnitTests" />
   </ItemGroup>
 

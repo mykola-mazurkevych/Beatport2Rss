@@ -6,8 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Messaging.Jobs\Beatport2Rss.Common.Messaging.Jobs.csproj" />
-    <ProjectReference Include="..\Beatport2Rss.Builder.Application\Beatport2Rss.Builder.Application.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
   </ItemGroup>
 
 </Project>
