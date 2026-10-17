@@ -1,6 +1,6 @@
-namespace Beatport2Rss.Common.IntegrationEvents.V1.Tags;
+namespace Beatport2Rss.Common.IntegrationEvents.Tags;
 
-public sealed record TagCreatedV1(
+public sealed record TagCreated(
     Guid Id,
     DateTimeOffset OccurredAt,
     Guid TagId,

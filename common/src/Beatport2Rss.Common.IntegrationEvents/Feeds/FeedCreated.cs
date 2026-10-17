@@ -1,6 +1,6 @@
-namespace Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+namespace Beatport2Rss.Common.IntegrationEvents.Feeds;
 
-public sealed record FeedCreatedV1(
+public sealed record FeedCreated(
     Guid Id,
     DateTimeOffset OccurredAt,
     Guid FeedId,

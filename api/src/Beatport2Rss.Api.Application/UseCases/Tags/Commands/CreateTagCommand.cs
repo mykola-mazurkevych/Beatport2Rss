@@ -5,7 +5,7 @@ using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Tags;
+using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
@@ -63,7 +63,7 @@ internal sealed class CreateTagCommandHandler(
             slug);
         await tagCommandRepository.AddAsync(tag, cancellationToken);
 
-        var tagCreated = new TagCreatedV1(
+        var tagCreated = new TagCreated(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value,

@@ -2,7 +2,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Tags;
+using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
@@ -32,7 +32,7 @@ internal sealed class DeleteTagCommandHandler(
         var tag = await tagCommandRepository.LoadAsync(command.UserId, command.TagSlug, cancellationToken);
         tagCommandRepository.Delete(tag);
 
-        var tagDeleted = new TagDeletedV1(
+        var tagDeleted = new TagDeleted(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             tag.Id.Value);

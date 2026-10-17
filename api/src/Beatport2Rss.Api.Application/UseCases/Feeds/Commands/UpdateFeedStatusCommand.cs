@@ -2,7 +2,7 @@ using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
@@ -35,7 +35,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
         feed.UpdateStatus(command.IsActive);
         feedCommandRepository.Update(feed);
 
-        var feedUpdated = new FeedUpdatedV1(
+        var feedUpdated = new FeedUpdated(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,

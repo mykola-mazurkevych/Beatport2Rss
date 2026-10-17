@@ -4,7 +4,7 @@ using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
@@ -70,7 +70,7 @@ internal sealed class CreateFeedCommandHandler(
             command.IsActive);
         await feedCommandRepository.AddAsync(feed, cancellationToken);
 
-        var feedCreated = new FeedCreatedV1(
+        var feedCreated = new FeedCreated(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,

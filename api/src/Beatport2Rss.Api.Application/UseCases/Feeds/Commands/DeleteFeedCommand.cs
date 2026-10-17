@@ -2,7 +2,7 @@ using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.ValueObjects;
@@ -32,7 +32,7 @@ internal sealed class DeleteFeedCommandHandler(
         var feed = await feedCommandRepository.LoadAsync(command.UserId, command.FeedSlug, cancellationToken);
         feedCommandRepository.Delete(feed);
 
-        var feedDeleted = new FeedDeletedV1(
+        var feedDeleted = new FeedDeleted(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value);

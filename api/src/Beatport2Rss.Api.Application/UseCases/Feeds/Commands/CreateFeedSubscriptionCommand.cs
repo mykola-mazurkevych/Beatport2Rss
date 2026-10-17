@@ -2,7 +2,7 @@ using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.IntegrationEvents.V1.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.Messaging.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Extensions;
@@ -43,7 +43,7 @@ internal sealed class CreateFeedSubscriptionCommandHandler(
         feed.AddSubscription(subscriptionId);
         feedCommandRepository.Update(feed);
 
-        var feedSubscriptionCreated = new FeedSubscriptionCreatedV1(
+        var feedSubscriptionCreated = new FeedSubscriptionCreated(
             Id: Guid.CreateVersion7(),
             OccurredAt: clock.UtcNow,
             feed.Id.Value,
