@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="FluentResults" />
-    <PackageReference Include="Light.GuardClauses" />
+    <ProjectReference Include="..\Beatport2Rss.Common.Domain\Beatport2Rss.Common.Domain.csproj" />
   </ItemGroup>
 
 </Project>

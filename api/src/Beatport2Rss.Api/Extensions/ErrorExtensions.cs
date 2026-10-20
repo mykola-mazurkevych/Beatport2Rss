@@ -1,7 +1,7 @@
 using System.Net;
 
 using Beatport2Rss.Api.Constants;
-using Beatport2Rss.Common.SharedKernel.Errors;
+using Beatport2Rss.Common.FluentResults.Errors;
 
 using FluentResults;
 

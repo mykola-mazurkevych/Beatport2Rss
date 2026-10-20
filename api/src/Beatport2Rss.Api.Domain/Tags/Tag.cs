@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Common.SharedKernel.Interfaces;
-using Beatport2Rss.Common.SharedKernel.ValueObjects;
+using Beatport2Rss.Common.Domain.Interfaces;
+using Beatport2Rss.Common.Domain.ValueObjects;
 
 namespace Beatport2Rss.Api.Domain.Tags;
 

@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Subscriptions;
-using Beatport2Rss.Common.SharedKernel.ValueObjects;
+using Beatport2Rss.Common.Domain.ValueObjects;
 
 namespace Beatport2Rss.Api.Application.ReadModels.Subscriptions;
 

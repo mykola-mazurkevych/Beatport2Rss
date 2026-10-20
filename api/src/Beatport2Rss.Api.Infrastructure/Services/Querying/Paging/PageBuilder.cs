@@ -1,5 +1,6 @@
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Querying.Paging;
+using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using EFPagination;

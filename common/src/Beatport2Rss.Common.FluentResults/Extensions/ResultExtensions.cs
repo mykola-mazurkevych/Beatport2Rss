@@ -2,11 +2,11 @@
 
 using System.Globalization;
 
-using Beatport2Rss.Common.SharedKernel.Errors;
+using Beatport2Rss.Common.FluentResults.Errors;
 
 using FluentResults;
 
-namespace Beatport2Rss.Common.SharedKernel.Extensions;
+namespace Beatport2Rss.Common.FluentResults.Extensions;
 
 public static class ResultExtensions
 {
