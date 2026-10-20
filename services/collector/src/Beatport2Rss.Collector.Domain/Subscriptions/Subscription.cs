@@ -1,4 +1,7 @@
+using Beatport2Rss.Common.SharedKernel.Exceptions;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
+
+using Light.GuardClauses;
 
 namespace Beatport2Rss.Collector.Domain.Subscriptions;
 
@@ -39,4 +42,13 @@ public sealed class Subscription :
             SubscribersCount = subscribersCount,
             RefreshedAt = refreshedAt,
         };
+
+    public void IncreaseSubscribersCount() =>
+        SubscribersCount++;
+
+    public void DecreaseSubscribersCount()
+    {
+        SubscribersCount--;
+        SubscribersCount.MustBeGreaterThanOrEqualTo(0, (_, _) => new InvalidValueObjectValueException($"{nameof(SubscribersCount)} cannot be negative"));
+    }
 }

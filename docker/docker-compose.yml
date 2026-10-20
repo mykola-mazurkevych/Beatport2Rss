@@ -39,6 +39,34 @@ services:
       retries: 5
       start_period: 10s
 
+  collector:
+    build:
+      context: ..
+      dockerfile: services/collector/src/Beatport2Rss.Collector.Worker/Dockerfile
+    container_name: collector
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
+      - RabbitMqOptions__HostName=${RABBITMQ_HOSTNAME}
+      - RabbitMqOptions__Port=${RABBITMQ_PORT}
+      - RabbitMqOptions__UserName=${RABBITMQ_USERNAME}
+      - RabbitMqOptions__Password=${RABBITMQ_PASSWORD}
+      - RabbitMqOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
+      - QueueOptions__DeadLetterSuffix=${QUEUE_DEAD_LETTER_SUFFIX}
+      - QueueOptions__ExchangeName=${QUEUE_EXCHANGE_NAME}
+      - QueueOptions__Queues__SubscriptionCreatedV1=${QUEUE_SUBSCRIPTION_CREATED}
+      - QueueOptions__Queues__FeedSubscriptionCreatedV1=${QUEUE_FEED_SUBSCRIPTION_CREATED}
+      - QueueOptions__Queues__FeedSubscriptionDeletedV1=${QUEUE_FEED_SUBSCRIPTION_DELETED}
+      - QueueOptions__RoutingKeys__SubscriptionCreatedV1=${ROUTING_SUBSCRIPTION_CREATED}
+      - QueueOptions__RoutingKeys__FeedSubscriptionCreatedV1=${ROUTING_FEED_SUBSCRIPTION_CREATED}
+      - QueueOptions__RoutingKeys__FeedSubscriptionDeletedV1=${ROUTING_FEED_SUBSCRIPTION_DELETED}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
   interceptor:
     build:
       context: ..
