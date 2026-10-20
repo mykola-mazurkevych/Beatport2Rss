@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Common.SharedKernel.Extensions;
+using Beatport2Rss.Common.FluentResults.Extensions;
 
 using FluentResults;
 
