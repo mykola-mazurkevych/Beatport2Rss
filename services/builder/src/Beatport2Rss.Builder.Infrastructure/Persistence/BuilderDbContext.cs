@@ -3,6 +3,7 @@ using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.Messaging.Persistence.Entities;
 using Beatport2Rss.Common.Messaging.Persistence.Interfaces;
 
@@ -11,11 +12,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Beatport2Rss.Builder.Infrastructure.Persistence;
 
 internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> options) :
-    DbContext(options), IInboxDbContext, IOutboxDbContext
+    DbContext(options), IBeatport2RssDbContext, IInboxDbContext, IOutboxDbContext
 {
-    internal const string Schema = "builder";
     internal const string InboxSchema = "builder_inbox";
     internal const string OutboxSchema = "builder_outbox";
+
+    public static string Schema => "builder";
 
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<Release> Releases => Set<Release>();

@@ -1,14 +1,15 @@
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Collector.Infrastructure.Persistence;
 
 internal sealed class CollectorDbContext(DbContextOptions<CollectorDbContext> options) :
-    DbContext(options)
+    DbContext(options), IBeatport2RssDbContext
 {
-    internal const string Schema = "collector";
+    public static string Schema => "collector";
 
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
