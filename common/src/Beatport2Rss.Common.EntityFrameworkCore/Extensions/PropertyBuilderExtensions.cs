@@ -1,4 +1,4 @@
-using Beatport2Rss.Common.SharedKernel.Constants;
+using Beatport2Rss.Common.Domain.Constants;
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

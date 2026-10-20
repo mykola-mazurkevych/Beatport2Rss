@@ -2,7 +2,10 @@
 
   <ItemGroup>
     <PackageReference Include="FluentResults" />
-    <PackageReference Include="Light.GuardClauses" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Beatport2Rss.Common.Domain\Beatport2Rss.Common.Domain.csproj" />
   </ItemGroup>
 
 </Project>
