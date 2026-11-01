@@ -45,11 +45,16 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddMessaging(IConfiguration configuration) =>
             services
                 .AddTransient<IValidator<CreateFeedCommand>, CreateFeedCommandValidator>()
+                .AddTransient<IValidator<UpdateFeedCommand>, UpdateFeedCommandValidator>()
+                .AddTransient<IValidator<DeleteFeedCommand>, DeleteFeedCommandValidator>()
                 .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
                 .AddWolverineListener<BuilderDbContext>(
                     configuration,
                     typeof(BuilderApplication).Assembly,
-                    listener => listener.ListensTo<FeedCreated>());
+                    listener => listener
+                        .ListensTo<FeedCreated>()
+                        .ListensTo<FeedUpdated>()
+                        .ListensTo<FeedDeleted>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

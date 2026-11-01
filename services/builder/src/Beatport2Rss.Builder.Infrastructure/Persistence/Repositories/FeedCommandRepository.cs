@@ -12,4 +12,7 @@ internal sealed class FeedCommandRepository(DbSet<Feed> feeds) :
 {
     public Task<bool> ExistsAsync(FeedId feedId, CancellationToken cancellationToken = default) =>
         ExistsAsync(feed => feed.Id == feedId, cancellationToken);
+
+    public Task<Feed?> FindAsync(FeedId feedId, CancellationToken cancellationToken = default) =>
+        FindAsync(feed => feed.Id == feedId, cancellationToken);
 }

@@ -3,7 +3,7 @@ using Beatport2Rss.Common.IntegrationEvents.Feeds;
 
 namespace Beatport2Rss.Builder.Application.Extensions;
 
-internal static class FeedCreatedExtensions
+internal static class FeedExtensions
 {
     extension(FeedCreated feedCreated)
     {
@@ -14,5 +14,21 @@ internal static class FeedCreatedExtensions
                 feedCreated.Slug,
                 feedCreated.AuthorName,
                 feedCreated.Status);
+    }
+
+    extension(FeedUpdated feedUpdated)
+    {
+        public UpdateFeedCommand ToCommand() =>
+            new(feedUpdated.FeedId,
+                feedUpdated.Name,
+                feedUpdated.Slug,
+                feedUpdated.AuthorName,
+                feedUpdated.Status);
+    }
+
+    extension(FeedDeleted feedDeleted)
+    {
+        public DeleteFeedCommand ToCommand() =>
+            new(feedDeleted.FeedId);
     }
 }

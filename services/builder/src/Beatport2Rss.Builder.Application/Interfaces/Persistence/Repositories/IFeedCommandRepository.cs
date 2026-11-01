@@ -8,7 +8,13 @@ public interface IFeedCommandRepository
         FeedId feedId,
         CancellationToken cancellationToken = default);
 
+    Task<Feed?> FindAsync(
+        FeedId feedId,
+        CancellationToken cancellationToken = default);
+
     Task<Feed> AddAsync(
         Feed feed,
         CancellationToken cancellationToken = default);
+
+    void Delete(Feed feed);
 }
