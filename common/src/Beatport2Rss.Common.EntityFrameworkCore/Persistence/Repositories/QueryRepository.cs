@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 
+using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
@@ -29,4 +30,10 @@ public abstract class QueryRepository<TEntity>(IQueryable<TEntity> entities)
 public abstract class QueryRepository<TQueryModel, TId>(IQueryable<TQueryModel> queryModels) :
     QueryRepository<TQueryModel>(queryModels)
     where TQueryModel : IQueryModel<TId>
-    where TId : struct, IId<TId>;
+    where TId : struct, IId<TId>
+{
+    public Task<bool> ExistsAsync(
+        TId id,
+        CancellationToken cancellationToken = default) =>
+        base.ExistsAsync(e => e.Id.Equals(id), cancellationToken);
+}

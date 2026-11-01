@@ -1,4 +1,4 @@
-using Beatport2Rss.Common.SharedKernel.Extensions;
+using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.Validation.Extensions;
 
 using FluentResults;

@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 
-using Beatport2Rss.Common.SharedKernel.Constants;
-using Beatport2Rss.Common.SharedKernel.Exceptions;
-using Beatport2Rss.Common.SharedKernel.Interfaces;
+using Beatport2Rss.Common.Domain.Constants;
+using Beatport2Rss.Common.Domain.Exceptions;
+using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Common.SharedKernel.ValueObjects;
+namespace Beatport2Rss.Common.Domain.ValueObjects;
 
 public readonly record struct Slug :
     IValueObject, IParsable<Slug>

@@ -1,5 +1,5 @@
 using Beatport2Rss.Builder.Domain.Subscriptions;
-using Beatport2Rss.Common.SharedKernel.Interfaces;
+using Beatport2Rss.Common.Domain.Interfaces;
 
 namespace Beatport2Rss.Builder.Domain.Feeds;
 

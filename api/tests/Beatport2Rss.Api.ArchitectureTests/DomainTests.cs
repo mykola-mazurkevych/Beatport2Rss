@@ -1,4 +1,4 @@
-using Beatport2Rss.Common.SharedKernel.Interfaces;
+using Beatport2Rss.Common.Domain.Interfaces;
 
 using NetArchTest.Rules;
 

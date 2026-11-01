@@ -1,7 +1,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.ValueObjects;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
-using Beatport2Rss.Common.SharedKernel.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
 

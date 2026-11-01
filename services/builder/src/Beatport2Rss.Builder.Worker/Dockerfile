@@ -12,9 +12,11 @@ COPY ["services/builder/src/Beatport2Rss.Builder.Application/Beatport2Rss.Builde
 COPY ["services/builder/src/Beatport2Rss.Builder.Domain/Beatport2Rss.Builder.Domain.csproj", "services/builder/src/Beatport2Rss.Builder.Domain/"]
 COPY ["services/builder/src/Beatport2Rss.Builder.Infrastructure/Beatport2Rss.Builder.Infrastructure.csproj", "services/builder/src/Beatport2Rss.Builder.Infrastructure/"]
 COPY ["services/builder/src/Beatport2Rss.Builder.Jobs/Beatport2Rss.Builder.Jobs.csproj", "services/builder/src/Beatport2Rss.Builder.Jobs/"]
+COPY ["common/src/Beatport2Rss.Common.Domain/Beatport2Rss.Common.Domain.csproj", "common/src/Beatport2Rss.Common.Domain/"]
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj", "common/src/Beatport2Rss.Common.IntegrationEvents/"]
 COPY ["common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj", "common/src/Beatport2Rss.Common.Messaging/"]
+COPY ["common/src/Beatport2Rss.Common.Messaging.Jobs/Beatport2Rss.Common.Messaging.Jobs.csproj", "common/src/Beatport2Rss.Common.Messaging.Jobs/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj", "common/src/Beatport2Rss.Common.Miscellaneous/"]
 COPY ["common/src/Beatport2Rss.Common.RabbitMQ/Beatport2Rss.Common.RabbitMQ.csproj", "common/src/Beatport2Rss.Common.RabbitMQ/"]
 COPY ["common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj", "common/src/Beatport2Rss.Common.SharedKernel/"]
@@ -24,9 +26,11 @@ COPY ["tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.cspro
 RUN dotnet restore "services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj"
 
 COPY ["services/builder/src/", "services/builder/src/"]
+COPY ["common/src/Beatport2Rss.Common.Domain/", "common/src/Beatport2Rss.Common.Domain/"]
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/", "common/src/Beatport2Rss.Common.IntegrationEvents/"]
 COPY ["common/src/Beatport2Rss.Common.Messaging/", "common/src/Beatport2Rss.Common.Messaging/"]
+COPY ["common/src/Beatport2Rss.Common.Messaging.Jobs/", "common/src/Beatport2Rss.Common.Messaging.Jobs/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/", "common/src/Beatport2Rss.Common.Miscellaneous/"]
 COPY ["common/src/Beatport2Rss.Common.RabbitMQ/", "common/src/Beatport2Rss.Common.RabbitMQ/"]
 COPY ["common/src/Beatport2Rss.Common.SharedKernel/", "common/src/Beatport2Rss.Common.SharedKernel/"]
