@@ -1,11 +1,18 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
+using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
+using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
-using Beatport2Rss.Common.Messaging;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.Wolverine;
+using Beatport2Rss.Common.Wolverine.Extensions;
+
+using FluentValidation;
 
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -20,7 +27,8 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .AddPersistence(configuration);
+                .AddPersistence(configuration)
+                .AddMessaging(configuration);
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
             services
@@ -34,13 +42,22 @@ public static class ServiceCollectionExtensions
                         configuration.GetConnectionString(nameof(BuilderDbContext)),
                         BuilderDbContext.Schema));
 
+        private IServiceCollection AddMessaging(IConfiguration configuration) =>
+            services
+                .AddTransient<IValidator<CreateFeedCommand>, CreateFeedCommandValidator>()
+                .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
+                .AddWolverineListener<BuilderDbContext>(
+                    configuration,
+                    typeof(BuilderApplication).Assembly,
+                    listener => listener.ListensTo<FeedCreated>());
+
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddInboxPersistence<BuilderDbContext>()
-                .AddOutboxPersistence<BuilderDbContext>()
                 .AddUnitOfWork<BuilderDbContext>()
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
+                .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>();
     }
 }

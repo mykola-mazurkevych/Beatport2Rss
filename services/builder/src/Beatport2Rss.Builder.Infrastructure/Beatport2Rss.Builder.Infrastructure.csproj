@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Messaging\Beatport2Rss.Common.Messaging.csproj" />
+    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Wolverine\Beatport2Rss.Common.Wolverine.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Builder.Application\Beatport2Rss.Builder.Application.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Builder.Domain\Beatport2Rss.Builder.Domain.csproj" />
   </ItemGroup>

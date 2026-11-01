@@ -30,6 +30,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
+    <PackageVersion Include="Microsoft.CodeAnalysis" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Scripting.Common" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic" Version="5.6.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.6.0" />
@@ -57,11 +62,16 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageVersion Include="PuppeteerSharp" Version="25.2.1" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.18.2" />
-    <PackageVersion Include="RabbitMQ.Client" Version="6.8.1" />
+    <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.16.9" />
     <PackageVersion Include="Scriban" Version="7.2.5" />
     <PackageVersion Include="Slugify.Core" Version="5.1.1" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.19.1" />
+    <PackageVersion Include="WolverineFx.EntityFrameworkCore" Version="6.51.0" />
+    <PackageVersion Include="WolverineFx.FluentValidation" Version="6.51.0" />
+    <PackageVersion Include="WolverineFx.Postgresql" Version="6.51.0" />
+    <PackageVersion Include="WolverineFx.RuntimeCompilation" Version="6.51.0" />
+    <PackageVersion Include="WolverineFx.RabbitMQ" Version="6.51.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

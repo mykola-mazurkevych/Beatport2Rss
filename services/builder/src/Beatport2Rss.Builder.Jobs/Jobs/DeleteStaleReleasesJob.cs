@@ -1,16 +1,16 @@
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Jobs.Options;
 
-using Mediator;
-
 using Microsoft.Extensions.Options;
 
 using Quartz;
 
+using Wolverine;
+
 namespace Beatport2Rss.Builder.Jobs.Jobs;
 
 internal sealed class DeleteStaleReleasesJob(
-    IMediator mediator,
+    IMessageBus messageBus,
     IOptions<BuilderJobOptions> options) :
     IJob
 {
@@ -19,6 +19,6 @@ internal sealed class DeleteStaleReleasesJob(
     public async Task Execute(IJobExecutionContext context)
     {
         var command = new DeleteStaleReleasesCommand(_options.ReleasesRetentionInDays);
-        await mediator.Send(command, context.CancellationToken);
+        await messageBus.InvokeAsync(command, context.CancellationToken);
     }
 }

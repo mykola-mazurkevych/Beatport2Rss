@@ -8,7 +8,6 @@ using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
-using Beatport2Rss.Api.Infrastructure.BackgroundServices;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
 using Beatport2Rss.Api.Infrastructure.Options;
@@ -21,11 +20,12 @@ using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
-using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
-using Beatport2Rss.Common.Messaging;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Miscellaneous;
-using Beatport2Rss.Common.RabbitMQ;
+using Beatport2Rss.Common.Wolverine;
+using Beatport2Rss.Common.Wolverine.Extensions;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -49,15 +49,23 @@ public static class ServiceCollectionExtensions
                 .ConfigureOptions(configuration)
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
-                .AddHostedService<OutboxBackgroundService>()
                 .AddHttpClient()
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
-                .AddMessaging(configuration)
                 .AddMiscellaneous()
-                .AddMiscServices()
+                .AddServices()
                 .AddPaging()
                 .AddPersistence(configuration)
-                .AddRabbitMQ(configuration)
+                .AddWolverinePublisher<ApiDbContext>(
+                    configuration,
+                    options => options
+                        .Publishes<FeedCreated>()
+                        .Publishes<FeedUpdated>()
+                        .Publishes<FeedDeleted>()
+                        .Publishes<FeedSubscriptionCreated>()
+                        .Publishes<FeedSubscriptionDeleted>()
+                        .Publishes<TagCreated>()
+                        .Publishes<TagUpdated>()
+                        .Publishes<TagDeleted>())
                 .AddSecurityServices();
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
@@ -122,7 +130,7 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        private IServiceCollection AddMiscServices() =>
+        private IServiceCollection AddServices() =>
             services
                 .AddSingleton<ISlugGenerator, SlugGenerator>()
                 .AddSingleton<ISlugHelper, SlugHelper>();
@@ -135,8 +143,6 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddOutboxPersistence<ApiDbContext>()
-                .AddUnitOfWork<ApiDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SessionQueryModels.AsNoTracking())

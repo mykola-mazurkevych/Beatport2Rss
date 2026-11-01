@@ -24,15 +24,12 @@
     <Project Path="common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.FluentResults/Beatport2Rss.Common.FluentResults.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj" />
-    <Project Path="common/src/Beatport2Rss.Common.Messaging.Jobs/Beatport2Rss.Common.Messaging.Jobs.csproj" />
-    <Project Path="common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj" />
-    <Project Path="common/src/Beatport2Rss.Common.RabbitMQ/Beatport2Rss.Common.RabbitMQ.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Validation/Beatport2Rss.Common.Validation.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Wolverine/Beatport2Rss.Common.Wolverine.csproj" />
   </Folder>
   <Folder Name="/common/tests/">
-    <Project Path="common/tests/Beatport2Rss.Common.RabbitMQ.UnitTests/Beatport2Rss.Common.RabbitMQ.UnitTests.csproj" />
   </Folder>
   <Folder Name="/docker/">
     <File Path="docker/.env.example" />

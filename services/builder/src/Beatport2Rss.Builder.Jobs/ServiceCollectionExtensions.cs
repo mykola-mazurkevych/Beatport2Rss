@@ -2,7 +2,6 @@
 
 using Beatport2Rss.Builder.Jobs.Jobs;
 using Beatport2Rss.Builder.Jobs.Options;
-using Beatport2Rss.Common.Messaging.Jobs;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,8 +27,6 @@ public static class ServiceCollectionExtensions
                         .AddJob<DeleteStaleReleasesJob>(deleteStaleReleasesJobKey)
                         .AddTrigger(trigger => trigger.ForJob(deleteStaleReleasesJobKey).WithCronSchedule(options.DeleteStaleReleasesCronSchedule));
                 })
-                .AddInboxJobs(configuration)
-                .AddOutboxJobs(configuration)
                 .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>

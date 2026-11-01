@@ -1,5 +1,6 @@
 namespace Beatport2Rss.Common.IntegrationEvents.Feeds;
 
+[IntegrationEventTopic("feed.updated")]
 public sealed record FeedUpdated(
     Guid Id,
     DateTimeOffset OccurredAt,

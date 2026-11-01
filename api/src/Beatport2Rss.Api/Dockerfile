@@ -21,9 +21,9 @@ COPY ["common/src/Beatport2Rss.Common.Domain/Beatport2Rss.Common.Domain.csproj",
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
 COPY ["common/src/Beatport2Rss.Common.FluentResults/Beatport2Rss.Common.FluentResults.csproj", "common/src/Beatport2Rss.Common.FluentResults/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj", "common/src/Beatport2Rss.Common.IntegrationEvents/"]
-COPY ["common/src/Beatport2Rss.Common.Messaging/Beatport2Rss.Common.Messaging.csproj", "common/src/Beatport2Rss.Common.Messaging/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj", "common/src/Beatport2Rss.Common.Miscellaneous/"]
 COPY ["common/src/Beatport2Rss.Common.SharedKernel/Beatport2Rss.Common.SharedKernel.csproj", "common/src/Beatport2Rss.Common.SharedKernel/"]
+COPY ["common/src/Beatport2Rss.Common.Wolverine/Beatport2Rss.Common.Wolverine.csproj", "common/src/Beatport2Rss.Common.Wolverine/"]
 COPY ["tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.csproj", "tools/src/Beatport2Rss.SourceGenerator/"]
 COPY ["common/protos/", "common/protos/"]
 
