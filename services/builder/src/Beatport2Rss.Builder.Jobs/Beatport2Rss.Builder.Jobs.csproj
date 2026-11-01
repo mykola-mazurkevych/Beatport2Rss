@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
@@ -6,7 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Messaging.Jobs\Beatport2Rss.Common.Messaging.Jobs.csproj" />
+    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Wolverine\Beatport2Rss.Common.Wolverine.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Builder.Application\Beatport2Rss.Builder.Application.csproj" />
   </ItemGroup>
 

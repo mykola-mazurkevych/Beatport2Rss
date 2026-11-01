@@ -2,19 +2,14 @@ using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.Validation.Extensions;
 
-using FluentResults;
-
 using FluentValidation;
-
-using Mediator;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 
 public sealed record DeleteStaleReleasesCommand(
-    int RetentionInDays) :
-    ICommand<Result>;
+    int RetentionInDays);
 
-internal sealed class DeleteStaleReleasesCommandValidator :
+public sealed class DeleteStaleReleasesCommandValidator :
     AbstractValidator<DeleteStaleReleasesCommand>
 {
     public DeleteStaleReleasesCommandValidator()
@@ -23,18 +18,15 @@ internal sealed class DeleteStaleReleasesCommandValidator :
     }
 }
 
-internal sealed class DeleteStaleReleasesCommandHandler(
-    IClock clock,
-    IReleaseCommandRepository releaseCommandRepository) :
-    ICommandHandler<DeleteStaleReleasesCommand, Result>
+public static class DeleteStaleReleasesCommandHandler
 {
-    public async ValueTask<Result> Handle(
+    public static async Task Handle(
         DeleteStaleReleasesCommand command,
+        IClock clock,
+        IReleaseCommandRepository releaseCommandRepository,
         CancellationToken cancellationToken)
     {
         var minCreatedAt = clock.UtcNow.AddDays(-command.RetentionInDays);
         await releaseCommandRepository.DeleteAsync(release => release.CreatedAt < minCreatedAt, cancellationToken);
-
-        return Result.Ok();
     }
 }
