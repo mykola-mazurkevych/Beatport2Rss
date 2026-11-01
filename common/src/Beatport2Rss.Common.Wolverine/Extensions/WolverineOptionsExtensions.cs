@@ -31,14 +31,18 @@ public static class WolverineOptionsExtensions
                 configuration.GetRequiredSection(nameof(RabbitMQOptions)).Get<RabbitMQOptions>() ??
                 throw new InvalidOperationException($"Configuration section '{nameof(RabbitMQOptions)}' is required.");
 
-            options.UseRabbitMq(connectionFactory =>
-            {
-                connectionFactory.HostName = rabbitMQOptions.HostName;
-                connectionFactory.Port = rabbitMQOptions.Port;
-                connectionFactory.UserName = rabbitMQOptions.UserName;
-                connectionFactory.Password = rabbitMQOptions.Password;
-                connectionFactory.VirtualHost = rabbitMQOptions.VirtualHost;
-            });
+            options
+                .UseRabbitMq(connectionFactory =>
+                {
+                    connectionFactory.HostName = rabbitMQOptions.HostName;
+                    connectionFactory.Port = rabbitMQOptions.Port;
+                    connectionFactory.UserName = rabbitMQOptions.UserName;
+                    connectionFactory.Password = rabbitMQOptions.Password;
+                    connectionFactory.VirtualHost = rabbitMQOptions.VirtualHost;
+                })
+                .DeclareExchange(
+                    RabbitMQTopology.IntegrationEventsExchange,
+                    exchange => exchange.ExchangeType = ExchangeType.Topic);
 
             var connectionStringName = typeof(TDbContext).Name;
             var connectionString =
