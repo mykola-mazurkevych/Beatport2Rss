@@ -7,6 +7,7 @@ using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.Wolverine.Extensions;
 using Beatport2Rss.Common.Wolverine.Persistence;
 
+using JasperFx.CodeGeneration.Model;
 using JasperFx.Resources;
 
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,7 @@ public static class ServiceCollectionExtensions
             services
                 .AddWolverine(options =>
                 {
+                    options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
                     options.ConfigureWolverine<TDbContext>(configuration);
                     configure(options);
                 })
