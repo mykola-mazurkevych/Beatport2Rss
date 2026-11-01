@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Common.SharedKernel.ValueObjects;
+using Beatport2Rss.Common.Domain.ValueObjects;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

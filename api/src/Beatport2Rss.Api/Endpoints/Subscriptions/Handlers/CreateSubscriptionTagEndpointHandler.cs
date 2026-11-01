@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Beatport2Rss.Api.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Api.Endpoints.Subscriptions.Requests;
 using Beatport2Rss.Api.Extensions;
-using Beatport2Rss.Common.SharedKernel.ValueObjects;
+using Beatport2Rss.Common.Domain.ValueObjects;
 
 using Mediator;
 

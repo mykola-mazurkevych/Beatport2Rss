@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Common.SharedKernel.Constants;
+namespace Beatport2Rss.Common.Domain.Constants;
 
 public static class MaxLengthConstants
 {

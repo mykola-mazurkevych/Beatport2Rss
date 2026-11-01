@@ -1,3 +1,5 @@
+using Beatport2Rss.Common.Domain.Interfaces;
+
 namespace Beatport2Rss.Common.SharedKernel.Interfaces;
 
 public interface IPaginable<out TId>
