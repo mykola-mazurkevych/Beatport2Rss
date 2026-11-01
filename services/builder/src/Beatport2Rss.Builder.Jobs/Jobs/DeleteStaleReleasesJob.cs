@@ -16,9 +16,9 @@ internal sealed class DeleteStaleReleasesJob(
 {
     private readonly BuilderJobOptions _options = options.Value;
 
-    public async Task Execute(IJobExecutionContext context)
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
     {
         var command = new DeleteStaleReleasesCommand(_options.ReleasesRetentionInDays);
-        await messageBus.InvokeAsync(command, context.CancellationToken);
+        await messageBus.InvokeAsync(command, cancellationToken);
     }
 }

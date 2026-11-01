@@ -19,8 +19,8 @@ public static class ServiceCollectionExtensions
                 {
                     var deleteExpiredSessionsJobKey = new JobKey(nameof(DeleteExpiredSessionsJob));
                     configurator
-                        .AddJob<DeleteExpiredSessionsJob>(deleteExpiredSessionsJobKey)
-                        .AddTrigger(trigger => trigger.ForJob(deleteExpiredSessionsJobKey).StartNow().WithSimpleSchedule(builder => builder.WithIntervalInHours(24).RepeatForever()));
+                        .AddJob<DeleteExpiredSessionsJob>(job => job.WithIdentity(deleteExpiredSessionsJobKey))
+                        .AddTrigger(trigger => trigger.ForJob(deleteExpiredSessionsJobKey).StartNow().WithSimpleSchedule(builder => builder.WithInterval(TimeSpan.FromHours(24)).RepeatForever()));
                 })
                 .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
     }

@@ -9,9 +9,9 @@ namespace Beatport2Rss.Api.Jobs.Jobs;
 internal sealed class DeleteExpiredSessionsJob(IMediator mediator) :
     IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
     {
         var command = new DeleteExpiredSessionsCommand();
-        await mediator.Send(command, context.CancellationToken);
+        await mediator.Send(command, cancellationToken);
     }
 }

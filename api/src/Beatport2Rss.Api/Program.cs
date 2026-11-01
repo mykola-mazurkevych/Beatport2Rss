@@ -20,7 +20,6 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
-    .AddOpenApi(options => options.AddDocumentTransformer<BearerSecuritySchemeTransformer>())
     .AddApplication()
     .AddInfrastructure(builder.Configuration)
     .AddJobs(builder.Configuration)
@@ -36,7 +35,8 @@ builder.Services
     {
         options.GroupNameFormat = "'v'VVV";
         options.SubstituteApiVersionInUrl = false;
-    });
+    })
+    .AddOpenApi(options => options.Document.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
 var app = builder.Build();
 
@@ -48,7 +48,7 @@ app
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.MapOpenApi().WithDocumentPerVersion();
     app.MapScalarApiReference(options =>
     {
         options.Title = "Beatport2Rss API Reference";

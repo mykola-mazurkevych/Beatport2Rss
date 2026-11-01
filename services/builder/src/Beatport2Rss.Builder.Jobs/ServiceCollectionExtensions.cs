@@ -18,14 +18,16 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddJobs(IConfiguration configuration) =>
             services
                 .ConfigureOptions(configuration)
-                .AddQuartz((configurator, provider) =>
+                .AddQuartz(configurator =>
                 {
-                    var options = provider.GetRequiredService<IOptions<BuilderJobOptions>>().Value;
-
                     var deleteStaleReleasesJobKey = new JobKey(nameof(DeleteStaleReleasesJob));
                     configurator
-                        .AddJob<DeleteStaleReleasesJob>(deleteStaleReleasesJobKey)
-                        .AddTrigger(trigger => trigger.ForJob(deleteStaleReleasesJobKey).WithCronSchedule(options.DeleteStaleReleasesCronSchedule));
+                        .AddJob<DeleteStaleReleasesJob>(job => job.WithIdentity(deleteStaleReleasesJobKey))
+                        .AddTrigger((provider, trigger) =>
+                        {
+                            var options = provider.GetRequiredService<IOptions<BuilderJobOptions>>().Value;
+                            trigger.ForJob(deleteStaleReleasesJobKey).WithCronSchedule(options.DeleteStaleReleasesCronSchedule);
+                        });
                 })
                 .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
