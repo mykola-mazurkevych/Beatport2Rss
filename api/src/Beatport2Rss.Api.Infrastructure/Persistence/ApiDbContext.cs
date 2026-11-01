@@ -7,18 +7,15 @@ using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.Messaging.Persistence.Entities;
-using Beatport2Rss.Common.Messaging.Persistence.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence;
 
 internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
-    DbContext(options), IBeatport2RssDbContext, IOutboxDbContext
+    DbContext(options),
+    IBeatport2RssDbContext
 {
-    internal const string OutboxSchema = "api_outbox";
-
     public static string Schema => "api";
 
     public DbSet<Country> Countries => Set<Country>();
@@ -30,7 +27,6 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<User> Users => Set<User>();
 
-    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();
     public DbSet<SessionQueryModel> SessionQueryModels => Set<SessionQueryModel>();
@@ -50,8 +46,6 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     {
         modelBuilder.HasDefaultSchema(Schema);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApiDbContext).Assembly);
-
-        modelBuilder.Entity<OutboxMessage>().Metadata.SetSchema(OutboxSchema);
 
         base.OnModelCreating(modelBuilder);
     }
