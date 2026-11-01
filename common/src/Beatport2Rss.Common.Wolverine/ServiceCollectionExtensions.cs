@@ -20,6 +20,8 @@ namespace Beatport2Rss.Common.Wolverine;
 
 public static class ServiceCollectionExtensions
 {
+    private const int DefaultMessageRetentionInDays = 100;
+
     extension(IServiceCollection services)
     {
         public IServiceCollection AddWolverinePublisher<TDbContext>(
@@ -39,7 +41,7 @@ public static class ServiceCollectionExtensions
         {
             return services.AddWolverine<TDbContext>(configuration, options =>
             {
-                options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(100);
+                options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(DefaultMessageRetentionInDays);
                 options.Policies.UseDurableLocalQueues();
                 options.Discovery.IncludeAssembly(handlersAssembly);
                 configureTopics(
