@@ -63,7 +63,8 @@ public static class WolverineOptionsExtensions
             options.PublishMessage<TIntegrationEvent>()
                 .ToRabbitTopic(
                     IntegrationEventTopicResolver.GetTopicName<TIntegrationEvent>(),
-                    RabbitMQTopology.IntegrationEventsExchange);
+                    RabbitMQTopology.IntegrationEventsExchange)
+                .UseDurableOutbox();
             return options;
         }
     }

@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.FluentResults\Beatport2Rss.Common.FluentResults.csproj" />
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.IntegrationEvents\Beatport2Rss.Common.IntegrationEvents.csproj" />
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Miscellaneous\Beatport2Rss.Common.Miscellaneous.csproj" />
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Validation\Beatport2Rss.Common.Validation.csproj" />

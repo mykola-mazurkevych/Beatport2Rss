@@ -40,6 +40,7 @@ public static class ServiceCollectionExtensions
             return services.AddWolverine<TDbContext>(configuration, options =>
             {
                 options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(100);
+                options.Policies.UseDurableLocalQueues();
                 options.Discovery.IncludeAssembly(handlersAssembly);
                 configureTopics(
                     options.ListenToRabbitQueue($"{TDbContext.Schema}_events")
