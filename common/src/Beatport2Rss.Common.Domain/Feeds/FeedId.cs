@@ -1,9 +1,9 @@
-using Beatport2Rss.Common.Domain.Exceptions;
+﻿using Beatport2Rss.Common.Domain.Exceptions;
 using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Builder.Domain.Feeds;
+namespace Beatport2Rss.Common.Domain.Feeds;
 
 public readonly record struct FeedId :
     IId<FeedId>

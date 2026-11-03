@@ -1,4 +1,5 @@
 using Beatport2Rss.Builder.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Feeds;
 
 namespace Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 

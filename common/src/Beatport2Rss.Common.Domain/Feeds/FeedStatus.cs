@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Builder.Domain.Feeds;
+namespace Beatport2Rss.Common.Domain.Feeds;
 
 public enum FeedStatus
 {

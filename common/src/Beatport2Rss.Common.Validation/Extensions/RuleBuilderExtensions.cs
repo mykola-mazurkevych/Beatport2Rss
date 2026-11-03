@@ -20,6 +20,12 @@ public static class RuleBuilderExtensions
 
     extension<T>(IRuleBuilderInitial<T, string?> ruleBuilder)
     {
+        public void IsAuthorName() =>
+            ruleBuilder
+                .Must(value => value is null || !string.IsNullOrWhiteSpace(value))
+                .WithMessage("Author name cannot be empty.")
+                .IsNotTooLong(MaxLengthConstants.AuthorName, "Author name must be at most {MaxLength} characters long.");
+
         public void IsCountryCode() =>
             ruleBuilder
                 .IsNotTooLong(MaxLengthConstants.CountryCode, "Country code must be ad most {MaxLength} characters long.");
@@ -30,6 +36,13 @@ public static class RuleBuilderExtensions
                 .IsNotEmpty("Email address is required.")
                 .IsNotTooLong(MaxLengthConstants.EmailAddress, "Email address must be at most {MaxLength} characters long.")
                 .EmailAddress().WithMessage("A valid email address is required.");
+
+        public void IsEnum<TEnum>()
+            where TEnum : struct, Enum =>
+            ruleBuilder
+                .IsNotEmpty($"{typeof(TEnum)} is required.")
+                .Must(stringValue => Enum.TryParse<TEnum>(stringValue, out var enumValue) && Enum.IsDefined(enumValue))
+                .WithMessage($"{typeof(TEnum)} should be a correct enum value.");
 
         public void IsFeedName() =>
             ruleBuilder
@@ -61,6 +74,11 @@ public static class RuleBuilderExtensions
                 .Cascade(CascadeMode.Stop)
                 .IsNotEmpty("Refresh token is required.")
                 .IsExactlyLong(ExactLengthConstants.RefreshToken, "Refresh token must be exactly {TotalLength} characters long.");
+
+        public void IsSlug() =>
+            ruleBuilder
+                .IsNotEmpty("Slug is required.")
+                .IsNotTooLong(MaxLengthConstants.Slug, "Slug must be at most {MaxLength} characters long.");
 
         public void IsTagName() =>
             ruleBuilder

@@ -1,4 +1,5 @@
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.ValueObjects;
 

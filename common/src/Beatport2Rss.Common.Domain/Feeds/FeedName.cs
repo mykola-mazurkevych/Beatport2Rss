@@ -6,7 +6,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Feeds;
+namespace Beatport2Rss.Common.Domain.Feeds;
 
 public readonly record struct FeedName :
     IValueObject

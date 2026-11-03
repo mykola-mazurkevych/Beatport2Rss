@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.Domain.ValueObjects;
 using Beatport2Rss.Common.Validation.Extensions;
@@ -23,9 +24,9 @@ public sealed class CreateFeedCommandValidator :
     {
         RuleFor(c => c.FeedId).NotEmpty();
         RuleFor(c => c.Name).IsFeedName();
-        RuleFor(c => c.Slug).NotEmpty();
-        RuleFor(c => c.AuthorName).NotEmpty().MaximumLength(AuthorName.MaxLength).When(c => c.AuthorName is not null);
-        RuleFor(c => c.Status).Must(status => Enum.TryParse<FeedStatus>(status, out var parsed) && Enum.IsDefined(parsed));
+        RuleFor(c => c.Slug).IsSlug();
+        RuleFor(c => c.AuthorName).IsAuthorName();
+        RuleFor(c => c.Status).IsEnum<CreateFeedCommand, FeedStatus>();
     }
 }
 

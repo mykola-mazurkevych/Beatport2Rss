@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using Beatport2Rss.Api.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Feeds;
 
 namespace Beatport2Rss.Api.Infrastructure.JsonConverters;
 

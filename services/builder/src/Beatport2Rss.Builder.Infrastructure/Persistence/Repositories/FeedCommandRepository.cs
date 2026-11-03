@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
 using Microsoft.EntityFrameworkCore;
