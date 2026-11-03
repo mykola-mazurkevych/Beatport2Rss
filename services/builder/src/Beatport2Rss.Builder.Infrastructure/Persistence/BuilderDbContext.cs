@@ -16,7 +16,9 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     public static string Schema => "builder";
 
     public DbSet<Feed> Feeds => Set<Feed>();
+    public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Release> Releases => Set<Release>();
+    public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<Track> Tracks => Set<Track>();
 

@@ -44,7 +44,7 @@ internal sealed class FeedConfiguration :
             feed => feed.Subscriptions,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable("FeedSubscriptions");
+                navigationBuilder.ToTable(nameof(BuilderDbContext.FeedSubscriptions));
 
                 navigationBuilder.HasKey(feedSubscription => new { feedSubscription.FeedId, feedSubscription.SubscriptionId });
 
@@ -65,5 +65,8 @@ internal sealed class FeedConfiguration :
 
                 navigationBuilder.HasIndex(feedSubscription => feedSubscription.SubscriptionId);
             });
+
+        builder.HasIndex(feed => feed.Slug)
+            .IsUnique();
     }
 }

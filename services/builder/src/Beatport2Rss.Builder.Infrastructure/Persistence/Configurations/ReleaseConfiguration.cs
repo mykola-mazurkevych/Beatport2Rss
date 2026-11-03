@@ -53,7 +53,7 @@ internal sealed class ReleaseConfiguration :
             release => release.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable("ReleaseArtists");
+                navigationBuilder.ToTable(nameof(BuilderDbContext.ReleaseArtists));
 
                 navigationBuilder.HasKey(releaseArtist => new { releaseArtist.ReleaseId, releaseArtist.ArtistId, releaseArtist.Type });
 
