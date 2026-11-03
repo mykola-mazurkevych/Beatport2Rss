@@ -42,7 +42,7 @@ internal sealed class UpdateFeedStatusCommandHandler(
             feed.Name.Value,
             feed.Slug.Value,
             feed.AuthorName?.Value,
-            feed.Status.ToString());
+            feed.Status);
         await integrationEventOutbox.EnqueueAsync(feedUpdated, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

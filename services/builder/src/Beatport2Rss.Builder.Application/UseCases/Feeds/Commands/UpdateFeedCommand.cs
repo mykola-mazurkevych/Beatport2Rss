@@ -13,7 +13,7 @@ public sealed record UpdateFeedCommand(
     string Name,
     string Slug,
     string? AuthorName,
-    string Status);
+    FeedStatus Status);
 
 public sealed class UpdateFeedCommandValidator :
     AbstractValidator<UpdateFeedCommand>
@@ -24,7 +24,6 @@ public sealed class UpdateFeedCommandValidator :
         RuleFor(c => c.Name).IsFeedName();
         RuleFor(c => c.Slug).IsSlug();
         RuleFor(c => c.AuthorName).IsAuthorName();
-        RuleFor(c => c.Status).IsEnum<UpdateFeedCommand, FeedStatus>();
     }
 }
 
@@ -45,7 +44,7 @@ public static class UpdateFeedCommandHandler
         feed.UpdateName(FeedName.Create(command.Name));
         feed.UpdateSlug(Slug.Create(command.Slug));
         feed.UpdateAuthorName(command.AuthorName is null ? null : AuthorName.Create(command.AuthorName));
-        feed.UpdateStatus(Enum.Parse<FeedStatus>(command.Status));
+        feed.UpdateStatus(command.Status);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }

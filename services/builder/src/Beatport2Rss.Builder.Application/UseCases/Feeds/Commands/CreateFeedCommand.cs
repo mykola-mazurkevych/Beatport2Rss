@@ -15,7 +15,7 @@ public sealed record CreateFeedCommand(
     string Name,
     string Slug,
     string? AuthorName,
-    string Status);
+    FeedStatus Status);
 
 public sealed class CreateFeedCommandValidator :
     AbstractValidator<CreateFeedCommand>
@@ -26,7 +26,6 @@ public sealed class CreateFeedCommandValidator :
         RuleFor(c => c.Name).IsFeedName();
         RuleFor(c => c.Slug).IsSlug();
         RuleFor(c => c.AuthorName).IsAuthorName();
-        RuleFor(c => c.Status).IsEnum<CreateFeedCommand, FeedStatus>();
     }
 }
 
@@ -50,7 +49,7 @@ public static class CreateFeedCommandHandler
             FeedName.Create(command.Name),
             Slug.Create(command.Slug),
             command.AuthorName is null ? null : AuthorName.Create(command.AuthorName),
-            Enum.Parse<FeedStatus>(command.Status));
+            command.Status);
 
         await feedCommandRepository.AddAsync(feed, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);

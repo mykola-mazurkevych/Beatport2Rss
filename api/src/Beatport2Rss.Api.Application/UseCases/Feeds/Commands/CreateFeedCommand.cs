@@ -79,7 +79,7 @@ internal sealed class CreateFeedCommandHandler(
             feed.Name.Value,
             feed.Slug.Value,
             feed.AuthorName?.Value,
-            feed.Status.ToString());
+            feed.Status);
         await integrationEventOutbox.EnqueueAsync(feedCreated, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

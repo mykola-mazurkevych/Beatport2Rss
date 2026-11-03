@@ -1,3 +1,5 @@
+using Beatport2Rss.Common.Domain.Feeds;
+
 namespace Beatport2Rss.Common.IntegrationEvents.Feeds;
 
 [IntegrationEventTopic("feed.updated")]
@@ -8,5 +10,5 @@ public sealed record FeedUpdated(
     string Name,
     string Slug,
     string? AuthorName,
-    string Status) :
+    FeedStatus Status) :
     IIntegrationEvent;

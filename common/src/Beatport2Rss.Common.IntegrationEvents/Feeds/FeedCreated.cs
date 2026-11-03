@@ -1,3 +1,5 @@
+using Beatport2Rss.Common.Domain.Feeds;
+
 namespace Beatport2Rss.Common.IntegrationEvents.Feeds;
 
 [IntegrationEventTopic("feed.created")]
@@ -9,5 +11,5 @@ public sealed record FeedCreated(
     string Name,
     string Slug,
     string? AuthorName,
-    string Status) :
+    FeedStatus Status) :
     IIntegrationEvent;
