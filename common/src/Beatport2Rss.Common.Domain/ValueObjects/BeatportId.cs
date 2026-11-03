@@ -5,7 +5,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Collector.Domain.Subscriptions;
+namespace Beatport2Rss.Common.Domain.ValueObjects;
 
 public readonly record struct BeatportId :
     IValueObject

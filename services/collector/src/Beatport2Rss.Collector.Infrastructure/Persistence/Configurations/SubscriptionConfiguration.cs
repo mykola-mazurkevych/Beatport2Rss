@@ -1,4 +1,5 @@
 using Beatport2Rss.Collector.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.ValueObjects;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;

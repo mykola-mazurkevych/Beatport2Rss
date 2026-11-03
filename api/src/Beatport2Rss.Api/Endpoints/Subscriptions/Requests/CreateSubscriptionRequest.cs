@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.ValueObjects;
 
 namespace Beatport2Rss.Api.Endpoints.Subscriptions.Requests;
 
