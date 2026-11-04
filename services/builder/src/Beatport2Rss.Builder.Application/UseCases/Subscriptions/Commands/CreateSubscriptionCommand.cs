@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 namespace Beatport2Rss.Builder.Application.UseCases.Subscriptions.Commands;
 
 public sealed record CreateSubscriptionCommand(
-    SubscriptionId Id,
+    Guid SubscriptionId,
     DateTimeOffset CreatedAt,
-    SubscriptionName Name,
+    string Name,
     SubscriptionType Type,
-    BeatportId BeatportId);
+    int BeatportId);
 
 public static class CreateSubscriptionCommandHandler
 {
@@ -24,36 +24,37 @@ public static class CreateSubscriptionCommandHandler
         ILogger<CreateSubscriptionCommand> logger,
         CancellationToken cancellationToken)
     {
-        LoggerMessages.Creating(logger, command.Id, command.Name, command.Type);
+        LoggerMessages.Creating(logger, command.SubscriptionId, command.Name, command.Type);
 
-        if (await subscriptionCommandRepository.ExistsAsync(command.Id, cancellationToken))
+        var subscriptionId = SubscriptionId.Create(command.SubscriptionId);
+        if (await subscriptionCommandRepository.ExistsAsync(subscriptionId, cancellationToken))
         {
-            LoggerMessages.AlreadyExists(logger, command.Id);
+            LoggerMessages.AlreadyExists(logger, command.SubscriptionId);
             return;
         }
 
         var subscription = Subscription.Create(
-            command.Id,
+            subscriptionId,
             command.CreatedAt,
             command.Type,
-            command.Name,
-            command.BeatportId);
+            SubscriptionName.Create(command.Name),
+            BeatportId.Create(command.BeatportId));
 
         await subscriptionCommandRepository.AddAsync(subscription, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        LoggerMessages.Created(logger, command.Id);
+        LoggerMessages.Created(logger, command.SubscriptionId);
     }
 }
 
 internal static partial class LoggerMessages
 {
     [LoggerMessage(Level = LogLevel.Information, Message = "Creating subscription {SubscriptionId} (Name: {SubscriptionName}, Type: {SubscriptionType})")]
-    public static partial void Creating(ILogger logger, SubscriptionId subscriptionId, SubscriptionName subscriptionName, SubscriptionType subscriptionType);
+    public static partial void Creating(ILogger logger, Guid subscriptionId, string subscriptionName, SubscriptionType subscriptionType);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Subscription {SubscriptionId} already exists")]
-    public static partial void AlreadyExists(ILogger logger, SubscriptionId subscriptionId);
+    public static partial void AlreadyExists(ILogger logger, Guid subscriptionId);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Subscription {SubscriptionId} created")]
-    public static partial void Created(ILogger logger, SubscriptionId subscriptionId);
+    public static partial void Created(ILogger logger, Guid subscriptionId);
 }

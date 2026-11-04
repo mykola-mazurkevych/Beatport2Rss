@@ -7,6 +7,8 @@ using Beatport2Rss.Common.Validation.Extensions;
 
 using FluentValidation;
 
+using Microsoft.Extensions.Logging;
+
 namespace Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 
 public sealed record CreateFeedCommand(
@@ -35,11 +37,15 @@ public static class CreateFeedCommandHandler
         CreateFeedCommand command,
         IFeedCommandRepository feedCommandRepository,
         IUnitOfWork unitOfWork,
+        ILogger<CreateFeedCommand> logger,
         CancellationToken cancellationToken)
     {
+        LoggerMessages.Creating(logger, command.FeedId, command.Name);
+
         var feedId = FeedId.Create(command.FeedId);
         if (await feedCommandRepository.ExistsAsync(feedId, cancellationToken))
         {
+            LoggerMessages.AlreadyExists(logger, command.FeedId);
             return;
         }
 
@@ -53,5 +59,19 @@ public static class CreateFeedCommandHandler
 
         await feedCommandRepository.AddAsync(feed, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        LoggerMessages.Created(logger, command.FeedId);
     }
+}
+
+internal static partial class LoggerMessages
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Creating feed {FeedId} (Name: {FeedName})")]
+    public static partial void Creating(ILogger logger, Guid feedId, string feedName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Feed {FeedId} already exists")]
+    public static partial void AlreadyExists(ILogger logger, Guid feedId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Feed {FeedId} created")]
+    public static partial void Created(ILogger logger, Guid feedId);
 }
