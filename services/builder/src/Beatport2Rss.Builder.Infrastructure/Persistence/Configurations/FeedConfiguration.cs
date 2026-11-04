@@ -1,7 +1,7 @@
 using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
-using Beatport2Rss.Common.Domain.ValueObjects;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;

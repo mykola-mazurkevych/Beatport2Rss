@@ -6,7 +6,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Common.Domain.ValueObjects;
+namespace Beatport2Rss.Common.Domain.Common;
 
 public readonly record struct Slug :
     IValueObject, IParsable<Slug>

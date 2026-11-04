@@ -1,7 +1,7 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.Domain.ValueObjects;
 using Beatport2Rss.Common.Validation.Extensions;
 
 using FluentValidation;

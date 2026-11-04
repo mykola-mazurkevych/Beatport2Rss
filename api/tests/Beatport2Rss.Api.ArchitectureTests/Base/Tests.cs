@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-using Beatport2Rss.Common.Domain.ValueObjects;
+using Beatport2Rss.Common.Domain.Common;
 
 namespace Beatport2Rss.Api.ArchitectureTests.Base;
 

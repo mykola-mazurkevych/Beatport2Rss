@@ -1,5 +1,5 @@
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
-using Beatport2Rss.Common.Domain.ValueObjects;
 
 namespace Beatport2Rss.Api.Application.Dtos.Feeds;
 

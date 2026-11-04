@@ -1,5 +1,5 @@
 ﻿using Beatport2Rss.Api.Domain.Tags;
-using Beatport2Rss.Common.Domain.ValueObjects;
+using Beatport2Rss.Common.Domain.Common;
 
 namespace Beatport2Rss.Api.Application.Dtos.Tags;
 

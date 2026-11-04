@@ -1,6 +1,7 @@
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Subscriptions;
-using Beatport2Rss.Common.Domain.ValueObjects;
+using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;

@@ -1,7 +1,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Common.Domain.ValueObjects;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;

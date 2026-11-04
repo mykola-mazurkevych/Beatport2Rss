@@ -1,7 +1,8 @@
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Tags;
+using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Interfaces;
-using Beatport2Rss.Common.Domain.ValueObjects;
 
 namespace Beatport2Rss.Api.Domain.Subscriptions;
 

@@ -1,4 +1,4 @@
-using Beatport2Rss.Common.Domain.ValueObjects;
+using Beatport2Rss.Common.Domain.Beatport;
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
