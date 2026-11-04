@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Api.Domain.Subscriptions;
+namespace Beatport2Rss.Common.Domain.Subscriptions;
 
 public enum SubscriptionType
 {

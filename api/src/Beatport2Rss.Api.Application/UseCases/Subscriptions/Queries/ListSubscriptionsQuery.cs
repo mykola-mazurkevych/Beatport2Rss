@@ -4,9 +4,9 @@ using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Querying.Paging;
 using Beatport2Rss.Api.Application.ReadModels.Subscriptions;
-using Beatport2Rss.Api.Domain.Subscriptions;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Beatport.Interfaces;
+using Beatport2Rss.Common.Domain.Subscriptions;
 
 using FluentResults;
 

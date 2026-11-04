@@ -1,5 +1,6 @@
 using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Common.Domain.Interfaces;
+using Beatport2Rss.Common.Domain.Subscriptions;
 
 namespace Beatport2Rss.Api.Domain.Subscriptions;
 

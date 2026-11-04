@@ -3,7 +3,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Builder.Domain.Subscriptions;
+namespace Beatport2Rss.Common.Domain.Subscriptions;
 
 public readonly record struct SubscriptionId :
     IId<SubscriptionId>
