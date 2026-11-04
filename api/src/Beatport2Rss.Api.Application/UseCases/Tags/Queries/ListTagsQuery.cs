@@ -4,8 +4,8 @@ using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Querying.Paging;
 using Beatport2Rss.Api.Application.ReadModels.Tags;
-using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Tags;
 
 using FluentResults;
 

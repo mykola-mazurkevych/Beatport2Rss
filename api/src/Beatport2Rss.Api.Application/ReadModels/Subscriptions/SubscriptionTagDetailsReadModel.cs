@@ -1,5 +1,5 @@
-using Beatport2Rss.Api.Domain.Tags;
 using Beatport2Rss.Common.Domain.Common;
+using Beatport2Rss.Common.Domain.Tags;
 
 namespace Beatport2Rss.Api.Application.ReadModels.Subscriptions;
 

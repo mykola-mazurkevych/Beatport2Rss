@@ -3,7 +3,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Tags;
+namespace Beatport2Rss.Common.Domain.Tags;
 
 public readonly record struct TagId :
     IId<TagId>
