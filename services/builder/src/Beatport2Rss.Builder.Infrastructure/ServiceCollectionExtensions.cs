@@ -2,6 +2,7 @@
 
 using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Builder.Application.UseCases.Subscriptions.IntegrationEvents;
 using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
@@ -9,6 +10,7 @@ using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
@@ -54,7 +56,8 @@ public static class ServiceCollectionExtensions
                     listener => listener
                         .ListensTo<FeedCreated>()
                         .ListensTo<FeedUpdated>()
-                        .ListensTo<FeedDeleted>());
+                        .ListensTo<FeedDeleted>()
+                        .ListensTo<SubscriptionCreated>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
@@ -62,7 +65,9 @@ public static class ServiceCollectionExtensions
                 .AddUnitOfWork<BuilderDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
-                .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>();
+                .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
+                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
     }
 }

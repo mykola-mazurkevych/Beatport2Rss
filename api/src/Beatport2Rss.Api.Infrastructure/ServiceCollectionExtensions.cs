@@ -22,6 +22,7 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
@@ -63,6 +64,7 @@ public static class ServiceCollectionExtensions
                         .Publishes<FeedDeleted>()
                         .Publishes<FeedSubscriptionCreated>()
                         .Publishes<FeedSubscriptionDeleted>()
+                        .Publishes<SubscriptionCreated>()
                         .Publishes<TagCreated>()
                         .Publishes<TagUpdated>()
                         .Publishes<TagDeleted>())

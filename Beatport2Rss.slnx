@@ -46,6 +46,7 @@
   </Folder>
   <Folder Name="/services/collector/" />
   <Folder Name="/services/collector/src/">
+    <Project Path="services/collector/src/Beatport2Rss.Collector.Application/Beatport2Rss.Collector.Application.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
   </Folder>
