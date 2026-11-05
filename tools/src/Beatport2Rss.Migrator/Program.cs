@@ -15,7 +15,8 @@ Console.WriteLine("#################################################");
 Console.WriteLine();
 
 var configurationRoot = new ConfigurationBuilder()
-    .AddUserSecrets(Assembly.GetEntryAssembly()!, optional: false)
+    .AddUserSecrets(Assembly.GetEntryAssembly()!, optional: true)
+    .AddEnvironmentVariables()
     .Build();
 
 var serviceCollection = new ServiceCollection();
@@ -24,7 +25,7 @@ Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceC
 Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
 Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
 
-var serviceProvider =serviceCollection 
+var serviceProvider = serviceCollection
     .AddLogging(builder => builder.AddConsole())
     .AddSingleton<IApplication, Application>()
     .BuildServiceProvider();

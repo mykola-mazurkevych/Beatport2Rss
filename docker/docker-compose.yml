@@ -62,6 +62,21 @@ services:
       retries: 3
       start_period: 10s
 
+  migrator:
+    build:
+      context: ..
+      dockerfile: tools/src/Beatport2Rss.Migrator/Dockerfile
+    container_name: migrator
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
+      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION}
+      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   builder:
     build:
       context: ..
@@ -83,6 +98,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   collector:
@@ -103,6 +120,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   api:
@@ -135,6 +154,8 @@ services:
         condition: service_healthy
       interceptor:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
