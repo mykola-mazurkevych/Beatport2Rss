@@ -13,4 +13,7 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
 {
     public Task<bool> ExistsAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
         ExistsAsync(subscription => subscription.Id == subscriptionId, cancellationToken);
+
+    public Task<Subscription?> FindAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
+        FindAsync(subscription => subscription.Id == subscriptionId, cancellationToken);
 }

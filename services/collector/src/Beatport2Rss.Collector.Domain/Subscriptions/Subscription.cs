@@ -41,4 +41,17 @@ public sealed class Subscription :
             SubscribersCount = subscribersCount,
             RefreshedAt = refreshedAt,
         };
+
+    public void IncrementSubscribersCount() => SubscribersCount++;
+
+    public bool DecrementSubscribersCount()
+    {
+        if (SubscribersCount == 0)
+        {
+            return false;
+        }
+
+        SubscribersCount--;
+        return true;
+    }
 }

@@ -25,12 +25,12 @@ public static class CreateSubscriptionCommandHandler
         ILogger<CreateSubscriptionCommand> logger,
         CancellationToken cancellationToken)
     {
-        LoggerMessages.Creating(logger, command.Id, command.Name, command.Type);
+        CreateSubscriptionCommandLoggerMessages.Creating(logger, command.Id, command.Name, command.Type);
 
         var subscriptionId = SubscriptionId.Create(command.Id);
         if (await subscriptionCommandRepository.ExistsAsync(subscriptionId, cancellationToken))
         {
-            LoggerMessages.AlreadyExists(logger, command.Id);
+            CreateSubscriptionCommandLoggerMessages.AlreadyExists(logger, command.Id);
             return;
         }
 
@@ -46,11 +46,11 @@ public static class CreateSubscriptionCommandHandler
         await subscriptionCommandRepository.AddAsync(subscription, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        LoggerMessages.Created(logger, command.Id);
+        CreateSubscriptionCommandLoggerMessages.Created(logger, command.Id);
     }
 }
 
-internal static partial class LoggerMessages
+internal static partial class CreateSubscriptionCommandLoggerMessages
 {
     [LoggerMessage(Level = LogLevel.Information, Message = "Creating subscription {SubscriptionId} (Name: {SubscriptionName}, Type: {SubscriptionType})")]
     public static partial void Creating(ILogger logger, Guid subscriptionId, string subscriptionName, SubscriptionType subscriptionType);

@@ -6,6 +6,7 @@ using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
@@ -43,7 +44,10 @@ public static class ServiceCollectionExtensions
                 .AddWolverineListener<CollectorDbContext>(
                     configuration,
                     typeof(CollectorApplication).Assembly,
-                    listener => listener.ListensTo<SubscriptionCreated>());
+                    listener => listener
+                        .ListensTo<FeedSubscriptionCreated>()
+                        .ListensTo<FeedSubscriptionDeleted>()
+                        .ListensTo<SubscriptionCreated>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
