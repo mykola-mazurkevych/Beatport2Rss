@@ -4,7 +4,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Microsoft.Extensions.Logging;
 
-namespace Beatport2Rss.Collector.Application.UseCases.Subscriptions.Commands;
+namespace Beatport2Rss.Collector.Application.UseCases.Feeds.Commands;
 
 public sealed record IncrementSubscribersCountCommand(Guid SubscriptionId);
 
