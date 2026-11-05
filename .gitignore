@@ -33,6 +33,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+!common/src/**/Releases/
 !src/**/Releases/
 !services/**/src/**/Releases/
 
