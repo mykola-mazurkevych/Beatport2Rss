@@ -38,6 +38,15 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.RefreshedAt)
             .IsRequired(required: false);
 
+        builder.Property(subscription => subscription.RefreshAttemptedAt)
+            .IsRequired(required: false);
+
+        builder.Property(subscription => subscription.RefreshStatus)
+            .IsEnum();
+
+        builder.Property(subscription => subscription.FailReason)
+            .IsRequired(required: false);
+
         builder.HasIndex(subscription => new { subscription.Type, subscription.BeatportId })
             .IsUnique();
     }

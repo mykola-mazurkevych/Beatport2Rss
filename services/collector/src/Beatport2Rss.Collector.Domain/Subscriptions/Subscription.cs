@@ -21,7 +21,11 @@ public sealed class Subscription :
     public BeatportSlug BeatportSlug { get; private set; }
 
     public int SubscribersCount { get; private set; }
-    public DateTimeOffset? RefreshedAt { get; private set; }
+
+    public DateOnly? RefreshedAt { get; private set; }
+    public DateTimeOffset? RefreshAttemptedAt { get; private set; }
+    public RefreshStatus? RefreshStatus { get; private set; }
+    public string? FailReason { get; private set; }
 
     public static Subscription Create(
         SubscriptionId id,
@@ -30,7 +34,7 @@ public sealed class Subscription :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         int subscribersCount,
-        DateTimeOffset? refreshedAt) =>
+        DateOnly? refreshedAt) =>
         new()
         {
             Id = id,
@@ -53,5 +57,29 @@ public sealed class Subscription :
 
         SubscribersCount--;
         return true;
+    }
+
+    public void RecordRefreshAttempt(DateTimeOffset attemptedAt)
+    {
+        RefreshAttemptedAt = attemptedAt;
+        RefreshStatus = null;
+        FailReason = null;
+    }
+
+    public void RecordRefreshFailure(string reason)
+    {
+        RefreshStatus = Subscriptions.RefreshStatus.Failed;
+        FailReason = reason;
+    }
+
+    public void MarkRefreshed()
+    {
+        if (RefreshAttemptedAt is null)
+        {
+            throw new InvalidOperationException("Refresh attempt must be recorded before marking the subscription as refreshed");
+        }
+
+        RefreshStatus = Subscriptions.RefreshStatus.Refreshed;
+        RefreshedAt = DateOnly.FromDateTime(RefreshAttemptedAt.Value.UtcDateTime);
     }
 }

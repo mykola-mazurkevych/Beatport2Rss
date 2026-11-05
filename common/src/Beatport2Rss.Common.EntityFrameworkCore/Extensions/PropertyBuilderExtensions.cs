@@ -17,6 +17,16 @@ public static class PropertyBuilderExtensions
                 .IsRequired();
     }
 
+    extension<TEnum>(PropertyBuilder<TEnum?> builder)
+        where TEnum : struct, Enum
+    {
+        public PropertyBuilder<TEnum?> IsEnum() =>
+            builder
+                .HasConversion<EnumToStringConverter<TEnum>>()
+                .HasMaxLength(MaxLengthConstants.Enum)
+                .IsRequired(required: false);
+    }
+
     extension(PropertyBuilder<Uri> builder)
     {
         public PropertyBuilder<Uri> IsUri() =>
