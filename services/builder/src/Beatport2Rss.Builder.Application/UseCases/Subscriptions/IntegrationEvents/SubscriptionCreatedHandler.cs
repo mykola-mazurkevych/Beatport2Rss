@@ -6,15 +6,9 @@ namespace Beatport2Rss.Builder.Application.UseCases.Subscriptions.IntegrationEve
 public static class SubscriptionCreatedHandler
 {
     public static CreateSubscriptionCommand Handle(SubscriptionCreated subscriptionCreated) =>
-        subscriptionCreated.ToCommand();
-
-    extension(SubscriptionCreated subscriptionCreated)
-    {
-        private CreateSubscriptionCommand ToCommand() =>
-            new(subscriptionCreated.SubscriptionId,
-                subscriptionCreated.OccurredAt,
-                subscriptionCreated.Name,
-                subscriptionCreated.Type,
-                subscriptionCreated.BeatportId);
-    }
+        new(subscriptionCreated.SubscriptionId,
+            subscriptionCreated.OccurredAt,
+            subscriptionCreated.Name,
+            subscriptionCreated.Type,
+            subscriptionCreated.BeatportId);
 }
