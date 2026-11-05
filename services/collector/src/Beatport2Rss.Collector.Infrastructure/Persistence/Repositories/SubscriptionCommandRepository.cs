@@ -9,11 +9,4 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscriptions) :
     CommandRepository<Subscription, SubscriptionId>(subscriptions),
-    ISubscriptionCommandRepository
-{
-    public Task<bool> ExistsAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
-        ExistsAsync(subscription => subscription.Id == subscriptionId, cancellationToken);
-
-    public Task<Subscription?> FindAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
-        FindAsync(subscription => subscription.Id == subscriptionId, cancellationToken);
-}
+    ISubscriptionCommandRepository;

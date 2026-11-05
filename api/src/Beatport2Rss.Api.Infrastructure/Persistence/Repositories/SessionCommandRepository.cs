@@ -21,13 +21,6 @@ internal sealed class SessionCommandRepository(
             session => session.Id == sessionId,
             cancellationToken);
 
-    public Task<Session?> FindAsync(
-        SessionId sessionId,
-        CancellationToken cancellationToken = default) =>
-        FindAsync(
-            session => session.Id == sessionId,
-            cancellationToken);
-
     Task ISessionCommandRepository.AddAsync(
         Session session,
         CancellationToken cancellationToken) =>

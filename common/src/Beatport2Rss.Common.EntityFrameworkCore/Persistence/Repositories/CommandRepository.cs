@@ -49,4 +49,11 @@ public abstract class CommandRepository<TEntity>(DbSet<TEntity> entities)
 public abstract class CommandRepository<TAggregateRoot, TId>(DbSet<TAggregateRoot> dbSet) :
     CommandRepository<TAggregateRoot>(dbSet)
     where TAggregateRoot : class, IAggregateRoot<TId>
-    where TId : struct, IId<TId>;
+    where TId : struct, IId<TId>
+{
+    public Task<bool> ExistsAsync(TId id, CancellationToken cancellationToken = default) =>
+        ExistsAsync(entity => entity.Id.Equals(id), cancellationToken);
+
+    public Task<TAggregateRoot?> FindAsync(TId id, CancellationToken cancellationToken = default) =>
+        FindAsync(entity => entity.Id.Equals(id), cancellationToken);
+}

@@ -9,11 +9,4 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 
 internal sealed class FeedCommandRepository(DbSet<Feed> feeds) :
     CommandRepository<Feed, FeedId>(feeds),
-    IFeedCommandRepository
-{
-    public Task<bool> ExistsAsync(FeedId feedId, CancellationToken cancellationToken = default) =>
-        ExistsAsync(feed => feed.Id == feedId, cancellationToken);
-
-    public Task<Feed?> FindAsync(FeedId feedId, CancellationToken cancellationToken = default) =>
-        FindAsync(feed => feed.Id == feedId, cancellationToken);
-}
+    IFeedCommandRepository;
