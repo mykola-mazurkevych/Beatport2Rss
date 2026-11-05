@@ -85,6 +85,26 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  collector:
+    build:
+      context: ..
+      dockerfile: services/collector/src/Beatport2Rss.Collector.Worker/Dockerfile
+    container_name: collector
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
+      - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}
+      - RabbitMQOptions__Port=${RABBITMQ_PORT}
+      - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
+      - RabbitMQOptions__Password=${RABBITMQ_PASSWORD}
+      - RabbitMQOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
   api:
     build:
       context: ..
