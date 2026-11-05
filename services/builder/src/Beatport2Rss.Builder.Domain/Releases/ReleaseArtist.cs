@@ -1,4 +1,5 @@
 using Beatport2Rss.Common.Domain.Interfaces;
+using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 
 namespace Beatport2Rss.Builder.Domain.Releases;

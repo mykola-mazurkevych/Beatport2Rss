@@ -1,6 +1,6 @@
-using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Interfaces;
+using Beatport2Rss.Common.Domain.Releases;
 
 namespace Beatport2Rss.Builder.Domain.Tracks;
 
