@@ -25,6 +25,7 @@ public sealed record CreateReleaseCommand(
     DateOnly ReleaseDate,
     CatalogNumber CatalogNumber,
     Uri ImageUri,
+    int TracksCount,
     IReadOnlyCollection<TrackDto> Tracks);
 
 public static class CreateReleaseCommandHandler
@@ -96,6 +97,7 @@ public static class CreateReleaseCommandHandler
             label.Id,
             createReleaseCommand.CatalogNumber,
             createReleaseCommand.ImageUri,
+            createReleaseCommand.TracksCount,
             releaseArtists,
             tracks);
         await releaseCommandRepository.AddAsync(release, cancellationToken);

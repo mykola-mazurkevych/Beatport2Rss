@@ -102,6 +102,9 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<DateOnly>("ReleaseDate")
                         .HasColumnType("date");
 
+                    b.Property<int>("TracksCount")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BeatportId")

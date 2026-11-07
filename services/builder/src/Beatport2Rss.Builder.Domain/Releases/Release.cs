@@ -40,6 +40,8 @@ public sealed class Release :
 
     public Uri ImageUri { get; private set; } = null!;
 
+    public int TracksCount { get; private set; }
+
     public IReadOnlyCollection<ReleaseArtist> Artists => _artists.AsReadOnly();
     public IReadOnlyCollection<Track> Tracks => _tracks.AsReadOnly();
 
@@ -54,6 +56,7 @@ public sealed class Release :
         SubscriptionId labelId,
         CatalogNumber catalogNumber,
         Uri imageUri,
+        int tracksCount,
         IEnumerable<ReleaseArtist> artists,
         IEnumerable<Track> tracks) =>
         new(artists, tracks)
@@ -68,5 +71,6 @@ public sealed class Release :
             LabelId = labelId,
             CatalogNumber = catalogNumber,
             ImageUri = imageUri,
+            TracksCount = tracksCount,
         };
 }

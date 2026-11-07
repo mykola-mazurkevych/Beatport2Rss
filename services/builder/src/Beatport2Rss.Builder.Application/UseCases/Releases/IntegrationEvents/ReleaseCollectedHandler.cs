@@ -25,6 +25,7 @@ public static class ReleaseCollectedHandler
             releaseCollected.ReleaseDate,
             CatalogNumber.Create(releaseCollected.CatalogNumber),
             releaseCollected.ImageUri,
+            releaseCollected.TracksCount,
             [.. releaseCollected.Tracks.Select(MapTrack)]);
 
     private static ArtistDto MapArtist(ReleaseCollectedArtist artist) =>
