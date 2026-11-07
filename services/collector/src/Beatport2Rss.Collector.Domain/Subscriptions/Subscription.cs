@@ -18,12 +18,11 @@ public sealed class Subscription :
     public SubscriptionType Type { get; private set; }
 
     public BeatportId BeatportId { get; private set; }
-    public BeatportSlug BeatportSlug { get; private set; }
 
     public int SubscribersCount { get; private set; }
 
     public DateOnly? RefreshedAt { get; private set; }
-    public DateTimeOffset? RefreshAttemptedAt { get; private set; }
+    public DateOnly? RefreshAttemptedAt { get; private set; }
     public RefreshStatus? RefreshStatus { get; private set; }
     public string? FailReason { get; private set; }
 
@@ -32,7 +31,6 @@ public sealed class Subscription :
         DateTimeOffset createdAt,
         SubscriptionType type,
         BeatportId beatportId,
-        BeatportSlug beatportSlug,
         int subscribersCount,
         DateOnly? refreshedAt) =>
         new()
@@ -41,7 +39,6 @@ public sealed class Subscription :
             CreatedAt = createdAt,
             Type = type,
             BeatportId = beatportId,
-            BeatportSlug = beatportSlug,
             SubscribersCount = subscribersCount,
             RefreshedAt = refreshedAt,
         };
@@ -59,27 +56,22 @@ public sealed class Subscription :
         return true;
     }
 
-    public void RecordRefreshAttempt(DateTimeOffset attemptedAt)
+    public void RecordRefreshAttempt(DateOnly refreshAttemptedAt)
     {
-        RefreshAttemptedAt = attemptedAt;
+        RefreshAttemptedAt = refreshAttemptedAt;
         RefreshStatus = null;
         FailReason = null;
     }
 
-    public void RecordRefreshFailure(string reason)
+    public void RecordRefreshFailure(string failReason)
     {
         RefreshStatus = Subscriptions.RefreshStatus.Failed;
-        FailReason = reason;
+        FailReason = failReason;
     }
 
     public void MarkRefreshed()
     {
-        if (RefreshAttemptedAt is null)
-        {
-            throw new InvalidOperationException("Refresh attempt must be recorded before marking the subscription as refreshed");
-        }
-
         RefreshStatus = Subscriptions.RefreshStatus.Refreshed;
-        RefreshedAt = DateOnly.FromDateTime(RefreshAttemptedAt.Value.UtcDateTime);
+        RefreshedAt = RefreshAttemptedAt;
     }
 }

@@ -28,10 +28,6 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.BeatportId)
             .IsRequired();
 
-        builder.Property(subscription => subscription.BeatportSlug)
-            .HasMaxLength(BeatportSlug.MaxLength)
-            .IsRequired();
-
         builder.Property(subscription => subscription.SubscribersCount)
             .IsRequired();
 
