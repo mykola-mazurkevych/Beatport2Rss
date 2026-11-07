@@ -14,6 +14,7 @@ public sealed record ReleaseCollected(
     DateOnly ReleaseDate,
     string CatalogNumber,
     Uri ImageUri,
+    int TracksCount,
     IReadOnlyCollection<ReleaseCollectedTrack> Tracks) :
     IIntegrationEvent;
 

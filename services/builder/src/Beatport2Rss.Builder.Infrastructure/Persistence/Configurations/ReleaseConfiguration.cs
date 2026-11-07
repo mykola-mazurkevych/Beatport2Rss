@@ -54,6 +54,9 @@ internal sealed class ReleaseConfiguration :
         builder.Property(release => release.ImageUri)
             .IsUri();
 
+        builder.Property(release => release.TracksCount)
+            .IsRequired();
+
         builder.OwnsMany(
             release => release.Artists,
             navigationBuilder =>
