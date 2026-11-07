@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
@@ -9,4 +10,10 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscriptions) :
     CommandRepository<Subscription, SubscriptionId>(subscriptions),
-    ISubscriptionCommandRepository;
+    ISubscriptionCommandRepository
+{
+    public Task<IEnumerable<Subscription>> FindAllAsync(
+        IEnumerable<BeatportId> beatportIds,
+        CancellationToken cancellationToken = default) =>
+        FindAllAsync(subscription => beatportIds.Contains(subscription.BeatportId), cancellationToken);
+}

@@ -68,6 +68,11 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("BeatportSlug")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<string>("BeatportUri")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -131,6 +136,8 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BeatportId");
+
                     b.HasIndex("Type", "BeatportId")
                         .IsUnique();
 
@@ -142,14 +149,6 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<int>("BeatportId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("BeatportUri")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -179,9 +178,6 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BeatportId")
-                        .IsUnique();
 
                     b.HasIndex("ReleaseId");
 

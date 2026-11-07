@@ -35,5 +35,7 @@ internal sealed class SubscriptionConfiguration :
 
         builder.HasIndex(subscription => new { subscription.Type, subscription.BeatportId })
             .IsUnique();
+
+        builder.HasIndex(subscription => subscription.BeatportId);
     }
 }

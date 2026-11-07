@@ -29,6 +29,7 @@ public sealed class Release :
     public DateTimeOffset CreatedAt { get; private set; }
 
     public BeatportId BeatportId { get; private set; }
+    public BeatportSlug BeatportSlug { get; private set; }
     public Uri BeatportUri { get; private set; } = null!;
 
     public ReleaseName Name { get; private set; }
@@ -46,12 +47,12 @@ public sealed class Release :
         ReleaseId id,
         DateTimeOffset createdAt,
         BeatportId beatportId,
+        BeatportSlug beatportSlug,
         Uri beatportUri,
         ReleaseName name,
         DateOnly releaseDate,
         SubscriptionId labelId,
         CatalogNumber catalogNumber,
-
         Uri imageUri,
         IEnumerable<ReleaseArtist> artists,
         IEnumerable<Track> tracks) =>
@@ -60,6 +61,7 @@ public sealed class Release :
             Id = id,
             CreatedAt = createdAt,
             BeatportId = beatportId,
+            BeatportSlug = beatportSlug,
             BeatportUri = beatportUri,
             Name = name,
             ReleaseDate = releaseDate,

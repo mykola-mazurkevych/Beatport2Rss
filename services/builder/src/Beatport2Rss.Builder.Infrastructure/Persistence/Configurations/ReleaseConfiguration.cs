@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,10 @@ internal sealed class ReleaseConfiguration :
             .IsRequired();
 
         builder.Property(release => release.BeatportId)
+            .IsRequired();
+
+        builder.Property(release => release.BeatportSlug)
+            .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
         builder.Property(release => release.BeatportUri)

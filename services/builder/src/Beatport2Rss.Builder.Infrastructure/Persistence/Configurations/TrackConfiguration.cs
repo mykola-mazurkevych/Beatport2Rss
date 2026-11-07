@@ -24,12 +24,6 @@ internal sealed class TrackConfiguration :
         builder.Property(track => track.CreatedAt)
             .IsRequired();
 
-        builder.Property(track => track.BeatportId)
-            .IsRequired();
-
-        builder.Property(release => release.BeatportUri)
-            .IsUri();
-
         builder.Property(track => track.Number)
             .IsRequired();
 
@@ -54,7 +48,7 @@ internal sealed class TrackConfiguration :
             track => track.Artists,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable("TrackArtists");
+                navigationBuilder.ToTable(nameof(BuilderDbContext.TrackArtists));
 
                 navigationBuilder.HasKey(trackArtist => new { trackArtist.TrackId, trackArtist.ArtistId, trackArtist.Type });
 
@@ -82,8 +76,5 @@ internal sealed class TrackConfiguration :
             .WithMany(release => release.Tracks)
             .HasForeignKey(track => track.ReleaseId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasIndex(track => track.BeatportId)
-            .IsUnique();
     }
 }
