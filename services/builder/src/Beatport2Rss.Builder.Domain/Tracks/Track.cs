@@ -1,4 +1,3 @@
-using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Releases;
 
@@ -20,9 +19,6 @@ public sealed class Track :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public BeatportId BeatportId { get; private set; }
-    public Uri BeatportUri { get; private set; } = null!;
-
     public int Number { get; private set; }
 
     public TrackName Name { get; private set; }
@@ -40,8 +36,6 @@ public sealed class Track :
         TrackId id,
         DateTimeOffset createdAt,
         ReleaseId releaseId,
-        BeatportId beatportId,
-        Uri beatportUri,
         int number,
         TrackName name,
         MixName mixName,
@@ -53,8 +47,6 @@ public sealed class Track :
             Id = id,
             CreatedAt = createdAt,
             ReleaseId = releaseId,
-            BeatportId = beatportId,
-            BeatportUri = beatportUri,
             Number = number,
             Name = name,
             MixName = mixName,

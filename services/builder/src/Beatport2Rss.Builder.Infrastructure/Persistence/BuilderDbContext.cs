@@ -21,7 +21,7 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<Track> Tracks => Set<Track>();
-
+    public DbSet<TrackArtist> TrackArtists => Set<TrackArtist>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

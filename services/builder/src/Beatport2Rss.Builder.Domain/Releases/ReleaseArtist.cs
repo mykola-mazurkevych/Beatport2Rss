@@ -1,3 +1,4 @@
+using Beatport2Rss.Builder.Domain.Common;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
@@ -14,12 +15,12 @@ public sealed record ReleaseArtist :
     public ReleaseId ReleaseId { get; private set; }
     public SubscriptionId ArtistId { get; private set; }
 
-    public ReleaseArtistType Type { get; private set; }
+    public ArtistType Type { get; private set; }
 
     public static ReleaseArtist Create(
         ReleaseId releaseId,
         SubscriptionId artistId,
-        ReleaseArtistType type) =>
+        ArtistType type) =>
         new()
         {
             ReleaseId = releaseId,
