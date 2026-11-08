@@ -4,5 +4,7 @@ public sealed record BeatportArtistDto(
     int Id,
     string Slug,
     string Name,
-    BeatportImage Image) :
+    BeatportImage Image,
+    string? Bio,
+    Uri? Website) :
     BeatportDto(Id, Slug);
