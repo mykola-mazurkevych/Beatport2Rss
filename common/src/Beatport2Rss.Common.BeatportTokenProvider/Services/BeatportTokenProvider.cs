@@ -1,4 +1,8 @@
+using System.Net;
+
 using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
+using Beatport2Rss.Common.FluentResults.Errors;
+using Beatport2Rss.Common.FluentResults.Extensions;
 
 using BeatportAccessTokenService;
 
@@ -26,11 +30,24 @@ internal sealed class BeatportTokenProvider(
                 ? exception.Message
                 : exception.Status.Detail;
 
-            return Result.Fail($"Token service call failed: {message}");
+            var errorMessage = $"Token service call failed: {message}";
+            return exception.StatusCode switch
+            {
+                StatusCode.DeadlineExceeded or StatusCode.ResourceExhausted or StatusCode.Unavailable => Result.Transient<string>(errorMessage),
+                _ => Result.Fail<string>(errorMessage),
+            };
         }
         catch (HttpRequestException exception)
         {
-            return Result.Fail($"Token service request failed: {exception.Message}");
+            var errorMessage = $"Token service request failed: {exception.Message}";
+            return exception.StatusCode switch
+            {
+                HttpStatusCode.RequestTimeout => Result.Fail<string>(new RequestTimeoutError(errorMessage)),
+                HttpStatusCode.TooManyRequests => Result.Fail<string>(new TooManyRequestsError(errorMessage)),
+                { } statusCode when (int)statusCode is >= 500 and <= 599 => Result.Fail<string>(new TransientHttpError(errorMessage, statusCode)),
+                null => Result.Transient<string>(errorMessage),
+                _ => Result.Fail<string>(errorMessage),
+            };
         }
     }
 }
