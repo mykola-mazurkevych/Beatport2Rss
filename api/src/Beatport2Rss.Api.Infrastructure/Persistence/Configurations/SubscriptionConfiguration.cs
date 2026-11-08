@@ -48,8 +48,14 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.ImageUri)
             .IsUri();
 
+        builder.Property(subscription => subscription.Website)
+            .IsUri(required: false);
+
         builder.Property(subscription => subscription.CountryCode)
-            .IsRequired(false);
+            .IsRequired(required: false);
+
+        builder.Property(subscription => subscription.Bio)
+            .IsRequired(required: false);
 
         builder.HasOne<Country>()
             .WithMany()

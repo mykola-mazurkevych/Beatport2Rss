@@ -3,7 +3,6 @@ using Beatport2Rss.Common.Domain.Subscriptions;
 
 namespace Beatport2Rss.Api.Endpoints.Subscriptions.Requests;
 
-internal sealed record CreateSubscriptionRequest(
+internal sealed record RequestSubscriptionRequest(
     SubscriptionType Type,
-    BeatportId BeatportId,
-    string? CountryCode);
+    BeatportId BeatportId);

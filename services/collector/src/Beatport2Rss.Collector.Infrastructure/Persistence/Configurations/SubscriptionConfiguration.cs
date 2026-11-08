@@ -1,5 +1,4 @@
 using Beatport2Rss.Collector.Domain.Subscriptions;
-using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;
@@ -26,10 +25,6 @@ internal sealed class SubscriptionConfiguration :
             .IsEnum();
 
         builder.Property(subscription => subscription.BeatportId)
-            .IsRequired();
-
-        builder.Property(subscription => subscription.BeatportSlug)
-            .HasMaxLength(BeatportSlug.MaxLength)
             .IsRequired();
 
         builder.Property(subscription => subscription.SubscribersCount)

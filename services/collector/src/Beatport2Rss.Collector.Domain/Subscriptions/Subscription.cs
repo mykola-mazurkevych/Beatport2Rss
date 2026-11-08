@@ -18,7 +18,6 @@ public sealed class Subscription :
     public SubscriptionType Type { get; private set; }
 
     public BeatportId BeatportId { get; private set; }
-    public BeatportSlug BeatportSlug { get; private set; }
 
     public int SubscribersCount { get; private set; }
     public DateTimeOffset? RefreshedAt { get; private set; }
@@ -28,7 +27,6 @@ public sealed class Subscription :
         DateTimeOffset createdAt,
         SubscriptionType type,
         BeatportId beatportId,
-        BeatportSlug beatportSlug,
         int subscribersCount,
         DateTimeOffset? refreshedAt) =>
         new()
@@ -37,7 +35,6 @@ public sealed class Subscription :
             CreatedAt = createdAt,
             Type = type,
             BeatportId = beatportId,
-            BeatportSlug = beatportSlug,
             SubscribersCount = subscribersCount,
             RefreshedAt = refreshedAt,
         };

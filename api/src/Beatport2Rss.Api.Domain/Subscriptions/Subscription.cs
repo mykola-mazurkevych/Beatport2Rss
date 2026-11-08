@@ -28,8 +28,11 @@ public sealed class Subscription :
     public BeatportSlug BeatportSlug { get; private set; }
 
     public Uri ImageUri { get; private set; } = null!;
+    public Uri? Website { get; private set; }
 
     public CountryCode? CountryCode { get; private set; }
+
+    public string? Bio { get; private set; }
 
     public IReadOnlySet<SubscriptionTag> Tags =>
         _tags.AsReadOnly();
@@ -43,7 +46,9 @@ public sealed class Subscription :
         BeatportId beatportId,
         BeatportSlug beatportSlug,
         Uri imageUri,
-        CountryCode? countryCode) =>
+        Uri? website,
+        CountryCode? countryCode,
+        string? bio) =>
         new()
         {
             Id = id,
@@ -54,7 +59,9 @@ public sealed class Subscription :
             BeatportId = beatportId,
             BeatportSlug = beatportSlug,
             ImageUri = imageUri,
+            Website = website,
             CountryCode = countryCode,
+            Bio = bio,
         };
 
     public bool ContainsTag(TagId tagId) =>

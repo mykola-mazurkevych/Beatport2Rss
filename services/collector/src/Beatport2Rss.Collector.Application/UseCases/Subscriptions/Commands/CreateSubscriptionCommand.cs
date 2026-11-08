@@ -1,63 +1,168 @@
-﻿using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
+﻿using Beatport2Rss.Collector.Application.Exceptions;
+using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Domain.Subscriptions;
+using Beatport2Rss.Common.Beatport.Interfaces;
+using Beatport2Rss.Common.Beatport.Models;
+using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.FluentResults.Errors;
+using Beatport2Rss.Common.FluentResults.Extensions;
+using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
+
+using FluentResults;
 
 using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Collector.Application.UseCases.Subscriptions.Commands;
 
-public sealed record CreateSubscriptionCommand(
-    Guid Id,
-    DateTimeOffset CreatedAt,
-    string Name,
+internal sealed record CreateSubscriptionCommand(
     SubscriptionType Type,
-    int BeatportId,
-    string BeatportSlug);
+    int BeatportId);
 
-public static class CreateSubscriptionCommandHandler
+internal sealed class CreateSubscriptionCommandHandler(
+    IClock clock,
+    IBeatportTokenProvider beatportTokenProvider,
+    IBeatportClient beatportClient,
+    ISubscriptionCommandRepository subscriptionCommandRepository,
+    IUnitOfWork unitOfWork,
+    IIntegrationEventOutbox integrationEventOutbox,
+    ILogger<CreateSubscriptionCommand> logger)
 {
-    public static async Task HandleAsync(
-        CreateSubscriptionCommand command,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        IUnitOfWork unitOfWork,
-        ILogger<CreateSubscriptionCommand> logger,
-        CancellationToken cancellationToken)
+    public async Task HandleAsync(CreateSubscriptionCommand command, CancellationToken cancellationToken)
     {
-        CreateSubscriptionCommandLoggerMessages.Creating(logger, command.Id, command.Name, command.Type);
+        CreateSubscriptionCommandLoggerMessages.Creating(logger, command.Type, command.BeatportId);
 
-        var subscriptionId = SubscriptionId.Create(command.Id);
-        if (await subscriptionCommandRepository.ExistsAsync(subscriptionId, cancellationToken))
+        var beatportSubscriptionResult = await GetBeatportSubscriptionAsync(command.Type, command.BeatportId, cancellationToken);
+        if (beatportSubscriptionResult.IsFailed)
         {
-            CreateSubscriptionCommandLoggerMessages.AlreadyExists(logger, command.Id);
+            CreateSubscriptionCommandLoggerMessages.BeatportFailure(logger, beatportSubscriptionResult.ErrorMessage);
+
+            if (beatportSubscriptionResult.Errors.Any(error => error is TransientError or TransientHttpError or RequestTimeoutError or TooManyRequestsError))
+            {
+                throw new RetryableBeatportRequestException(beatportSubscriptionResult.ErrorMessage);
+            }
+
             return;
         }
 
-        var subscription = Subscription.Create(
-            subscriptionId,
-            command.CreatedAt,
-            command.Type,
-            BeatportId.Create(command.BeatportId),
-            BeatportSlug.Create(command.BeatportSlug),
-            subscribersCount: 0,
-            refreshedAt: null);
+        var beatportSubscription = beatportSubscriptionResult.Value;
 
-        await subscriptionCommandRepository.AddAsync(subscription, cancellationToken);
+        var beatportId = BeatportId.Create(beatportSubscription.Id);
+        var subscription =
+            await subscriptionCommandRepository.FindAsync(beatportSubscription.Type, beatportId, cancellationToken) ??
+            await subscriptionCommandRepository
+                .AddAsync(
+                    Subscription.Create(
+                        SubscriptionId.Create(Guid.CreateVersion7()),
+                        createdAt: clock.UtcNow,
+                        beatportSubscription.Type,
+                        beatportId,
+                        subscribersCount: 0,
+                        refreshedAt: null),
+                    cancellationToken);
+
+        var subscriptionCreated = new SubscriptionCreated(
+            Id: Guid.CreateVersion7(),
+            OccurredAt: clock.UtcNow,
+            subscription.Id.Value,
+            beatportSubscription.Type,
+            beatportSubscription.Name,
+            beatportSubscription.Id,
+            beatportSubscription.Slug,
+            beatportSubscription.ImageUri,
+            beatportSubscription.Website,
+            beatportSubscription.Bio);
+        await integrationEventOutbox.EnqueueAsync(subscriptionCreated, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        CreateSubscriptionCommandLoggerMessages.Created(logger, command.Id);
+        CreateSubscriptionCommandLoggerMessages.Created(logger, subscription.Id.Value);
     }
+
+    private async Task<Result<BeatportSubscription>> GetBeatportSubscriptionAsync(
+        SubscriptionType type,
+        int beatportId,
+        CancellationToken cancellationToken)
+    {
+        return type switch
+        {
+            SubscriptionType.Artist => await GetArtistSubscriptionAsync(beatportId, cancellationToken),
+            SubscriptionType.Label => await GetLabelSubscriptionAsync(beatportId, cancellationToken),
+            _ => Result.Unprocessable($"Subscription type '{type}' is not supported")
+        };
+    }
+
+    private async Task<Result<BeatportSubscription>> GetArtistSubscriptionAsync(int beatportId, CancellationToken cancellationToken)
+    {
+        var artistResult = await GetBeatportDtoAsync<BeatportArtistDto>(beatportId, cancellationToken);
+        return artistResult switch
+        {
+            { IsFailed: true } => Result.Fail<BeatportSubscription>(artistResult.Errors),
+            { Value: null } => Result.NotFound($"Artist {beatportId} not found"),
+            _ => new BeatportSubscription(
+                SubscriptionType.Artist,
+                artistResult.Value.Id,
+                artistResult.Value.Slug,
+                artistResult.Value.Name,
+                artistResult.Value.Image.Uri,
+                artistResult.Value.Website,
+                artistResult.Value.Bio)
+        };
+    }
+
+    private async Task<Result<BeatportSubscription>> GetLabelSubscriptionAsync(int beatportId, CancellationToken cancellationToken)
+    {
+        var labelResult = await GetBeatportDtoAsync<BeatportLabelDto>(beatportId, cancellationToken);
+        return labelResult switch
+        {
+            { IsFailed: true } => Result.Fail<BeatportSubscription>(labelResult.Errors),
+            { Value: null } => Result.NotFound($"Label {beatportId} not found"),
+            _ => new BeatportSubscription(
+                SubscriptionType.Label,
+                labelResult.Value.Id,
+                labelResult.Value.Slug,
+                labelResult.Value.Name,
+                labelResult.Value.Image.Uri,
+                Website: null,
+                Bio: null)
+        };
+    }
+
+    private async Task<Result<TBeatportDto?>> GetBeatportDtoAsync<TBeatportDto>(int beatportId, CancellationToken cancellationToken)
+        where TBeatportDto : BeatportDto
+    {
+        var accessTokenResult = await beatportTokenProvider.ProvideAsync(cancellationToken);
+        if (accessTokenResult.IsFailed)
+        {
+            return Result.Fail<TBeatportDto?>(accessTokenResult.Errors);
+        }
+
+        var beatportDto = await beatportClient.GetAsync<TBeatportDto>(beatportId, accessTokenResult.Value, cancellationToken);
+
+        return beatportDto;
+    }
+    private sealed record BeatportSubscription(
+        SubscriptionType Type,
+        int Id,
+        string Slug,
+        string Name,
+        Uri ImageUri,
+        Uri? Website,
+        string? Bio);
 }
 
 internal static partial class CreateSubscriptionCommandLoggerMessages
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Creating subscription {SubscriptionId} (Name: {SubscriptionName}, Type: {SubscriptionType})")]
-    public static partial void Creating(ILogger logger, Guid subscriptionId, string subscriptionName, SubscriptionType subscriptionType);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Creating {SubscriptionType} subscription {BeatportId}")]
+    public static partial void Creating(ILogger logger, SubscriptionType subscriptionType, int beatportId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Subscription {SubscriptionId} already exists")]
-    public static partial void AlreadyExists(ILogger logger, Guid subscriptionId);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to get subscription details from Beatport: {ErrorMessage}")]
+    public static partial void BeatportFailure(ILogger logger, string errorMessage);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Subscription {SubscriptionId} created")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Subscription created: {SubscriptionId}")]
     public static partial void Created(ILogger logger, Guid subscriptionId);
 }

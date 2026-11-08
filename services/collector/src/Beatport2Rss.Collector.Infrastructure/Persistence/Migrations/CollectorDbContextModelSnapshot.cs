@@ -18,7 +18,7 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("collector")
-                .HasAnnotation("ProductVersion", "10.0.9")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -30,11 +30,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("BeatportId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("BeatportSlug")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");

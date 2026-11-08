@@ -67,5 +67,20 @@ public static class WolverineOptionsExtensions
                 .UseDurableOutbox();
             return options;
         }
+
+        public WolverineOptions Retry<TException>()
+            where TException : Exception
+        {
+            options
+                .OnException<TException>()
+                .RetryWithCooldown(
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromMinutes(1))
+                .WithBoundedJitter(0.25);
+            return options;
+        }
     }
 }

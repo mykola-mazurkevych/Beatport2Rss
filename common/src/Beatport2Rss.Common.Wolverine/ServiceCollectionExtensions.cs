@@ -37,7 +37,8 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddWolverineListener<TDbContext>(
             IConfiguration configuration,
             Assembly handlersAssembly,
-            Action<RabbitMqListenerConfiguration> configureTopics)
+            Action<RabbitMqListenerConfiguration> configureTopics,
+            Action<WolverineOptions>? configurePolicies = null)
             where TDbContext : DbContext, IBeatport2RssDbContext
         {
             return services.AddWolverine<TDbContext>(configuration, options =>
@@ -45,6 +46,7 @@ public static class ServiceCollectionExtensions
                 options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(DefaultMessageRetentionInDays);
                 options.Policies.UseDurableLocalQueues();
                 options.Discovery.IncludeAssembly(handlersAssembly);
+                configurePolicies?.Invoke(options);
                 configureTopics(
                     options.ListenToRabbitQueue($"{TDbContext.Schema}_events")
                         .UseDurableInbox());
@@ -62,5 +64,4 @@ public static class ServiceCollectionExtensions
                 })
                 .AddResourceSetupOnStartup();
     }
-
 }

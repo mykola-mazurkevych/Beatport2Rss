@@ -1,6 +1,5 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Subscriptions;
-using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
@@ -14,16 +13,6 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
     ISubscriptionCommandRepository
 {
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
-
-    public Task<bool> ExistsAsync(
-        SubscriptionType type,
-        BeatportId beatportId,
-        CancellationToken cancellationToken = default) =>
-        ExistsAsync(
-            subscription =>
-                subscription.Type == type &&
-                subscription.BeatportId == beatportId,
-            cancellationToken);
 
     public Task<Subscription> LoadWithTagsAsync(
         Slug slug,

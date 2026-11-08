@@ -7,8 +7,11 @@ public sealed record SubscriptionCreated(
     Guid Id,
     DateTimeOffset OccurredAt,
     Guid SubscriptionId,
-    string Name,
     SubscriptionType Type,
+    string Name,
     int BeatportId,
-    string BeatportSlug) :
+    string BeatportSlug,
+    Uri ImageUri,
+    Uri? Website,
+    string? Bio) :
     IIntegrationEvent;
