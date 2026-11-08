@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 using Beatport2Rss.Api.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Api.Endpoints.Subscriptions.Requests;
-using Beatport2Rss.Api.Endpoints.Subscriptions.Responses;
 using Beatport2Rss.Api.Extensions;
 
 using Mediator;
@@ -11,24 +10,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Beatport2Rss.Api.Endpoints.Subscriptions.Handlers;
 
-internal static class CreateSubscriptionEndpointHandler
+internal static class RequestSubscriptionEndpointHandler
 {
     public static async Task<IResult> Handle(
-        [FromBody] [Required] CreateSubscriptionRequest request,
+        [FromBody] [Required] RequestSubscriptionRequest request,
         [FromServices] IMediator mediator,
         HttpContext context,
         CancellationToken cancellationToken)
     {
-        var command = new CreateSubscriptionCommand(
+        var command = new RequestSubscriptionCommand(
             request.Type,
-            request.BeatportId,
-            request.CountryCode);
+            request.BeatportId);
         var result = await mediator.Send(command, cancellationToken);
         return result.ToAspNetCoreResult(
-            () => Results.CreatedAtRoute(
-                SubscriptionEndpointNames.Get,
-                new { slug = result.Value.Slug },
-                SubscriptionResponse.Create(result.Value)),
+            () => Results.Accepted(),
             context);
     }
 }

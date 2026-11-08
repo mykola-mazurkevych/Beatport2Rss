@@ -1,3 +1,5 @@
+// ReSharper disable UnusedNullableDirective
+
 using Beatport2Rss.Common.Domain.Constants;
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -27,12 +29,14 @@ public static class PropertyBuilderExtensions
                 .IsRequired(required: false);
     }
 
+    #nullable disable
     extension(PropertyBuilder<Uri> builder)
     {
-        public PropertyBuilder<Uri> IsUri() =>
+        public PropertyBuilder<Uri> IsUri(bool required = true) =>
             builder
                 .HasConversion<string>()
                 .HasMaxLength(MaxLengthConstants.Uri)
-                .IsRequired();
+                .IsRequired(required);
     }
+    #nullable enable
 }

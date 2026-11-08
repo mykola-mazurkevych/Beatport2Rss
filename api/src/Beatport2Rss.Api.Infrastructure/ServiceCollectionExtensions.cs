@@ -3,6 +3,7 @@
 using System.Text;
 using System.Text.Json;
 
+using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
@@ -56,6 +57,11 @@ public static class ServiceCollectionExtensions
                 .AddServices()
                 .AddPaging()
                 .AddPersistence(configuration)
+                .AddWolverineListener<ApiDbContext>(
+                    configuration,
+                    typeof(ApiApplication).Assembly,
+                    options => options
+                        .ListensTo<SubscriptionCreated>())
                 .AddWolverinePublisher<ApiDbContext>(
                     configuration,
                     options => options
@@ -64,7 +70,7 @@ public static class ServiceCollectionExtensions
                         .Publishes<FeedDeleted>()
                         .Publishes<FeedSubscriptionCreated>()
                         .Publishes<FeedSubscriptionDeleted>()
-                        .Publishes<SubscriptionCreated>()
+                        .Publishes<SubscriptionRequested>()
                         .Publishes<TagCreated>()
                         .Publishes<TagUpdated>()
                         .Publishes<TagDeleted>())

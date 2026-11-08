@@ -33,12 +33,12 @@ internal static class SubscriptionEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             groupBuilder
-                .MapPost("", CreateSubscriptionEndpointHandler.Handle)
+                .MapPost("", RequestSubscriptionEndpointHandler.Handle)
                 .WithName(SubscriptionEndpointNames.Create)
-                .WithDescription("Create a subscription by type")
-                .WithSummary("Create Subscription")
-                .Accepts<CreateSubscriptionRequest>(MediaTypeNames.Application.Json)
-                .Produces<SubscriptionResponse>(StatusCodes.Status201Created, MediaTypeNames.Application.Json)
+                .WithDescription("Request creating a subscription by type")
+                .WithSummary("Request Subscription Creation")
+                .Accepts<RequestSubscriptionRequest>(MediaTypeNames.Application.Json)
+                .Produces(StatusCodes.Status202Accepted)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, MediaTypeNames.Application.Json)
