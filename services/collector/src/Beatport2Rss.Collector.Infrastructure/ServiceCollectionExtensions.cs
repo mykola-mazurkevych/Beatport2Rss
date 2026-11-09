@@ -6,7 +6,6 @@ using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.Beatport;
-using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
@@ -44,25 +43,21 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddMessaging(IConfiguration configuration) =>
             services
-                .AddWolverineListener<CollectorDbContext>(
+                .AddWolverine<CollectorDbContext, CollectorApplication>(
                     configuration,
-                    typeof(CollectorApplication).Assembly,
-                    listener => listener
+                    configurePublisher: options => options
+                        .Publishes<SubscriptionCreated>(),
+                    configureListener: listener => listener
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<SubscriptionRequested>(),
-                    options => options
-                        .Retry<HttpRequestException>()
-                        .Retry<RetryableBeatportRequestException>())
-                .AddWolverinePublisher<CollectorDbContext>(
-                    configuration,
-                    options => options
-                        .Publishes<SubscriptionCreated>());
+                    configureRetries: options => options
+                        .Retries<HttpRequestException>()
+                        .Retries<RetryableBeatportRequestException>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddUnitOfWork<CollectorDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions)
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
     }

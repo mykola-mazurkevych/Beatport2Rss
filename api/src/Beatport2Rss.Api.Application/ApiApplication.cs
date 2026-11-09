@@ -1,3 +1,3 @@
 namespace Beatport2Rss.Api.Application;
 
-public static class ApiApplication;
+public sealed class ApiApplication;

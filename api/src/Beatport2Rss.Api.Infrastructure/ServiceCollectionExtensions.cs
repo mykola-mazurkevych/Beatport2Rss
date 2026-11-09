@@ -57,14 +57,9 @@ public static class ServiceCollectionExtensions
                 .AddServices()
                 .AddPaging()
                 .AddPersistence(configuration)
-                .AddWolverineListener<ApiDbContext>(
+                .AddWolverine<ApiDbContext, ApiApplication>(
                     configuration,
-                    typeof(ApiApplication).Assembly,
-                    options => options
-                        .ListensTo<SubscriptionCreated>())
-                .AddWolverinePublisher<ApiDbContext>(
-                    configuration,
-                    options => options
+                    configurePublisher: options => options
                         .Publishes<FeedCreated>()
                         .Publishes<FeedUpdated>()
                         .Publishes<FeedDeleted>()
@@ -73,7 +68,9 @@ public static class ServiceCollectionExtensions
                         .Publishes<SubscriptionRequested>()
                         .Publishes<TagCreated>()
                         .Publishes<TagUpdated>()
-                        .Publishes<TagDeleted>())
+                        .Publishes<TagDeleted>(),
+                    configureListener: listener => listener
+                        .ListensTo<SubscriptionCreated>())
                 .AddSecurityServices();
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
