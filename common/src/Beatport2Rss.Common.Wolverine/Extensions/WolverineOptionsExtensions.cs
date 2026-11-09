@@ -24,6 +24,33 @@ public static class WolverineOptionsExtensions
 
     extension(WolverineOptions options)
     {
+        public WolverineOptions Publishes<TIntegrationEvent>()
+            where TIntegrationEvent : IIntegrationEvent
+        {
+            options
+                .PublishMessage<TIntegrationEvent>()
+                .ToRabbitTopic(
+                    IntegrationEventTopicResolver.GetTopicName<TIntegrationEvent>(),
+                    RabbitMQTopology.IntegrationEventsExchange)
+                .UseDurableOutbox();
+            return options;
+        }
+
+        public WolverineOptions Retries<TException>()
+            where TException : Exception
+        {
+            options
+                .OnException<TException>()
+                .RetryWithCooldown(
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30),
+                    TimeSpan.FromSeconds(60))
+                .WithBoundedJitter(0.25);
+            return options;
+        }
+
         internal void ConfigureWolverine<TDbContext>(IConfiguration configuration)
             where TDbContext : DbContext, IBeatport2RssDbContext
         {
@@ -55,32 +82,6 @@ public static class WolverineOptionsExtensions
 
             options.UseFluentValidation();
             options.Policies.OnException<ValidationException>().MoveToErrorQueue();
-        }
-
-        public WolverineOptions Publishes<TIntegrationEvent>()
-            where TIntegrationEvent : IIntegrationEvent
-        {
-            options.PublishMessage<TIntegrationEvent>()
-                .ToRabbitTopic(
-                    IntegrationEventTopicResolver.GetTopicName<TIntegrationEvent>(),
-                    RabbitMQTopology.IntegrationEventsExchange)
-                .UseDurableOutbox();
-            return options;
-        }
-
-        public WolverineOptions Retry<TException>()
-            where TException : Exception
-        {
-            options
-                .OnException<TException>()
-                .RetryWithCooldown(
-                    TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(5),
-                    TimeSpan.FromSeconds(10),
-                    TimeSpan.FromSeconds(30),
-                    TimeSpan.FromMinutes(1))
-                .WithBoundedJitter(0.25);
-            return options;
         }
     }
 }

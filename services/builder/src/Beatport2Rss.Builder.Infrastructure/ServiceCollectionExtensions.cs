@@ -50,10 +50,10 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IValidator<UpdateFeedCommand>, UpdateFeedCommandValidator>()
                 .AddTransient<IValidator<DeleteFeedCommand>, DeleteFeedCommandValidator>()
                 .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
-                .AddWolverineListener<BuilderDbContext>(
+                .AddWolverine<BuilderDbContext, BuilderApplication>(
                     configuration,
-                    typeof(BuilderApplication).Assembly,
-                    listener => listener
+                    configurePublisher: null,
+                    configureListener: listener => listener
                         .ListensTo<FeedCreated>()
                         .ListensTo<FeedUpdated>()
                         .ListensTo<FeedDeleted>()

@@ -1,7 +1,5 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
-using System.Reflection;
-
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.Wolverine.Extensions;
@@ -25,35 +23,38 @@ public static class ServiceCollectionExtensions
 
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddWolverinePublisher<TDbContext>(
+        public IServiceCollection AddWolverine<TDbContext, THandlersMarker>(
             IConfiguration configuration,
-            Action<WolverineOptions> configurePublishedEvents)
+            Action<WolverineOptions>? configurePublisher = null,
+            Action<RabbitMqListenerConfiguration>? configureListener = null,
+            Action<WolverineOptions>? configureRetries = null)
             where TDbContext : DbContext, IBeatport2RssDbContext =>
-            services
-                .AddTransient<IIntegrationEventOutbox, WolverineIntegrationEventOutbox<TDbContext>>()
-                .AddTransient<IUnitOfWork, WolverineUnitOfWork<TDbContext>>()
-                .AddWolverine<TDbContext>(configuration, configurePublishedEvents);
-
-        public IServiceCollection AddWolverineListener<TDbContext>(
-            IConfiguration configuration,
-            Assembly handlersAssembly,
-            Action<RabbitMqListenerConfiguration> configureTopics,
-            Action<WolverineOptions>? configurePolicies = null)
-            where TDbContext : DbContext, IBeatport2RssDbContext
-        {
-            return services.AddWolverine<TDbContext>(configuration, options =>
+            services.AddWolverineHost<TDbContext>(configuration, options =>
             {
-                options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(DefaultMessageRetentionInDays);
-                options.Policies.UseDurableLocalQueues();
-                options.Discovery.IncludeAssembly(handlersAssembly);
-                configurePolicies?.Invoke(options);
-                configureTopics(
-                    options.ListenToRabbitQueue($"{TDbContext.Schema}_events")
-                        .UseDurableInbox());
-            });
-        }
+                if (configurePublisher is not null)
+                {
+                    services
+                        .AddTransient<IIntegrationEventOutbox, WolverineIntegrationEventOutbox<TDbContext>>()
+                        .AddTransient<IUnitOfWork, WolverineUnitOfWork<TDbContext>>();
+                    configurePublisher(options);
+                }
 
-        private IServiceCollection AddWolverine<TDbContext>(IConfiguration configuration, Action<WolverineOptions> configure)
+                if (configureListener is not null)
+                {
+                    options.Durability.KeepAfterMessageHandling = TimeSpan.FromDays(DefaultMessageRetentionInDays);
+                    options.Policies.UseDurableLocalQueues();
+                    options.Discovery.IncludeAssembly(typeof(THandlersMarker).Assembly);
+
+                    var listener = options.ListenToRabbitQueue($"{TDbContext.Schema}_events").UseDurableInbox();
+                    configureListener(listener);
+                }
+
+                configureRetries?.Invoke(options);
+            });
+
+        private IServiceCollection AddWolverineHost<TDbContext>(
+            IConfiguration configuration,
+            Action<WolverineOptions> configure)
             where TDbContext : DbContext, IBeatport2RssDbContext =>
             services
                 .AddWolverine(options =>

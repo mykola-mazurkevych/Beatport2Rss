@@ -13,7 +13,8 @@ public static class RabbitMqListenerConfigurationExtensions
         public RabbitMqListenerConfiguration ListensTo<TIntegrationEvent>()
             where TIntegrationEvent : IIntegrationEvent =>
             listener.ConfigureQueue(queue =>
-                queue.BindTopic(IntegrationEventTopicResolver.GetTopicName<TIntegrationEvent>())
+                queue
+                    .BindTopic(IntegrationEventTopicResolver.GetTopicName<TIntegrationEvent>())
                     .ToExchange(RabbitMQTopology.IntegrationEventsExchange));
     }
 }
