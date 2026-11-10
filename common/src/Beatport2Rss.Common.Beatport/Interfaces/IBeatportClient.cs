@@ -10,4 +10,9 @@ public interface IBeatportClient
         int beatportId,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto;
+
+    Task<Result<IReadOnlyCollection<int>>> SearchForIdsAsync<TBeatportDto>(
+        IReadOnlyDictionary<string, string?> queryParameters,
+        CancellationToken cancellationToken = default)
+        where TBeatportDto : BeatportDto;
 }
