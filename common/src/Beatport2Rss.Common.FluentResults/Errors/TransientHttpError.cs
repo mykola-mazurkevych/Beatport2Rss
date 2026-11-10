@@ -1,3 +1,5 @@
+// ReSharper disable UnusedMember.Global
+
 using System.Net;
 
 using FluentResults;

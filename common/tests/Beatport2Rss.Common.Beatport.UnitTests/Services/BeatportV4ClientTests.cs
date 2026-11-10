@@ -24,7 +24,7 @@ public sealed class BeatportV4ClientTests
         var cancellationToken = cancellationSource.Token;
         var receivedTokens = new List<CancellationToken>();
         var requestCalls = 0;
-        var label = new BeatportLabelDto(42, "label", "Label", new BeatportImage(new Uri("https://example.com/image.jpg")));
+        var label = new BeatportLabelDto(42, "label", "Label", new BeatportImageDto(new Uri("https://example.com/image.jpg")));
         var tokenProvider = new StubTokenProvider(token =>
         {
             receivedTokens.Add(token);
@@ -38,7 +38,7 @@ public sealed class BeatportV4ClientTests
             Assert.Equal(new Uri("https://example.com/v4/labels/42/"), request.RequestUri);
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(label) });
         });
-        using var provider = CreateProvider(tokenProvider, handler);
+        await using var provider = CreateProvider(tokenProvider, handler);
         var client = provider.GetRequiredService<IBeatportClient>();
 
         var firstResult = await client.GetAsync<BeatportLabelDto>(42, cancellationToken);
@@ -66,7 +66,7 @@ public sealed class BeatportV4ClientTests
         var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Fail<string>(errors)));
         using var handler = new StubHttpMessageHandler((_, _) =>
             throw new InvalidOperationException("No HTTP request should be sent when token acquisition fails."));
-        using var provider = CreateProvider(tokenProvider, handler);
+        await using var provider = CreateProvider(tokenProvider, handler);
         var client = provider.GetRequiredService<IBeatportClient>();
 
         var result = await client.GetAsync<BeatportLabelDto>(42, TestContext.Current.CancellationToken);
@@ -92,7 +92,7 @@ public sealed class BeatportV4ClientTests
         });
         using var handler = new StubHttpMessageHandler((_, _) =>
             throw new InvalidOperationException("No HTTP request should be sent after cancellation."));
-        using var provider = CreateProvider(tokenProvider, handler);
+        await using var provider = CreateProvider(tokenProvider, handler);
         var client = provider.GetRequiredService<IBeatportClient>();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => client.GetAsync<BeatportLabelDto>(42, cancellationToken));
@@ -112,7 +112,7 @@ public sealed class BeatportV4ClientTests
         {
             Content = JsonContent.Create(new { Detail = "Request failed" })
         }));
-        using var provider = CreateProvider(tokenProvider, handler);
+        await using var provider = CreateProvider(tokenProvider, handler);
         var client = provider.GetRequiredService<IBeatportClient>();
 
         var result = await client.GetAsync<BeatportLabelDto>(42, TestContext.Current.CancellationToken);
@@ -121,6 +121,52 @@ public sealed class BeatportV4ClientTests
         var error = Assert.Single(result.Errors);
         Assert.IsType(errorType, error);
         Assert.Contains("Request failed", error.Message, StringComparison.Ordinal);
+    }
+
+    private static readonly int[] Expected = [42, 43, 44];
+
+    [Fact]
+    public async Task SearchForIdsAsync_WhenResultsHaveNextPage_ShouldReturnAllIdsAndIncrementPage()
+    {
+        var requestUris = new List<Uri?>();
+        using var handler = new StubHttpMessageHandler((request, _) =>
+        {
+            requestUris.Add(request.RequestUri);
+
+            var content = requestUris.Count switch
+            {
+                1 => JsonContent.Create(new
+                {
+                    Results = new[] { new { Id = 42 }, new { Id = 43 } },
+                    Next = "https://example.com/v4/labels/?name=A%26B&page=2"
+                }),
+                2 => JsonContent.Create(new
+                {
+                    Results = new[] { new { Id = 44 } },
+                    Next = (string?)null
+                }),
+                _ => throw new InvalidOperationException("Search should stop after the final page.")
+            };
+
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = content });
+        });
+        var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
+        await using var provider = CreateProvider(tokenProvider, handler);
+        var client = provider.GetRequiredService<IBeatportClient>();
+
+        var result = await client.SearchForIdsAsync<BeatportLabelDto>(
+            new Dictionary<string, string?> { ["name"] = "A&B" },
+            TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(Expected, result.Value);
+        Assert.Equal(
+            new[]
+            {
+                new Uri("https://example.com/v4/labels/?name=A%26B&page=1"),
+                new Uri("https://example.com/v4/labels/?name=A%26B&page=2")
+            },
+            requestUris);
     }
 
     private static ServiceProvider CreateProvider(IBeatportTokenProvider tokenProvider, HttpMessageHandler handler)
