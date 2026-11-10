@@ -3,7 +3,6 @@ using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
-using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -25,7 +24,6 @@ internal sealed record CreateSubscriptionCommand(
 
 internal sealed class CreateSubscriptionCommandHandler(
     IClock clock,
-    IBeatportTokenProvider beatportTokenProvider,
     IBeatportClient beatportClient,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     IUnitOfWork unitOfWork,
@@ -98,7 +96,7 @@ internal sealed class CreateSubscriptionCommandHandler(
 
     private async Task<Result<BeatportSubscription>> GetArtistSubscriptionAsync(int beatportId, CancellationToken cancellationToken)
     {
-        var artistResult = await GetBeatportDtoAsync<BeatportArtistDto>(beatportId, cancellationToken);
+        var artistResult = await beatportClient.GetAsync<BeatportArtistDto>(beatportId, cancellationToken);
         return artistResult switch
         {
             { IsFailed: true } => Result.Fail<BeatportSubscription>(artistResult.Errors),
@@ -116,7 +114,7 @@ internal sealed class CreateSubscriptionCommandHandler(
 
     private async Task<Result<BeatportSubscription>> GetLabelSubscriptionAsync(int beatportId, CancellationToken cancellationToken)
     {
-        var labelResult = await GetBeatportDtoAsync<BeatportLabelDto>(beatportId, cancellationToken);
+        var labelResult = await beatportClient.GetAsync<BeatportLabelDto>(beatportId, cancellationToken);
         return labelResult switch
         {
             { IsFailed: true } => Result.Fail<BeatportSubscription>(labelResult.Errors),
@@ -132,19 +130,6 @@ internal sealed class CreateSubscriptionCommandHandler(
         };
     }
 
-    private async Task<Result<TBeatportDto?>> GetBeatportDtoAsync<TBeatportDto>(int beatportId, CancellationToken cancellationToken)
-        where TBeatportDto : BeatportDto
-    {
-        var accessTokenResult = await beatportTokenProvider.ProvideAsync(cancellationToken);
-        if (accessTokenResult.IsFailed)
-        {
-            return Result.Fail<TBeatportDto?>(accessTokenResult.Errors);
-        }
-
-        var beatportDto = await beatportClient.GetAsync<TBeatportDto>(beatportId, accessTokenResult.Value, cancellationToken);
-
-        return beatportDto;
-    }
     private sealed record BeatportSubscription(
         SubscriptionType Type,
         int Id,

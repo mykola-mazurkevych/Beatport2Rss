@@ -6,6 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Beatport2Rss.Common.Beatport\Beatport2Rss.Common.Beatport.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Common.FluentResults\Beatport2Rss.Common.FluentResults.csproj" />
   </ItemGroup>
 

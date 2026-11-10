@@ -16,6 +16,7 @@ namespace Beatport2Rss.Common.Beatport.Services;
 
 internal sealed class BeatportV4Client(
     HttpClient httpClient,
+    IBeatportTokenProvider beatportTokenProvider,
     IOptions<JsonSerializerOptions> jsonSerializerOptions) :
     IBeatportClient
 {
@@ -23,14 +24,19 @@ internal sealed class BeatportV4Client(
 
     public async Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
         int id,
-        string accessToken,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto
     {
+        var accessTokenResult = await beatportTokenProvider.ProvideAsync(cancellationToken).ConfigureAwait(false);
+        if (accessTokenResult.IsFailed)
+        {
+            return Result.Fail(accessTokenResult);
+        }
+
         using var request = new HttpRequestMessage(HttpMethod.Get, new Uri($"{GetSegment<TBeatportDto>()}/{id}/", UriKind.Relative));
         request.Version = HttpVersion.Version11;
         request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessTokenResult.Value);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.UserAgent.Add(new ProductInfoHeaderValue("Beatport2Rss", "1.0"));
 

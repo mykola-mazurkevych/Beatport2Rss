@@ -1,7 +1,6 @@
 using System.Net;
 
-using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
-using Beatport2Rss.Common.FluentResults.Errors;
+using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 
 using BeatportAccessTokenService;
@@ -42,9 +41,9 @@ internal sealed class BeatportTokenProvider(
             var errorMessage = $"Token service request failed: {exception.Message}";
             return exception.StatusCode switch
             {
-                HttpStatusCode.RequestTimeout => Result.Fail<string>(new RequestTimeoutError(errorMessage)),
-                HttpStatusCode.TooManyRequests => Result.Fail<string>(new TooManyRequestsError(errorMessage)),
-                { } statusCode when (int)statusCode is >= 500 and <= 599 => Result.Fail<string>(new TransientHttpError(errorMessage, statusCode)),
+                HttpStatusCode.RequestTimeout => Result.RequestTimeout(errorMessage),
+                HttpStatusCode.TooManyRequests => Result.TooManyRequests(errorMessage),
+                { } statusCode when (int)statusCode is >= 500 and <= 599 => Result.Transient(errorMessage, statusCode),
                 null => Result.Transient<string>(errorMessage),
                 _ => Result.Fail<string>(errorMessage),
             };

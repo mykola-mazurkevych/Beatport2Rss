@@ -1,7 +1,7 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
+using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.BeatportTokenProvider.Options;
-using Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
 
 using BeatportAccessTokenService;
 
