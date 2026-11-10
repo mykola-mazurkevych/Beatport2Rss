@@ -1,6 +1,6 @@
 using FluentResults;
 
-namespace Beatport2Rss.Common.BeatportTokenProvider.Services.Interfaces;
+namespace Beatport2Rss.Common.Beatport.Interfaces;
 
 public interface IBeatportTokenProvider
 {

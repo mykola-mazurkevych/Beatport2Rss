@@ -17,7 +17,7 @@ public static class ResultExtensions
             Result.Fail(new ConflictError(message));
 
         public static Result Fail(IResultBase result) =>
-            Result.Fail(result.ErrorMessage);
+            Result.Fail(result.Errors);
 
         public static Result Forbidden(string message) =>
             Result.Fail(new ForbiddenError(message));
@@ -51,9 +51,6 @@ public static class ResultExtensions
 
         public static Result Unprocessable(string message) =>
             Result.Fail(new UnprocessableError(message));
-
-        public static Result Unprocessable(IResultBase result) =>
-            Result.Unprocessable(result.ErrorMessage);
     }
 
     extension(IResultBase result)

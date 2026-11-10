@@ -8,7 +8,6 @@ public interface IBeatportClient
 {
     Task<Result<TBeatportDto?>> GetAsync<TBeatportDto>(
         int beatportId,
-        string accessToken,
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto;
 }

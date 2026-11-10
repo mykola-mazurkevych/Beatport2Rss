@@ -6,6 +6,7 @@ using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.Beatport;
+using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
@@ -26,6 +27,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
                 .AddBeatportClient(configuration)
+                .AddBeatportTokenProvider(configuration)
                 .AddPersistence(configuration)
                 .AddMessaging(configuration);
 
