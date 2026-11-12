@@ -7,9 +7,9 @@ public sealed record ReleaseCollected(
     Guid ReleaseId,
     int BeatportId,
     string BeatportSlug,
-    IReadOnlyCollection<ReleaseCollectedArtist> Artists,
-    IReadOnlyCollection<ReleaseCollectedArtist> Remixers,
-    ReleaseCollectedLabel Label,
+    IReadOnlyCollection<int> ArtistBeatportIds,
+    IReadOnlyCollection<int> RemixerBeatportIds,
+    int LabelBeatportId,
     string ReleaseName,
     DateOnly ReleaseDate,
     string CatalogNumber,
@@ -18,20 +18,12 @@ public sealed record ReleaseCollected(
     IReadOnlyCollection<ReleaseCollectedTrack> Tracks) :
     IIntegrationEvent;
 
-public sealed record ReleaseCollectedArtist(
-    int BeatportId,
-    string Name);
-
-public sealed record ReleaseCollectedLabel(
-    int BeatportId,
-    string Name);
-
 public sealed record ReleaseCollectedTrack(
     int BeatportId,
     int Number,
     string Name,
     string MixName,
-    IReadOnlyCollection<ReleaseCollectedArtist> Artists,
-    IReadOnlyCollection<ReleaseCollectedArtist> Remixers,
+    IReadOnlyCollection<int> ArtistBeatportIds,
+    IReadOnlyCollection<int> RemixerBeatportIds,
     TimeSpan Length,
     Uri SampleUri);

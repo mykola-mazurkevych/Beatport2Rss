@@ -8,7 +8,7 @@ public sealed record TrackDto(
     int Number,
     TrackName Name,
     MixName MixName,
-    IReadOnlyCollection<ArtistDto> Artists,
-    IReadOnlyCollection<ArtistDto> Remixers,
+    IReadOnlyCollection<BeatportId> ArtistBeatportIds,
+    IReadOnlyCollection<BeatportId> RemixerBeatportIds,
     TimeSpan Length,
     Uri SampleUri);
