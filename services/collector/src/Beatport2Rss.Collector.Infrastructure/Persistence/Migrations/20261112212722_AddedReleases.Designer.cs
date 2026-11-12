@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CollectorDbContext))]
-    [Migration("20261112190335_AddedReleases")]
+    [Migration("20261112212722_AddedReleases")]
     partial class AddedReleases
     {
         /// <inheritdoc />
@@ -55,16 +55,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FailReason")
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly?>("RefreshAttemptedAt")
-                        .HasColumnType("date");
-
-                    b.Property<string>("RefreshStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.Property<DateOnly?>("RefreshedAt")
                         .HasColumnType("date");

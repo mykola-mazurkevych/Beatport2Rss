@@ -21,28 +21,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                 oldType: "timestamp with time zone",
                 oldNullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "FailReason",
-                schema: "collector",
-                table: "Subscriptions",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateOnly>(
-                name: "RefreshAttemptedAt",
-                schema: "collector",
-                table: "Subscriptions",
-                type: "date",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "RefreshStatus",
-                schema: "collector",
-                table: "Subscriptions",
-                type: "character varying(50)",
-                maxLength: 50,
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "Releases",
                 schema: "collector",
@@ -71,21 +49,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
             migrationBuilder.DropTable(
                 name: "Releases",
                 schema: "collector");
-
-            migrationBuilder.DropColumn(
-                name: "FailReason",
-                schema: "collector",
-                table: "Subscriptions");
-
-            migrationBuilder.DropColumn(
-                name: "RefreshAttemptedAt",
-                schema: "collector",
-                table: "Subscriptions");
-
-            migrationBuilder.DropColumn(
-                name: "RefreshStatus",
-                schema: "collector",
-                table: "Subscriptions");
 
             migrationBuilder.AlterColumn<DateTimeOffset>(
                 name: "RefreshedAt",

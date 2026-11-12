@@ -53,16 +53,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("FailReason")
-                        .HasColumnType("text");
-
-                    b.Property<DateOnly?>("RefreshAttemptedAt")
-                        .HasColumnType("date");
-
-                    b.Property<string>("RefreshStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<DateOnly?>("RefreshedAt")
                         .HasColumnType("date");
 
