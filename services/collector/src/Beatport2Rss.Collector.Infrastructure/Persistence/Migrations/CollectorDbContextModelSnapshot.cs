@@ -23,6 +23,25 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Beatport2Rss.Collector.Domain.Releases.Release", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeatportId")
+                        .IsUnique();
+
+                    b.ToTable("Releases", "collector");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Collector.Domain.Subscriptions.Subscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -34,8 +53,18 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTimeOffset?>("RefreshedAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<string>("FailReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("RefreshAttemptedAt")
+                        .HasColumnType("date");
+
+                    b.Property<string>("RefreshStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateOnly?>("RefreshedAt")
+                        .HasColumnType("date");
 
                     b.Property<int>("SubscribersCount")
                         .HasColumnType("integer");
