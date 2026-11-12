@@ -18,9 +18,9 @@ public sealed record CreateReleaseCommand(
     DateTimeOffset CreatedAt,
     BeatportId BeatportId,
     BeatportSlug BeatportSlug,
-    IReadOnlyCollection<ArtistDto> Artists,
-    IReadOnlyCollection<ArtistDto> Remixers,
-    LabelDto Label,
+    IReadOnlyCollection<BeatportId> ArtistBeatportIds,
+    IReadOnlyCollection<BeatportId> RemixerBeatportIds,
+    BeatportId LabelBeatportId,
     ReleaseName ReleaseName,
     DateOnly ReleaseDate,
     CatalogNumber CatalogNumber,
@@ -46,43 +46,30 @@ public static class CreateReleaseCommandHandler
             return;
         }
 
-        HashSet<BeatportId> subscriptionBeatportIds = [createReleaseCommand.Label.BeatportId];
-        subscriptionBeatportIds.UnionWith(createReleaseCommand.Artists.Select(artist => artist.BeatportId));
-        subscriptionBeatportIds.UnionWith(createReleaseCommand.Remixers.Select(remixer => remixer.BeatportId));
+        HashSet<BeatportId> subscriptionBeatportIds = [createReleaseCommand.LabelBeatportId];
+        subscriptionBeatportIds.UnionWith(createReleaseCommand.ArtistBeatportIds);
+        subscriptionBeatportIds.UnionWith(createReleaseCommand.RemixerBeatportIds);
         // Technically, artists/remixers from tracks should alredy be included in release's artists/tracks
-        subscriptionBeatportIds.UnionWith(createReleaseCommand.Tracks.SelectMany(track => track.Artists).Select(artist => artist.BeatportId));
-        subscriptionBeatportIds.UnionWith(createReleaseCommand.Tracks.SelectMany(track => track.Remixers).Select(remixer => remixer.BeatportId));
+        subscriptionBeatportIds.UnionWith(createReleaseCommand.Tracks.SelectMany(track => track.ArtistBeatportIds));
+        subscriptionBeatportIds.UnionWith(createReleaseCommand.Tracks.SelectMany(track => track.RemixerBeatportIds));
 
         var subscriptions = await subscriptionCommandRepository.FindAllAsync(subscriptionBeatportIds, cancellationToken);
-        var subscriptionsMap = subscriptions
-            .ToDictionary(subscription => (subscription.Type, subscription.BeatportId));
+        var subscriptionsMap = subscriptions.ToDictionary(subscription => (subscription.Type, subscription.BeatportId));
 
-        var label = await GetSubscriptionAsync(
-            subscriptionsMap,
-            SubscriptionType.Label,
-            createReleaseCommand.Label.BeatportId,
-            createReleaseCommand.Label.Name,
-            clock,
-            subscriptionCommandRepository,
-            cancellationToken);
+        var label = subscriptionsMap[(SubscriptionType.Label, createReleaseCommand.LabelBeatportId)];
 
-        var releaseArtists = await GetArtistsAsync(
+        var releaseArtists = GetArtists(
             createReleaseCommand.ReleaseId,
-            createReleaseCommand.Artists,
-            createReleaseCommand.Remixers,
+            createReleaseCommand.ArtistBeatportIds,
+            createReleaseCommand.RemixerBeatportIds,
             subscriptionsMap,
-            clock,
-            subscriptionCommandRepository,
-            ReleaseArtist.Create,
-            cancellationToken);
+            ReleaseArtist.Create);
 
-        var tracks = await GetTracksAsync(
+        var tracks = GetTracks(
             createReleaseCommand.ReleaseId,
             createReleaseCommand.Tracks,
             subscriptionsMap,
-            clock,
-            subscriptionCommandRepository,
-            cancellationToken);
+            clock);
 
         var release = Release.Create(
             createReleaseCommand.ReleaseId,
@@ -105,29 +92,24 @@ public static class CreateReleaseCommandHandler
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task<IEnumerable<Track>> GetTracksAsync(
+    private static HashSet<Track> GetTracks(
         ReleaseId releaseId,
         IEnumerable<TrackDto> trackDtos,
         Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptionsMap,
-        IClock clock,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        CancellationToken cancellationToken)
+        IClock clock)
     {
         HashSet<Track> tracks = [];
 
-        foreach (var trackDto in trackDtos.OrderBy(t => t.Number))
+        foreach (var trackDto in trackDtos.OrderBy(track => track.Number))
         {
             var trackId = TrackId.Create(Guid.CreateVersion7());
 
-            var trackArtsits = await GetArtistsAsync(
+            var trackArtsits = GetArtists(
                 trackId,
-                trackDto.Artists,
-                trackDto.Remixers,
+                trackDto.ArtistBeatportIds,
+                trackDto.RemixerBeatportIds,
                 subscriptionsMap,
-                clock,
-                subscriptionCommandRepository,
-                TrackArtist.Create,
-                cancellationToken);
+                TrackArtist.Create);
 
             var track = Track.Create(
                 trackId,
@@ -146,67 +128,15 @@ public static class CreateReleaseCommandHandler
         return tracks;
     }
 
-    private static async Task<IEnumerable<TArtist>> GetArtistsAsync<TOwnerId, TArtist>(
+    private static HashSet<TArtist> GetArtists<TOwnerId, TArtist>(
         TOwnerId ownerId,
-        IEnumerable<ArtistDto> artistDtos,
-        IEnumerable<ArtistDto> remixerDtos,
+        IEnumerable<BeatportId> artistBeatportIds,
+        IEnumerable<BeatportId> remixerBeatportIds,
         Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptionsMap,
-        IClock clock,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        Func<TOwnerId, SubscriptionId, ArtistType, TArtist> create,
-        CancellationToken cancellationToken)
-    {
-        HashSet<TArtist> artists = [];
-
-        await ProcessAsync(artistDtos, ArtistType.Artist);
-        await ProcessAsync(remixerDtos, ArtistType.Remixer);
-
-        return artists;
-
-        async Task ProcessAsync(IEnumerable<ArtistDto> dtos, ArtistType type)
-        {
-            foreach (var dto in dtos)
-            {
-                var subscription = await GetSubscriptionAsync(
-                    subscriptionsMap,
-                    SubscriptionType.Artist,
-                    dto.BeatportId,
-                    dto.Name,
-                    clock,
-                    subscriptionCommandRepository,
-                    cancellationToken);
-
-                var artist = create(ownerId, subscription.Id, type);
-                artists.Add(artist);
-            }
-        }
-    }
-
-    private static async Task<Subscription> GetSubscriptionAsync(
-        Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptionsMap,
-        SubscriptionType type,
-        BeatportId beatportId,
-        SubscriptionName name,
-        IClock clock,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        CancellationToken cancellationToken)
-    {
-        var key = (type, beatportId);
-        if (subscriptionsMap.TryGetValue(key, out var subscription))
-        {
-            return subscription;
-        }
-
-        subscription = await subscriptionCommandRepository.AddAsync(
-            Subscription.Create(
-                SubscriptionId.Create(Guid.CreateVersion7()),
-                createdAt: clock.UtcNow,
-                type,
-                name,
-                beatportId),
-            cancellationToken);
-        subscriptionsMap[key] = subscription;
-
-        return subscription;
-    }
+        Func<TOwnerId, SubscriptionId, ArtistType, TArtist> create) =>
+    [
+        .. artistBeatportIds
+            .Select(beatportId => create(ownerId, subscriptionsMap[(SubscriptionType.Artist, beatportId)].Id, ArtistType.Artist))
+            .Union(remixerBeatportIds.Select(beatportId => create(ownerId, subscriptionsMap[(SubscriptionType.Artist, beatportId)].Id, ArtistType.Remixer)))
+    ];
 }
