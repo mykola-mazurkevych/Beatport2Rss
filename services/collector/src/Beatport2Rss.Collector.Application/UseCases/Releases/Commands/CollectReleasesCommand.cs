@@ -49,7 +49,8 @@ public sealed class CollectReleasesCommandHandler(
             return;
         }
 
-        var result = await ProcessSubscriptionAsync(subscription, cancellationToken);
+        var refreshedAt = clock.UtcToday;
+        var result = await ProcessSubscriptionAsync(subscription, refreshedAt, cancellationToken);
         if (result.IsFailed)
         {
             if (result.HasRetryableError)
@@ -61,17 +62,18 @@ public sealed class CollectReleasesCommandHandler(
             return;
         }
 
-        subscription.MarkRefreshed(clock.UtcToday);
+        subscription.MarkRefreshed(refreshedAt);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<Result> ProcessSubscriptionAsync(
         Subscription subscriptionToProcess,
+        DateOnly refreshedAt,
         CancellationToken cancellationToken)
     {
         try
         {
-            var releaseBeatportIdsResult = await CollectReleaseBeatportIdsAsync(subscriptionToProcess, cancellationToken);
+            var releaseBeatportIdsResult = await CollectReleaseBeatportIdsAsync(subscriptionToProcess, refreshedAt, cancellationToken);
             if (releaseBeatportIdsResult.IsFailed)
             {
                 return Result.Fail(releaseBeatportIdsResult);
@@ -173,6 +175,7 @@ public sealed class CollectReleasesCommandHandler(
 
     private async Task<Result<IReadOnlyCollection<BeatportId>>> CollectReleaseBeatportIdsAsync(
         Subscription subscription,
+        DateOnly refreshedAt,
         CancellationToken cancellationToken)
     {
         var subscriptionQueryParameterName = subscription.Type switch
@@ -185,7 +188,7 @@ public sealed class CollectReleasesCommandHandler(
         var queryParameters = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             [subscriptionQueryParameterName] = subscription.BeatportId.ToString(),
-            ["publish_date"] = FormattableString.Invariant($"{subscription.RefreshedAt ?? clock.UtcToday.AddDays(-InitialPullDaysCount):yyyy-MM-dd}:{clock.UtcToday:yyyy-MM-dd}"),
+            ["publish_date"] = FormattableString.Invariant($"{subscription.RefreshedAt ?? refreshedAt.AddDays(-InitialPullDaysCount):yyyy-MM-dd}:{refreshedAt:yyyy-MM-dd}"),
             ["per_page"] = PageSize.ToString(CultureInfo.InvariantCulture),
         };
         var idsResult = await beatportClient.SearchForIdsAsync<BeatportReleaseDto>(queryParameters, cancellationToken);

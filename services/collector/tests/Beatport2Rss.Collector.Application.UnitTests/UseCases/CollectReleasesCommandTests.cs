@@ -157,12 +157,17 @@ public sealed class CollectReleasesCommandTests
         }
     }
 
-    [Fact]
-    public async Task HandleAsync_RecordsTheDateUsedForCollectionWhenUtcDayChanges()
+    [Theory]
+    [InlineData(true, "2026-11-05:2026-11-12")]
+    [InlineData(false, "2026-11-02:2026-11-12")]
+    public async Task HandleAsync_RecordsTheDateUsedForCollectionWhenUtcDayChanges(bool previouslyRefreshed, string expectedPublishDate)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var subscription = CreateSubscription();
-        subscription.MarkRefreshed(new DateOnly(2026, 11, 5));
+        if (previouslyRefreshed)
+        {
+            subscription.MarkRefreshed(new DateOnly(2026, 11, 5));
+        }
         var clock = new Mock<IClock>();
         clock.SetupSequence(value => value.UtcToday)
             .Returns(new DateOnly(2026, 11, 12))
@@ -178,7 +183,7 @@ public sealed class CollectReleasesCommandTests
         await handler.HandleAsync(new CollectReleasesCommand(subscription.Id.Value), cancellationToken);
 
         Assert.NotNull(queryParameters);
-        Assert.Equal("2026-11-05:2026-11-12", queryParameters["publish_date"]);
+        Assert.Equal(expectedPublishDate, queryParameters["publish_date"]);
         Assert.Equal(new DateOnly(2026, 11, 12), subscription.RefreshedAt);
     }
 
