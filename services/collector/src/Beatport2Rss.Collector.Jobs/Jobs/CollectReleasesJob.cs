@@ -11,5 +11,5 @@ internal sealed class CollectReleasesJob(IMessageBus messageBus) :
     IJob
 {
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) =>
-        await messageBus.InvokeAsync(new CollectReleasesCommand(), cancellationToken);
+        await messageBus.SendAsync(new QueueReleaseCollectionCommand());
 }

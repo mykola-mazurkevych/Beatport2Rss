@@ -2,6 +2,7 @@
 
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Wolverine.Extensions;
 using Beatport2Rss.Common.Wolverine.Persistence;
 
@@ -61,6 +62,7 @@ public static class ServiceCollectionExtensions
                 {
                     options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
                     options.ConfigureWolverine<TDbContext>(configuration);
+                    options.Retries<RetryableException>();
                     configure(options);
                 })
                 .AddResourceSetupOnStartup();

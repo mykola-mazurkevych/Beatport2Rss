@@ -22,9 +22,6 @@ public sealed class Subscription :
     public int SubscribersCount { get; private set; }
 
     public DateOnly? RefreshedAt { get; private set; }
-    public DateOnly? RefreshAttemptedAt { get; private set; }
-    public RefreshStatus? RefreshStatus { get; private set; }
-    public string? FailReason { get; private set; }
 
     public static Subscription Create(
         SubscriptionId id,
@@ -52,22 +49,5 @@ public sealed class Subscription :
         return true;
     }
 
-    public void RecordRefreshAttempt(DateOnly refreshAttemptedAt)
-    {
-        RefreshAttemptedAt = refreshAttemptedAt;
-        RefreshStatus = null;
-        FailReason = null;
-    }
-
-    public void RecordRefreshFailure(string failReason)
-    {
-        RefreshStatus = Subscriptions.RefreshStatus.Failed;
-        FailReason = failReason;
-    }
-
-    public void MarkRefreshed()
-    {
-        RefreshStatus = Subscriptions.RefreshStatus.Refreshed;
-        RefreshedAt = RefreshAttemptedAt;
-    }
+    public void MarkRefreshed(DateOnly refreshedAt) => RefreshedAt = refreshedAt;
 }

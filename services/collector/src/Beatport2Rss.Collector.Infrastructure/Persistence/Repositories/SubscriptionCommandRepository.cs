@@ -26,10 +26,11 @@ internal sealed class SubscriptionCommandRepository(
                     subscription.BeatportId == beatportId,
                 cancellationToken);
 
-    public Task<Subscription?> FindNextToRefreshAsync(CancellationToken cancellationToken = default) =>
-        _subscriptions
+    public async Task<IReadOnlyCollection<SubscriptionId>> FindAllToRefreshAsync(CancellationToken cancellationToken = default) =>
+        await _subscriptions
             .Where(subscription => subscription.SubscribersCount > 0)
-            .Where(subscription => subscription.RefreshAttemptedAt != clock.UtcToday)
+            .Where(subscription => subscription.RefreshedAt != clock.UtcToday)
             .OrderBy(subscription => subscription.RefreshedAt ?? DateOnly.MinValue)
-            .FirstOrDefaultAsync(cancellationToken);
+            .Select(subscription => subscription.Id)
+            .ToArrayAsync(cancellationToken);
 }

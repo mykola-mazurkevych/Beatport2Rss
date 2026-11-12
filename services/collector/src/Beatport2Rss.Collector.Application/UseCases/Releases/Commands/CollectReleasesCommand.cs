@@ -3,7 +3,6 @@
 
 using System.Globalization;
 
-using Beatport2Rss.Collector.Application.Exceptions;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Collector.Domain.Releases;
@@ -17,6 +16,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using FluentResults;
@@ -25,16 +25,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 
-public sealed record CollectReleasesCommand;
+public sealed record CollectReleasesCommand(Guid SubscriptionId);
 
-internal sealed class CollectReleasesCommandHandler(
+public sealed class CollectReleasesCommandHandler(
+    IClock clock,
+    IBeatportClient beatportClient,
     IReleaseCommandRepository releaseCommandRepository,
     ISubscriptionCommandRepository subscriptionCommandRepository,
-    ISubscriptionService subscriptionService,
-    IBeatportClient beatportClient,
     IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
-    IClock clock,
+    ISubscriptionService subscriptionService,
     ILogger<CollectReleasesCommand> logger)
 {
     private const int InitialPullDaysCount = 10;
@@ -42,30 +42,26 @@ internal sealed class CollectReleasesCommandHandler(
 
     public async Task HandleAsync(CollectReleasesCommand command, CancellationToken cancellationToken)
     {
-        CollectReleasesCommandLoggerMessages.Started(logger);
-
-        var subscription = await subscriptionCommandRepository.FindNextToRefreshAsync(cancellationToken);
-        if (subscription is null)
+        var subscription = await subscriptionCommandRepository.FindAsync(SubscriptionId.Create(command.SubscriptionId), cancellationToken);
+        if (subscription is null || subscription.SubscribersCount == 0)
         {
-            CollectReleasesCommandLoggerMessages.NoSubscriptions(logger);
+            CollectReleasesCommandLoggerMessages.SubscriptionUnavailable(logger, command.SubscriptionId);
             return;
         }
 
-        CollectReleasesCommandLoggerMessages.Processing(logger, subscription.Id);
-
-        subscription.RecordRefreshAttempt(clock.UtcToday);
-
         var result = await ProcessSubscriptionAsync(subscription, cancellationToken);
-
-        if (result.IsSuccess)
+        if (result.IsFailed)
         {
-            subscription.MarkRefreshed();
-        }
-        else
-        {
-            subscription.RecordRefreshFailure(failReason: result.ErrorMessage);
+            if (result.HasRetryableError)
+            {
+                throw new RetryableException(result.ErrorMessage);
+            }
+
+            CollectReleasesCommandLoggerMessages.CollectionFailed(logger, command.SubscriptionId, result.ErrorMessage);
+            return;
         }
 
+        subscription.MarkRefreshed(clock.UtcToday);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
@@ -150,7 +146,19 @@ internal sealed class CollectReleasesCommandHandler(
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }
         }
-        catch (RetryableBeatportRequestException)
+        catch (RetryableException)
+        {
+            throw;
+        }
+        catch (HttpRequestException)
+        {
+            throw;
+        }
+        catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new RetryableException("The Beatport request timed out.", exception);
+        }
+        catch (OperationCanceledException)
         {
             throw;
         }
@@ -226,9 +234,7 @@ internal sealed class CollectReleasesCommandHandler(
             var result = await subscriptionService.EnsureSubscriptionExistsAsync(type, beatportId, cancellationToken);
             if (result.IsFailed)
             {
-                return result.HasRetryableError
-                    ? throw new RetryableBeatportRequestException(result.ErrorMessage)
-                    : Result.Fail(result);
+                return Result.Fail(result);
             }
         }
 
@@ -238,14 +244,11 @@ internal sealed class CollectReleasesCommandHandler(
 
 internal static partial class CollectReleasesCommandLoggerMessages
 {
-    [LoggerMessage(Level = LogLevel.Information, Message = "Started")]
-    public static partial void Started(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Subscription {SubscriptionId} is no longer available for collection")]
+    public static partial void SubscriptionUnavailable(ILogger logger, Guid subscriptionId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "All subscriptions are up to date")]
-    public static partial void NoSubscriptions(ILogger logger);
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Processing subscription {SubscriptionId}")]
-    public static partial void Processing(ILogger logger, SubscriptionId subscriptionId);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to collect releases for subscription {SubscriptionId}: {ErrorMessage}")]
+    public static partial void CollectionFailed(ILogger logger, Guid subscriptionId, string errorMessage);
 
     [LoggerMessage(Level = LogLevel.Error)]
     public static partial void Failed(ILogger logger, Exception exception);

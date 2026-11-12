@@ -1,9 +1,9 @@
-﻿using Beatport2Rss.Collector.Application.Exceptions;
-using Beatport2Rss.Collector.Application.Interfaces.Services;
+﻿using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using Microsoft.Extensions.Logging;
 
@@ -30,7 +30,7 @@ internal sealed class CreateSubscriptionCommandHandler(
 
             if (subscriptionResult.HasRetryableError)
             {
-                throw new RetryableBeatportRequestException(subscriptionResult.ErrorMessage);
+                throw new RetryableException(subscriptionResult.ErrorMessage);
             }
 
             return;

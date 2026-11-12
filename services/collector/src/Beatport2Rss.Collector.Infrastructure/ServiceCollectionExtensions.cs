@@ -1,8 +1,8 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
 using Beatport2Rss.Collector.Application;
-using Beatport2Rss.Collector.Application.Exceptions;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.Beatport;
@@ -53,14 +53,13 @@ public static class ServiceCollectionExtensions
                     configuration,
                     configurePublisher: options => options
                         .Publishes<SubscriptionCreated>()
-                        .Publishes<ReleaseCollected>(),
+                        .Publishes<ReleaseCollected>()
+                        .LocalQueueFor<CollectReleasesCommand>().Sequential().UseDurableInbox(),
                     configureListener: listener => listener
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<SubscriptionRequested>(),
-                    configureRetries: options => options
-                        .Retries<HttpRequestException>()
-                        .Retries<RetryableBeatportRequestException>());
+                    configureRetries: options => options.Retries<HttpRequestException>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

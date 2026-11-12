@@ -3,6 +3,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Moq" />
     <PackageReference Include="xunit.runner.visualstudio">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -12,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Beatport2Rss.Collector.Infrastructure\Beatport2Rss.Collector.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Beatport2Rss.Collector.Jobs\Beatport2Rss.Collector.Jobs.csproj" />
   </ItemGroup>
 
 </Project>

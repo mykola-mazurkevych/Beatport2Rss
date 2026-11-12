@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
 
                             trigger
                                 .ForJob(collectReleasesJobKey)
-                                .WithCronSchedule(options.CollectReleasesCronSchedule);
+                                .WithCronSchedule(options.CollectReleasesCronSchedule, schedule => schedule.InTimeZone(TimeZoneInfo.Utc));
                         });
                 })
                 .AddQuartzHostedService(options => options.WaitForJobsToComplete = true);

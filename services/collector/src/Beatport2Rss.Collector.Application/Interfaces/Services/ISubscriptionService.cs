@@ -5,7 +5,7 @@ using FluentResults;
 
 namespace Beatport2Rss.Collector.Application.Interfaces.Services;
 
-internal interface ISubscriptionService
+public interface ISubscriptionService
 {
     Task<Result> EnsureSubscriptionExistsAsync(
         SubscriptionType subscriptionType,

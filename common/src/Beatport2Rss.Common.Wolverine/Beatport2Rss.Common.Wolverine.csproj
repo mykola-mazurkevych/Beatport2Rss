@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Common.IntegrationEvents\Beatport2Rss.Common.IntegrationEvents.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Common.Miscellaneous\Beatport2Rss.Common.Miscellaneous.csproj" />
   </ItemGroup>
 
 </Project>

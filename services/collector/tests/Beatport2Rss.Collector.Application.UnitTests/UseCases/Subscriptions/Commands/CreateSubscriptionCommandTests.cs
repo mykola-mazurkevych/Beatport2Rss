@@ -1,12 +1,12 @@
 using System.Net;
 
-using Beatport2Rss.Collector.Application.Exceptions;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Collector.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Errors;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using FluentResults;
 
@@ -66,7 +66,7 @@ public sealed class CreateSubscriptionCommandTests
 
         if (errorIndex < 4)
         {
-            var exception = await Assert.ThrowsAsync<RetryableBeatportRequestException>(() => handler.HandleAsync(command, cancellationToken));
+            var exception = await Assert.ThrowsAsync<RetryableException>(() => handler.HandleAsync(command, cancellationToken));
             Assert.Contains(errors[errorIndex].Message, exception.Message, StringComparison.Ordinal);
         }
         else
