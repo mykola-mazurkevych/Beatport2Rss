@@ -22,6 +22,7 @@ public sealed record CreateReleaseCommand(
     IReadOnlyCollection<BeatportId> RemixerBeatportIds,
     BeatportId LabelBeatportId,
     ReleaseName ReleaseName,
+    string? Description,
     DateOnly ReleaseDate,
     CatalogNumber CatalogNumber,
     Uri ImageUri,
@@ -85,6 +86,7 @@ public static class CreateReleaseCommandHandler
             createReleaseCommand.CatalogNumber,
             createReleaseCommand.ImageUri,
             createReleaseCommand.TracksCount,
+            createReleaseCommand.Description,
             releaseArtists,
             tracks);
         await releaseCommandRepository.AddAsync(release, cancellationToken);

@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Beatport2Rss.Collector.Infrastructure\Beatport2Rss.Collector.Infrastructure.csproj" />
+    <ProjectReference Include="..\Beatport2Rss.Collector.Jobs\Beatport2Rss.Collector.Jobs.csproj" />
   </ItemGroup>
 
 </Project>

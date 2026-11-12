@@ -3,7 +3,6 @@ using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.FluentResults.Errors;
 using Beatport2Rss.Common.FluentResults.Extensions;
 
 using Microsoft.Extensions.Logging;
@@ -29,7 +28,7 @@ internal sealed class CreateSubscriptionCommandHandler(
         {
             CreateSubscriptionCommandLoggerMessages.BeatportFailure(logger, subscriptionResult.ErrorMessage);
 
-            if (subscriptionResult.Errors.Any(error => error is TransientError or TransientHttpError or RequestTimeoutError or TooManyRequestsError))
+            if (subscriptionResult.HasRetryableError)
             {
                 throw new RetryableBeatportRequestException(subscriptionResult.ErrorMessage);
             }

@@ -3,12 +3,15 @@ using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 
-internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscriptions) :
+internal sealed class SubscriptionCommandRepository(
+    DbSet<Subscription> subscriptions,
+    IClock clock) :
     CommandRepository<Subscription, SubscriptionId>(subscriptions),
     ISubscriptionCommandRepository
 {
@@ -23,10 +26,10 @@ internal sealed class SubscriptionCommandRepository(DbSet<Subscription> subscrip
                     subscription.BeatportId == beatportId,
                 cancellationToken);
 
-    public Task<Subscription?> FindAsync(SubscriptionType type, BeatportId beatportId, CancellationToken cancellationToken = default) =>
-        FindAsync(
-            subscription =>
-                subscription.Type == type &&
-                subscription.BeatportId == beatportId,
-            cancellationToken);
+    public Task<Subscription?> FindNextToRefreshAsync(CancellationToken cancellationToken = default) =>
+        _subscriptions
+            .Where(subscription => subscription.SubscribersCount > 0)
+            .Where(subscription => subscription.RefreshAttemptedAt != clock.UtcToday)
+            .OrderBy(subscription => subscription.RefreshedAt ?? DateOnly.MinValue)
+            .FirstOrDefaultAsync(cancellationToken);
 }

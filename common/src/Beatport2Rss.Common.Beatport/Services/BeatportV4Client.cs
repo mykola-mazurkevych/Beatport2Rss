@@ -46,7 +46,7 @@ internal sealed class BeatportV4Client(
         CancellationToken cancellationToken = default)
         where TBeatportDto : BeatportDto
     {
-        List<int> ids = [];
+        HashSet<int> ids = [];
 
         var parameters = new Dictionary<string, string?>(queryParameters);
 
@@ -76,7 +76,7 @@ internal sealed class BeatportV4Client(
 
             var pagedResponse = pagedResult.Value!;
 
-            ids.AddRange(pagedResponse.Results.Select(result => result.Id));
+            ids.UnionWith(pagedResponse.Results.Select(result => result.Id));
 
             if (pagedResponse.Next is null)
             {
@@ -94,6 +94,8 @@ internal sealed class BeatportV4Client(
         {
             nameof(BeatportArtistDto) => "artists",
             nameof(BeatportLabelDto) => "labels",
+            nameof(BeatportReleaseDto) => "releases",
+            nameof(BeatportTrackDto) => "tracks",
             _ => throw new InvalidOperationException($"Beatport dto type '{nameof(TBeatportDto)}' is not supported")
         };
 

@@ -9,7 +9,9 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
+using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
@@ -29,6 +31,8 @@ public static class ServiceCollectionExtensions
                 .AddBeatportClient(configuration)
                 .AddBeatportTokenProvider(configuration)
                 .AddPersistence(configuration)
+                .AddBeatportTokenProvider(configuration)
+                .AddMiscellaneous()
                 .AddMessaging(configuration);
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
@@ -48,7 +52,8 @@ public static class ServiceCollectionExtensions
                 .AddWolverine<CollectorDbContext, CollectorApplication>(
                     configuration,
                     configurePublisher: options => options
-                        .Publishes<SubscriptionCreated>(),
+                        .Publishes<SubscriptionCreated>()
+                        .Publishes<ReleaseCollected>(),
                     configureListener: listener => listener
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
@@ -61,6 +66,8 @@ public static class ServiceCollectionExtensions
             services
                 .AddDbContext(configuration)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Releases)
+                .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
     }
 }

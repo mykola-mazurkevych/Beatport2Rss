@@ -86,6 +86,9 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
                     b.Property<string>("ImageUri")
                         .IsRequired()
                         .HasMaxLength(500)
