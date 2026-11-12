@@ -177,7 +177,7 @@ internal sealed class CollectReleasesCommandHandler(
         var queryParameters = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
         {
             [subscriptionQueryParameterName] = subscription.BeatportId.ToString(),
-            ["publish_date"] = $"{subscription.RefreshedAt ?? clock.UtcToday.AddDays(-InitialPullDaysCount)}:{clock.UtcToday}",
+            ["publish_date"] = FormattableString.Invariant($"{subscription.RefreshedAt ?? clock.UtcToday.AddDays(-InitialPullDaysCount):yyyy-MM-dd}:{clock.UtcToday:yyyy-MM-dd}"),
             ["per_page"] = PageSize.ToString(CultureInfo.InvariantCulture),
         };
         var idsResult = await beatportClient.SearchForIdsAsync<BeatportReleaseDto>(queryParameters, cancellationToken);
