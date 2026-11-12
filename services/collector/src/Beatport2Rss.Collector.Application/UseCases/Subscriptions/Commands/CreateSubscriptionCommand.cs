@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Collector.Application.UseCases.Subscriptions.Commands;
 
-internal sealed record CreateSubscriptionCommand(
+public sealed record CreateSubscriptionCommand(
     SubscriptionType Type,
     int BeatportId);
 
-internal sealed class CreateSubscriptionCommandHandler(
+public sealed class CreateSubscriptionCommandHandler(
     ISubscriptionService subscriptionService,
     IUnitOfWork unitOfWork,
     ILogger<CreateSubscriptionCommand> logger)

@@ -16,6 +16,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
+using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
@@ -45,6 +46,29 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests;
 
 public sealed class CollectReleasesRetryTests
 {
+    [Fact]
+    public async Task SubscriptionRequestedCreatesSubscriptionThroughWolverine()
+    {
+        var client = new Mock<IBeatportClient>();
+        client.Setup(value => value.GetAsync<BeatportArtistDto>(42, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok<BeatportArtistDto?>(new BeatportArtistDto(
+                42, "artist", "Artist", new BeatportImageDto(new Uri("https://example.com/image")), null, null)));
+
+        using var host = await CreateHostAsync(client.Object);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await host.Services.GetRequiredService<IMessageBus>().SendAsync(new SubscriptionRequested(
+            Guid.NewGuid(), DateTimeOffset.UtcNow, SubscriptionType.Artist, 42));
+        var committedEvents = host.Services.GetRequiredService<CommittedEvents>();
+        await committedEvents.Completed.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+
+        await using var scope = host.Services.CreateAsyncScope();
+        var subscription = await scope.ServiceProvider.GetRequiredService<CollectorDbContext>()
+            .Subscriptions.SingleAsync(cancellationToken);
+        var subscriptionCreated = Assert.Single(committedEvents.Events.OfType<SubscriptionCreated>());
+        Assert.Equal(42, subscription.BeatportId.Value);
+        Assert.Equal(subscription.Id.Value, subscriptionCreated.SubscriptionId);
+    }
+
     [Fact]
     public async Task CollectionJobUsesUtcForItsSchedule()
     {
