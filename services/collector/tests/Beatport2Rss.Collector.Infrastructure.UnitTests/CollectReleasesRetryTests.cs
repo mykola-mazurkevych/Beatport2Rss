@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 
 using Beatport2Rss.Collector.Application;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Collector.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
@@ -19,6 +20,7 @@ using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
+using Beatport2Rss.Common.Wolverine.Extensions;
 
 using FluentResults;
 
@@ -46,6 +48,40 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests;
 
 public sealed class CollectReleasesRetryTests
 {
+    [Fact]
+    public async Task ConcurrentSubscribersCountChangesAreRetried()
+    {
+        var race = new SubscribersCountRace();
+        using var host = await CreateHostAsync(
+            Mock.Of<IBeatportClient>(),
+            configureServices: services =>
+            {
+                services.AddScoped<IUnitOfWork>(provider =>
+                    new CoordinatedUnitOfWork(provider.GetRequiredService<CollectorDbContext>(), race));
+            });
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await SeedAsync(host.Services, includeSecondSubscription: false, cancellationToken);
+
+        Guid subscriptionId;
+        await using (var scope = host.Services.CreateAsyncScope())
+        {
+            var subscription = await scope.ServiceProvider.GetRequiredService<CollectorDbContext>()
+                .Subscriptions.SingleAsync(value => value.SubscribersCount > 0, cancellationToken);
+            subscriptionId = subscription.Id.Value;
+        }
+
+        var bus = host.Services.GetRequiredService<IMessageBus>();
+        await bus.SendAsync(new IncrementSubscribersCountCommand(subscriptionId));
+        await bus.SendAsync(new DecrementSubscribersCountCommand(subscriptionId));
+        await race.Completed.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+
+        await using var verificationScope = host.Services.CreateAsyncScope();
+        var savedSubscription = await verificationScope.ServiceProvider.GetRequiredService<CollectorDbContext>()
+            .Subscriptions.SingleAsync(value => value.Id == SubscriptionId.Create(subscriptionId), cancellationToken);
+        Assert.Equal(1, savedSubscription.SubscribersCount);
+        Assert.Equal(3, race.Attempts);
+    }
+
     [Fact]
     public async Task SubscriptionRequestedCreatesSubscriptionThroughWolverine()
     {
@@ -231,7 +267,10 @@ public sealed class CollectReleasesRetryTests
         Assert.Equal(["42", "42", "42", "42", "42", "42", "43"], requests.ToArray());
     }
 
-    private static async Task<IHost> CreateHostAsync(IBeatportClient client, string? connectionString = null)
+    private static async Task<IHost> CreateHostAsync(
+        IBeatportClient client,
+        string? connectionString = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         var databaseName = Guid.NewGuid().ToString();
         var host = Host.CreateDefaultBuilder()
@@ -259,10 +298,12 @@ public sealed class CollectReleasesRetryTests
                 services.AddScoped<TestOutbox>();
                 services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<TestOutbox>());
                 services.AddScoped<IIntegrationEventOutbox>(provider => provider.GetRequiredService<TestOutbox>());
+                configureServices?.Invoke(services);
                 services.AddWolverine(options =>
                 {
                     options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
                     options.Discovery.IncludeAssembly(typeof(CollectorApplication).Assembly);
+                    options.Retries<DbUpdateConcurrencyException>();
                     var queue = options.LocalQueueFor<CollectReleasesCommand>().Sequential();
                     if (connectionString is not null)
                     {
@@ -336,6 +377,36 @@ public sealed class CollectReleasesRetryTests
     {
         public ConcurrentBag<IIntegrationEvent> Events { get; } = [];
         public TaskCompletionSource Completed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
+    private sealed class SubscribersCountRace
+    {
+        public int Attempts;
+        public int Saves;
+        public TaskCompletionSource BothStarted { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource Completed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
+    private sealed class CoordinatedUnitOfWork(CollectorDbContext db, SubscribersCountRace race) : IUnitOfWork
+    {
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var attempt = Interlocked.Increment(ref race.Attempts);
+            if (attempt <= 2)
+            {
+                if (attempt == 2)
+                {
+                    race.BothStarted.TrySetResult();
+                }
+                await race.BothStarted.Task.WaitAsync(cancellationToken);
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
+            if (Interlocked.Increment(ref race.Saves) == 2)
+            {
+                race.Completed.TrySetResult();
+            }
+        }
     }
 
     private sealed class TestOutbox(CollectorDbContext db, CommittedEvents committedEvents) :

@@ -19,6 +19,40 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests.Persistence.Repositori
 
 public sealed class SubscriptionCommandRepositoryTests
 {
+    [Fact]
+    public void ConcurrencyTokenDoesNotRequireDatabaseMigration()
+    {
+        var options = new DbContextOptionsBuilder<CollectorDbContext>()
+            .UseNpgsql("Host=localhost;Database=collector_model_check;Username=test;Password=test")
+            .Options;
+        using var context = new CollectorDbContext(options);
+
+        Assert.False(context.Database.HasPendingModelChanges());
+    }
+
+    [Fact]
+    public async Task ConcurrentSubscribersCountChangeRaisesConcurrencyException()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var options = new DbContextOptionsBuilder<CollectorDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        await using var firstContext = new CollectorDbContext(options);
+        var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
+            SubscriptionType.Artist, BeatportId.Create(42));
+        subscription.IncrementSubscribersCount();
+        firstContext.Subscriptions.Add(subscription);
+        await firstContext.SaveChangesAsync(cancellationToken);
+
+        await using var secondContext = new CollectorDbContext(options);
+        var concurrentSubscription = await secondContext.Subscriptions.SingleAsync(cancellationToken);
+        subscription.IncrementSubscribersCount();
+        concurrentSubscription.IncrementSubscribersCount();
+        await firstContext.SaveChangesAsync(cancellationToken);
+
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => secondContext.SaveChangesAsync(cancellationToken));
+    }
+
     [Theory]
     [InlineData(true, 2)]
     [InlineData(false, 0)]

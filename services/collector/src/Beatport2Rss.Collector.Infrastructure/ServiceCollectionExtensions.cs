@@ -15,6 +15,7 @@ using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -59,7 +60,9 @@ public static class ServiceCollectionExtensions
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<SubscriptionRequested>(),
-                    configureRetries: options => options.Retries<HttpRequestException>());
+                    configureRetries: options => options
+                        .Retries<HttpRequestException>()
+                        .Retries<DbUpdateConcurrencyException>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
