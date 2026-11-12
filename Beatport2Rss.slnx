@@ -52,6 +52,10 @@
     <Project Path="services/collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Worker/Beatport2Rss.Collector.Worker.csproj" />
   </Folder>
+  <Folder Name="/services/collector/tests/">
+    <Project Path="services/collector/tests/Beatport2Rss.Collector.Application.UnitTests/Beatport2Rss.Collector.Application.UnitTests.csproj" />
+    <Project Path="services/collector/tests/Beatport2Rss.Collector.Infrastructure.UnitTests/Beatport2Rss.Collector.Infrastructure.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/services/interceptor/" />
   <Folder Name="/services/interceptor/src/">
     <Project Path="services/interceptor/src/Beatport2Rss.Interceptor/Beatport2Rss.Interceptor.csproj" />

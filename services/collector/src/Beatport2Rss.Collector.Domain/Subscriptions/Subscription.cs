@@ -30,17 +30,13 @@ public sealed class Subscription :
         SubscriptionId id,
         DateTimeOffset createdAt,
         SubscriptionType type,
-        BeatportId beatportId,
-        int subscribersCount,
-        DateOnly? refreshedAt) =>
+        BeatportId beatportId) =>
         new()
         {
             Id = id,
             CreatedAt = createdAt,
             Type = type,
             BeatportId = beatportId,
-            SubscribersCount = subscribersCount,
-            RefreshedAt = refreshedAt,
         };
 
     public void IncrementSubscribersCount() => SubscribersCount++;
