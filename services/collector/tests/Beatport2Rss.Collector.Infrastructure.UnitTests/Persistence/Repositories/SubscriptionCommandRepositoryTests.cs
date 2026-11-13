@@ -80,7 +80,7 @@ public sealed class SubscriptionCommandRepositoryTests
         var repository = new SubscriptionCommandRepository(handlerContext.Subscriptions, new TestClock());
         var unitOfWork = new Mock<IUnitOfWork>();
         unitOfWork.Setup(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .Returns((CancellationToken token) => handlerContext.SaveChangesAsync(token));
+            .Returns<CancellationToken>(handlerContext.SaveChangesAsync);
         if (increment)
         {
             await IncrementSubscribersCountCommandHandler.HandleAsync(

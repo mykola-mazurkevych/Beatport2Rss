@@ -1,8 +1,8 @@
-#pragma warning disable CA1031 // Do not catch general exception types
 #pragma warning disable IDE0060 // Remove unused parameter
 
 using System.Globalization;
 
+using Beatport2Rss.Collector.Application.Extensions;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Collector.Domain.Releases;
@@ -21,6 +21,7 @@ using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using FluentResults;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
@@ -58,12 +59,19 @@ public sealed class CollectReleasesCommandHandler(
                 throw new RetryableException(result.ErrorMessage);
             }
 
-            CollectReleasesCommandLoggerMessages.CollectionFailed(logger, command.SubscriptionId, result.ErrorMessage);
-            return;
+            throw new InvalidOperationException($"Failed to collect releases for subscription {command.SubscriptionId}: {result.ErrorMessage}");
         }
 
         subscription.MarkRefreshed(refreshedAt);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException dbUpdateException) when (dbUpdateException.IsUniqueViolation)
+        {
+            throw new RetryableException("Unique constraint violation.", dbUpdateException);
+        }
     }
 
     private async Task<Result> ProcessSubscriptionAsync(
@@ -148,26 +156,9 @@ public sealed class CollectReleasesCommandHandler(
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }
         }
-        catch (RetryableException)
-        {
-            throw;
-        }
-        catch (HttpRequestException)
-        {
-            throw;
-        }
         catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
         {
             throw new RetryableException("The Beatport request timed out.", exception);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception exception)
-        {
-            CollectReleasesCommandLoggerMessages.Failed(logger, exception);
-            return Result.Fail(exception.Message);
         }
 
         return Result.Ok();
@@ -250,9 +241,4 @@ internal static partial class CollectReleasesCommandLoggerMessages
     [LoggerMessage(Level = LogLevel.Information, Message = "Subscription {SubscriptionId} is no longer available for collection")]
     public static partial void SubscriptionUnavailable(ILogger logger, Guid subscriptionId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to collect releases for subscription {SubscriptionId}: {ErrorMessage}")]
-    public static partial void CollectionFailed(ILogger logger, Guid subscriptionId, string errorMessage);
-
-    [LoggerMessage(Level = LogLevel.Error)]
-    public static partial void Failed(ILogger logger, Exception exception);
 }

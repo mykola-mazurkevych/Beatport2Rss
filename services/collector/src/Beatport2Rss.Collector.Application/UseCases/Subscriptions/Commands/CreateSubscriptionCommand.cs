@@ -1,10 +1,12 @@
-﻿using Beatport2Rss.Collector.Application.Interfaces.Services;
+﻿using Beatport2Rss.Collector.Application.Extensions;
+using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Beatport2Rss.Collector.Application.UseCases.Subscriptions.Commands;
@@ -36,7 +38,14 @@ public sealed class CreateSubscriptionCommandHandler(
             return;
         }
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException dbUpdateException) when (dbUpdateException.IsUniqueViolation)
+        {
+            throw new RetryableException("Unique constraint violation.", dbUpdateException);
+        }
     }
 }
 

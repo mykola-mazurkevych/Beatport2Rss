@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 
 using Beatport2Rss.Collector.Application;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
@@ -48,6 +49,50 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests;
 
 public sealed class CollectReleasesRetryTests
 {
+    [Fact]
+    public async Task ConcurrentSubscriptionCreationIsRetriedOnUniqueConflict()
+    {
+        var adminConnectionString = Environment.GetEnvironmentVariable("COLLECTOR_TEST_POSTGRES");
+        Assert.SkipWhen(string.IsNullOrEmpty(adminConnectionString), "COLLECTOR_TEST_POSTGRES is not configured.");
+        await using var database = await IsolatedPostgresDatabase.CreateAsync(adminConnectionString);
+        var race = new SubscribersCountRace();
+        var client = new Mock<IBeatportClient>();
+        client.Setup(value => value.SearchForIdsAsync<BeatportReleaseDto>(
+                It.IsAny<IReadOnlyDictionary<string, string?>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok<IReadOnlyCollection<int>>([1]));
+        client.Setup(value => value.GetAsync<BeatportReleaseDto>(1, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok<BeatportReleaseDto?>(CreateRelease(1)));
+        client.Setup(value => value.GetAsync<BeatportLabelDto>(10, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Ok<BeatportLabelDto?>(new BeatportLabelDto(
+                10, "label", "Label", new BeatportImageDto(new Uri("https://example.com/image")))));
+        using var host = await CreateHostAsync(client.Object, database.ConnectionString, services =>
+            services.AddScoped<IUnitOfWork>(provider =>
+                new CoordinatedUnitOfWork(provider.GetRequiredService<CollectorDbContext>(), race)));
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subscriptionId = SubscriptionId.Create(Guid.NewGuid());
+        await using (var scope = host.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CollectorDbContext>();
+            var subscription = Subscription.Create(subscriptionId, DateTimeOffset.UtcNow,
+                SubscriptionType.Artist, BeatportId.Create(42));
+            subscription.IncrementSubscribersCount();
+            db.Subscriptions.Add(subscription);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        var bus = host.Services.GetRequiredService<IMessageBus>();
+        await bus.SendAsync(new SubscriptionRequested(Guid.NewGuid(), DateTimeOffset.UtcNow, SubscriptionType.Label, 10));
+        await bus.SendAsync(new CollectReleasesCommand(subscriptionId.Value));
+        await race.Completed.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+
+        await using var verificationScope = host.Services.CreateAsyncScope();
+        var verification = verificationScope.ServiceProvider.GetRequiredService<CollectorDbContext>();
+        Assert.Equal(1, await verification.Subscriptions.CountAsync(value => value.Type == SubscriptionType.Label, cancellationToken));
+        Assert.Equal(1, await verification.Releases.CountAsync(cancellationToken));
+        Assert.Equal(3, race.Attempts);
+        await host.StopAsync(cancellationToken);
+    }
+
     [Fact]
     public async Task ConcurrentSubscribersCountChangesAreRetried()
     {
@@ -130,8 +175,10 @@ public sealed class CollectReleasesRetryTests
     [Fact]
     public async Task QueuedSubscriptionsArePersistedWhileProcessingIsBlocked()
     {
-        var connectionString = Environment.GetEnvironmentVariable("COLLECTOR_TEST_POSTGRES");
-        Assert.SkipWhen(string.IsNullOrEmpty(connectionString), "COLLECTOR_TEST_POSTGRES is not configured.");
+        var adminConnectionString = Environment.GetEnvironmentVariable("COLLECTOR_TEST_POSTGRES");
+        Assert.SkipWhen(string.IsNullOrEmpty(adminConnectionString), "COLLECTOR_TEST_POSTGRES is not configured.");
+        await using var database = await IsolatedPostgresDatabase.CreateAsync(adminConnectionString);
+        var connectionString = database.ConnectionString;
         var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var secondStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -371,6 +418,35 @@ public sealed class CollectReleasesRetryTests
     {
         public DateTimeOffset UtcNow => new(2026, 11, 12, 3, 0, 0, TimeSpan.Zero);
         public DateOnly UtcToday => new(2026, 11, 12);
+    }
+
+    private sealed class IsolatedPostgresDatabase(string adminConnectionString, Guid databaseId) : IAsyncDisposable
+    {
+        public string ConnectionString => new NpgsqlConnectionStringBuilder(adminConnectionString)
+        {
+            Database = $"collector_test_{databaseId:N}",
+            Pooling = false
+        }.ConnectionString;
+
+        [SuppressMessage("Security", "CA2100", Justification = "The database identifier is generated from a GUID and cannot be parameterized.")]
+        public static async Task<IsolatedPostgresDatabase> CreateAsync(string adminConnectionString)
+        {
+            var databaseId = Guid.NewGuid();
+            await using var connection = new NpgsqlConnection(adminConnectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand($"CREATE DATABASE \"collector_test_{databaseId:N}\"", connection);
+            await command.ExecuteNonQueryAsync();
+            return new IsolatedPostgresDatabase(adminConnectionString, databaseId);
+        }
+
+        [SuppressMessage("Security", "CA2100", Justification = "The database identifier is generated from a GUID and cannot be parameterized.")]
+        public async ValueTask DisposeAsync()
+        {
+            await using var connection = new NpgsqlConnection(adminConnectionString);
+            await connection.OpenAsync();
+            await using var command = new NpgsqlCommand($"DROP DATABASE \"collector_test_{databaseId:N}\" WITH (FORCE)", connection);
+            await command.ExecuteNonQueryAsync();
+        }
     }
 
     private sealed class CommittedEvents

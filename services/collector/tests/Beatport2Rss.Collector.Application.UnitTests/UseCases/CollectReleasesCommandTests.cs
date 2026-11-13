@@ -4,6 +4,7 @@ using System.Net;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
+using Beatport2Rss.Collector.Domain.Releases;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
@@ -12,6 +13,7 @@ using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
@@ -27,6 +29,45 @@ namespace Beatport2Rss.Collector.Application.UnitTests.UseCases;
 
 public sealed class CollectReleasesCommandTests
 {
+    [Fact]
+    public async Task HandleAsync_AbortsWhenPermanentFailureOccursAfterAReleaseWasStaged()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subscription = CreateSubscription();
+        var subscriptions = new Mock<ISubscriptionCommandRepository>();
+        subscriptions.Setup(value => value.FindAsync(subscription.Id, cancellationToken)).ReturnsAsync(subscription);
+        var releases = new Mock<IReleaseCommandRepository>();
+        releases.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken)).ReturnsAsync([]);
+        var client = new Mock<IBeatportClient>();
+        client.Setup(value => value.SearchForIdsAsync<BeatportReleaseDto>(
+            It.IsAny<IReadOnlyDictionary<string, string?>>(), cancellationToken))
+            .ReturnsAsync(Result.Ok<IReadOnlyCollection<int>>([1, 2]));
+        var release = new BeatportReleaseDto(1, "release", [], [], new BeatportReleaseLabelDto(10, "label"),
+            "catalog", "Release", null, new DateOnly(2026, 11, 12), new DateOnly(2026, 11, 12),
+            new BeatportImageDto(new Uri("https://example.com/image")), 0, []);
+        client.Setup(value => value.GetAsync<BeatportReleaseDto>(1, cancellationToken))
+            .ReturnsAsync(Result.Ok<BeatportReleaseDto?>(release));
+        client.Setup(value => value.GetAsync<BeatportReleaseDto>(2, cancellationToken))
+            .ReturnsAsync(Result.Fail<BeatportReleaseDto?>(Result.NotFound("Missing release").Errors));
+        var subscriptionService = new Mock<ISubscriptionService>();
+        subscriptionService.Setup(value => value.EnsureSubscriptionExistsAsync(
+            It.IsAny<SubscriptionType>(), It.IsAny<BeatportId>(), cancellationToken)).ReturnsAsync(Result.Ok());
+        var outbox = new Mock<IIntegrationEventOutbox>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var handler = new CollectReleasesCommandHandler(
+            Mock.Of<IClock>(value => value.UtcToday == new DateOnly(2026, 11, 12)), client.Object,
+            releases.Object, subscriptions.Object, outbox.Object, unitOfWork.Object, subscriptionService.Object,
+            NullLogger<CollectReleasesCommand>.Instance);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            handler.HandleAsync(new CollectReleasesCommand(subscription.Id.Value), cancellationToken));
+
+        releases.Verify(value => value.AddAsync(It.IsAny<Release>(), cancellationToken), Times.Once);
+        outbox.Verify(value => value.EnqueueAsync(It.IsAny<ReleaseCollected>(), cancellationToken), Times.Once);
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Null(subscription.RefreshedAt);
+    }
+
     [Theory]
     [InlineData(0)]
     [InlineData(1)]
@@ -61,7 +102,8 @@ public sealed class CollectReleasesCommandTests
         }
         else
         {
-            await handler.HandleAsync(command, cancellationToken);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command, cancellationToken));
+            Assert.Contains(failures[errorIndex].Errors[0].Message, exception.Message, StringComparison.Ordinal);
         }
 
         Assert.Equal(new DateOnly(2026, 11, 5), subscription.RefreshedAt);
