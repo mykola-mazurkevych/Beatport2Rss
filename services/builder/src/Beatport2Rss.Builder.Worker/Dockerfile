@@ -11,8 +11,10 @@ COPY ["services/builder/src/Beatport2Rss.Builder.Application/Beatport2Rss.Builde
 COPY ["services/builder/src/Beatport2Rss.Builder.Domain/Beatport2Rss.Builder.Domain.csproj", "services/builder/src/Beatport2Rss.Builder.Domain/"]
 COPY ["services/builder/src/Beatport2Rss.Builder.Infrastructure/Beatport2Rss.Builder.Infrastructure.csproj", "services/builder/src/Beatport2Rss.Builder.Infrastructure/"]
 COPY ["services/builder/src/Beatport2Rss.Builder.Jobs/Beatport2Rss.Builder.Jobs.csproj", "services/builder/src/Beatport2Rss.Builder.Jobs/"]
+COPY ["common/src/Beatport2Rss.Common.Beatport/Beatport2Rss.Common.Beatport.csproj", "common/src/Beatport2Rss.Common.Beatport/"]
 COPY ["common/src/Beatport2Rss.Common.Domain/Beatport2Rss.Common.Domain.csproj", "common/src/Beatport2Rss.Common.Domain/"]
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
+COPY ["common/src/Beatport2Rss.Common.FluentResults/Beatport2Rss.Common.FluentResults.csproj", "common/src/Beatport2Rss.Common.FluentResults/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj", "common/src/Beatport2Rss.Common.IntegrationEvents/"]
 COPY ["services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj", "services/builder/src/Beatport2Rss.Builder.Worker/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/Beatport2Rss.Common.Miscellaneous.csproj", "common/src/Beatport2Rss.Common.Miscellaneous/"]
@@ -24,8 +26,10 @@ COPY ["tools/src/Beatport2Rss.SourceGenerator/Beatport2Rss.SourceGenerator.cspro
 RUN dotnet restore "services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj"
 
 COPY ["services/builder/src/", "services/builder/src/"]
+COPY ["common/src/Beatport2Rss.Common.Beatport/", "common/src/Beatport2Rss.Common.Beatport/"]
 COPY ["common/src/Beatport2Rss.Common.Domain/", "common/src/Beatport2Rss.Common.Domain/"]
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
+COPY ["common/src/Beatport2Rss.Common.FluentResults/", "common/src/Beatport2Rss.Common.FluentResults/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/", "common/src/Beatport2Rss.Common.IntegrationEvents/"]
 COPY ["common/src/Beatport2Rss.Common.Miscellaneous/", "common/src/Beatport2Rss.Common.Miscellaneous/"]
 COPY ["common/src/Beatport2Rss.Common.SharedKernel/", "common/src/Beatport2Rss.Common.SharedKernel/"]
