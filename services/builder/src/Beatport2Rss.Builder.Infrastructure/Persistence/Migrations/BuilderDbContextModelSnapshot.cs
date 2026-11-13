@@ -150,6 +150,25 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.ToTable("Subscriptions", "builder");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Tags.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags", "builder");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Tracks.Track", b =>
                 {
                     b.Property<Guid>("Id")
@@ -256,6 +275,35 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Artists");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Subscriptions.Subscription", b =>
+                {
+                    b.OwnsMany("Beatport2Rss.Builder.Domain.Subscriptions.SubscriptionTag", "Tags", b1 =>
+                        {
+                            b1.Property<Guid>("SubscriptionId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("TagId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("SubscriptionId", "TagId");
+
+                            b1.HasIndex("TagId");
+
+                            b1.ToTable("SubscriptionTags", "builder");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubscriptionId");
+
+                            b1.HasOne("Beatport2Rss.Builder.Domain.Tags.Tag", null)
+                                .WithMany()
+                                .HasForeignKey("TagId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Tracks.Track", b =>

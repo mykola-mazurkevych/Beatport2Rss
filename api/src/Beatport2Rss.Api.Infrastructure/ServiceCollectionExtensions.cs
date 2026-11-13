@@ -66,6 +66,8 @@ public static class ServiceCollectionExtensions
                         .Publishes<FeedSubscriptionCreated>()
                         .Publishes<FeedSubscriptionDeleted>()
                         .Publishes<SubscriptionRequested>()
+                        .Publishes<SubscriptionTagCreated>()
+                        .Publishes<SubscriptionTagDeleted>()
                         .Publishes<TagCreated>()
                         .Publishes<TagUpdated>()
                         .Publishes<TagDeleted>(),

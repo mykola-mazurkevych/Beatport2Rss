@@ -3,6 +3,9 @@ using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using FluentResults;
 
@@ -17,6 +20,8 @@ public sealed record DeleteSubscriptionTagsCommand(
 
 internal sealed class DeleteSubscriptionTagsCommandHandler(
     ISubscriptionCommandRepository subscriptionCommandRepository,
+    IClock clock,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<DeleteSubscriptionTagsCommand, Result>
 {
@@ -25,6 +30,16 @@ internal sealed class DeleteSubscriptionTagsCommandHandler(
         CancellationToken cancellationToken)
     {
         var subscription = await subscriptionCommandRepository.LoadWithTagsAsync(command.SubscriptionSlug, cancellationToken);
+
+        foreach (var tag in subscription.Tags)
+        {
+            var subscriptionTagDeleted = new SubscriptionTagDeleted(
+                Id: Guid.CreateVersion7(),
+                OccurredAt: clock.UtcNow,
+                subscription.Id.Value,
+                tag.TagId.Value);
+            await integrationEventOutbox.EnqueueAsync(subscriptionTagDeleted, cancellationToken);
+        }
 
         subscription.RemoveTags();
 
