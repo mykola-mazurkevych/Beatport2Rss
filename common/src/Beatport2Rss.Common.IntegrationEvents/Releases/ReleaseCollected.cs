@@ -10,9 +10,10 @@ public sealed record ReleaseCollected(
     IReadOnlyCollection<int> ArtistBeatportIds,
     IReadOnlyCollection<int> RemixerBeatportIds,
     int LabelBeatportId,
-    string ReleaseName,
-    DateOnly ReleaseDate,
     string CatalogNumber,
+    string Name,
+    string? Description,
+    DateOnly ReleaseDate,
     Uri ImageUri,
     int TracksCount,
     IReadOnlyCollection<ReleaseCollectedTrack> Tracks) :

@@ -28,7 +28,8 @@ internal sealed class SubscriptionConfiguration :
             .IsRequired();
 
         builder.Property(subscription => subscription.SubscribersCount)
-            .IsRequired();
+            .IsRequired()
+            .IsConcurrencyToken();
 
         builder.Property(subscription => subscription.RefreshedAt)
             .IsRequired(required: false);

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Beatport2Rss.Builder.Application\Beatport2Rss.Builder.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Wolverine\Beatport2Rss.Common.Wolverine.csproj" />
   </ItemGroup>
 
 </Project>

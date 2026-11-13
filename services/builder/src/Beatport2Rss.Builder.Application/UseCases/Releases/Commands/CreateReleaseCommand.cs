@@ -9,6 +9,7 @@ using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
@@ -22,6 +23,7 @@ public sealed record CreateReleaseCommand(
     IReadOnlyCollection<BeatportId> RemixerBeatportIds,
     BeatportId LabelBeatportId,
     ReleaseName ReleaseName,
+    string? Description,
     DateOnly ReleaseDate,
     CatalogNumber CatalogNumber,
     Uri ImageUri,
@@ -56,7 +58,7 @@ public static class CreateReleaseCommandHandler
         var subscriptions = await subscriptionCommandRepository.FindAllAsync(subscriptionBeatportIds, cancellationToken);
         var subscriptionsMap = subscriptions.ToDictionary(subscription => (subscription.Type, subscription.BeatportId));
 
-        var label = subscriptionsMap[(SubscriptionType.Label, createReleaseCommand.LabelBeatportId)];
+        var label = GetSubscription(subscriptionsMap, SubscriptionType.Label, createReleaseCommand.LabelBeatportId);
 
         var releaseArtists = GetArtists(
             createReleaseCommand.ReleaseId,
@@ -85,12 +87,21 @@ public static class CreateReleaseCommandHandler
             createReleaseCommand.CatalogNumber,
             createReleaseCommand.ImageUri,
             createReleaseCommand.TracksCount,
+            createReleaseCommand.Description,
             releaseArtists,
             tracks);
         await releaseCommandRepository.AddAsync(release, cancellationToken);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
+
+    private static Subscription GetSubscription(
+        Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptions,
+        SubscriptionType type,
+        BeatportId beatportId) =>
+        subscriptions.TryGetValue((type, beatportId), out var subscription)
+            ? subscription
+            : throw new RetryableException($"Subscription {type} {beatportId} is not available yet.");
 
     private static HashSet<Track> GetTracks(
         ReleaseId releaseId,
@@ -136,7 +147,7 @@ public static class CreateReleaseCommandHandler
         Func<TOwnerId, SubscriptionId, ArtistType, TArtist> create) =>
     [
         .. artistBeatportIds
-            .Select(beatportId => create(ownerId, subscriptionsMap[(SubscriptionType.Artist, beatportId)].Id, ArtistType.Artist))
-            .Union(remixerBeatportIds.Select(beatportId => create(ownerId, subscriptionsMap[(SubscriptionType.Artist, beatportId)].Id, ArtistType.Remixer)))
+            .Select(beatportId => create(ownerId, GetSubscription(subscriptionsMap, SubscriptionType.Artist, beatportId).Id, ArtistType.Artist))
+            .Union(remixerBeatportIds.Select(beatportId => create(ownerId, GetSubscription(subscriptionsMap, SubscriptionType.Artist, beatportId).Id, ArtistType.Remixer)))
     ];
 }

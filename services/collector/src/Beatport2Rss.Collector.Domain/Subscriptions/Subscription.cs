@@ -20,23 +20,20 @@ public sealed class Subscription :
     public BeatportId BeatportId { get; private set; }
 
     public int SubscribersCount { get; private set; }
-    public DateTimeOffset? RefreshedAt { get; private set; }
+
+    public DateOnly? RefreshedAt { get; private set; }
 
     public static Subscription Create(
         SubscriptionId id,
         DateTimeOffset createdAt,
         SubscriptionType type,
-        BeatportId beatportId,
-        int subscribersCount,
-        DateTimeOffset? refreshedAt) =>
+        BeatportId beatportId) =>
         new()
         {
             Id = id,
             CreatedAt = createdAt,
             Type = type,
             BeatportId = beatportId,
-            SubscribersCount = subscribersCount,
-            RefreshedAt = refreshedAt,
         };
 
     public void IncrementSubscribersCount() => SubscribersCount++;
@@ -51,4 +48,6 @@ public sealed class Subscription :
         SubscribersCount--;
         return true;
     }
+
+    public void MarkRefreshed(DateOnly refreshedAt) => RefreshedAt = refreshedAt;
 }

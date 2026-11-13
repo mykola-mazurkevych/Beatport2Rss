@@ -33,7 +33,6 @@ public static class DecrementSubscribersCountCommandHandler
             return;
         }
 
-        subscriptionCommandRepository.Update(subscription);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         DecrementSubscribersCountCommandLoggerMessages.Decremented(logger, command.SubscriptionId, subscription.SubscribersCount);

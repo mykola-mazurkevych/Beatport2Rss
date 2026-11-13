@@ -6,4 +6,5 @@ internal sealed class Clock :
     IClock
 {
     public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+    public DateOnly UtcToday => DateOnly.FromDateTime(UtcNow.DateTime);
 }

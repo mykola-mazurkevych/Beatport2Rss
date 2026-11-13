@@ -57,6 +57,9 @@ internal sealed class ReleaseConfiguration :
         builder.Property(release => release.TracksCount)
             .IsRequired();
 
+        builder.Property(release => release.Description)
+            .IsRequired(required: false);
+
         builder.OwnsMany(
             release => release.Artists,
             navigationBuilder =>

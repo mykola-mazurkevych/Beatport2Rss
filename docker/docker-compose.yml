@@ -115,6 +115,8 @@ services:
       - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
       - RabbitMQOptions__Password=${RABBITMQ_PASSWORD}
       - RabbitMQOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
+      - BeatportTokenProviderOptions__TokenInterceptorGrpcUri=${INTERCEPTOR_GRPC_URI}
+      - CollectorJobOptions__CollectReleasesCronSchedule=${COLLECTOR_COLLECT_RELEASES_CRON}
     depends_on:
       postgres:
         condition: service_healthy
@@ -122,6 +124,8 @@ services:
         condition: service_healthy
       migrator:
         condition: service_completed_successfully
+      interceptor:
+        condition: service_healthy
     restart: unless-stopped
 
   api:

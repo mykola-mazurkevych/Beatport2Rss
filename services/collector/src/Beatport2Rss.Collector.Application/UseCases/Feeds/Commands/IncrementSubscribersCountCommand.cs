@@ -28,7 +28,6 @@ public static class IncrementSubscribersCountCommandHandler
         }
 
         subscription.IncrementSubscribersCount();
-        subscriptionCommandRepository.Update(subscription);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
