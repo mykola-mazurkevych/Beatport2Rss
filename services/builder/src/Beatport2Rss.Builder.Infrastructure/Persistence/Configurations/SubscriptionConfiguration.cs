@@ -1,4 +1,5 @@
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
