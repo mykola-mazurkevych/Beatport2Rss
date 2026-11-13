@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Common.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;
@@ -37,5 +38,32 @@ internal sealed class SubscriptionConfiguration :
             .IsUnique();
 
         builder.HasIndex(subscription => subscription.BeatportId);
+
+        builder.OwnsMany(
+            subscription => subscription.Tags,
+            navigationBuilder =>
+            {
+                navigationBuilder.ToTable(BuilderDbContext.SubscriptionTags);
+
+                navigationBuilder.HasKey(subscriptionTag => new { subscriptionTag.SubscriptionId, subscriptionTag.TagId });
+
+                navigationBuilder.Property(subscriptionTag => subscriptionTag.SubscriptionId)
+                    .IsRequired();
+
+                navigationBuilder.Property(subscriptionTag => subscriptionTag.TagId)
+                    .IsRequired();
+
+                navigationBuilder
+                    .WithOwner()
+                    .HasForeignKey(subscriptionTag => subscriptionTag.SubscriptionId);
+
+                navigationBuilder
+                    .HasOne<Tag>()
+                    .WithMany()
+                    .HasForeignKey(subscriptionTag => subscriptionTag.TagId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                navigationBuilder.HasIndex(subscriptionTag => subscriptionTag.TagId);
+            });
     }
 }

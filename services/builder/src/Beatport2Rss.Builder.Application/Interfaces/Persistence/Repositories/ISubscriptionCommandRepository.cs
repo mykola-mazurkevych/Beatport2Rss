@@ -10,5 +10,7 @@ public interface ISubscriptionCommandRepository
 
     Task<IEnumerable<Subscription>> FindAllAsync(IEnumerable<BeatportId> beatportIds, CancellationToken cancellationToken = default);
 
+    Task<Subscription?> FindAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default);
+
     Task<Subscription> AddAsync(Subscription subscription, CancellationToken cancellationToken = default);
 }

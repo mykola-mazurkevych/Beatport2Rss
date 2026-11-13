@@ -4,6 +4,7 @@ using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
+using Beatport2Rss.Builder.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
@@ -62,7 +63,9 @@ public static class ServiceCollectionExtensions
                         .ListensTo<TagUpdated>()
                         .ListensTo<TagDeleted>()
                         .ListensTo<ReleaseCollected>()
-                        .ListensTo<SubscriptionCreated>());
+                        .ListensTo<SubscriptionCreated>()
+                        .ListensTo<SubscriptionTagCreated>()
+                        .ListensTo<SubscriptionTagDeleted>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services

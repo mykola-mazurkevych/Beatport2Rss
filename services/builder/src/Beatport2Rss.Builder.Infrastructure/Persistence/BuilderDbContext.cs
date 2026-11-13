@@ -15,6 +15,7 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     IBeatport2RssDbContext
 {
     public static string Schema => "builder";
+    public const string SubscriptionTags = "SubscriptionTags";
 
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
