@@ -45,12 +45,20 @@
     <Project Path="services/builder/src/Beatport2Rss.Builder.Jobs/Beatport2Rss.Builder.Jobs.csproj" />
     <Project Path="services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj" />
   </Folder>
+  <Folder Name="/services/builder/tests/">
+    <Project Path="services/builder/tests/Beatport2Rss.Builder.Application.UnitTests/Beatport2Rss.Builder.Application.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/services/collector/" />
   <Folder Name="/services/collector/src/">
     <Project Path="services/collector/src/Beatport2Rss.Collector.Application/Beatport2Rss.Collector.Application.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Domain/Beatport2Rss.Collector.Domain.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Infrastructure/Beatport2Rss.Collector.Infrastructure.csproj" />
+    <Project Path="services/collector/src/Beatport2Rss.Collector.Jobs/Beatport2Rss.Collector.Jobs.csproj" />
     <Project Path="services/collector/src/Beatport2Rss.Collector.Worker/Beatport2Rss.Collector.Worker.csproj" />
+  </Folder>
+  <Folder Name="/services/collector/tests/">
+    <Project Path="services/collector/tests/Beatport2Rss.Collector.Application.UnitTests/Beatport2Rss.Collector.Application.UnitTests.csproj" />
+    <Project Path="services/collector/tests/Beatport2Rss.Collector.Infrastructure.UnitTests/Beatport2Rss.Collector.Infrastructure.UnitTests.csproj" />
   </Folder>
   <Folder Name="/services/interceptor/" />
   <Folder Name="/services/interceptor/src/">

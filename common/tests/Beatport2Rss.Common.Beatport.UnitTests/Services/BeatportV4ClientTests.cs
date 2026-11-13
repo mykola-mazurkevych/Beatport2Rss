@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Common.Beatport.Interfaces;
@@ -17,6 +18,28 @@ namespace Beatport2Rss.Common.Beatport.UnitTests.Services;
 
 public sealed class BeatportV4ClientTests
 {
+    [Fact]
+    public async Task GetAsync_DeserializesTrackLengthInMilliseconds()
+    {
+        const string json = """
+            {"id":42,"slug":"track","number":1,"name":"Track","mix_name":"Original Mix",
+             "length_ms":234567,"sample_url":"https://example.com/sample","artists":[],"remixers":[]}
+            """;
+        var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
+        using var handler = new StubHttpMessageHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        }));
+        await using var provider = CreateProvider(tokenProvider, handler);
+
+        var result = await provider.GetRequiredService<IBeatportClient>()
+            .GetAsync<BeatportTrackDto>(42, TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(234567, result.Value.LengthMilliseconds);
+    }
+
     [Fact]
     public async Task GetAsync_WhenTokenProvided_ShouldAuthenticateEachRequest()
     {

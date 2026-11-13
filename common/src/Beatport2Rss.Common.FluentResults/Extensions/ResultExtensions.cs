@@ -62,5 +62,8 @@ public static class ResultExtensions
                 1 => result.Errors.Single().Message,
                 _ => $"Multiple errors occured:\n{string.Join('\n', result.Errors.Select(error => error.Message))}"
             };
+
+        public bool HasRetryableError =>
+            result.Errors.Any(error => error is TransientError or TransientHttpError or RequestTimeoutError or TooManyRequestsError);
     }
 }
