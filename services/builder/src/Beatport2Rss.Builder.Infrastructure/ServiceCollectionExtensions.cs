@@ -4,6 +4,7 @@ using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
+using Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
+using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
@@ -49,6 +51,9 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IValidator<CreateFeedCommand>, CreateFeedCommandValidator>()
                 .AddTransient<IValidator<UpdateFeedCommand>, UpdateFeedCommandValidator>()
                 .AddTransient<IValidator<DeleteFeedCommand>, DeleteFeedCommandValidator>()
+                .AddTransient<IValidator<CreateTagCommand>, CreateTagCommandValidator>()
+                .AddTransient<IValidator<UpdateTagCommand>, UpdateTagCommandValidator>()
+                .AddTransient<IValidator<DeleteTagCommand>, DeleteTagCommandValidator>()
                 .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
                 .AddWolverine<BuilderDbContext, BuilderApplication>(
                     configuration,
@@ -57,6 +62,9 @@ public static class ServiceCollectionExtensions
                         .ListensTo<FeedCreated>()
                         .ListensTo<FeedUpdated>()
                         .ListensTo<FeedDeleted>()
+                        .ListensTo<TagCreated>()
+                        .ListensTo<TagUpdated>()
+                        .ListensTo<TagDeleted>()
                         .ListensTo<ReleaseCollected>()
                         .ListensTo<SubscriptionCreated>());
 
@@ -67,7 +75,9 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
+                .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
     }
