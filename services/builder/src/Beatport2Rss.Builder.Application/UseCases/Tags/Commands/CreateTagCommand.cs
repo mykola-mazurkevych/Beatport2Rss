@@ -2,9 +2,6 @@ using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.Validation.Extensions;
-
-using FluentValidation;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 
@@ -13,22 +10,12 @@ public sealed record CreateTagCommand(
     DateTimeOffset CreatedAt,
     string Name);
 
-public sealed class CreateTagCommandValidator :
-    AbstractValidator<CreateTagCommand>
+public sealed class CreateTagCommandHandler(
+    ITagCommandRepository tagCommandRepository,
+    IUnitOfWork unitOfWork)
 {
-    public CreateTagCommandValidator()
-    {
-        RuleFor(command => command.TagId).NotEmpty();
-        RuleFor(command => command.Name).IsTagName();
-    }
-}
-
-public static class CreateTagCommandHandler
-{
-    public static async Task Handle(
+    public async Task HandleAsync(
         CreateTagCommand command,
-        ITagCommandRepository tagCommandRepository,
-        IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {
         var tagId = TagId.Create(command.TagId);

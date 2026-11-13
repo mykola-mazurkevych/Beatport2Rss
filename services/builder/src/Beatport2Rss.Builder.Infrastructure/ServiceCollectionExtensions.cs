@@ -4,7 +4,6 @@ using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
-using Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
@@ -51,9 +50,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IValidator<CreateFeedCommand>, CreateFeedCommandValidator>()
                 .AddTransient<IValidator<UpdateFeedCommand>, UpdateFeedCommandValidator>()
                 .AddTransient<IValidator<DeleteFeedCommand>, DeleteFeedCommandValidator>()
-                .AddTransient<IValidator<CreateTagCommand>, CreateTagCommandValidator>()
-                .AddTransient<IValidator<UpdateTagCommand>, UpdateTagCommandValidator>()
-                .AddTransient<IValidator<DeleteTagCommand>, DeleteTagCommandValidator>()
                 .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
                 .AddWolverine<BuilderDbContext, BuilderApplication>(
                     configuration,

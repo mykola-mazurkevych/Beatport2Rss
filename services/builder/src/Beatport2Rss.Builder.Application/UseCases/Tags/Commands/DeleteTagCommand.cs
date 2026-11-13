@@ -2,30 +2,20 @@ using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
-using FluentValidation;
-
 namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 
 public sealed record DeleteTagCommand(Guid TagId);
 
-public sealed class DeleteTagCommandValidator :
-    AbstractValidator<DeleteTagCommand>
+public sealed class DeleteTagCommandHandler(
+    ITagCommandRepository tagCommandRepository,
+    IUnitOfWork unitOfWork)
 {
-    public DeleteTagCommandValidator()
-    {
-        RuleFor(command => command.TagId).NotEmpty();
-    }
-}
-
-public static class DeleteTagCommandHandler
-{
-    public static async Task Handle(
+    public async Task HandleAsync(
         DeleteTagCommand command,
-        ITagCommandRepository tagCommandRepository,
-        IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.FindAsync(TagId.Create(command.TagId), cancellationToken);
+        var tagId = TagId.Create(command.TagId);
+        var tag = await tagCommandRepository.FindAsync(tagId, cancellationToken);
         if (tag is null)
         {
             return;

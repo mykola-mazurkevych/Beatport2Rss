@@ -22,10 +22,12 @@ public sealed class TagCommandHandlerTests
             .Setup(value => value.ExistsAsync(It.IsAny<TagId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
-        await CreateTagCommandHandler.Handle(
-            new CreateTagCommand(tagId, DateTimeOffset.UtcNow, "Techno"),
+        var handler = new CreateTagCommandHandler(
             repository.Object,
-            unitOfWork.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new CreateTagCommand(tagId, DateTimeOffset.UtcNow, "Techno"),
             CancellationToken.None);
 
         repository.Verify(
@@ -44,11 +46,13 @@ public sealed class TagCommandHandlerTests
         repository
             .Setup(value => value.ExistsAsync(It.IsAny<TagId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
-
-        await CreateTagCommandHandler.Handle(
-            new CreateTagCommand(Guid.NewGuid(), DateTimeOffset.UtcNow, "Techno"),
+        
+        var handler = new CreateTagCommandHandler(
             repository.Object,
-            unitOfWork.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new CreateTagCommand(Guid.NewGuid(), DateTimeOffset.UtcNow, "Techno"),
             CancellationToken.None);
 
         repository.Verify(value => value.AddAsync(It.IsAny<Tag>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -64,11 +68,13 @@ public sealed class TagCommandHandlerTests
         repository
             .Setup(value => value.FindAsync(tag.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(tag);
-
-        await UpdateTagCommandHandler.Handle(
-            new UpdateTagCommand(tag.Id.Value, "House"),
+        
+        var handler = new UpdateTagCommandHandler(
             repository.Object,
-            unitOfWork.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new UpdateTagCommand(tag.Id.Value, "House"),
             CancellationToken.None);
 
         Assert.Equal(TagName.Create("House"), tag.Name);
@@ -84,11 +90,13 @@ public sealed class TagCommandHandlerTests
         repository
             .Setup(value => value.FindAsync(tag.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(tag);
-
-        await DeleteTagCommandHandler.Handle(
-            new DeleteTagCommand(tag.Id.Value),
+        
+        var handler = new DeleteTagCommandHandler(
             repository.Object,
-            unitOfWork.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new DeleteTagCommand(tag.Id.Value),
             CancellationToken.None);
 
         repository.Verify(value => value.Delete(tag), Times.Once);

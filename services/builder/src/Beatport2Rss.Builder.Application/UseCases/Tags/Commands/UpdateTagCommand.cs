@@ -1,33 +1,23 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.Validation.Extensions;
-
-using FluentValidation;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 
-public sealed record UpdateTagCommand(Guid TagId, string Name);
+public sealed record UpdateTagCommand(
+    Guid TagId,
+    string Name);
 
-public sealed class UpdateTagCommandValidator :
-    AbstractValidator<UpdateTagCommand>
+public sealed class UpdateTagCommandHandler(
+    ITagCommandRepository tagCommandRepository,
+    IUnitOfWork unitOfWork)
 {
-    public UpdateTagCommandValidator()
-    {
-        RuleFor(command => command.TagId).NotEmpty();
-        RuleFor(command => command.Name).IsTagName();
-    }
-}
-
-public static class UpdateTagCommandHandler
-{
-    public static async Task Handle(
+    public async Task HandleAsync(
         UpdateTagCommand command,
-        ITagCommandRepository tagCommandRepository,
-        IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {
-        var tag = await tagCommandRepository.FindAsync(TagId.Create(command.TagId), cancellationToken);
+        var tagId = TagId.Create(command.TagId);
+        var tag = await tagCommandRepository.FindAsync(tagId, cancellationToken);
         if (tag is null)
         {
             return;
