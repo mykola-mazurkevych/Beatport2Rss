@@ -1,10 +1,12 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Subscriptions.Commands;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using Microsoft.Extensions.Logging;
 
@@ -28,13 +30,17 @@ public sealed class SubscriptionTagCommandHandlerTests
             SubscriptionName.Create("Label"),
             BeatportId.Create(123));
         var repository = new Mock<ISubscriptionCommandRepository>();
+        var tagRepository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository
             .Setup(value => value.FindAsync(subscriptionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(subscription);
+        tagRepository
+            .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
-        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, unitOfWork.Object, logger);
+        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
 
         await handler.HandleAsync(
             new CreateSubscriptionTagCommand(subscriptionId.Value, tagId.Value),
@@ -58,13 +64,17 @@ public sealed class SubscriptionTagCommandHandlerTests
         subscription.AddTag(tagId);
 
         var repository = new Mock<ISubscriptionCommandRepository>();
+        var tagRepository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository
             .Setup(value => value.FindAsync(subscriptionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(subscription);
+        tagRepository
+            .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
-        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, unitOfWork.Object, logger);
+        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
 
         await handler.HandleAsync(
             new CreateSubscriptionTagCommand(subscriptionId.Value, tagId.Value),
@@ -75,17 +85,47 @@ public sealed class SubscriptionTagCommandHandlerTests
     }
 
     [Fact]
-    public async Task CreateSubscriptionTagCommandHandler_WhenSubscriptionIsMissing_ShouldLogWarning()
+    public async Task CreateSubscriptionTagCommandHandler_WhenSubscriptionIsMissing_ShouldThrowRetryableException()
     {
         var subscriptionId = Guid.NewGuid();
         var repository = new Mock<ISubscriptionCommandRepository>();
+        var tagRepository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
-        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, unitOfWork.Object, logger);
+        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
 
-        await handler.HandleAsync(
+        await Assert.ThrowsAsync<RetryableException>(() => handler.HandleAsync(
             new CreateSubscriptionTagCommand(subscriptionId, Guid.NewGuid()),
-            CancellationToken.None);
+            CancellationToken.None));
+
+        Assert.Contains(LogLevel.Warning, logger.Levels);
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CreateSubscriptionTagCommandHandler_WhenTagIsMissing_ShouldThrowRetryableException()
+    {
+        var subscriptionId = SubscriptionId.Create(Guid.NewGuid());
+        var subscription = Subscription.Create(
+            subscriptionId,
+            DateTimeOffset.UtcNow,
+            SubscriptionType.Label,
+            SubscriptionName.Create("Label"),
+            BeatportId.Create(123));
+        var tagId = Guid.NewGuid();
+
+        var repository = new Mock<ISubscriptionCommandRepository>();
+        repository
+            .Setup(value => value.FindAsync(subscriptionId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(subscription);
+        var tagRepository = new Mock<ITagCommandRepository>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
+        var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
+
+        await Assert.ThrowsAsync<RetryableException>(() => handler.HandleAsync(
+            new CreateSubscriptionTagCommand(subscriptionId.Value, tagId),
+            CancellationToken.None));
 
         Assert.Contains(LogLevel.Warning, logger.Levels);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
