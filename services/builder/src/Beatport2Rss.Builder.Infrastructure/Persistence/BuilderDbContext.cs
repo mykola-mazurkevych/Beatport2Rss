@@ -15,13 +15,13 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     IBeatport2RssDbContext
 {
     public static string Schema => "builder";
-    public const string SubscriptionTags = "SubscriptionTags";
 
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Release> Releases => Set<Release>();
     public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
+    public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<TrackArtist> TrackArtists => Set<TrackArtist>();

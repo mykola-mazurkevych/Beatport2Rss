@@ -1,7 +1,6 @@
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Subscriptions;
-using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +43,7 @@ internal sealed class SubscriptionConfiguration :
             subscription => subscription.Tags,
             navigationBuilder =>
             {
-                navigationBuilder.ToTable(BuilderDbContext.SubscriptionTags);
+                navigationBuilder.ToTable(nameof(BuilderDbContext.SubscriptionTags));
 
                 navigationBuilder.HasKey(subscriptionTag => new { subscriptionTag.SubscriptionId, subscriptionTag.TagId });
 
