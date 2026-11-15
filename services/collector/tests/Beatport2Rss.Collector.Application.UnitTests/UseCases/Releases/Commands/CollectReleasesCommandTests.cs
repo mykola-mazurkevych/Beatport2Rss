@@ -25,7 +25,7 @@ using Moq;
 
 using Xunit;
 
-namespace Beatport2Rss.Collector.Application.UnitTests.UseCases;
+namespace Beatport2Rss.Collector.Application.UnitTests.UseCases.Releases.Commands;
 
 public sealed class CollectReleasesCommandTests
 {

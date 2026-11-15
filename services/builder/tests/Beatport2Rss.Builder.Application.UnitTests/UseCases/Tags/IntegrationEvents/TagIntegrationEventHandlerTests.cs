@@ -3,7 +3,7 @@ using Beatport2Rss.Common.IntegrationEvents.Tags;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Tags;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Tags.IntegrationEvents;
 
 public sealed class TagIntegrationEventHandlerTests
 {

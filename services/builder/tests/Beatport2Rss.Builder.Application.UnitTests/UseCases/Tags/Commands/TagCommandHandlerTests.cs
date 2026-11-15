@@ -8,7 +8,7 @@ using Moq;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Tags;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Tags.Commands;
 
 public sealed class TagCommandHandlerTests
 {
@@ -82,6 +82,23 @@ public sealed class TagCommandHandlerTests
     }
 
     [Fact]
+    public async Task UpdateTagCommandHandler_WhenTagIsMissing_ShouldNotSave()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new Mock<ITagCommandRepository>(MockBehavior.Strict);
+        var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
+        repository.Setup(value => value.FindAsync(It.IsAny<TagId>(), cancellationToken))
+            .ReturnsAsync((Tag?)null);
+        var handler = new UpdateTagCommandHandler(repository.Object, unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new UpdateTagCommand(Guid.NewGuid(), "House"),
+            cancellationToken);
+
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task DeleteTagCommandHandler_ShouldDeleteAndSaveTag()
     {
         var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, TagName.Create("Techno"));
@@ -101,5 +118,21 @@ public sealed class TagCommandHandlerTests
 
         repository.Verify(value => value.Delete(tag), Times.Once);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteTagCommandHandler_WhenTagIsMissing_ShouldNotSave()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var repository = new Mock<ITagCommandRepository>(MockBehavior.Strict);
+        var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
+        repository.Setup(value => value.FindAsync(It.IsAny<TagId>(), cancellationToken))
+            .ReturnsAsync((Tag?)null);
+        var handler = new DeleteTagCommandHandler(repository.Object, unitOfWork.Object);
+
+        await handler.HandleAsync(new DeleteTagCommand(Guid.NewGuid()), cancellationToken);
+
+        repository.Verify(value => value.Delete(It.IsAny<Tag>()), Times.Never);
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }

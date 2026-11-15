@@ -13,7 +13,7 @@ using Moq;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Feeds;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Feeds.Commands;
 
 public sealed class FeedSubscriptionCommandHandlerTests
 {
@@ -92,6 +92,34 @@ public sealed class FeedSubscriptionCommandHandlerTests
     }
 
     [Fact]
+    public async Task CreateFeedSubscriptionCommandHandler_WhenSubscriptionIsAlreadyLinked_ShouldNotSave()
+    {
+        var feedId = FeedId.Create(Guid.NewGuid());
+        var subscriptionId = SubscriptionId.Create(Guid.NewGuid());
+        var feed = CreateFeed(feedId);
+        feed.AddSubscription(subscriptionId);
+        var feedRepository = new Mock<IFeedCommandRepository>(MockBehavior.Strict);
+        var subscriptionRepository = new Mock<ISubscriptionCommandRepository>(MockBehavior.Strict);
+        var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
+        feedRepository.Setup(value => value.FindAsync(feedId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(feed);
+        var handler = new CreateFeedSubscriptionCommandHandler(
+            feedRepository.Object,
+            subscriptionRepository.Object,
+            unitOfWork.Object,
+            Mock.Of<ILogger<CreateFeedSubscriptionCommandHandler>>());
+
+        await handler.HandleAsync(
+            new CreateFeedSubscriptionCommand(feedId.Value, subscriptionId.Value),
+            CancellationToken.None);
+
+        subscriptionRepository.Verify(
+            value => value.ExistsAsync(It.IsAny<SubscriptionId>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task DeleteFeedSubscriptionCommandHandler_ShouldRemoveAndSaveSubscription()
     {
         var feedId = FeedId.Create(Guid.NewGuid());
@@ -128,6 +156,23 @@ public sealed class FeedSubscriptionCommandHandlerTests
             new DeleteFeedSubscriptionCommand(feedId.Value, Guid.NewGuid()),
             CancellationToken.None);
 
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteFeedSubscriptionCommandHandler_WhenFeedIsMissing_ShouldNotSave()
+    {
+        var feedRepository = new Mock<IFeedCommandRepository>(MockBehavior.Strict);
+        var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
+        feedRepository.Setup(value => value.FindAsync(It.IsAny<FeedId>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Feed?)null);
+        var handler = new DeleteFeedSubscriptionCommandHandler(feedRepository.Object, unitOfWork.Object);
+
+        await handler.HandleAsync(
+            new DeleteFeedSubscriptionCommand(Guid.NewGuid(), Guid.NewGuid()),
+            CancellationToken.None);
+
+        feedRepository.Verify(value => value.Delete(It.IsAny<Feed>()), Times.Never);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 

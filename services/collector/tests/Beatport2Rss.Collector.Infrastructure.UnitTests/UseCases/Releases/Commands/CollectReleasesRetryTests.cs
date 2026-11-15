@@ -45,7 +45,7 @@ using Wolverine.Postgresql;
 
 using Xunit;
 
-namespace Beatport2Rss.Collector.Infrastructure.UnitTests;
+namespace Beatport2Rss.Collector.Infrastructure.UnitTests.UseCases.Releases.Commands;
 
 public sealed class CollectReleasesRetryTests
 {

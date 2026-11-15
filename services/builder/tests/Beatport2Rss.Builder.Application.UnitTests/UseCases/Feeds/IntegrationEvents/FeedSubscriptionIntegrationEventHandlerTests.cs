@@ -3,7 +3,7 @@ using Beatport2Rss.Common.IntegrationEvents.Feeds;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Feeds;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Feeds.IntegrationEvents;
 
 public sealed class FeedSubscriptionIntegrationEventHandlerTests
 {

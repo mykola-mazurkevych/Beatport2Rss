@@ -14,7 +14,7 @@ using Moq;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Subscriptions;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Subscriptions.Commands;
 
 public sealed class SubscriptionTagCommandHandlerTests
 {

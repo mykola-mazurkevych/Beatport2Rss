@@ -3,7 +3,7 @@ using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Subscriptions;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Subscriptions.IntegrationEvents;
 
 public sealed class SubscriptionTagIntegrationEventHandlerTests
 {

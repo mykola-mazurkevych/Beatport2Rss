@@ -23,7 +23,7 @@ using Wolverine.ErrorHandling;
 
 using Xunit;
 
-namespace Beatport2Rss.Builder.Application.UnitTests;
+namespace Beatport2Rss.Builder.Application.UnitTests.UseCases.Releases.Commands;
 
 public sealed class CreateReleaseCommandTests
 {
@@ -54,6 +54,31 @@ public sealed class CreateReleaseCommandTests
 
         Assert.Contains($"{missingType} {missingId}", exception.Message, StringComparison.Ordinal);
         releases.Verify(value => value.AddAsync(It.IsAny<Release>(), It.IsAny<CancellationToken>()), Times.Never);
+        unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ExistingReleaseIsNotAddedAgain()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var command = ReleaseCollectedHandler.Handle(CreateEvent(includeArtists: false));
+        var releases = new Mock<IReleaseCommandRepository>(MockBehavior.Strict);
+        var subscriptions = new Mock<ISubscriptionCommandRepository>(MockBehavior.Strict);
+        var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
+        releases.Setup(value => value.ExistsAsync(command.ReleaseId, cancellationToken)).ReturnsAsync(true);
+        var handler = new CreateReleaseCommandHandler(
+            Mock.Of<IClock>(),
+            Mock.Of<IBeatportUriBuilder>(),
+            releases.Object,
+            subscriptions.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(command, cancellationToken);
+
+        releases.Verify(value => value.AddAsync(It.IsAny<Release>(), It.IsAny<CancellationToken>()), Times.Never);
+        subscriptions.Verify(
+            value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), It.IsAny<CancellationToken>()),
+            Times.Never);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
