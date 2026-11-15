@@ -3,7 +3,7 @@ using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 
 namespace Beatport2Rss.Api.Application.UseCases.Subscriptions.IntegrationEvents;
 
-internal static class SubscriptionCreatedHandler
+public static class SubscriptionCreatedHandler
 {
     public static CreateSubscriptionCommand Handle(SubscriptionCreated subscriptionCreated) =>
         new(subscriptionCreated.SubscriptionId,

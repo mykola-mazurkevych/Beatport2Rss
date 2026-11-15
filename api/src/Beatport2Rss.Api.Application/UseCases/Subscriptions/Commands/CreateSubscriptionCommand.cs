@@ -8,7 +8,7 @@ using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 namespace Beatport2Rss.Api.Application.UseCases.Subscriptions.Commands;
 
-internal sealed record CreateSubscriptionCommand(
+public sealed record CreateSubscriptionCommand(
     Guid SubscriptionId,
     SubscriptionType Type,
     string Name,
@@ -18,7 +18,7 @@ internal sealed record CreateSubscriptionCommand(
     Uri? Website,
     string? Bio);
 
-internal sealed class CreateSubscriptionCommandHandler(
+public sealed class CreateSubscriptionCommandHandler(
     IClock clock,
     ISlugGenerator slugGenerator,
     ISubscriptionCommandRepository subscriptionCommandRepository,
