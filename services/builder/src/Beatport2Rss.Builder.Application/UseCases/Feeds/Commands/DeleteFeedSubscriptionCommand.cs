@@ -9,12 +9,12 @@ public sealed record DeleteFeedSubscriptionCommand(
     Guid FeedId,
     Guid SubscriptionId);
 
-public static class DeleteFeedSubscriptionCommandHandler
+public sealed class DeleteFeedSubscriptionCommandHandler(
+    IFeedCommandRepository feedCommandRepository,
+    IUnitOfWork unitOfWork)
 {
-    public static async Task HandleAsync(
+    public async Task HandleAsync(
         DeleteFeedSubscriptionCommand command,
-        IFeedCommandRepository feedCommandRepository,
-        IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {
         var feed = await feedCommandRepository.FindAsync(FeedId.Create(command.FeedId), cancellationToken);

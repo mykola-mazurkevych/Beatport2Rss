@@ -8,13 +8,13 @@ namespace Beatport2Rss.Collector.Application.UseCases.Feeds.Commands;
 
 public sealed record IncrementSubscribersCountCommand(Guid SubscriptionId);
 
-public static class IncrementSubscribersCountCommandHandler
+public sealed class IncrementSubscribersCountCommandHandler(
+    ISubscriptionCommandRepository subscriptionCommandRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<IncrementSubscribersCountCommand> logger)
 {
-    public static async Task HandleAsync(
+    public async Task HandleAsync(
         IncrementSubscribersCountCommand command,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        IUnitOfWork unitOfWork,
-        ILogger<IncrementSubscribersCountCommand> logger,
         CancellationToken cancellationToken = default)
     {
         IncrementSubscribersCountCommandLoggerMessages.Incrementing(logger, command.SubscriptionId);

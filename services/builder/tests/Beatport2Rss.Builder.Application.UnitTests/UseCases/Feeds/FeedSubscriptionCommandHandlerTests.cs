@@ -104,10 +104,9 @@ public sealed class FeedSubscriptionCommandHandlerTests
             .Setup(value => value.FindAsync(feedId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(feed);
 
-        await DeleteFeedSubscriptionCommandHandler.HandleAsync(
+        var handler = new DeleteFeedSubscriptionCommandHandler(feedRepository.Object, unitOfWork.Object);
+        await handler.HandleAsync(
             new DeleteFeedSubscriptionCommand(feedId.Value, subscriptionId.Value),
-            feedRepository.Object,
-            unitOfWork.Object,
             CancellationToken.None);
 
         Assert.False(feed.HasSubscription(subscriptionId));
@@ -124,10 +123,9 @@ public sealed class FeedSubscriptionCommandHandlerTests
             .Setup(value => value.FindAsync(feedId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(CreateFeed(feedId));
 
-        await DeleteFeedSubscriptionCommandHandler.HandleAsync(
+        var handler = new DeleteFeedSubscriptionCommandHandler(feedRepository.Object, unitOfWork.Object);
+        await handler.HandleAsync(
             new DeleteFeedSubscriptionCommand(feedId.Value, Guid.NewGuid()),
-            feedRepository.Object,
-            unitOfWork.Object,
             CancellationToken.None);
 
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);

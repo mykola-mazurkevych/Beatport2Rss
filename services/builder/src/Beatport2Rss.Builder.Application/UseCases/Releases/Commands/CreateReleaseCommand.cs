@@ -30,15 +30,15 @@ public sealed record CreateReleaseCommand(
     int TracksCount,
     IReadOnlyCollection<TrackDto> Tracks);
 
-public static class CreateReleaseCommandHandler
+public sealed class CreateReleaseCommandHandler(
+    IClock clock,
+    IBeatportUriBuilder beatportUriBuilder,
+    IReleaseCommandRepository releaseCommandRepository,
+    ISubscriptionCommandRepository subscriptionCommandRepository,
+    IUnitOfWork unitOfWork)
 {
-    public static async Task HandleAsync(
+    public async Task HandleAsync(
         CreateReleaseCommand createReleaseCommand,
-        IClock clock,
-        IBeatportUriBuilder beatportUriBuilder,
-        IReleaseCommandRepository releaseCommandRepository,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        IUnitOfWork unitOfWork,
         CancellationToken cancellationToken)
     {
         var exists = await releaseCommandRepository.ExistsAsync(createReleaseCommand.ReleaseId, cancellationToken);

@@ -3,9 +3,6 @@ using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
-using Beatport2Rss.Common.Validation.Extensions;
-
-using FluentValidation;
 
 using Microsoft.Extensions.Logging;
 
@@ -19,25 +16,13 @@ public sealed record CreateFeedCommand(
     string? AuthorName,
     FeedStatus Status);
 
-public sealed class CreateFeedCommandValidator :
-    AbstractValidator<CreateFeedCommand>
+public sealed class CreateFeedCommandHandler(
+    IFeedCommandRepository feedCommandRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<CreateFeedCommand> logger)
 {
-    public CreateFeedCommandValidator()
-    {
-        RuleFor(c => c.FeedId).NotEmpty();
-        RuleFor(c => c.Name).IsFeedName();
-        RuleFor(c => c.Slug).IsSlug();
-        RuleFor(c => c.AuthorName).IsAuthorName();
-    }
-}
-
-public static class CreateFeedCommandHandler
-{
-    public static async Task Handle(
+    public async Task Handle(
         CreateFeedCommand command,
-        IFeedCommandRepository feedCommandRepository,
-        IUnitOfWork unitOfWork,
-        ILogger<CreateFeedCommand> logger,
         CancellationToken cancellationToken)
     {
         LoggerMessages.Creating(logger, command.FeedId, command.Name);

@@ -42,14 +42,32 @@ public sealed class CreateReleaseCommandTests
         var releases = new Mock<IReleaseCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var command = ReleaseCollectedHandler.Handle(CreateEvent(includeArtists: true));
+        var handler = new CreateReleaseCommandHandler(
+            Mock.Of<IClock>(),
+            Mock.Of<IBeatportUriBuilder>(),
+            releases.Object,
+            subscriptions.Object,
+            unitOfWork.Object);
 
-        var exception = await Assert.ThrowsAsync<RetryableException>(() => CreateReleaseCommandHandler.HandleAsync(
-            command, Mock.Of<IClock>(), Mock.Of<IBeatportUriBuilder>(), releases.Object, subscriptions.Object,
-            unitOfWork.Object, cancellationToken));
+        var exception = await Assert.ThrowsAsync<RetryableException>(() =>
+            handler.HandleAsync(command, cancellationToken));
 
         Assert.Contains($"{missingType} {missingId}", exception.Message, StringComparison.Ordinal);
         releases.Verify(value => value.AddAsync(It.IsAny<Release>(), It.IsAny<CancellationToken>()), Times.Never);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task DeleteStaleReleasesCommand_InvalidRetentionInDays_Throws(int retentionInDays)
+    {
+        var handler = new DeleteStaleReleasesCommandHandler(
+            Mock.Of<IClock>(),
+            Mock.Of<IReleaseCommandRepository>());
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            handler.Handle(new DeleteStaleReleasesCommand(retentionInDays), CancellationToken.None));
     }
 
     [Theory]

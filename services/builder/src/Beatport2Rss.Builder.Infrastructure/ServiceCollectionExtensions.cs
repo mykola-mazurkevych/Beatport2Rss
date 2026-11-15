@@ -2,8 +2,6 @@
 
 using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
-using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.EntityFrameworkCore;
@@ -14,8 +12,6 @@ using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
-
-using FluentValidation;
 
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -47,10 +43,6 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection AddMessaging(IConfiguration configuration) =>
             services
-                .AddTransient<IValidator<CreateFeedCommand>, CreateFeedCommandValidator>()
-                .AddTransient<IValidator<UpdateFeedCommand>, UpdateFeedCommandValidator>()
-                .AddTransient<IValidator<DeleteFeedCommand>, DeleteFeedCommandValidator>()
-                .AddTransient<IValidator<DeleteStaleReleasesCommand>, DeleteStaleReleasesCommandValidator>()
                 .AddWolverine<BuilderDbContext, BuilderApplication>(
                     configuration,
                     configurePublisher: null,

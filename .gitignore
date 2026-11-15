@@ -33,9 +33,12 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+!api/srs/**/Releases/
+!api/tests/**/Releases/
 !common/src/**/Releases/
-!src/**/Releases/
+!common/tests/**/Releases/
 !services/**/src/**/Releases/
+!services/**/tests/**/Releases/
 
 # Build results on 'Bin' directories
 **/[Bb]in/*

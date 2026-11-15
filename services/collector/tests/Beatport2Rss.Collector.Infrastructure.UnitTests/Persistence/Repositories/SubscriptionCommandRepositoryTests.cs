@@ -83,15 +83,19 @@ public sealed class SubscriptionCommandRepositoryTests
             .Returns<CancellationToken>(handlerContext.SaveChangesAsync);
         if (increment)
         {
-            await IncrementSubscribersCountCommandHandler.HandleAsync(
-                new IncrementSubscribersCountCommand(subscriptionId.Value), repository, unitOfWork.Object,
-                NullLogger<IncrementSubscribersCountCommand>.Instance, cancellationToken);
+            var handler = new IncrementSubscribersCountCommandHandler(
+                repository,
+                unitOfWork.Object,
+                NullLogger<IncrementSubscribersCountCommand>.Instance);
+            await handler.HandleAsync(new IncrementSubscribersCountCommand(subscriptionId.Value), cancellationToken);
         }
         else
         {
-            await DecrementSubscribersCountCommandHandler.HandleAsync(
-                new DecrementSubscribersCountCommand(subscriptionId.Value), repository, unitOfWork.Object,
-                NullLogger<DecrementSubscribersCountCommand>.Instance, cancellationToken);
+            var handler = new DecrementSubscribersCountCommandHandler(
+                repository,
+                unitOfWork.Object,
+                NullLogger<DecrementSubscribersCountCommand>.Instance);
+            await handler.HandleAsync(new DecrementSubscribersCountCommand(subscriptionId.Value), cancellationToken);
         }
 
         await using var verificationContext = new CollectorDbContext(options);

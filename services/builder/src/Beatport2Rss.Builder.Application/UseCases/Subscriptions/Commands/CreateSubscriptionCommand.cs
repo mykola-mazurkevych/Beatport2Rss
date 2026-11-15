@@ -15,13 +15,13 @@ public sealed record CreateSubscriptionCommand(
     SubscriptionType Type,
     int BeatportId);
 
-public static class CreateSubscriptionCommandHandler
+public sealed class CreateSubscriptionCommandHandler(
+    ISubscriptionCommandRepository subscriptionCommandRepository,
+    IUnitOfWork unitOfWork,
+    ILogger<CreateSubscriptionCommand> logger)
 {
-    public static async Task Handle(
+    public async Task Handle(
         CreateSubscriptionCommand command,
-        ISubscriptionCommandRepository subscriptionCommandRepository,
-        IUnitOfWork unitOfWork,
-        ILogger<CreateSubscriptionCommand> logger,
         CancellationToken cancellationToken)
     {
         LoggerMessages.Creating(logger, command.SubscriptionId, command.Name, command.Type);
