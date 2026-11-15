@@ -58,6 +58,8 @@ public static class ServiceCollectionExtensions
                         .ListensTo<FeedCreated>()
                         .ListensTo<FeedUpdated>()
                         .ListensTo<FeedDeleted>()
+                        .ListensTo<FeedSubscriptionCreated>()
+                        .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<TagCreated>()
                         .ListensTo<TagUpdated>()
                         .ListensTo<TagDeleted>()
