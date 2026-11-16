@@ -14,16 +14,20 @@ public sealed class Tag :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    public Guid UserId { get; private set; }
+
     public TagName Name { get; private set; }
 
     public static Tag Create(
         TagId id,
         DateTimeOffset createdAt,
+        Guid userId,
         TagName name) =>
         new()
         {
             Id = id,
             CreatedAt = createdAt,
+            UserId = userId,
             Name = name,
         };
 

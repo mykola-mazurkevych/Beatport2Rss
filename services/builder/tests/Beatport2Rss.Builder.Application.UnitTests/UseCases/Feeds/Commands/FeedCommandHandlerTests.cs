@@ -22,6 +22,7 @@ public sealed class FeedCommandHandlerTests
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var feedId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var createdAt = DateTimeOffset.UtcNow;
         var repository = new Mock<IFeedCommandRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
@@ -38,11 +39,12 @@ public sealed class FeedCommandHandlerTests
             NullLogger<CreateFeedCommand>.Instance);
 
         await handler.Handle(
-            new CreateFeedCommand(feedId, createdAt, "Feed", "feed", authorName, FeedStatus.Active),
+            new CreateFeedCommand(feedId, userId, createdAt, "Feed", "feed", authorName, FeedStatus.Active),
             cancellationToken);
 
         Assert.NotNull(addedFeed);
         Assert.Equal(FeedId.Create(feedId), addedFeed.Id);
+        Assert.Equal(userId, addedFeed.UserId);
         Assert.Equal(createdAt, addedFeed.CreatedAt);
         Assert.Equal(FeedName.Create("Feed"), addedFeed.Name);
         Assert.Equal(Slug.Create("feed"), addedFeed.Slug);
@@ -72,7 +74,7 @@ public sealed class FeedCommandHandlerTests
             NullLogger<CreateFeedCommand>.Instance);
 
         await handler.Handle(
-            new CreateFeedCommand(Guid.NewGuid(), DateTimeOffset.UtcNow, "Feed", "feed", null, FeedStatus.Active),
+            new CreateFeedCommand(Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UtcNow, "Feed", "feed", null, FeedStatus.Active),
             cancellationToken);
 
         repository.Verify(value => value.AddAsync(It.IsAny<Feed>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -175,6 +177,7 @@ public sealed class FeedCommandHandlerTests
         Feed.Create(
             FeedId.Create(Guid.NewGuid()),
             DateTimeOffset.UtcNow,
+            Guid.NewGuid(),
             FeedName.Create("Feed"),
             Slug.Create("feed"),
             AuthorName.Create("Original Author"),

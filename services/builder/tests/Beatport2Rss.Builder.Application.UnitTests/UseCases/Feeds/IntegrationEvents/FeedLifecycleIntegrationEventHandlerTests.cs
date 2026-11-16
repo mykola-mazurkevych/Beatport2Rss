@@ -13,6 +13,7 @@ public sealed class FeedLifecycleIntegrationEventHandlerTests
     {
         var occurredAt = DateTimeOffset.UtcNow;
         var feedId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         const string name = "Feed";
         const string slug = "feed";
         const string authorName = "Author";
@@ -21,7 +22,7 @@ public sealed class FeedLifecycleIntegrationEventHandlerTests
             Guid.NewGuid(),
             occurredAt,
             feedId,
-            Guid.NewGuid(),
+            userId,
             name,
             slug,
             authorName,
@@ -30,6 +31,7 @@ public sealed class FeedLifecycleIntegrationEventHandlerTests
         var command = FeedCreatedHandler.Handle(integrationEvent);
 
         Assert.Equal(feedId, command.FeedId);
+        Assert.Equal(userId, command.UserId);
         Assert.Equal(occurredAt, command.CreatedAt);
         Assert.Equal(name, command.Name);
         Assert.Equal(slug, command.Slug);

@@ -10,6 +10,7 @@ namespace Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 
 public sealed record CreateFeedCommand(
     Guid FeedId,
+    Guid UserId,
     DateTimeOffset CreatedAt,
     string Name,
     string Slug,
@@ -37,6 +38,7 @@ public sealed class CreateFeedCommandHandler(
         var feed = Feed.Create(
             feedId,
             command.CreatedAt,
+            command.UserId,
             FeedName.Create(command.Name),
             Slug.Create(command.Slug),
             command.AuthorName is null ? null : AuthorName.Create(command.AuthorName),

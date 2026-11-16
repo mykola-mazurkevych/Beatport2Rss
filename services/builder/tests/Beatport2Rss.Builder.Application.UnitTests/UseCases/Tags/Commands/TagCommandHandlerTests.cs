@@ -16,20 +16,28 @@ public sealed class TagCommandHandlerTests
     public async Task CreateTagCommandHandler_ShouldAddAndSaveTag()
     {
         var tagId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        Tag? addedTag = null;
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository
             .Setup(value => value.ExistsAsync(It.IsAny<TagId>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
+        repository
+            .Setup(value => value.AddAsync(It.IsAny<Tag>(), It.IsAny<CancellationToken>()))
+            .Callback<Tag, CancellationToken>((tag, _) => addedTag = tag)
+            .ReturnsAsync((Tag tag, CancellationToken _) => tag);
 
         var handler = new CreateTagCommandHandler(
             repository.Object,
             unitOfWork.Object);
 
         await handler.HandleAsync(
-            new CreateTagCommand(tagId, DateTimeOffset.UtcNow, "Techno"),
+            new CreateTagCommand(tagId, userId, DateTimeOffset.UtcNow, "Techno"),
             CancellationToken.None);
 
+        Assert.NotNull(addedTag);
+        Assert.Equal(userId, addedTag.UserId);
         repository.Verify(
             value => value.AddAsync(
                 It.Is<Tag>(tag => tag.Id == TagId.Create(tagId) && tag.Name == TagName.Create("Techno")),
@@ -52,7 +60,7 @@ public sealed class TagCommandHandlerTests
             unitOfWork.Object);
 
         await handler.HandleAsync(
-            new CreateTagCommand(Guid.NewGuid(), DateTimeOffset.UtcNow, "Techno"),
+            new CreateTagCommand(Guid.NewGuid(), Guid.NewGuid(), DateTimeOffset.UtcNow, "Techno"),
             CancellationToken.None);
 
         repository.Verify(value => value.AddAsync(It.IsAny<Tag>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -62,7 +70,7 @@ public sealed class TagCommandHandlerTests
     [Fact]
     public async Task UpdateTagCommandHandler_ShouldUpdateAndSaveTag()
     {
-        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, TagName.Create("Techno"));
+        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno"));
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository
@@ -101,7 +109,7 @@ public sealed class TagCommandHandlerTests
     [Fact]
     public async Task DeleteTagCommandHandler_ShouldDeleteAndSaveTag()
     {
-        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, TagName.Create("Techno"));
+        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno"));
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository

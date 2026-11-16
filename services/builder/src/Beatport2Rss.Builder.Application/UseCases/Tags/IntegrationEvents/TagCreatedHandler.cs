@@ -7,6 +7,7 @@ public static class TagCreatedHandler
 {
     public static CreateTagCommand Handle(TagCreated tagCreated) =>
         new(tagCreated.TagId,
+            tagCreated.UserId,
             tagCreated.OccurredAt,
             tagCreated.Name);
 }

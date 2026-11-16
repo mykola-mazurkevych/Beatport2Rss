@@ -22,6 +22,9 @@ internal sealed class TagConfiguration :
         builder.Property(tag => tag.CreatedAt)
             .IsRequired();
 
+        builder.Property(tag => tag.UserId)
+            .IsRequired();
+
         builder.Property(tag => tag.Name)
             .HasMaxLength(TagName.MaxLength)
             .IsRequired();

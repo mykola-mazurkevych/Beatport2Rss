@@ -25,6 +25,9 @@ internal sealed class FeedConfiguration :
         builder.Property(feed => feed.CreatedAt)
             .IsRequired();
 
+        builder.Property(feed => feed.UserId)
+            .IsRequired();
+
         builder.Property(feed => feed.Name)
             .HasMaxLength(FeedName.MaxLength)
             .IsRequired();

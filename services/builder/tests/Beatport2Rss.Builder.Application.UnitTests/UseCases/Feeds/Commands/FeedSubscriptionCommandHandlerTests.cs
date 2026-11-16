@@ -180,6 +180,7 @@ public sealed class FeedSubscriptionCommandHandlerTests
         Feed.Create(
             feedId,
             DateTimeOffset.UtcNow,
+            Guid.NewGuid(),
             FeedName.Create("Feed"),
             Slug.Create("feed"),
             null,

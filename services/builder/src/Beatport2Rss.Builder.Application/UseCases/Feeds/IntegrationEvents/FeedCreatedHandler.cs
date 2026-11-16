@@ -7,6 +7,7 @@ public static class FeedCreatedHandler
 {
     public static CreateFeedCommand Handle(FeedCreated feedCreated) =>
         new(feedCreated.FeedId,
+            feedCreated.UserId,
             feedCreated.OccurredAt,
             feedCreated.Name,
             feedCreated.Slug,

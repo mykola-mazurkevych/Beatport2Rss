@@ -12,10 +12,12 @@ public sealed class TagIntegrationEventHandlerTests
     {
         var occurredAt = DateTimeOffset.UtcNow;
         var tagId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var command = TagCreatedHandler.Handle(
-            new TagCreated(Guid.NewGuid(), occurredAt, tagId, Guid.NewGuid(), "Techno"));
+            new TagCreated(Guid.NewGuid(), occurredAt, tagId, userId, "Techno"));
 
         Assert.Equal(tagId, command.TagId);
+        Assert.Equal(userId, command.UserId);
         Assert.Equal(occurredAt, command.CreatedAt);
         Assert.Equal("Techno", command.Name);
     }

@@ -18,6 +18,8 @@ public sealed class Feed :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
+    public Guid UserId { get; private set; }
+
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
     public AuthorName? AuthorName { get; private set; }
@@ -30,6 +32,7 @@ public sealed class Feed :
     public static Feed Create(
         FeedId id,
         DateTimeOffset createdAt,
+        Guid userId,
         FeedName name,
         Slug slug,
         AuthorName? authorName,
@@ -38,6 +41,7 @@ public sealed class Feed :
         {
             Id = id,
             CreatedAt = createdAt,
+            UserId = userId,
             Name = name,
             Slug = slug,
             AuthorName = authorName,

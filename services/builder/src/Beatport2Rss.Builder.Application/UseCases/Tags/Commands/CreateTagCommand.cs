@@ -7,6 +7,7 @@ namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 
 public sealed record CreateTagCommand(
     Guid TagId,
+    Guid UserId,
     DateTimeOffset CreatedAt,
     string Name);
 
@@ -27,6 +28,7 @@ public sealed class CreateTagCommandHandler(
         var tag = Tag.Create(
             tagId,
             command.CreatedAt,
+            command.UserId,
             TagName.Create(command.Name));
 
         await tagCommandRepository.AddAsync(tag, cancellationToken);

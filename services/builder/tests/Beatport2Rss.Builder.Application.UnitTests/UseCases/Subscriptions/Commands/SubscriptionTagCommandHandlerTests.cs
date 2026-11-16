@@ -37,7 +37,7 @@ public sealed class SubscriptionTagCommandHandlerTests
             .ReturnsAsync(subscription);
         tagRepository
             .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, TagName.Create("Techno")));
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
         var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
@@ -71,7 +71,7 @@ public sealed class SubscriptionTagCommandHandlerTests
             .ReturnsAsync(subscription);
         tagRepository
             .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, TagName.Create("Techno")));
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
         var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
