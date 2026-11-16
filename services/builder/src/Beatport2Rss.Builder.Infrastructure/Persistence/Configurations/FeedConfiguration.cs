@@ -66,6 +66,12 @@ internal sealed class FeedConfiguration :
                 navigationBuilder.HasIndex(feedSubscription => feedSubscription.SubscriptionId);
             });
 
+        builder
+            .HasOne<RssFeedDocument>()
+            .WithOne()
+            .HasForeignKey<RssFeedDocument>(rssFeedDocument => rssFeedDocument.Id)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(feed => feed.Slug)
             .IsUnique();
     }

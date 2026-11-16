@@ -59,6 +59,26 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.ToTable("Feeds", "builder");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Feeds.RssFeedDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RssFeedDocuments", "builder");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Releases.Release", b =>
                 {
                     b.Property<Guid>("Id")
@@ -236,6 +256,15 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Subscriptions");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Feeds.RssFeedDocument", b =>
+                {
+                    b.HasOne("Beatport2Rss.Builder.Domain.Feeds.Feed", null)
+                        .WithOne()
+                        .HasForeignKey("Beatport2Rss.Builder.Domain.Feeds.RssFeedDocument", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Releases.Release", b =>

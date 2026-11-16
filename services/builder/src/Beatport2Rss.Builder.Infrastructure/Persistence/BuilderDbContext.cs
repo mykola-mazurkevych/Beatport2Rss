@@ -20,6 +20,7 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Release> Releases => Set<Release>();
     public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
+    public DbSet<RssFeedDocument> RssFeedDocuments => Set<RssFeedDocument>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
     public DbSet<SubscriptionTag> SubscriptionTags => Set<SubscriptionTag>();
     public DbSet<Tag> Tags => Set<Tag>();
