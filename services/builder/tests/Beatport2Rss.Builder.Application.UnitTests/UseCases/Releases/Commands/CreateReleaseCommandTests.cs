@@ -3,17 +3,20 @@ using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.IntegrationEvents;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
+using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using JasperFx.CodeGeneration.Model;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 using Moq;
@@ -121,18 +124,20 @@ public sealed class CreateReleaseCommandTests
         unitOfWork.Setup(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .Callback(() => saved.TrySetResult())
             .Returns(Task.CompletedTask);
-        var uriBuilder = new Mock<IBeatportUriBuilder>();
-        uriBuilder.Setup(value => value.Build(It.IsAny<int>(), It.IsAny<string>()))
-            .Returns(new Uri("https://example.com/release"));
-
         using var host = Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureAppConfiguration(configuration => configuration.AddInMemoryCollection(
+                new Dictionary<string, string?>
+                {
+                    ["BeatportOptions:ApiV4BaseUri"] = "https://api.beatport.com/v4/catalog",
+                    ["BeatportOptions:WebBaseUri"] = "https://www.beatport.com"
+                }))
+            .ConfigureServices((context, services) =>
             {
                 services.AddSingleton(subscriptions.Object);
                 services.AddSingleton(releases.Object);
                 services.AddSingleton(unitOfWork.Object);
-                services.AddSingleton(uriBuilder.Object);
-                services.AddSingleton(Mock.Of<IClock>());
+                services.AddBeatportClient(context.Configuration);
+                services.AddMiscellaneous();
                 services.AddWolverine(options =>
                 {
                     options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
@@ -156,6 +161,12 @@ public sealed class CreateReleaseCommandTests
         Assert.Equal(expectedAttempts, attempts);
         releases.Verify(value => value.AddAsync(It.IsAny<Release>(), It.IsAny<CancellationToken>()),
             alwaysMissing ? Times.Never : Times.Once);
+        if (!alwaysMissing)
+        {
+            releases.Verify(value => value.AddAsync(
+                It.Is<Release>(release => release.BeatportUri == new Uri("https://www.beatport.com/release/100")),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()),
             alwaysMissing ? Times.Never : Times.Once);
     }

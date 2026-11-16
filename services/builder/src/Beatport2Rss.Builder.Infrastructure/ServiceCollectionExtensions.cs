@@ -4,12 +4,14 @@ using Beatport2Rss.Builder.Application;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Infrastructure.Persistence;
 using Beatport2Rss.Builder.Infrastructure.Persistence.Repositories;
+using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
+using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
@@ -26,8 +28,10 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration) =>
             services
-                .AddPersistence(configuration)
-                .AddMessaging(configuration);
+                .AddBeatportClient(configuration)
+                .AddMessaging(configuration)
+                .AddMiscellaneous()
+                .AddPersistence(configuration);
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
             services
@@ -69,8 +73,8 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
-                .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
-                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
+                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
+                .AddTransient<ITagCommandRepository, TagCommandRepository>();
     }
 }
