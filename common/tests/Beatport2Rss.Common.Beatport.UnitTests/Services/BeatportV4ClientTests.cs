@@ -41,6 +41,28 @@ public sealed class BeatportV4ClientTests
     }
 
     [Fact]
+    public async Task GetAsync_DeserializesEmptyArtistWebsiteAsNull()
+    {
+        const string json = """
+            {"id":42,"slug":"artist","name":"Artist","image":{"uri":"https://example.com/image.jpg"},
+             "bio":null,"website":""}
+            """;
+        var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
+        using var handler = new StubHttpMessageHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        }));
+        await using var provider = CreateProvider(tokenProvider, handler);
+
+        var result = await provider.GetRequiredService<IBeatportClient>()
+            .GetAsync<BeatportArtistDto>(42, TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Null(result.Value.Website);
+    }
+
+    [Fact]
     public async Task GetAsync_WhenTokenProvided_ShouldAuthenticateEachRequest()
     {
         using var cancellationSource = new CancellationTokenSource();

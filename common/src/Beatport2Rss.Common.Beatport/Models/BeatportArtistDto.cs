@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using Beatport2Rss.Common.Beatport.JsonConverters;
+
 namespace Beatport2Rss.Common.Beatport.Models;
 
 public sealed record BeatportArtistDto(
@@ -8,5 +10,5 @@ public sealed record BeatportArtistDto(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("image")] BeatportImageDto Image,
     [property: JsonPropertyName("bio")] string? Bio,
-    [property: JsonPropertyName("website")] Uri? Website) :
+    [property: JsonPropertyName("website")] [property: JsonConverter(typeof(EmptyStringToNullUriJsonConverter))] Uri? Website) :
     BeatportDto(Id, Slug);
