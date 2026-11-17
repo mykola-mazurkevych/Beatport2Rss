@@ -27,10 +27,6 @@ internal sealed class SubscriptionConfiguration :
         builder.Property(subscription => subscription.BeatportId)
             .IsRequired();
 
-        builder.Property(subscription => subscription.SubscribersCount)
-            .IsRequired()
-            .IsConcurrencyToken();
-
         builder.Property(subscription => subscription.RefreshedAt)
             .IsRequired(required: false);
 

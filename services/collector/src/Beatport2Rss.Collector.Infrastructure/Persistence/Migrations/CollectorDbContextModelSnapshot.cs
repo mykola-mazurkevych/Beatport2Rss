@@ -23,6 +23,24 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Beatport2Rss.Collector.Domain.Feeds.Feed", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Feeds", "collector");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Collector.Domain.Releases.Release", b =>
                 {
                     b.Property<Guid>("Id")
@@ -56,9 +74,6 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                     b.Property<DateOnly?>("RefreshedAt")
                         .HasColumnType("date");
 
-                    b.Property<int>("SubscribersCount")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -70,6 +85,54 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("Subscriptions", "collector");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Collector.Domain.Users.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users", "collector");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Collector.Domain.Feeds.Feed", b =>
+                {
+                    b.HasOne("Beatport2Rss.Collector.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("Beatport2Rss.Collector.Domain.Feeds.FeedSubscription", "Subscriptions", b1 =>
+                        {
+                            b1.Property<Guid>("FeedId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("SubscriptionId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("FeedId", "SubscriptionId");
+
+                            b1.HasIndex("SubscriptionId");
+
+                            b1.ToTable("FeedSubscriptions", "collector");
+
+                            b1.WithOwner()
+                                .HasForeignKey("FeedId");
+
+                            b1.HasOne("Beatport2Rss.Collector.Domain.Subscriptions.Subscription", null)
+                                .WithMany()
+                                .HasForeignKey("SubscriptionId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+                        });
+
+                    b.Navigation("Subscriptions");
                 });
 #pragma warning restore 612, 618
         }

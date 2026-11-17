@@ -44,7 +44,7 @@ public sealed class CollectReleasesCommandHandler(
     public async Task HandleAsync(CollectReleasesCommand command, CancellationToken cancellationToken)
     {
         var subscription = await subscriptionCommandRepository.FindAsync(SubscriptionId.Create(command.SubscriptionId), cancellationToken);
-        if (subscription is null || subscription.SubscribersCount == 0)
+        if (subscription is null || !await subscriptionCommandRepository.HasFeedsAsync(subscription.Id, cancellationToken))
         {
             CollectReleasesCommandLoggerMessages.SubscriptionUnavailable(logger, command.SubscriptionId);
             return;

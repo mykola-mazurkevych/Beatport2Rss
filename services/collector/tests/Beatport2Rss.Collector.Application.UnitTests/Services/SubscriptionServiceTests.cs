@@ -69,7 +69,6 @@ public sealed class SubscriptionServiceTests
         Assert.Equal(type, subscription.Type);
         Assert.Equal(beatportId, subscription.BeatportId);
         Assert.Equal(now, subscription.CreatedAt);
-        Assert.Equal(0, subscription.SubscribersCount);
         Assert.Null(subscription.RefreshedAt);
         var message = Assert.Single(events);
         Assert.NotEqual(Guid.Empty, message.Id);

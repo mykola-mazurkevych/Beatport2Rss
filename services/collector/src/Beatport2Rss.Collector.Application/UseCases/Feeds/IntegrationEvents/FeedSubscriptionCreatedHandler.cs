@@ -5,6 +5,7 @@ namespace Beatport2Rss.Collector.Application.UseCases.Feeds.IntegrationEvents;
 
 public static class FeedSubscriptionCreatedHandler
 {
-    public static IncrementSubscribersCountCommand Handle(FeedSubscriptionCreated feedSubscriptionCreated) =>
-        new(feedSubscriptionCreated.SubscriptionId);
+    public static CreateFeedSubscriptionCommand Handle(FeedSubscriptionCreated feedSubscriptionCreated) =>
+        new(feedSubscriptionCreated.FeedId,
+            feedSubscriptionCreated.SubscriptionId);
 }

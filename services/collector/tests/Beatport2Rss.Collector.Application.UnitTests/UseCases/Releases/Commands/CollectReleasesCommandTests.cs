@@ -36,6 +36,7 @@ public sealed class CollectReleasesCommandTests
         var subscription = CreateSubscription();
         var subscriptions = new Mock<ISubscriptionCommandRepository>();
         subscriptions.Setup(value => value.FindAsync(subscription.Id, cancellationToken)).ReturnsAsync(subscription);
+        subscriptions.Setup(value => value.HasFeedsAsync(subscription.Id, cancellationToken)).ReturnsAsync(true);
         var releases = new Mock<IReleaseCommandRepository>();
         releases.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken)).ReturnsAsync([]);
         var client = new Mock<IBeatportClient>();
@@ -233,10 +234,9 @@ public sealed class CollectReleasesCommandTests
     public async Task HandleAsync_SkipsUnsubscribedSubscription()
     {
         var subscription = CreateSubscription();
-        subscription.DecrementSubscribersCount();
         var client = new Mock<IBeatportClient>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
-        var handler = CreateHandler(subscription, client.Object, unitOfWork.Object);
+        var handler = CreateHandler(subscription, client.Object, unitOfWork.Object, hasFeeds: false);
 
         await handler.HandleAsync(new CollectReleasesCommand(subscription.Id.Value), TestContext.Current.CancellationToken);
 
@@ -248,17 +248,18 @@ public sealed class CollectReleasesCommandTests
     {
         var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Artist, BeatportId.Create(42));
-        subscription.IncrementSubscribersCount();
         return subscription;
     }
 
     private static CollectReleasesCommandHandler CreateHandler(
-        Subscription subscription, IBeatportClient client, IUnitOfWork unitOfWork, IClock? clock = null)
+        Subscription subscription, IBeatportClient client, IUnitOfWork unitOfWork, IClock? clock = null, bool hasFeeds = true)
     {
         clock ??= Mock.Of<IClock>(value => value.UtcToday == new DateOnly(2026, 11, 12));
         var subscriptions = new Mock<ISubscriptionCommandRepository>();
         subscriptions.Setup(value => value.FindAsync(subscription.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(subscription);
+        subscriptions.Setup(value => value.HasFeedsAsync(subscription.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(hasFeeds);
         var releases = new Mock<IReleaseCommandRepository>();
         releases.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);

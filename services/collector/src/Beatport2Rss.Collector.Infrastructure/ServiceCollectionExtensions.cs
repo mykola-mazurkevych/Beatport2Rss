@@ -11,6 +11,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
+using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
@@ -53,23 +54,31 @@ public static class ServiceCollectionExtensions
                 .AddWolverine<CollectorDbContext, CollectorApplication>(
                     configuration,
                     configurePublisher: options => options
-                        .Publishes<SubscriptionCreated>()
                         .Publishes<ReleaseCollected>()
+                        .Publishes<SubscriptionCreated>()
                         .LocalQueueFor<CollectReleasesCommand>().Sequential().UseDurableInbox(),
                     configureListener: listener => listener
+                        .ListensTo<FeedCreated>()
+                        .ListensTo<FeedDeleted>()
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
-                        .ListensTo<SubscriptionRequested>(),
+                        .ListensTo<SubscriptionRequested>()
+                        .ListensTo<UserCreated>()
+                        .ListensTo<UserDeleted>(),
                     configureRetries: options => options
-                        .Retries<HttpRequestException>()
-                        .Retries<DbUpdateConcurrencyException>());
+                        .Retries<DbUpdateConcurrencyException>()
+                        .Retries<HttpRequestException>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
-                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Releases)
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions)
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Users)
+                .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
-                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
+                .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
+                .AddTransient<IUserCommandRepository, UserCommandRepository>();
     }
 }

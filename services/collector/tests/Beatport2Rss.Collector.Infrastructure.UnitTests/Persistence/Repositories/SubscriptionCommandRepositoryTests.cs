@@ -1,8 +1,12 @@
 using Beatport2Rss.Collector.Domain.Subscriptions;
+using Beatport2Rss.Collector.Domain.Feeds;
+using Beatport2Rss.Collector.Domain.Users;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
@@ -14,40 +18,6 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests.Persistence.Repositori
 public sealed class SubscriptionCommandRepositoryTests
 {
     [Fact]
-    public void ConcurrencyTokenDoesNotRequireDatabaseMigration()
-    {
-        var options = new DbContextOptionsBuilder<CollectorDbContext>()
-            .UseNpgsql("Host=localhost;Database=collector_model_check;Username=test;Password=test")
-            .Options;
-        using var context = new CollectorDbContext(options);
-
-        Assert.False(context.Database.HasPendingModelChanges());
-    }
-
-    [Fact]
-    public async Task ConcurrentSubscribersCountChangeRaisesConcurrencyException()
-    {
-        var cancellationToken = TestContext.Current.CancellationToken;
-        var options = new DbContextOptionsBuilder<CollectorDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        await using var firstContext = new CollectorDbContext(options);
-        var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
-            SubscriptionType.Artist, BeatportId.Create(42));
-        subscription.IncrementSubscribersCount();
-        firstContext.Subscriptions.Add(subscription);
-        await firstContext.SaveChangesAsync(cancellationToken);
-
-        await using var secondContext = new CollectorDbContext(options);
-        var concurrentSubscription = await secondContext.Subscriptions.SingleAsync(cancellationToken);
-        subscription.IncrementSubscribersCount();
-        concurrentSubscription.IncrementSubscribersCount();
-        await firstContext.SaveChangesAsync(cancellationToken);
-
-        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => secondContext.SaveChangesAsync(cancellationToken));
-    }
-
-    [Fact]
     public async Task FindAllToRefreshAsync_ReturnsOnlySubscribedAndNotRefreshedToday()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -58,19 +28,22 @@ public sealed class SubscriptionCommandRepositoryTests
         var clock = new TestClock();
         var pending = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Artist, BeatportId.Create(1));
-        pending.IncrementSubscribersCount();
         var refreshed = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Artist, BeatportId.Create(2));
-        refreshed.IncrementSubscribersCount();
         refreshed.MarkRefreshed(clock.UtcToday);
         var unsubscribed = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Artist, BeatportId.Create(3));
         context.Subscriptions.AddRange(pending, refreshed, unsubscribed);
+        AddFeed(context, pending.Id, refreshed.Id);
+        AddFeed(context, pending.Id);
         await context.SaveChangesAsync(cancellationToken);
 
-        var result = await new SubscriptionCommandRepository(context.Subscriptions, clock).FindAllToRefreshAsync(cancellationToken);
+        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, clock);
+        var result = await repository.FindAllToRefreshAsync(cancellationToken);
 
         Assert.Equal([pending.Id], result);
+        Assert.True(await repository.HasFeedsAsync(pending.Id, cancellationToken));
+        Assert.False(await repository.HasFeedsAsync(unsubscribed.Id, cancellationToken));
     }
 
     [Fact]
@@ -81,7 +54,7 @@ public sealed class SubscriptionCommandRepositoryTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         await using var context = new CollectorDbContext(options);
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
         var beatportId = BeatportId.Create(42);
         Assert.False(await repository.ExistsAsync(SubscriptionType.Artist, beatportId, cancellationToken));
         var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, SubscriptionType.Artist, beatportId);
@@ -109,12 +82,24 @@ public sealed class SubscriptionCommandRepositoryTests
         context.Subscriptions.Add(Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, SubscriptionType.Label, beatportId));
         await context.SaveChangesAsync(cancellationToken);
         context.ChangeTracker.Clear();
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
 
         Assert.True(await repository.ExistsAsync(SubscriptionType.Label, beatportId, cancellationToken));
         Assert.False(await repository.ExistsAsync(SubscriptionType.Artist, beatportId, cancellationToken));
         Assert.False(await repository.ExistsAsync(SubscriptionType.Label, BeatportId.Create(43), cancellationToken));
         Assert.Empty(context.ChangeTracker.Entries());
+    }
+
+    private static void AddFeed(CollectorDbContext context, params SubscriptionId[] subscriptionIds)
+    {
+        var user = User.Create(UserId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow);
+        var feed = Feed.Create(FeedId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, user.Id);
+        foreach (var subscriptionId in subscriptionIds)
+        {
+            feed.AddSubscription(subscriptionId);
+        }
+        context.Users.Add(user);
+        context.Feeds.Add(feed);
     }
 
     private sealed class TestClock : IClock

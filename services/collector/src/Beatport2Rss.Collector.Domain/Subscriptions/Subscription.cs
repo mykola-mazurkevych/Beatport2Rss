@@ -19,8 +19,6 @@ public sealed class Subscription :
 
     public BeatportId BeatportId { get; private set; }
 
-    public int SubscribersCount { get; private set; }
-
     public DateOnly? RefreshedAt { get; private set; }
 
     public static Subscription Create(
@@ -35,19 +33,6 @@ public sealed class Subscription :
             Type = type,
             BeatportId = beatportId,
         };
-
-    public void IncrementSubscribersCount() => SubscribersCount++;
-
-    public bool DecrementSubscribersCount()
-    {
-        if (SubscribersCount == 0)
-        {
-            return false;
-        }
-
-        SubscribersCount--;
-        return true;
-    }
 
     public void MarkRefreshed(DateOnly refreshedAt) => RefreshedAt = refreshedAt;
 }

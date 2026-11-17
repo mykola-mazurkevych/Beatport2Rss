@@ -5,6 +5,7 @@ namespace Beatport2Rss.Collector.Application.UseCases.Feeds.IntegrationEvents;
 
 public static class FeedSubscriptionDeletedHandler
 {
-    public static DecrementSubscribersCountCommand Handle(FeedSubscriptionDeleted feedSubscriptionDeleted) =>
-        new(feedSubscriptionDeleted.SubscriptionId);
+    public static DeleteFeedSubscriptionCommand Handle(FeedSubscriptionDeleted feedSubscriptionDeleted) =>
+        new(feedSubscriptionDeleted.FeedId,
+            feedSubscriptionDeleted.SubscriptionId);
 }

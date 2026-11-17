@@ -11,29 +11,33 @@ public sealed class FeedSubscriptionIntegrationEventHandlerTests
     public void FeedSubscriptionCreatedHandler_ShouldMapSubscriptionId()
     {
         var subscriptionId = Guid.NewGuid();
+        var feedId = Guid.NewGuid();
         var integrationEvent = new FeedSubscriptionCreated(
             Guid.NewGuid(),
             DateTimeOffset.UtcNow,
-            Guid.NewGuid(),
+            feedId,
             subscriptionId);
 
         var command = FeedSubscriptionCreatedHandler.Handle(integrationEvent);
 
         Assert.Equal(subscriptionId, command.SubscriptionId);
+        Assert.Equal(feedId, command.FeedId);
     }
 
     [Fact]
     public void FeedSubscriptionDeletedHandler_ShouldMapSubscriptionId()
     {
         var subscriptionId = Guid.NewGuid();
+        var feedId = Guid.NewGuid();
         var integrationEvent = new FeedSubscriptionDeleted(
             Guid.NewGuid(),
             DateTimeOffset.UtcNow,
-            Guid.NewGuid(),
+            feedId,
             subscriptionId);
 
         var command = FeedSubscriptionDeletedHandler.Handle(integrationEvent);
 
         Assert.Equal(subscriptionId, command.SubscriptionId);
+        Assert.Equal(feedId, command.FeedId);
     }
 }

@@ -3,9 +3,10 @@ using System.Diagnostics.CodeAnalysis;
 
 using Beatport2Rss.Collector.Application;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Collector.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Collector.Domain.Subscriptions;
+using Beatport2Rss.Collector.Domain.Feeds;
+using Beatport2Rss.Collector.Domain.Users;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Collector.Jobs;
@@ -13,7 +14,9 @@ using Beatport2Rss.Collector.Jobs.Jobs;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
@@ -55,7 +58,7 @@ public sealed class CollectReleasesRetryTests
         var adminConnectionString = Environment.GetEnvironmentVariable("COLLECTOR_TEST_POSTGRES");
         Assert.SkipWhen(string.IsNullOrEmpty(adminConnectionString), "COLLECTOR_TEST_POSTGRES is not configured.");
         await using var database = await IsolatedPostgresDatabase.CreateAsync(adminConnectionString);
-        var race = new SubscribersCountRace();
+        var race = new SubscriptionCreationRace();
         var client = new Mock<IBeatportClient>();
         client.Setup(value => value.SearchForIdsAsync<BeatportReleaseDto>(
                 It.IsAny<IReadOnlyDictionary<string, string?>>(), It.IsAny<CancellationToken>()))
@@ -75,7 +78,7 @@ public sealed class CollectReleasesRetryTests
             var db = scope.ServiceProvider.GetRequiredService<CollectorDbContext>();
             var subscription = Subscription.Create(subscriptionId, DateTimeOffset.UtcNow,
                 SubscriptionType.Artist, BeatportId.Create(42));
-            subscription.IncrementSubscribersCount();
+            AddFeed(db, subscription.Id);
             db.Subscriptions.Add(subscription);
             await db.SaveChangesAsync(cancellationToken);
         }
@@ -91,40 +94,6 @@ public sealed class CollectReleasesRetryTests
         Assert.Equal(1, await verification.Releases.CountAsync(cancellationToken));
         Assert.Equal(3, race.Attempts);
         await host.StopAsync(cancellationToken);
-    }
-
-    [Fact]
-    public async Task ConcurrentSubscribersCountChangesAreRetried()
-    {
-        var race = new SubscribersCountRace();
-        using var host = await CreateHostAsync(
-            Mock.Of<IBeatportClient>(),
-            configureServices: services =>
-            {
-                services.AddScoped<IUnitOfWork>(provider =>
-                    new CoordinatedUnitOfWork(provider.GetRequiredService<CollectorDbContext>(), race));
-            });
-        var cancellationToken = TestContext.Current.CancellationToken;
-        await SeedAsync(host.Services, includeSecondSubscription: false, cancellationToken);
-
-        Guid subscriptionId;
-        await using (var scope = host.Services.CreateAsyncScope())
-        {
-            var subscription = await scope.ServiceProvider.GetRequiredService<CollectorDbContext>()
-                .Subscriptions.SingleAsync(value => value.SubscribersCount > 0, cancellationToken);
-            subscriptionId = subscription.Id.Value;
-        }
-
-        var bus = host.Services.GetRequiredService<IMessageBus>();
-        await bus.SendAsync(new IncrementSubscribersCountCommand(subscriptionId));
-        await bus.SendAsync(new DecrementSubscribersCountCommand(subscriptionId));
-        await race.Completed.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
-
-        await using var verificationScope = host.Services.CreateAsyncScope();
-        var savedSubscription = await verificationScope.ServiceProvider.GetRequiredService<CollectorDbContext>()
-            .Subscriptions.SingleAsync(value => value.Id == SubscriptionId.Create(subscriptionId), cancellationToken);
-        Assert.Equal(1, savedSubscription.SubscribersCount);
-        Assert.Equal(3, race.Attempts);
     }
 
     [Fact]
@@ -274,7 +243,8 @@ public sealed class CollectReleasesRetryTests
 
         await using var scope = host.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CollectorDbContext>();
-        var subscription = await db.Subscriptions.SingleAsync(value => value.SubscribersCount > 0, cancellationToken);
+        var subscription = await db.Subscriptions.SingleAsync(value =>
+            db.Feeds.Any(feed => feed.Subscriptions.Any(link => link.SubscriptionId == value.Id)), cancellationToken);
         Assert.Equal(new DateOnly(2026, 11, 12), subscription.RefreshedAt);
         Assert.Equal(2, await db.Releases.CountAsync(cancellationToken));
         Assert.Equal(2, host.Services.GetRequiredService<CommittedEvents>().Events.OfType<ReleaseCollected>().Count());
@@ -308,7 +278,8 @@ public sealed class CollectReleasesRetryTests
 
         await using var scope = host.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CollectorDbContext>();
-        var subscriptions = await db.Subscriptions.Where(value => value.SubscribersCount > 0).ToListAsync(cancellationToken);
+        var subscriptions = await db.Subscriptions.Where(value =>
+            db.Feeds.Any(feed => feed.Subscriptions.Any(link => link.SubscriptionId == value.Id))).ToListAsync(cancellationToken);
         Assert.Equal(new DateOnly(2026, 11, 1), subscriptions.Single(value => value.BeatportId.Value == 42).RefreshedAt);
         Assert.Equal(new DateOnly(2026, 11, 12), subscriptions.Single(value => value.BeatportId.Value == 43).RefreshedAt);
         Assert.Equal(["42", "42", "42", "42", "42", "42", "43"], requests.ToArray());
@@ -340,6 +311,10 @@ public sealed class CollectReleasesRetryTests
                 });
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions);
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Releases);
+                services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Users);
+                services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Feeds);
+                services.AddTransient<IUserCommandRepository, UserCommandRepository>();
+                services.AddTransient<IFeedCommandRepository, FeedCommandRepository>();
                 services.AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
                 services.AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>();
                 services.AddScoped<TestOutbox>();
@@ -386,20 +361,29 @@ public sealed class CollectReleasesRetryTests
         var db = scope.ServiceProvider.GetRequiredService<CollectorDbContext>();
         var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Artist, BeatportId.Create(42));
-        subscription.IncrementSubscribersCount();
+        AddFeed(db, subscription.Id);
         subscription.MarkRefreshed(new DateOnly(2026, 11, 1));
         db.Subscriptions.Add(subscription);
         if (includeSecondSubscription)
         {
             var secondSubscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
                 SubscriptionType.Artist, BeatportId.Create(43));
-            secondSubscription.IncrementSubscribersCount();
+            AddFeed(db, secondSubscription.Id);
             secondSubscription.MarkRefreshed(new DateOnly(2026, 11, 2));
             db.Subscriptions.Add(secondSubscription);
         }
         db.Subscriptions.Add(Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow,
             SubscriptionType.Label, BeatportId.Create(10)));
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void AddFeed(CollectorDbContext db, SubscriptionId subscriptionId)
+    {
+        var user = User.Create(UserId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow);
+        var feed = Feed.Create(FeedId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, user.Id);
+        feed.AddSubscription(subscriptionId);
+        db.Users.Add(user);
+        db.Feeds.Add(feed);
     }
 
     private static async Task ExecuteJobAsync(IServiceProvider services, CancellationToken cancellationToken)
@@ -455,7 +439,7 @@ public sealed class CollectReleasesRetryTests
         public TaskCompletionSource Completed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
-    private sealed class SubscribersCountRace
+    private sealed class SubscriptionCreationRace
     {
         public int Attempts;
         public int Saves;
@@ -463,7 +447,7 @@ public sealed class CollectReleasesRetryTests
         public TaskCompletionSource Completed { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
-    private sealed class CoordinatedUnitOfWork(CollectorDbContext db, SubscribersCountRace race) : IUnitOfWork
+    private sealed class CoordinatedUnitOfWork(CollectorDbContext db, SubscriptionCreationRace race) : IUnitOfWork
     {
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
