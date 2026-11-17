@@ -1,5 +1,5 @@
-using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Common.Domain.Feeds;
+using Beatport2Rss.Builder.Application.Dtos;
+using Beatport2Rss.Builder.Application.UseCases.Feeds.Queries;
 
 using Google.Protobuf.WellKnownTypes;
 
@@ -7,51 +7,39 @@ using Grpc.Core;
 
 using RssFeedService;
 
+using Wolverine;
+
 namespace Beatport2Rss.Builder.Worker.GrpcServices;
 
 internal sealed class RssFeedGrpcService(
-    IRssFeedDocumentQueryRepository rssFeedDocumentQueryRepository) :
+    IMessageBus messageBus) :
     GrpcRssFeedService.GrpcRssFeedServiceBase
 {
     public override async Task<GetRssFeedResponse> GetRssFeed(
         GetRssFeedRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.FeedId, out var feedGuid) || feedGuid == Guid.Empty)
+        if (!Guid.TryParse(request.FeedId, out var feedId) || feedId == Guid.Empty)
         {
             throw new RpcException(new Status(StatusCode.InvalidArgument, "feed_id must be a non-empty GUID"));
         }
 
-        var feedId = FeedId.Create(feedGuid);
+        var query = new GetRssFeedDocumentQuery(feedId, request.IfGeneratedAt?.ToDateTimeOffset());
+        var document = await messageBus.InvokeAsync<RssFeedDocumentDto>(query, context.CancellationToken);
 
-        if (request.IfGeneratedAt is not null)
+        return document.Status switch
         {
-            var generatedAt = await rssFeedDocumentQueryRepository.FindGeneratedAtAsync(feedId, context.CancellationToken);
-            if (generatedAt is null)
+            RssFeedDocumentStatus.Found => new GetRssFeedResponse
             {
-                throw NotFound();
-            }
-
-            if (generatedAt.Value == request.IfGeneratedAt.ToDateTimeOffset())
+                GeneratedAt = Timestamp.FromDateTimeOffset(document.GeneratedAt!.Value),
+                Content = document.Content,
+            },
+            RssFeedDocumentStatus.NotModified => new GetRssFeedResponse
             {
-                return new GetRssFeedResponse
-                {
-                    NotModified = true,
-                    GeneratedAt = Timestamp.FromDateTimeOffset(generatedAt.Value),
-                };
-            }
-        }
-
-        var document = await rssFeedDocumentQueryRepository.FindContentAsync(feedId, context.CancellationToken)
-            ?? throw NotFound();
-
-        return new GetRssFeedResponse
-        {
-            GeneratedAt = Timestamp.FromDateTimeOffset(document.GeneratedAt),
-            Content = document.Content,
+                NotModified = true,
+                GeneratedAt = Timestamp.FromDateTimeOffset(document.GeneratedAt!.Value),
+            },
+            _ => throw new RpcException(new Status(StatusCode.NotFound, "RSS feed document was not found")),
         };
     }
-
-    private static RpcException NotFound() =>
-        new(new Status(StatusCode.NotFound, "RSS feed document was not found"));
 }
