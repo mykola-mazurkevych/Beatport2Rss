@@ -1,4 +1,4 @@
-﻿using Beatport2Rss.Api.Infrastructure.Persistence.Extensions;
+﻿using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -12,23 +12,23 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateView("vwUsers", MigrationBuilderExtensions.Operation.Up);
-            migrationBuilder.UpdateView("vwTags", MigrationBuilderExtensions.Operation.Up);
-            migrationBuilder.UpdateView("vwFeeds", MigrationBuilderExtensions.Operation.Up);
-            migrationBuilder.UpdateView("vwSessions", MigrationBuilderExtensions.Operation.Up);
-            migrationBuilder.UpdateView("vwSubscriptions", MigrationBuilderExtensions.Operation.Up);
-            migrationBuilder.UpdateView("vwSubscriptionTags", MigrationBuilderExtensions.Operation.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwUsers", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwTags", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwFeeds", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSessions", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptions", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptionTags", MigrationDirection.Up);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateView("vwSubscriptionTags", MigrationBuilderExtensions.Operation.Down);
-            migrationBuilder.UpdateView("vwSubscriptions", MigrationBuilderExtensions.Operation.Down);
-            migrationBuilder.UpdateView("vwSessions", MigrationBuilderExtensions.Operation.Down);
-            migrationBuilder.UpdateView("vwFeeds", MigrationBuilderExtensions.Operation.Down);
-            migrationBuilder.UpdateView("vwTags", MigrationBuilderExtensions.Operation.Down);
-            migrationBuilder.UpdateView("vwUsers", MigrationBuilderExtensions.Operation.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptionTags", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptions", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSessions", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwFeeds", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwTags", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwUsers", MigrationDirection.Down);
         }
     }
 }
