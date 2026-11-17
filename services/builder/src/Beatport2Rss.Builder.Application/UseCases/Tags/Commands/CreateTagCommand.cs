@@ -3,6 +3,7 @@ using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Tags;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 
@@ -14,6 +15,7 @@ public sealed record CreateTagCommand(
 
 public sealed class CreateTagCommandHandler(
     ITagCommandRepository tagCommandRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork)
 {
     public async Task HandleAsync(
@@ -26,10 +28,16 @@ public sealed class CreateTagCommandHandler(
             return;
         }
 
+        var userId = UserId.Create(command.UserId);
+        if (!await userCommandRepository.ExistsAsync(userId, cancellationToken))
+        {
+            throw new RetryableException($"User {command.UserId} is not available yet.");
+        }
+
         var tag = Tag.Create(
             tagId,
             command.CreatedAt,
-            UserId.Create(command.UserId),
+            userId,
             TagName.Create(command.Name));
 
         await tagCommandRepository.AddAsync(tag, cancellationToken);

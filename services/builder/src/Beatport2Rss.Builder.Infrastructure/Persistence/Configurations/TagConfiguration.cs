@@ -1,4 +1,5 @@
 using Beatport2Rss.Builder.Domain.Tags;
+using Beatport2Rss.Builder.Domain.Users;
 using Beatport2Rss.Common.Domain.Tags;
 
 using Microsoft.EntityFrameworkCore;
@@ -28,5 +29,10 @@ internal sealed class TagConfiguration :
         builder.Property(tag => tag.Name)
             .HasMaxLength(TagName.MaxLength)
             .IsRequired();
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(tag => tag.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

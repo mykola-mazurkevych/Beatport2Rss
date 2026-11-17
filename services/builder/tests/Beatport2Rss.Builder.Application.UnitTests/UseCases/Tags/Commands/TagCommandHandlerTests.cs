@@ -17,7 +17,7 @@ public sealed class TagCommandHandlerTests
     public async Task CreateTagCommandHandler_ShouldAddAndSaveTag()
     {
         var tagId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
+        var userId = UserId.Create(Guid.NewGuid());
         Tag? addedTag = null;
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
@@ -29,16 +29,20 @@ public sealed class TagCommandHandlerTests
             .Callback<Tag, CancellationToken>((tag, _) => addedTag = tag)
             .ReturnsAsync((Tag tag, CancellationToken _) => tag);
 
+        var users = new Mock<IUserCommandRepository>();
+        users.Setup(value => value.ExistsAsync(userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
         var handler = new CreateTagCommandHandler(
             repository.Object,
+            users.Object,
             unitOfWork.Object);
 
         await handler.HandleAsync(
-            new CreateTagCommand(tagId, userId, DateTimeOffset.UtcNow, "Techno"),
+            new CreateTagCommand(tagId, userId.Value, DateTimeOffset.UtcNow, "Techno"),
             CancellationToken.None);
 
         Assert.NotNull(addedTag);
-        Assert.Equal(UserId.Create(userId), addedTag.UserId);
+        Assert.Equal(userId, addedTag.UserId);
         repository.Verify(
             value => value.AddAsync(
                 It.Is<Tag>(tag => tag.Id == TagId.Create(tagId) && tag.Name == TagName.Create("Techno")),
@@ -58,6 +62,7 @@ public sealed class TagCommandHandlerTests
         
         var handler = new CreateTagCommandHandler(
             repository.Object,
+            Mock.Of<IUserCommandRepository>(),
             unitOfWork.Object);
 
         await handler.HandleAsync(

@@ -4,6 +4,7 @@ using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using Microsoft.Extensions.Logging;
 
@@ -20,6 +21,7 @@ public sealed record CreateFeedCommand(
 
 public sealed class CreateFeedCommandHandler(
     IFeedCommandRepository feedCommandRepository,
+    IUserCommandRepository userCommandRepository,
     IUnitOfWork unitOfWork,
     ILogger<CreateFeedCommand> logger)
 {
@@ -36,10 +38,16 @@ public sealed class CreateFeedCommandHandler(
             return;
         }
 
+        var userId = UserId.Create(command.UserId);
+        if (!await userCommandRepository.ExistsAsync(userId, cancellationToken))
+        {
+            throw new RetryableException($"User {command.UserId} is not available yet.");
+        }
+
         var feed = Feed.Create(
             feedId,
             command.CreatedAt,
-            UserId.Create(command.UserId),
+            userId,
             FeedName.Create(command.Name),
             Slug.Create(command.Slug),
             command.AuthorName is null ? null : AuthorName.Create(command.AuthorName),

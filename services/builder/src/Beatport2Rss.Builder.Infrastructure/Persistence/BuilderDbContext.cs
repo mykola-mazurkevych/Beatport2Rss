@@ -3,6 +3,7 @@ using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Builder.Domain.Tracks;
+using Beatport2Rss.Builder.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
@@ -26,6 +27,7 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<Track> Tracks => Set<Track>();
     public DbSet<TrackArtist> TrackArtists => Set<TrackArtist>();
+    public DbSet<User> Users => Set<User>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

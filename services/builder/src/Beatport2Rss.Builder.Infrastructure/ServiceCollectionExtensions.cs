@@ -11,6 +11,7 @@ using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
+using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
@@ -52,17 +53,19 @@ public static class ServiceCollectionExtensions
                     configurePublisher: null,
                     configureListener: listener => listener
                         .ListensTo<FeedCreated>()
-                        .ListensTo<FeedUpdated>()
                         .ListensTo<FeedDeleted>()
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
-                        .ListensTo<TagCreated>()
-                        .ListensTo<TagUpdated>()
-                        .ListensTo<TagDeleted>()
+                        .ListensTo<FeedUpdated>()
                         .ListensTo<ReleaseCollected>()
                         .ListensTo<SubscriptionCreated>()
                         .ListensTo<SubscriptionTagCreated>()
-                        .ListensTo<SubscriptionTagDeleted>());
+                        .ListensTo<SubscriptionTagDeleted>()
+                        .ListensTo<TagCreated>()
+                        .ListensTo<TagDeleted>()
+                        .ListensTo<TagUpdated>()
+                        .ListensTo<UserCreated>()
+                        .ListensTo<UserDeleted>());
 
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
@@ -72,9 +75,11 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Users)
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
-                .AddTransient<ITagCommandRepository, TagCommandRepository>();
+                .AddTransient<ITagCommandRepository, TagCommandRepository>()
+                .AddTransient<IUserCommandRepository, UserCommandRepository>();
     }
 }

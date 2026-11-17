@@ -23,7 +23,7 @@ public sealed class FeedCommandHandlerTests
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var feedId = Guid.NewGuid();
-        var userId = Guid.NewGuid();
+        var userId = UserId.Create(Guid.NewGuid());
         var createdAt = DateTimeOffset.UtcNow;
         var repository = new Mock<IFeedCommandRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
@@ -34,18 +34,22 @@ public sealed class FeedCommandHandlerTests
             .Callback<Feed, CancellationToken>((feed, _) => addedFeed = feed)
             .ReturnsAsync((Feed feed, CancellationToken _) => feed);
         unitOfWork.Setup(value => value.SaveChangesAsync(cancellationToken)).Returns(Task.CompletedTask);
+        var users = new Mock<IUserCommandRepository>();
+        users.Setup(value => value.ExistsAsync(userId, cancellationToken))
+            .ReturnsAsync(true);
         var handler = new CreateFeedCommandHandler(
             repository.Object,
+            users.Object,
             unitOfWork.Object,
             NullLogger<CreateFeedCommand>.Instance);
 
         await handler.Handle(
-            new CreateFeedCommand(feedId, userId, createdAt, "Feed", "feed", authorName, FeedStatus.Active),
+            new CreateFeedCommand(feedId, userId.Value, createdAt, "Feed", "feed", authorName, FeedStatus.Active),
             cancellationToken);
 
         Assert.NotNull(addedFeed);
         Assert.Equal(FeedId.Create(feedId), addedFeed.Id);
-        Assert.Equal(UserId.Create(userId), addedFeed.UserId);
+        Assert.Equal(userId, addedFeed.UserId);
         Assert.Equal(createdAt, addedFeed.CreatedAt);
         Assert.Equal(FeedName.Create("Feed"), addedFeed.Name);
         Assert.Equal(Slug.Create("feed"), addedFeed.Slug);
@@ -71,6 +75,7 @@ public sealed class FeedCommandHandlerTests
             .ReturnsAsync(true);
         var handler = new CreateFeedCommandHandler(
             repository.Object,
+            Mock.Of<IUserCommandRepository>(),
             unitOfWork.Object,
             NullLogger<CreateFeedCommand>.Instance);
 

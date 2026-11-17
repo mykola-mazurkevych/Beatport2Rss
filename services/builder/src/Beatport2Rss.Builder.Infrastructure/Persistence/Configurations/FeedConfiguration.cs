@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Builder.Domain.Subscriptions;
+using Beatport2Rss.Builder.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
@@ -68,6 +69,11 @@ internal sealed class FeedConfiguration :
 
                 navigationBuilder.HasIndex(feedSubscription => feedSubscription.SubscriptionId);
             });
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(feed => feed.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .HasOne<RssFeedDocument>()
