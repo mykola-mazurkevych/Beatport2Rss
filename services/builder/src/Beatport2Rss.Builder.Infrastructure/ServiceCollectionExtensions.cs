@@ -76,6 +76,8 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Users)
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().RssFeedDocuments)
+                .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()

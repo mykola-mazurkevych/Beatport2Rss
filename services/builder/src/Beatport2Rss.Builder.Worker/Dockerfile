@@ -36,12 +36,16 @@ COPY ["common/src/Beatport2Rss.Common.SharedKernel/", "common/src/Beatport2Rss.C
 COPY ["common/src/Beatport2Rss.Common.Validation/", "common/src/Beatport2Rss.Common.Validation/"]
 COPY ["common/src/Beatport2Rss.Common.Wolverine/", "common/src/Beatport2Rss.Common.Wolverine/"]
 COPY ["tools/src/Beatport2Rss.SourceGenerator/", "tools/src/Beatport2Rss.SourceGenerator/"]
+COPY ["common/protos/", "common/protos/"]
 
 RUN dotnet publish "services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rss.Builder.Worker.csproj" -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 COPY --from=build /app/publish .
+
+# gRPC and health ports
+EXPOSE 5000 5001
 
 ENTRYPOINT ["dotnet", "Beatport2Rss.Builder.Worker.dll"]
