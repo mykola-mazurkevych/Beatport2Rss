@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net;
 
 using Beatport2Rss.Common.FluentResults.Errors;
+using Beatport2Rss.Common.FluentResults.Successes;
 
 using FluentResults;
 
@@ -27,6 +28,9 @@ public static class ResultExtensions
 
         public static Result NotFound(string message, params object?[] args) =>
             Result.Fail(new NotFoundError(string.Format(CultureInfo.InvariantCulture, message, args)));
+
+        public static Result NotModified() =>
+            Result.Ok().WithSuccess(new NotModifiedSuccess());
 
         public static Result RequestTimeout(string message) =>
             Result.Fail(new RequestTimeoutError(message));
