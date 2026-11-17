@@ -43,9 +43,18 @@ RUN dotnet publish "services/builder/src/Beatport2Rss.Builder.Worker/Beatport2Rs
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/publish .
 
 # gRPC and health ports
 EXPOSE 5000 5001
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:5001/health || exit 1
 
 ENTRYPOINT ["dotnet", "Beatport2Rss.Builder.Worker.dll"]
