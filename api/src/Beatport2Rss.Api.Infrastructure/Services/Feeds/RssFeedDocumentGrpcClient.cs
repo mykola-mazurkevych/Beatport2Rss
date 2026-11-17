@@ -1,5 +1,6 @@
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Common.Domain.Common;
+using Beatport2Rss.Common.Grpc.Interfaces;
 
 using RssFeedService;
 
@@ -7,8 +8,11 @@ namespace Beatport2Rss.Api.Infrastructure.Services.Feeds;
 
 internal sealed class RssFeedDocumentGrpcClient(
     GrpcRssFeedService.GrpcRssFeedServiceClient client) :
-    IRssFeedDocumentClient
+    IRssFeedDocumentClient,
+    IBeatport2RssGrpcClient
 {
+    public static string OptionName => nameof(RssFeedDocumentGrpcClient);
+
     public async Task<DateTimeOffset> GetGeneratedAtAsync(Slug slug, CancellationToken cancellationToken = default)
     {
         var request = new GetRssFeedRequest { Slug = slug.Value };

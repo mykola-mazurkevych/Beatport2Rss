@@ -13,23 +13,23 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwUsers", ViewOperation.Up);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwTags", ViewOperation.Up);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwFeeds", ViewOperation.Up);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSessions", ViewOperation.Up);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSubscriptions", ViewOperation.Up);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSubscriptionTags", ViewOperation.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwUsers", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwTags", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwFeeds", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSessions", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptions", MigrationDirection.Up);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptionTags", MigrationDirection.Up);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSubscriptionTags", ViewOperation.Down);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSubscriptions", ViewOperation.Down);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwSessions", ViewOperation.Down);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwFeeds", ViewOperation.Down);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwTags", ViewOperation.Down);
-            migrationBuilder.UpdateView(typeof(ApiDbContext), "vwUsers", ViewOperation.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptionTags", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSubscriptions", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwSessions", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwFeeds", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwTags", MigrationDirection.Down);
+            migrationBuilder.UpdateView<ApiDbContext>("vwUsers", MigrationDirection.Down);
         }
     }
 }

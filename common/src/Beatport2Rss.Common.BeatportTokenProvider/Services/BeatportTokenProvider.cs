@@ -2,6 +2,7 @@ using System.Net;
 
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
+using Beatport2Rss.Common.Grpc.Interfaces;
 
 using BeatportAccessTokenService;
 
@@ -13,8 +14,11 @@ namespace Beatport2Rss.Common.BeatportTokenProvider.Services;
 
 internal sealed class BeatportTokenProvider(
     GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceClient client) :
-    IBeatportTokenProvider
+    IBeatportTokenProvider,
+    IBeatport2RssGrpcClient
 {
+    public static string OptionName => nameof(BeatportTokenProvider);
+
     public async Task<Result<string>> ProvideAsync(CancellationToken cancellationToken = default)
     {
         try

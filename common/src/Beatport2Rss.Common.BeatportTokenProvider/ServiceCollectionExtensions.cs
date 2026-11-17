@@ -1,13 +1,12 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
 using Beatport2Rss.Common.Beatport.Interfaces;
-using Beatport2Rss.Common.BeatportTokenProvider.Options;
+using Beatport2Rss.Common.Grpc;
 
 using BeatportAccessTokenService;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Common.BeatportTokenProvider;
 
@@ -15,31 +14,9 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddBeatportTokenProvider(IConfiguration configuration)
-        {
-            services.Configure<BeatportTokenProviderOptions>(credentials => configuration.GetSection(nameof(BeatportTokenProviderOptions)).Bind(credentials));
-
+        public IServiceCollection AddBeatportTokenProvider(IConfiguration configuration) =>
             services
-                .AddGrpcClient<GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceClient>((provider, options) =>
-                {
-                    var tokenOptions = provider.GetRequiredService<IOptions<BeatportTokenProviderOptions>>().Value;
-                    options.Address = tokenOptions.TokenInterceptorGrpcUri;
-                })
-                .ConfigurePrimaryHttpMessageHandler(provider =>
-                {
-                    var tokenOptions = provider.GetRequiredService<IOptions<BeatportTokenProviderOptions>>().Value;
-
-                    if (tokenOptions.TokenInterceptorGrpcUri.Scheme == Uri.UriSchemeHttp)
-                    {
-                        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-                    }
-
-                    return new SocketsHttpHandler { EnableMultipleHttp2Connections = true };
-                });
-
-            services.AddSingleton<IBeatportTokenProvider, Services.BeatportTokenProvider>();
-
-            return services;
-        }
+                .AddGrpcClient<GrpcBeatportAccessTokenService.GrpcBeatportAccessTokenServiceClient, Services.BeatportTokenProvider>(configuration)
+                .AddSingleton<IBeatportTokenProvider, Services.BeatportTokenProvider>();
     }
 }

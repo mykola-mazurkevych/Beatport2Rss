@@ -125,7 +125,7 @@ services:
       - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
       - RabbitMQOptions__Password=${RABBITMQ_PASSWORD}
       - RabbitMQOptions__VirtualHost=${RABBITMQ_VIRTUAL_HOST}
-      - BeatportTokenProviderOptions__TokenInterceptorGrpcUri=${INTERCEPTOR_GRPC_URI}
+      - GrpcOptions__BeatportTokenProvider__Address=${INTERCEPTOR_GRPC_URI}
       - CollectorJobOptions__CollectReleasesCronSchedule=${COLLECTOR_COLLECT_RELEASES_CRON}
     depends_on:
       postgres:
@@ -148,7 +148,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
-      - BeatportTokenProviderOptions__TokenInterceptorGrpcUri=${INTERCEPTOR_GRPC_URI}
+      - GrpcOptions__BeatportTokenProvider__Address=${INTERCEPTOR_GRPC_URI}
+      - GrpcOptions__RssFeedDocumentGrpcClient__Address=http://builder:5000
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
       - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}

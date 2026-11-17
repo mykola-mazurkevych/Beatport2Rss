@@ -1,8 +1,10 @@
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
-public enum ViewOperation
+public enum MigrationDirection
 {
     Up,
     Down,
@@ -12,15 +14,17 @@ public static class MigrationBuilderExtensions
 {
     extension(MigrationBuilder migrationBuilder)
     {
-        public void UpdateView(Type resourceMarker, string viewName, ViewOperation operation)
+        public void UpdateView<TDbContext>(string viewName, MigrationDirection direction)
+            where TDbContext : IBeatport2RssDbContext
         {
+            var dbContextType = typeof(TDbContext);
             var resourceNamespace =
-                resourceMarker.Namespace ??
-                throw new ArgumentException("Resource marker must have a namespace.", nameof(resourceMarker));
-            var resourceName = $"{resourceNamespace}.Views.{viewName}.{operation}.sql";
+                dbContextType.Namespace ??
+                throw new InvalidOperationException("Db Context does not have a namespace");
+            var resourceName = $"{resourceNamespace}.Views.{viewName}.{direction}.sql";
 
             using var stream =
-                resourceMarker.Assembly.GetManifestResourceStream(resourceName) ??
+                dbContextType.Assembly.GetManifestResourceStream(resourceName) ??
                 throw new InvalidOperationException($"Cannot find embedded SQL script: {resourceName}");
 
             using var streamReader = new StreamReader(stream);
