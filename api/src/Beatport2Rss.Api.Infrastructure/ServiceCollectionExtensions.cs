@@ -25,6 +25,7 @@ using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
+using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
@@ -61,16 +62,18 @@ public static class ServiceCollectionExtensions
                     configuration,
                     configurePublisher: options => options
                         .Publishes<FeedCreated>()
-                        .Publishes<FeedUpdated>()
                         .Publishes<FeedDeleted>()
                         .Publishes<FeedSubscriptionCreated>()
                         .Publishes<FeedSubscriptionDeleted>()
+                        .Publishes<FeedUpdated>()
                         .Publishes<SubscriptionRequested>()
                         .Publishes<SubscriptionTagCreated>()
                         .Publishes<SubscriptionTagDeleted>()
                         .Publishes<TagCreated>()
+                        .Publishes<TagDeleted>()
                         .Publishes<TagUpdated>()
-                        .Publishes<TagDeleted>(),
+                        .Publishes<UserCreated>()
+                        .Publishes<UserDeleted>(),
                     configureListener: listener => listener
                         .ListensTo<SubscriptionCreated>())
                 .AddSecurityServices();

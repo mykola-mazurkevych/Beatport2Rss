@@ -6,6 +6,8 @@ using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
+using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.Validation.Extensions;
 
@@ -42,6 +44,7 @@ internal sealed class CreateUserCommandHandler(
     IClock clock,
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateUserCommand, Result>
 {
@@ -74,6 +77,11 @@ internal sealed class CreateUserCommandHandler(
             countryCode);
 
         await userCommandRepository.AddAsync(user, cancellationToken);
+        var userCreated = new UserCreated(
+            Id: Guid.CreateVersion7(),
+            OccurredAt: user.CreatedAt,
+            user.Id.Value);
+        await integrationEventOutbox.EnqueueAsync(userCreated, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
