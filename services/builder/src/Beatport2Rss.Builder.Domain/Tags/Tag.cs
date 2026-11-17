@@ -1,5 +1,6 @@
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Tags;
+using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Builder.Domain.Tags;
 
@@ -14,14 +15,14 @@ public sealed class Tag :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public Guid UserId { get; private set; }
+    public UserId UserId { get; private set; }
 
     public TagName Name { get; private set; }
 
     public static Tag Create(
         TagId id,
         DateTimeOffset createdAt,
-        Guid userId,
+        UserId userId,
         TagName name) =>
         new()
         {

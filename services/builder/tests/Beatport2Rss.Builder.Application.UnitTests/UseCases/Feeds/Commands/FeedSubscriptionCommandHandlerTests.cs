@@ -4,6 +4,7 @@ using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
@@ -180,7 +181,7 @@ public sealed class FeedSubscriptionCommandHandlerTests
         Feed.Create(
             feedId,
             DateTimeOffset.UtcNow,
-            Guid.NewGuid(),
+            UserId.Create(Guid.NewGuid()),
             FeedName.Create("Feed"),
             Slug.Create("feed"),
             null,

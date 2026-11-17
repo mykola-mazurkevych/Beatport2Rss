@@ -3,6 +3,7 @@ using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;

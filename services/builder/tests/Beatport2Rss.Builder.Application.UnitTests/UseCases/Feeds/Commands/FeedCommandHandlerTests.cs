@@ -3,6 +3,7 @@ using Beatport2Rss.Builder.Application.UseCases.Feeds.Commands;
 using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Microsoft.Extensions.Logging.Abstractions;
@@ -44,7 +45,7 @@ public sealed class FeedCommandHandlerTests
 
         Assert.NotNull(addedFeed);
         Assert.Equal(FeedId.Create(feedId), addedFeed.Id);
-        Assert.Equal(userId, addedFeed.UserId);
+        Assert.Equal(UserId.Create(userId), addedFeed.UserId);
         Assert.Equal(createdAt, addedFeed.CreatedAt);
         Assert.Equal(FeedName.Create("Feed"), addedFeed.Name);
         Assert.Equal(Slug.Create("feed"), addedFeed.Slug);
@@ -177,7 +178,7 @@ public sealed class FeedCommandHandlerTests
         Feed.Create(
             FeedId.Create(Guid.NewGuid()),
             DateTimeOffset.UtcNow,
-            Guid.NewGuid(),
+            UserId.Create(Guid.NewGuid()),
             FeedName.Create("Feed"),
             Slug.Create("feed"),
             AuthorName.Create("Original Author"),

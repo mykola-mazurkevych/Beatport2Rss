@@ -1,6 +1,7 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Tags;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 namespace Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
@@ -28,7 +29,7 @@ public sealed class CreateTagCommandHandler(
         var tag = Tag.Create(
             tagId,
             command.CreatedAt,
-            command.UserId,
+            UserId.Create(command.UserId),
             TagName.Create(command.Name));
 
         await tagCommandRepository.AddAsync(tag, cancellationToken);

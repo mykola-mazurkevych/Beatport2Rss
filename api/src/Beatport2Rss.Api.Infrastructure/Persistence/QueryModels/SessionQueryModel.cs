@@ -1,5 +1,6 @@
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;

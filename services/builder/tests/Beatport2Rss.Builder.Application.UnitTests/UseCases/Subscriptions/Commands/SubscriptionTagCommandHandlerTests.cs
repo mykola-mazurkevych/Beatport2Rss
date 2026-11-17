@@ -5,6 +5,7 @@ using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Beatport;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.Domain.Tags;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
@@ -37,7 +38,7 @@ public sealed class SubscriptionTagCommandHandlerTests
             .ReturnsAsync(subscription);
         tagRepository
             .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno")));
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, UserId.Create(Guid.NewGuid()), TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
         var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);
@@ -71,7 +72,7 @@ public sealed class SubscriptionTagCommandHandlerTests
             .ReturnsAsync(subscription);
         tagRepository
             .Setup(value => value.FindAsync(tagId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno")));
+            .ReturnsAsync(Tag.Create(tagId, DateTimeOffset.UtcNow, UserId.Create(Guid.NewGuid()), TagName.Create("Techno")));
 
         var logger = new RecordingLogger<CreateSubscriptionTagCommandHandler>();
         var handler = new CreateSubscriptionTagCommandHandler(repository.Object, tagRepository.Object, unitOfWork.Object, logger);

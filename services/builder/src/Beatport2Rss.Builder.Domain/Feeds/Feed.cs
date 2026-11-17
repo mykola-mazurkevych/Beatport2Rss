@@ -2,6 +2,7 @@ using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Subscriptions;
+using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Builder.Domain.Feeds;
 
@@ -18,7 +19,7 @@ public sealed class Feed :
 
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public Guid UserId { get; private set; }
+    public UserId UserId { get; private set; }
 
     public FeedName Name { get; private set; }
     public Slug Slug { get; private set; }
@@ -32,7 +33,7 @@ public sealed class Feed :
     public static Feed Create(
         FeedId id,
         DateTimeOffset createdAt,
-        Guid userId,
+        UserId userId,
         FeedName name,
         Slug slug,
         AuthorName? authorName,

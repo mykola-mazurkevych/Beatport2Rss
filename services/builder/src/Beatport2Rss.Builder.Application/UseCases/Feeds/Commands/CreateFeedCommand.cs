@@ -2,6 +2,7 @@ using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Microsoft.Extensions.Logging;
@@ -38,7 +39,7 @@ public sealed class CreateFeedCommandHandler(
         var feed = Feed.Create(
             feedId,
             command.CreatedAt,
-            command.UserId,
+            UserId.Create(command.UserId),
             FeedName.Create(command.Name),
             Slug.Create(command.Slug),
             command.AuthorName is null ? null : AuthorName.Create(command.AuthorName),

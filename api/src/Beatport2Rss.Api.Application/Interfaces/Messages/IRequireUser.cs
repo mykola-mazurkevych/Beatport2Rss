@@ -1,4 +1,4 @@
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Api.Application.Interfaces.Messages;
 

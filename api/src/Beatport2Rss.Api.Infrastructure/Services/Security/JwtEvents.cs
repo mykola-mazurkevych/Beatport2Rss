@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Sessions;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;

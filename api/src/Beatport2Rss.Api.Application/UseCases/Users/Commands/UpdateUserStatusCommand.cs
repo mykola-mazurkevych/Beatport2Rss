@@ -1,5 +1,5 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using FluentResults;

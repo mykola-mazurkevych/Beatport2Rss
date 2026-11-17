@@ -2,6 +2,7 @@ using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Tags.Commands;
 using Beatport2Rss.Builder.Domain.Tags;
 using Beatport2Rss.Common.Domain.Tags;
+using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 
 using Moq;
@@ -37,7 +38,7 @@ public sealed class TagCommandHandlerTests
             CancellationToken.None);
 
         Assert.NotNull(addedTag);
-        Assert.Equal(userId, addedTag.UserId);
+        Assert.Equal(UserId.Create(userId), addedTag.UserId);
         repository.Verify(
             value => value.AddAsync(
                 It.Is<Tag>(tag => tag.Id == TagId.Create(tagId) && tag.Name == TagName.Create("Techno")),
@@ -70,7 +71,7 @@ public sealed class TagCommandHandlerTests
     [Fact]
     public async Task UpdateTagCommandHandler_ShouldUpdateAndSaveTag()
     {
-        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno"));
+        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, UserId.Create(Guid.NewGuid()), TagName.Create("Techno"));
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository
@@ -109,7 +110,7 @@ public sealed class TagCommandHandlerTests
     [Fact]
     public async Task DeleteTagCommandHandler_ShouldDeleteAndSaveTag()
     {
-        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, Guid.NewGuid(), TagName.Create("Techno"));
+        var tag = Tag.Create(TagId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, UserId.Create(Guid.NewGuid()), TagName.Create("Techno"));
         var repository = new Mock<ITagCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         repository

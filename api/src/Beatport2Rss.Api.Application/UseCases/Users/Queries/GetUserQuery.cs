@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Application.Dtos.Users;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 
 using FluentResults;
 

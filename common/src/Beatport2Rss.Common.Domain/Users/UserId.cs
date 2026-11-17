@@ -5,7 +5,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Users;
+namespace Beatport2Rss.Common.Domain.Users;
 
 public readonly record struct UserId :
     IId<UserId>, IParsable<UserId>

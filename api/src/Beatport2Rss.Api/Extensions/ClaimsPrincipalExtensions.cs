@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 using Beatport2Rss.Api.Domain.Sessions;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Api.Extensions;
 
