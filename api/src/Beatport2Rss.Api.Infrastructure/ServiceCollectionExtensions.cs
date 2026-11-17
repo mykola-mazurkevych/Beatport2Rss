@@ -6,6 +6,7 @@ using System.Text.Json;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
@@ -15,6 +16,7 @@ using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
+using Beatport2Rss.Api.Infrastructure.Services.Feeds;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
@@ -30,12 +32,15 @@ using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
+using RssFeedService;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
@@ -53,6 +58,7 @@ public static class ServiceCollectionExtensions
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
+                .AddRssFeedDocumentClient(configuration)
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscellaneous()
                 .AddServices()
@@ -112,6 +118,37 @@ public static class ServiceCollectionExtensions
                 .AddCheck<DatabaseHealthCheck>(HealthCheckNames.Database);
 
             return services;
+        }
+
+        private IServiceCollection AddRssFeedDocumentClient(IConfiguration configuration)
+        {
+            services
+                .AddOptions<RssFeedGrpcOptions>()
+                .Bind(configuration.GetRequiredSection(nameof(RssFeedGrpcOptions)))
+                .Validate(
+                    options => options.BuilderGrpcUri is { IsAbsoluteUri: true },
+                    $"{nameof(RssFeedGrpcOptions)}:{nameof(RssFeedGrpcOptions.BuilderGrpcUri)} must be an absolute URI.")
+                .ValidateOnStart();
+
+            services
+                .AddGrpcClient<GrpcRssFeedService.GrpcRssFeedServiceClient>((provider, options) =>
+                {
+                    var grpcOptions = provider.GetRequiredService<IOptions<RssFeedGrpcOptions>>().Value;
+                    options.Address = grpcOptions.BuilderGrpcUri;
+                })
+                .ConfigurePrimaryHttpMessageHandler(provider =>
+                {
+                    var grpcOptions = provider.GetRequiredService<IOptions<RssFeedGrpcOptions>>().Value;
+
+                    if (grpcOptions.BuilderGrpcUri.Scheme == Uri.UriSchemeHttp)
+                    {
+                        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+                    }
+
+                    return new SocketsHttpHandler { EnableMultipleHttp2Connections = true };
+                });
+
+            return services.AddTransient<IRssFeedDocumentClient, RssFeedDocumentGrpcClient>();
         }
 
         private IServiceCollection AddJwtAuthentication(JwtOptions jwtOptions)

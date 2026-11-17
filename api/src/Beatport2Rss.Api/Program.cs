@@ -4,6 +4,7 @@ using Beatport2Rss.Api;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Constants;
 using Beatport2Rss.Api.Endpoints.Feeds;
+using Beatport2Rss.Api.Endpoints.Rss;
 using Beatport2Rss.Api.Endpoints.Sessions;
 using Beatport2Rss.Api.Endpoints.Subscriptions;
 using Beatport2Rss.Api.Endpoints.Tags;
@@ -76,7 +77,8 @@ app
     .BuildSessionEndpoints(versionSet)
     .BuildSubscriptionEndpoints(versionSet)
     .BuildTagEndpoints(versionSet)
-    .BuildUserEndpoints(versionSet);
+    .BuildUserEndpoints(versionSet)
+    .BuildRssFeedEndpoints();
 
 app.MapGet("", () => "Hello, Beatport2Rss!");
 

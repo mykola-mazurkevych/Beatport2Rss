@@ -1,6 +1,6 @@
 # Beatport2Rss
 
-Beatport2Rss is a .NET project for collecting Beatport releases for followed artists and labels. Its goal is to make these releases available as RSS feeds. The project is under active development: account, feed, and subscription management, scheduled collection, and release processing are implemented, while RSS generation and public delivery are not yet available.
+Beatport2Rss is a .NET project for collecting Beatport releases for followed artists and labels. Its goal is to make these releases available as RSS feeds. The project is under active development: account, feed, and subscription management, scheduled collection, and release processing are implemented, while RSS document generation is still in development.
 
 ## Current status
 
@@ -8,7 +8,7 @@ Beatport2Rss is a .NET project for collecting Beatport releases for followed art
 - **Collector:** scheduled worker that retrieves releases from Beatport and publishes collected release events.
 - **Builder:** processes release and management events and stores the corresponding data; it also removes stale releases.
 - **Token interceptor:** gRPC service used by workers to obtain Beatport access tokens.
-- **RSS output:** not implemented yet. Feed management exists in the API, but the project does not currently generate or expose RSS documents.
+- **RSS output:** the API exposes stored RSS documents at `/feeds/{slug}/rss`; scheduled RSS document generation is still in development.
 
 ## Architecture
 
@@ -24,6 +24,7 @@ flowchart LR
     Collector --> RabbitMQ
     RabbitMQ --> Builder
     Builder --> PostgreSQL
+    API -- gRPC RSS fetch --> Builder
 ```
 
 The API and workers use PostgreSQL for persistence and RabbitMQ for asynchronous integration events. The collector calls Beatport and obtains access tokens through the interceptor service. The builder processes collected releases and API events.

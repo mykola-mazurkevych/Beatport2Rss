@@ -95,6 +95,8 @@ services:
       - BuilderJobOptions__BuildRSSFeedJobCronSchedule=${BUILDER_BUILD_RSS_FEED_CRON}
     expose:
       - "5000"
+    ports:
+      - "5002:5000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
       interval: 30s

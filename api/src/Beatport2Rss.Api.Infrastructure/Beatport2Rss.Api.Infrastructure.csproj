@@ -8,6 +8,8 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" />
     <PackageReference Include="EFPagination" />
+    <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="Grpc.Net.ClientFactory" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
@@ -39,6 +41,10 @@
   <ItemGroup>
     <EmbeddedResource Include="Persistence\Views\*.sql" />
     <EmbeddedResource Include="Persistence\Seeders\Data\countries_csv.md.md" /> <!-- https://developers.google.com/public-data/docs/canonical/countries_csv.md.txt -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\..\common\protos\RssFeedService.proto" GrpcServices="Client" />
   </ItemGroup>
 
 </Project>

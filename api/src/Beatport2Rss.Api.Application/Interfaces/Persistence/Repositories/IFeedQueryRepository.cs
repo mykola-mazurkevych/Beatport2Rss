@@ -13,6 +13,10 @@ public interface IFeedQueryRepository
         Slug slug,
         CancellationToken cancellationToken = default);
 
+    Task<bool> ExistsAsync(
+        Slug slug,
+        CancellationToken cancellationToken = default);
+
     Task<FeedDetailsReadModel> LoadFeedDetailsAsync(
         UserId userId,
         Slug slug,

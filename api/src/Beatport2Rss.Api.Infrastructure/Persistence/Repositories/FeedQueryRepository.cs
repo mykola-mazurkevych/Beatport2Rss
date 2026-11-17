@@ -39,6 +39,13 @@ internal sealed class FeedQueryRepository(
                 feedQueryModel.Slug == slug,
             cancellationToken);
 
+    public Task<bool> ExistsAsync(
+        Slug slug,
+        CancellationToken cancellationToken = default) =>
+        ExistsAsync(
+            feedQueryModel => feedQueryModel.Slug == slug,
+            cancellationToken);
+
     public async Task<FeedDetailsReadModel> LoadFeedDetailsAsync(
         UserId userId,
         Slug slug,
