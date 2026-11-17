@@ -16,6 +16,7 @@ using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -76,10 +77,10 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Users)
-                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().RssFeedDocuments)
-                .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().RssFeedDocumentQueryModels.AsNoTracking())
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
+                .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>();

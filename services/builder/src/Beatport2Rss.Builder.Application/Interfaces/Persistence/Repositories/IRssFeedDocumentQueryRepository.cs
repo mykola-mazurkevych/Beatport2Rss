@@ -1,14 +1,9 @@
-using Beatport2Rss.Common.Domain.Feeds;
+using Beatport2Rss.Common.Domain.Common;
 
 namespace Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 
 public interface IRssFeedDocumentQueryRepository
 {
-    Task<DateTimeOffset?> FindGeneratedAtAsync(
-        FeedId feedId,
-        CancellationToken cancellationToken = default);
-
-    Task<(DateTimeOffset GeneratedAt, string Content)?> FindContentAsync(
-        FeedId feedId,
-        CancellationToken cancellationToken = default);
+    Task<DateTimeOffset> GetGeneratedAtAsync(Slug slug, CancellationToken cancellationToken = default);
+    Task<string> GetContentAsync(Slug slug, CancellationToken cancellationToken = default);
 }

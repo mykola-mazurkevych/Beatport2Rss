@@ -1,4 +1,3 @@
-using Beatport2Rss.Builder.Application.Dtos;
 using Beatport2Rss.Builder.Application.UseCases.Feeds.Queries;
 
 using Google.Protobuf.WellKnownTypes;
@@ -15,31 +14,29 @@ internal sealed class RssFeedGrpcService(
     IMessageBus messageBus) :
     GrpcRssFeedService.GrpcRssFeedServiceBase
 {
-    public override async Task<GetRssFeedResponse> GetRssFeed(
+    public override async Task<GetRssFeedGeneratedAtResponse> GetRssFeedGeneratedAt(
         GetRssFeedRequest request,
         ServerCallContext context)
     {
-        if (!Guid.TryParse(request.FeedId, out var feedId) || feedId == Guid.Empty)
-        {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, "feed_id must be a non-empty GUID"));
-        }
+        var query = new GetRssFeedGeneratedAtQuery(request.Slug);
+        var generatedAt = await messageBus.InvokeAsync<DateTimeOffset>(query, context.CancellationToken);
 
-        var query = new GetRssFeedDocumentQuery(feedId, request.IfGeneratedAt?.ToDateTimeOffset());
-        var document = await messageBus.InvokeAsync<RssFeedDocumentDto>(query, context.CancellationToken);
-
-        return document.Status switch
+        return new GetRssFeedGeneratedAtResponse
         {
-            RssFeedDocumentStatus.Found => new GetRssFeedResponse
-            {
-                GeneratedAt = Timestamp.FromDateTimeOffset(document.GeneratedAt!.Value),
-                Content = document.Content,
-            },
-            RssFeedDocumentStatus.NotModified => new GetRssFeedResponse
-            {
-                NotModified = true,
-                GeneratedAt = Timestamp.FromDateTimeOffset(document.GeneratedAt!.Value),
-            },
-            _ => throw new RpcException(new Status(StatusCode.NotFound, "RSS feed document was not found")),
+            GeneratedAt = Timestamp.FromDateTimeOffset(generatedAt),
+        };
+    }
+
+    public override async Task<GetRssFeedContentResponse> GetRssFeedContent(
+        GetRssFeedRequest request,
+        ServerCallContext context)
+    {
+        var query = new GetRssFeedDocumentContentQuery(request.Slug);
+        var content = await messageBus.InvokeAsync<string>(query, context.CancellationToken);
+
+        return new GetRssFeedContentResponse
+        {
+            Content = content,
         };
     }
 }

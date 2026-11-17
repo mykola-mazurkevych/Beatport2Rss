@@ -5,18 +5,18 @@ import "google/protobuf/timestamp.proto";
 option csharp_namespace = "RssFeedService";
 
 service GrpcRssFeedService {
-  rpc GetRssFeed (GetRssFeedRequest) returns (GetRssFeedResponse);
+  rpc GetRssFeedGeneratedAt (GetRssFeedRequest) returns (GetRssFeedGeneratedAtResponse);
+  rpc GetRssFeedContent (GetRssFeedRequest) returns (GetRssFeedContentResponse);
 }
 
 message GetRssFeedRequest {
-  string feed_id = 1;
-  // Version the caller already has cached. When it matches, content is omitted.
-  optional google.protobuf.Timestamp if_generated_at = 2;
+  string slug = 1;
 }
 
-message GetRssFeedResponse {
-  bool not_modified = 1;
-  google.protobuf.Timestamp generated_at = 2;
-  // Empty when not_modified is true.
-  string content = 3;
+message GetRssFeedGeneratedAtResponse {
+  google.protobuf.Timestamp generated_at = 1;
+}
+
+message GetRssFeedContentResponse {
+  string content = 1;
 }
