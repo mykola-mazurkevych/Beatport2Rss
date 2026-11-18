@@ -1,4 +1,5 @@
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Common.Domain.Feeds;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -13,7 +14,9 @@ public sealed class CreateFeedSubscriptionCommandHandler(
     ISubscriptionCommandRepository subscriptionCommandRepository,
     IUnitOfWork unitOfWork)
 {
-    public async Task HandleAsync(CreateFeedSubscriptionCommand command, CancellationToken cancellationToken)
+    public async Task<IEnumerable<object>> HandleAsync(
+        CreateFeedSubscriptionCommand command,
+        CancellationToken cancellationToken)
     {
         var feedId = FeedId.Create(command.FeedId);
         var feed =
@@ -23,7 +26,7 @@ public sealed class CreateFeedSubscriptionCommandHandler(
         var subscriptionId = SubscriptionId.Create(command.SubscriptionId);
         if (feed.HasSubscription(subscriptionId))
         {
-            return;
+            return [];
         }
 
         if (!await subscriptionCommandRepository.ExistsAsync(subscriptionId, cancellationToken))
@@ -31,7 +34,10 @@ public sealed class CreateFeedSubscriptionCommandHandler(
             throw new RetryableException($"Subscription {command.SubscriptionId} is not available yet.");
         }
 
+        var isFirstFeed = !await subscriptionCommandRepository.HasFeedsAsync(subscriptionId, cancellationToken);
         feed.AddSubscription(subscriptionId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return isFirstFeed ? [new CollectReleasesCommand(subscriptionId.Value)] : [];
     }
 }
