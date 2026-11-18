@@ -56,10 +56,10 @@ public sealed class CollectReleasesCommandHandler(
         {
             if (result.HasRetryableError)
             {
-                throw new RetryableException(result.ErrorMessage);
+                throw new RetryableException(result.Error.Message);
             }
 
-            throw new InvalidOperationException($"Failed to collect releases for subscription {command.SubscriptionId}: {result.ErrorMessage}");
+            throw new InvalidOperationException($"Failed to collect releases for subscription {command.SubscriptionId}: {result.Error.Message}");
         }
 
         subscription.MarkRefreshed(refreshedAt);
