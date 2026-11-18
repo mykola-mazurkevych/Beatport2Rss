@@ -3,6 +3,7 @@
 using System.Globalization;
 using System.Net;
 
+using Beatport2Rss.Common.FluentResults.Constants;
 using Beatport2Rss.Common.FluentResults.Errors;
 using Beatport2Rss.Common.FluentResults.Successes;
 
@@ -29,8 +30,8 @@ public static class ResultExtensions
         public static Result NotFound(string message, params object?[] args) =>
             Result.Fail(new NotFoundError(string.Format(CultureInfo.InvariantCulture, message, args)));
 
-        public static Result NotModified() =>
-            Result.Ok().WithSuccess(new NotModifiedSuccess());
+        public static Result NotModified(DateTimeOffset lastModified) =>
+            Result.Ok().WithSuccess(new NotModifiedSuccess().WithMetadata(MetadataKeys.LastModified, lastModified));
 
         public static Result RequestTimeout(string message) =>
             Result.Fail(new RequestTimeoutError(message));
@@ -55,22 +56,5 @@ public static class ResultExtensions
 
         public static Result Unprocessable(string message) =>
             Result.Fail(new UnprocessableError(message));
-    }
-
-    extension(IResultBase result)
-    {
-        public IError Error =>
-            result.Errors.Count switch
-            {
-                0 => throw new InvalidOperationException(),
-                1 => result.Errors.Single(),
-                _ => new AggregateError(result.Errors)
-            };
-
-        public bool HasRetryableError =>
-            result.Errors.Any(error => error is TransientError or TransientHttpError or RequestTimeoutError or TooManyRequestsError);
-
-        public bool IsNotModified =>
-            result.IsSuccess && result.Successes.Any(success => success is NotModifiedSuccess);
     }
 }
