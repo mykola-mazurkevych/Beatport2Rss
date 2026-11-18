@@ -1,4 +1,5 @@
-﻿using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+﻿using Beatport2Rss.Api.Infrastructure.Persistence;
+using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 
 using Microsoft.EntityFrameworkCore.Migrations;
 

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "RssFeedService";
+
+service GrpcRssFeedService {
+  rpc GetRssFeedGeneratedAt (GetRssFeedRequest) returns (GetRssFeedGeneratedAtResponse);
+  rpc GetRssFeedContent (GetRssFeedRequest) returns (GetRssFeedContentResponse);
+}
+
+message GetRssFeedRequest {
+  string slug = 1;
+}
+
+message GetRssFeedGeneratedAtResponse {
+  google.protobuf.Timestamp generated_at = 1;
+}
+
+message GetRssFeedContentResponse {
+  string content = 1;
+}

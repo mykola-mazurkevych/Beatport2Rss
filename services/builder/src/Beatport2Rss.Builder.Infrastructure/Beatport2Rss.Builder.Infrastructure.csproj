@@ -17,6 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Persistence\Views\*.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.EntityFrameworkCore\Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\..\..\common\src\Beatport2Rss.Common.Wolverine\Beatport2Rss.Common.Wolverine.csproj" />
     <ProjectReference Include="..\Beatport2Rss.Builder.Application\Beatport2Rss.Builder.Application.csproj" />

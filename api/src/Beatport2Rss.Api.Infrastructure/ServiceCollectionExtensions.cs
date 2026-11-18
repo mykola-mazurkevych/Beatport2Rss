@@ -6,6 +6,7 @@ using System.Text.Json;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
+using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
 using Beatport2Rss.Api.Domain.Countries;
@@ -15,6 +16,7 @@ using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
+using Beatport2Rss.Api.Infrastructure.Services.Feeds;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
@@ -22,6 +24,7 @@ using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
+using Beatport2Rss.Common.Grpc;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
@@ -29,6 +32,8 @@ using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous;
 using Beatport2Rss.Common.Wolverine;
 using Beatport2Rss.Common.Wolverine.Extensions;
+
+using RssFeedService;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -53,6 +58,7 @@ public static class ServiceCollectionExtensions
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
+                .AddRssFeedDocumentClient(configuration)
                 .AddJwtAuthentication(configuration.GetRequiredSection(nameof(JwtOptions)).Get<JwtOptions>()!)
                 .AddMiscellaneous()
                 .AddServices()
@@ -113,6 +119,11 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
+
+        private IServiceCollection AddRssFeedDocumentClient(IConfiguration configuration) =>
+            services
+                .AddGrpcClient<GrpcRssFeedService.GrpcRssFeedServiceClient, RssFeedDocumentGrpcClient>(configuration)
+                .AddTransient<IRssFeedDocumentClient, RssFeedDocumentGrpcClient>();
 
         private IServiceCollection AddJwtAuthentication(JwtOptions jwtOptions)
         {

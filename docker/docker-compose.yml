@@ -93,6 +93,16 @@ services:
       - BuilderJobOptions__ReleasesRetentionInDays=${BUILDER_RELEASES_RETENTION_IN_DAYS}
       - BuilderJobOptions__DeleteStaleReleasesCronSchedule=${BUILDER_DELETE_STALE_RELEASES_CRON}
       - BuilderJobOptions__BuildRSSFeedJobCronSchedule=${BUILDER_BUILD_RSS_FEED_CRON}
+    expose:
+      - "5000"
+    ports:
+      - "5002:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -139,6 +149,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
       - GrpcOptions__BeatportTokenProvider__Address=${INTERCEPTOR_GRPC_URI}
+      - GrpcOptions__RssFeedDocumentGrpcClient__Address=http://builder:5000
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
       - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}
