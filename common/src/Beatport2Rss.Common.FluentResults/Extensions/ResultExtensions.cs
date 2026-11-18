@@ -59,15 +59,18 @@ public static class ResultExtensions
 
     extension(IResultBase result)
     {
-        public string ErrorMessage =>
+        public IError Error =>
             result.Errors.Count switch
             {
                 0 => throw new InvalidOperationException(),
-                1 => result.Errors.Single().Message,
-                _ => $"Multiple errors occured:\n{string.Join('\n', result.Errors.Select(error => error.Message))}"
+                1 => result.Errors.Single(),
+                _ => new AggregateError(result.Errors)
             };
 
         public bool HasRetryableError =>
             result.Errors.Any(error => error is TransientError or TransientHttpError or RequestTimeoutError or TooManyRequestsError);
+
+        public bool IsNotModified =>
+            result.IsSuccess && result.Successes.Any(success => success is NotModifiedSuccess);
     }
 }

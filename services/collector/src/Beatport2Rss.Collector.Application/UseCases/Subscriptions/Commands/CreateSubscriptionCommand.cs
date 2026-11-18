@@ -28,11 +28,11 @@ public sealed class CreateSubscriptionCommandHandler(
         var subscriptionResult = await subscriptionService.EnsureSubscriptionExistsAsync(command.Type, beatportId, cancellationToken);
         if (subscriptionResult.IsFailed)
         {
-            CreateSubscriptionCommandLoggerMessages.BeatportFailure(logger, subscriptionResult.ErrorMessage);
+            CreateSubscriptionCommandLoggerMessages.BeatportFailure(logger, subscriptionResult.Error.Message);
 
             if (subscriptionResult.HasRetryableError)
             {
-                throw new RetryableException(subscriptionResult.ErrorMessage);
+                throw new RetryableException(subscriptionResult.Error.Message);
             }
 
             return;
