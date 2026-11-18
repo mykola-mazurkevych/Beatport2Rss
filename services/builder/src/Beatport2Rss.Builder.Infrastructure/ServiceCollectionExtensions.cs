@@ -80,6 +80,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().RssFeedDocumentQueryModels.AsNoTracking())
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
+                .AddTransient<IReleaseQueryRepository, ReleaseQueryRepository>()
                 .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
