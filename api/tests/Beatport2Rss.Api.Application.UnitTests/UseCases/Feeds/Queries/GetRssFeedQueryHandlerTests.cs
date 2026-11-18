@@ -82,6 +82,10 @@ public sealed class GetRssFeedQueryHandlerTests
         Assert.True(result.IsSuccess);
         Assert.False(result.IsNotModified);
         Assert.Equal(content, result.Value.Content);
+        Assert.True(result.TryGetSuccessMetadata(MetadataKeys.LastModified, out var lastModifiedAsObject));
+        Assert.Equal(
+            DateTimeOffset.FromUnixTimeSeconds(GeneratedAt.ToUnixTimeSeconds()),
+            Assert.IsType<DateTimeOffset>(lastModifiedAsObject));
     }
 
     [Fact]
@@ -105,6 +109,9 @@ public sealed class GetRssFeedQueryHandlerTests
         Assert.True(result.IsSuccess);
         Assert.False(result.IsNotModified);
         Assert.Equal(content, result.Value.Content);
-        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(GeneratedAt.ToUnixTimeSeconds()), result.Value.LastModified);
+        Assert.True(result.TryGetSuccessMetadata(MetadataKeys.LastModified, out var lastModifiedAsObject));
+        Assert.Equal(
+            DateTimeOffset.FromUnixTimeSeconds(GeneratedAt.ToUnixTimeSeconds()),
+            Assert.IsType<DateTimeOffset>(lastModifiedAsObject));
     }
 }

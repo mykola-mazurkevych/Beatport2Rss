@@ -35,17 +35,13 @@ internal sealed class GetRssFeedQueryHandler(
 
         if (query.IfModifiedSince is { } ifModifiedSince && ifModifiedSince.ToHttpDate() >= lastModified)
         {
-            return Result.NotModified(lastModified);
+            return Result.NotModified().WithLastModified(lastModified);
         }
 
         var content = await rssFeedDocumentClient.GetContentAsync(query.Slug, cancellationToken);
 
-        var rssFeedDocumentDto = new RssFeedDocumentDto
-        {
-            LastModified = lastModified,
-            Content = content,
-        };
+        var rssFeedDocumentDto = new RssFeedDocumentDto { Content = content };
 
-        return Result.Ok(rssFeedDocumentDto);
+        return Result.Ok(rssFeedDocumentDto).WithLastModified(lastModified);
     }
 }

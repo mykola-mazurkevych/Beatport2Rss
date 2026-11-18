@@ -13,13 +13,13 @@ namespace Beatport2Rss.Common.FluentResults.Extensions;
 
 public static class ResultExtensions
 {
-    extension(Result)
+    extension(Result result)
     {
         public static Result Conflict(string message) =>
             Result.Fail(new ConflictError(message));
 
-        public static Result Fail(IResultBase result) =>
-            Result.Fail(result.Errors);
+        public static Result Fail(IResultBase resultBase) =>
+            Result.Fail(resultBase.Errors);
 
         public static Result Forbidden(string message) =>
             Result.Fail(new ForbiddenError(message));
@@ -30,8 +30,8 @@ public static class ResultExtensions
         public static Result NotFound(string message, params object?[] args) =>
             Result.Fail(new NotFoundError(string.Format(CultureInfo.InvariantCulture, message, args)));
 
-        public static Result NotModified(DateTimeOffset lastModified) =>
-            Result.Ok().WithSuccess(new NotModifiedSuccess().WithMetadata(MetadataKeys.LastModified, lastModified));
+        public static Result NotModified() =>
+            Result.Ok().WithSuccess<NotModifiedSuccess>();
 
         public static Result RequestTimeout(string message) =>
             Result.Fail(new RequestTimeoutError(message));
@@ -56,5 +56,30 @@ public static class ResultExtensions
 
         public static Result Unprocessable(string message) =>
             Result.Fail(new UnprocessableError(message));
+
+        public Result WithLastModified(DateTimeOffset lastModified)
+        {
+            if (result.Successes.Count == 0)
+            {
+                result.WithSuccess<SimpleSuccess>();
+            }
+
+            result.Successes.Single().Metadata[MetadataKeys.LastModified] = lastModified;
+            return result;
+        }
+    }
+
+    extension<T>(Result<T> result)
+    {
+        public Result<T> WithLastModified(DateTimeOffset lastModified)
+        {
+            if (result.Successes.Count == 0)
+            {
+                result.WithSuccess<SimpleSuccess>();
+            }
+
+            result.Successes.Single().Metadata[MetadataKeys.LastModified] = lastModified;
+            return result;
+        }
     }
 }
