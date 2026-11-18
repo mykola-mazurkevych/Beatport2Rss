@@ -23,7 +23,9 @@ public sealed class BeatportV4ClientTests
     {
         const string json = """
             {"id":42,"slug":"track","number":1,"name":"Track","mix_name":"Original Mix",
-             "length_ms":234567,"sample_url":"https://example.com/sample","artists":[],"remixers":[]}
+             "length_ms":234567,"sample_url":"https://example.com/sample",
+             "genre":{"id":5,"name":"House","slug":"house","url":"https://api.beatport.com/v4/catalog/genres/5/"},
+             "artists":[],"remixers":[]}
             """;
         var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
         using var handler = new StubHttpMessageHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
@@ -38,6 +40,8 @@ public sealed class BeatportV4ClientTests
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
         Assert.Equal(234567, result.Value.LengthMilliseconds);
+        Assert.Equal(5, result.Value.Genre.Id);
+        Assert.Equal("House", result.Value.Genre.Name);
     }
 
     [Fact]

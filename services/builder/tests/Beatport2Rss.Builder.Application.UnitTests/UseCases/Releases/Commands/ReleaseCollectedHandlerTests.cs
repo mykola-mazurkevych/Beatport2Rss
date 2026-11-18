@@ -40,7 +40,8 @@ public sealed class ReleaseCollectedHandlerTests
                     [501, 502],
                     [601],
                     TimeSpan.FromMinutes(5),
-                    sampleUri)
+                    sampleUri,
+                    new ReleaseCollectedGenre(701, "House"))
             ]);
 
         var command = ReleaseCollectedHandler.Handle(integrationEvent);
@@ -68,5 +69,7 @@ public sealed class ReleaseCollectedHandlerTests
         Assert.Equal([BeatportId.Create(601)], track.RemixerBeatportIds);
         Assert.Equal(TimeSpan.FromMinutes(5), track.Length);
         Assert.Equal(sampleUri, track.SampleUri);
+        Assert.Equal(BeatportId.Create(701), track.Genre?.BeatportId);
+        Assert.Equal("House", track.Genre?.Name);
     }
 }

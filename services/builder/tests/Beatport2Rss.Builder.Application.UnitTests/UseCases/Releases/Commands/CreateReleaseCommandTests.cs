@@ -1,11 +1,13 @@
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Application.UseCases.Releases.IntegrationEvents;
+using Beatport2Rss.Builder.Domain.Genres;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
@@ -42,12 +44,14 @@ public sealed class CreateReleaseCommandTests
         var subscriptions = new Mock<ISubscriptionCommandRepository>();
         subscriptions.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken))
             .ReturnsAsync(AllSubscriptions().Where(subscription => subscription.BeatportId.Value != missingId));
+        var genres = CreateGenreRepository();
         var releases = new Mock<IReleaseCommandRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var command = ReleaseCollectedHandler.Handle(CreateEvent(includeArtists: true));
         var handler = new CreateReleaseCommandHandler(
             Mock.Of<IClock>(),
             Mock.Of<IBeatportUriBuilder>(),
+            genres.Object,
             releases.Object,
             subscriptions.Object,
             unitOfWork.Object);
@@ -66,12 +70,14 @@ public sealed class CreateReleaseCommandTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var command = ReleaseCollectedHandler.Handle(CreateEvent(includeArtists: false));
         var releases = new Mock<IReleaseCommandRepository>(MockBehavior.Strict);
+        var genres = CreateGenreRepository();
         var subscriptions = new Mock<ISubscriptionCommandRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         releases.Setup(value => value.ExistsAsync(command.ReleaseId, cancellationToken)).ReturnsAsync(true);
         var handler = new CreateReleaseCommandHandler(
             Mock.Of<IClock>(),
             Mock.Of<IBeatportUriBuilder>(),
+            genres.Object,
             releases.Object,
             subscriptions.Object,
             unitOfWork.Object);
@@ -83,6 +89,43 @@ public sealed class CreateReleaseCommandTests
             value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), It.IsAny<CancellationToken>()),
             Times.Never);
         unitOfWork.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task HandleAsync_CreatesGenreAndAssociatesItWithTrack()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var genres = CreateGenreRepository();
+        Genre? addedGenre = null;
+        genres.Setup(value => value.AddAsync(It.IsAny<Genre>(), cancellationToken))
+            .Callback<Genre, CancellationToken>((genre, _) => addedGenre = genre)
+            .ReturnsAsync((Genre genre, CancellationToken _) => genre);
+        var subscriptions = new Mock<ISubscriptionCommandRepository>();
+        subscriptions.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken))
+            .ReturnsAsync(AllSubscriptions());
+        Release? addedRelease = null;
+        var releases = new Mock<IReleaseCommandRepository>();
+        releases.Setup(value => value.ExistsAsync(It.IsAny<ReleaseId>(), cancellationToken)).ReturnsAsync(false);
+        releases.Setup(value => value.AddAsync(It.IsAny<Release>(), cancellationToken))
+            .Callback<Release, CancellationToken>((release, _) => addedRelease = release)
+            .ReturnsAsync((Release release, CancellationToken _) => release);
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(value => value.SaveChangesAsync(cancellationToken)).Returns(Task.CompletedTask);
+        var handler = new CreateReleaseCommandHandler(
+            Mock.Of<IClock>(),
+            Mock.Of<IBeatportUriBuilder>(),
+            genres.Object,
+            releases.Object,
+            subscriptions.Object,
+            unitOfWork.Object);
+
+        await handler.HandleAsync(ReleaseCollectedHandler.Handle(CreateEvent(includeArtists: true)), cancellationToken);
+
+        Assert.NotNull(addedGenre);
+        Assert.Equal(15, addedGenre.BeatportId.Value);
+        Assert.Equal("House", addedGenre.Name);
+        Assert.NotNull(addedRelease);
+        Assert.Equal(addedGenre.Id, Assert.Single(addedRelease.Tracks).GenreId);
     }
 
     [Theory]
@@ -134,6 +177,7 @@ public sealed class CreateReleaseCommandTests
             .ConfigureServices((context, services) =>
             {
                 services.AddSingleton(subscriptions.Object);
+                services.AddSingleton(CreateGenreRepository().Object);
                 services.AddSingleton(releases.Object);
                 services.AddSingleton(unitOfWork.Object);
                 services.AddBeatportClient(context.Configuration);
@@ -177,8 +221,21 @@ public sealed class CreateReleaseCommandTests
             new DateOnly(2026, 11, 12), new Uri("https://example.com/image"), includeArtists ? 1 : 0,
             includeArtists
                 ? [new ReleaseCollectedTrack(101, 1, "Track", "Original Mix", [13], [14],
-                    TimeSpan.FromSeconds(30), new Uri("https://example.com/sample"))]
+                    TimeSpan.FromSeconds(30), new Uri("https://example.com/sample"),
+                    new ReleaseCollectedGenre(15, "House"))]
                 : []);
+
+    private static Mock<IGenreCommandRepository> CreateGenreRepository()
+    {
+        var repository = new Mock<IGenreCommandRepository>();
+        repository.Setup(value => value.FindAllAsync(
+                It.IsAny<IEnumerable<BeatportId>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Enumerable.Empty<Genre>());
+        repository.Setup(value => value.AddAsync(It.IsAny<Genre>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Genre genre, CancellationToken _) => genre);
+        return repository;
+    }
 
     private static Subscription[] AllSubscriptions() =>
     [

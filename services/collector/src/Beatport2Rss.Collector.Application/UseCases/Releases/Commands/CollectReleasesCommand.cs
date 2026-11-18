@@ -151,7 +151,8 @@ public sealed class CollectReleasesCommandHandler(
                             [.. track.Artists.Select(artist => artist.Id)],
                             [.. track.Remixers.Select(remixer => remixer.Id)],
                             Length: TimeSpan.FromMilliseconds(track.LengthMilliseconds),
-                            track.SampleUri))
+                            track.SampleUri,
+                            new ReleaseCollectedGenre(track.Genre.Id, track.Genre.Name)))
                     ]);
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }

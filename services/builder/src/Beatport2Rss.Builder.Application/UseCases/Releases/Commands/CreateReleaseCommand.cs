@@ -1,6 +1,7 @@
 using Beatport2Rss.Builder.Application.Dtos;
 using Beatport2Rss.Builder.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Builder.Domain.Common;
+using Beatport2Rss.Builder.Domain.Genres;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
@@ -33,6 +34,7 @@ public sealed record CreateReleaseCommand(
 public sealed class CreateReleaseCommandHandler(
     IClock clock,
     IBeatportUriBuilder beatportUriBuilder,
+    IGenreCommandRepository genreCommandRepository,
     IReleaseCommandRepository releaseCommandRepository,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     IUnitOfWork unitOfWork)
@@ -60,6 +62,33 @@ public sealed class CreateReleaseCommandHandler(
 
         var label = GetSubscription(subscriptionsMap, SubscriptionType.Label, createReleaseCommand.LabelBeatportId);
 
+        var trackGenres = createReleaseCommand.Tracks
+            .Select(track => track.Genre)
+            .OfType<GenreDto>()
+            .DistinctBy(genre => genre.BeatportId)
+            .ToArray();
+        var genres = await genreCommandRepository.FindAllAsync(
+            trackGenres.Select(genre => genre.BeatportId),
+            cancellationToken);
+        var genresMap = genres.ToDictionary(genre => genre.BeatportId);
+
+        foreach (var trackGenre in trackGenres)
+        {
+            if (genresMap.TryGetValue(trackGenre.BeatportId, out var genre))
+            {
+                genre.UpdateName(trackGenre.Name);
+                continue;
+            }
+
+            genre = Genre.Create(
+                GenreId.Create(Guid.CreateVersion7()),
+                clock.UtcNow,
+                trackGenre.BeatportId,
+                trackGenre.Name);
+            await genreCommandRepository.AddAsync(genre, cancellationToken);
+            genresMap.Add(trackGenre.BeatportId, genre);
+        }
+
         var releaseArtists = GetArtists(
             createReleaseCommand.ReleaseId,
             createReleaseCommand.ArtistBeatportIds,
@@ -70,6 +99,7 @@ public sealed class CreateReleaseCommandHandler(
         var tracks = GetTracks(
             createReleaseCommand.ReleaseId,
             createReleaseCommand.Tracks,
+            genresMap,
             subscriptionsMap,
             clock);
 
@@ -106,6 +136,7 @@ public sealed class CreateReleaseCommandHandler(
     private static HashSet<Track> GetTracks(
         ReleaseId releaseId,
         IEnumerable<TrackDto> trackDtos,
+        Dictionary<BeatportId, Genre> genresMap,
         Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptionsMap,
         IClock clock)
     {
@@ -131,6 +162,7 @@ public sealed class CreateReleaseCommandHandler(
                 trackDto.MixName,
                 trackDto.Length,
                 trackDto.SampleUri,
+                trackDto.Genre is null ? null : genresMap[trackDto.Genre.BeatportId].Id,
                 trackArtsits);
 
             tracks.Add(track);

@@ -33,6 +33,9 @@ public static class ReleaseCollectedHandler
                             MixName.Create(track.MixName),
                             [.. track.ArtistBeatportIds.Select(BeatportId.Create)],
                             [.. track.RemixerBeatportIds.Select(BeatportId.Create)],
+                            track.Genre is null
+                                ? null
+                                : new GenreDto(BeatportId.Create(track.Genre.BeatportId), track.Genre.Name),
                             track.Length,
                             track.SampleUri))
             ]);
