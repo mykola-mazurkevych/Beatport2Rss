@@ -35,7 +35,7 @@ internal sealed class GetRssFeedQueryHandler(
 
         if (query.IfModifiedSince is { } ifModifiedSince && ifModifiedSince.ToHttpDate() >= lastModified)
         {
-            return Result.NotModified();
+            return Result.NotModified(lastModified);
         }
 
         var content = await rssFeedDocumentClient.GetContentAsync(query.Slug, cancellationToken);

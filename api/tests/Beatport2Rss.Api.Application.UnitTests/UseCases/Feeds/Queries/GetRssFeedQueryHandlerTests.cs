@@ -2,6 +2,7 @@ using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.UseCases.Feeds.Queries;
 using Beatport2Rss.Common.Domain.Common;
+using Beatport2Rss.Common.FluentResults.Constants;
 using Beatport2Rss.Common.FluentResults.Errors;
 using Beatport2Rss.Common.FluentResults.Extensions;
 
@@ -52,8 +53,8 @@ public sealed class GetRssFeedQueryHandlerTests
             .Handle(new GetRssFeedQuery(slug, ifModifiedSince), cancellationToken);
 
         Assert.True(result.IsNotModified);
-        Assert.Equal(ifModifiedSince, result.Value.LastModified);
-        Assert.Null(result.Value.Content);
+        Assert.True(result.TryGetSuccessMetadata(MetadataKeys.LastModified, out var lastModifiedAsObject));
+        Assert.Equal(ifModifiedSince, Assert.IsType<DateTimeOffset>(lastModifiedAsObject));
         rssFeedDocumentClient.Verify(
             client => client.GetContentAsync(It.IsAny<Slug>(), It.IsAny<CancellationToken>()),
             Times.Never);
