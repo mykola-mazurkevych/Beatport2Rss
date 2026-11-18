@@ -252,6 +252,29 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", "builder");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Builder.Infrastructure.Persistence.QueryModels.RssFeedDocumentQueryModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("GeneratedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vwRssFeedDocuments", "builder");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Feeds.Feed", b =>
                 {
                     b.HasOne("Beatport2Rss.Builder.Domain.Users.User", null)
