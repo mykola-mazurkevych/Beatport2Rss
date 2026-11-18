@@ -21,9 +21,25 @@ var configurationRoot = new ConfigurationBuilder()
 
 var serviceCollection = new ServiceCollection();
 
-Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
-Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
-Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+if (args.Length != 1)
+{
+    throw new ArgumentException("Expected one service argument: api, builder, or collector.", nameof(args));
+}
+
+switch (args[0])
+{
+    case "api":
+        Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+        break;
+    case "builder":
+        Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+        break;
+    case "collector":
+        Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+        break;
+    default:
+        throw new ArgumentException($"Unsupported service '{args[0]}'. Expected api, builder, or collector.", nameof(args));
+}
 
 var serviceProvider = serviceCollection
     .AddLogging(builder => builder.AddConsole())

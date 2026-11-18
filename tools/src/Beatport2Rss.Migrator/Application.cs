@@ -8,14 +8,9 @@ internal interface IApplication
 }
 
 internal sealed class Application(
-    IEnumerable<IMigrator> migrators) :
+    IMigrator migrator) :
     IApplication
 {
-    public async Task RunAsync(CancellationToken cancellationToken = default)
-    {
-        foreach (var migrator in migrators)
-        {
-            await migrator.MigrateAsync(cancellationToken: cancellationToken);
-        }
-    }
+    public Task RunAsync(CancellationToken cancellationToken = default) =>
+        migrator.MigrateAsync(cancellationToken: cancellationToken);
 }

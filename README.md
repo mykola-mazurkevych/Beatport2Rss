@@ -57,7 +57,7 @@ Start the services in the same terminal:
 docker compose up --build
 ```
 
-Compose starts PostgreSQL, RabbitMQ, the token interceptor, database migrator, collector, builder, and API. The migrator runs after PostgreSQL is healthy; the workers and API wait for their required dependencies.
+Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, and the three application services. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
 
 By default, the API is available at `http://localhost:8080` and its development API reference at `http://localhost:8080/scalar`. RabbitMQ management is available at `http://localhost:15672`. Ports and service settings can be changed in `docker/.env`.
 
