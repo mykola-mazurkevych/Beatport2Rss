@@ -1,5 +1,6 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
+using System.Net.Mail;
 using System.Text;
 using System.Text.Json;
 
@@ -9,6 +10,7 @@ using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
@@ -55,6 +57,8 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
+                .AddConfirmationEmailOptions(configuration)
+                .AddConfirmationEmailDelivery()
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
@@ -81,7 +85,8 @@ public static class ServiceCollectionExtensions
                         .Publishes<UserCreated>()
                         .Publishes<UserDeleted>(),
                     configureListener: listener => listener
-                        .ListensTo<SubscriptionCreated>())
+                        .ListensTo<SubscriptionCreated>(),
+                    configureRetries: options => options.ConfigureConfirmationEmailDelivery())
                 .AddSecurityServices();
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>
@@ -184,6 +189,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
+                .AddTransient<IEmailVerificationRepository, EmailVerificationRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
         private IServiceCollection AddSecurityServices() =>
@@ -198,5 +204,31 @@ public static class ServiceCollectionExtensions
                 .Configure<JsonSerializerOptions>(static options => options.Configure())
                 .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
                 .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
+
+        private IServiceCollection AddConfirmationEmailOptions(IConfiguration configuration)
+        {
+            services.AddOptions<EmailConfirmationOptions>()
+                .Bind(configuration.GetSection(EmailConfirmationOptions.SectionName))
+                .Validate(options => options.Lifetime > TimeSpan.Zero && options.Lifetime <= TimeSpan.FromDays(365),
+                    "EmailConfirmation:Lifetime must be positive and no longer than 365 days.")
+                .Validate(options => options.AdministratorUserId != Guid.Empty,
+                    "EmailConfirmation:AdministratorUserId must not be the empty GUID.")
+                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.ApiKey),
+                    "EmailConfirmation:ApiKey is required when confirmation emails are enabled.")
+                .Validate(options => !options.Enabled ||
+                    (MailAddress.TryCreate(options.SenderAddress, out var address) &&
+                     address.Address == options.SenderAddress &&
+                     !string.IsNullOrWhiteSpace(options.SenderName) &&
+                     !options.SenderName.Any(char.IsControl)),
+                    "EmailConfirmation requires a valid SenderAddress and SenderName when enabled.")
+                .Validate(options => !options.Enabled ||
+                    (Uri.TryCreate(options.PublicWebBaseUrl, UriKind.Absolute, out var uri) &&
+                     uri.Scheme is "http" or "https" && uri.Host.Length > 0 &&
+                     uri.UserInfo.Length == 0 && uri.Query.Length == 0 && uri.Fragment.Length == 0),
+                    "EmailConfirmation:PublicWebBaseUrl must be an absolute HTTP(S) URL without credentials, query, or fragment.")
+                .ValidateOnStart();
+
+            return services;
+        }
     }
 }

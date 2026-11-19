@@ -4,6 +4,7 @@ internal static class UserEndpointNames
 {
     private const string Prefix = "User";
 
+    public const string Activate = $"{Prefix}{nameof(Activate)}";
     public const string Create = $"{Prefix}{nameof(Create)}";
     public const string Delete = $"{Prefix}{nameof(Delete)}";
     public const string DeleteCurrent = $"{Prefix}{nameof(DeleteCurrent)}";
@@ -11,5 +12,4 @@ internal static class UserEndpointNames
     public const string UpdateCurrent = $"{Prefix}{nameof(UpdateCurrent)}";
     public const string UpdateCurrentEmailAddress = $"{Prefix}{nameof(UpdateCurrentEmailAddress)}";
     public const string UpdateCurrentPassword = $"{Prefix}{nameof(UpdateCurrentPassword)}";
-    public const string UpdateCurrentStatus = $"{Prefix}{nameof(UpdateCurrentStatus)}";
 }

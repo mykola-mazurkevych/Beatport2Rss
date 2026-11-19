@@ -1,0 +1,58 @@
+.confirmation-shell {
+    color-scheme: dark;
+    display: grid;
+    min-height: calc(100dvh - 16px);
+    place-items: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    background: #101318;
+    color: #f5f7fa;
+    font: 1rem/1.6 system-ui, sans-serif;
+}
+
+.confirmation-card {
+    box-sizing: border-box;
+    width: min(100%, 34rem);
+    padding: clamp(1.25rem, 5vw, 2.5rem);
+    border: 1px solid #536074;
+    border-radius: 0.75rem;
+    background: #1b222d;
+}
+
+.brand {
+    margin: 0;
+    color: #a7e8d1;
+    font-weight: 700;
+}
+
+h1 {
+    margin: 0.5rem 0;
+    font-size: clamp(1.5rem, 6vw, 2.25rem);
+    line-height: 1.2;
+}
+
+button {
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+    background: #a7e8d1;
+    color: #101318;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    background: #cef5e8;
+}
+
+button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+button:disabled {
+    background: #bac3ce;
+    cursor: not-allowed;
+}

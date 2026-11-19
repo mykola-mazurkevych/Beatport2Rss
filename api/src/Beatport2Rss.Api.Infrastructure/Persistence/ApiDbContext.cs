@@ -19,6 +19,7 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     public static string Schema => "api";
 
     public DbSet<Country> Countries => Set<Country>();
+    public DbSet<EmailVerification> EmailVerifications => Set<EmailVerification>();
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Session> Sessions => Set<Session>();

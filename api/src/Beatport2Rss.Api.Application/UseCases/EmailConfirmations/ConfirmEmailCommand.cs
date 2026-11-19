@@ -1,0 +1,31 @@
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
+
+using FluentResults;
+
+using Mediator;
+
+using Microsoft.Extensions.Options;
+
+namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+
+public sealed record ConfirmEmailCommand(string? Hash, bool? Confirmed) : ICommand<Result>;
+
+internal sealed class ConfirmEmailCommandHandler(
+    IEmailVerificationRepository repository,
+    IClock clock,
+    IOptions<EmailConfirmationOptions> options) :
+    ICommandHandler<ConfirmEmailCommand, Result>
+{
+    public async ValueTask<Result> Handle(ConfirmEmailCommand command, CancellationToken cancellationToken)
+    {
+        if (command.Confirmed is not true)
+        {
+            return EmailConfirmationErrors.ConfirmationRequiredResult();
+        }
+
+        return options.Value.Enabled && command.Hash is { } hash &&
+            await repository.ConfirmAsync(hash, clock, cancellationToken)
+            ? Result.Ok()
+            : EmailConfirmationErrors.InvalidLinkResult();
+    }
+}

@@ -1,6 +1,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Users;
@@ -16,6 +17,8 @@ using FluentResults;
 using FluentValidation;
 
 using Mediator;
+
+using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.Users.Commands;
 
@@ -45,6 +48,9 @@ internal sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
+    IEmailVerificationRepository verificationRepository,
+    IConfirmationEmailOutbox confirmationEmailOutbox,
+    IOptions<EmailConfirmationOptions> confirmationOptions,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateUserCommand, Result>
 {
@@ -77,6 +83,18 @@ internal sealed class CreateUserCommandHandler(
             countryCode);
 
         await userCommandRepository.AddAsync(user, cancellationToken);
+
+        if (confirmationOptions.Value.Enabled)
+        {
+            var identifier = EmailConfirmationIdentifier.Generate();
+            var verification = EmailVerification.Create(
+                user,
+                EmailConfirmationIdentifier.Hash(identifier)!,
+                user.CreatedAt + confirmationOptions.Value.Lifetime);
+            await verificationRepository.AddAsync(verification, cancellationToken);
+            await confirmationEmailOutbox.EnqueueAsync(identifier);
+        }
+
         var userCreated = new UserCreated(
             Id: Guid.CreateVersion7(),
             OccurredAt: user.CreatedAt,
