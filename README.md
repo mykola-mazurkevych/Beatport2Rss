@@ -97,6 +97,9 @@ For local development without Docker, run the web project from the repository ro
 dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
 ```
 
+The initial frontend runs independently of the API and other backend services.
+The `/register` and `/login` pages are informational placeholders. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
+
 ## Build and tests
 
 Install the .NET 10 SDK, then run these commands from the repository root:

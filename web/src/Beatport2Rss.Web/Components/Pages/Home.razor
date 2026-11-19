@@ -1,7 +1,10 @@
 ﻿@page "/"
 
-<PageTitle>Beatport2Rss</PageTitle>
+@inject IStringLocalizer<PublicPages> Text
 
+<PageTitle>Beatport2Rss</PageTitle>
 <h1>Beatport2Rss</h1>
 
-<p>Registration and login will be available in a future release.</p>
+<p>@Text["HomeMessage"]</p>
+<p><a href="/register">@Text["RegisterTitle"]</a></p>
+<p><a href="/login">@Text["LoginTitle"]</a></p>

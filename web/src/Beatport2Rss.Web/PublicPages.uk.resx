@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Language" xml:space="preserve"><value>Мова</value></data>
+  <data name="HomeMessage" xml:space="preserve"><value>Реєстрація та вхід будуть доступні в майбутньому випуску.</value></data>
+  <data name="RegisterTitle" xml:space="preserve"><value>Створити акаунт</value></data>
+  <data name="RegisterMessage" xml:space="preserve"><value>Реєстрація буде доступна незабаром.</value></data>
+  <data name="LoginTitle" xml:space="preserve"><value>Увійти</value></data>
+  <data name="LoginMessage" xml:space="preserve"><value>Вхід буде доступний незабаром.</value></data>
+  <data name="BackToHome" xml:space="preserve"><value>На головну</value></data>
+</root>
