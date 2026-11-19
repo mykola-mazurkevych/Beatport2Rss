@@ -7,8 +7,7 @@ internal interface IApplication
     Task RunAsync(CancellationToken cancellationToken = default);
 }
 
-internal sealed class Application(
-    IMigrator migrator) :
+internal sealed class Application(IMigrator migrator) :
     IApplication
 {
     public Task RunAsync(CancellationToken cancellationToken = default) =>
