@@ -57,7 +57,7 @@ Start the services in the same terminal:
 docker compose up --build
 ```
 
-Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, and the three application services. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
+Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the three backend application services, and the standalone web frontend. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
 
 By default, the API is available at `http://localhost:8080` and its development API reference at `http://localhost:8080/scalar`. RabbitMQ management is available at `http://localhost:15672`. Ports and service settings can be changed in `docker/.env`.
 
@@ -69,13 +69,33 @@ docker compose down
 
 ## Frontend
 
-The Blazor frontend is located in `web/src/Beatport2Rss.Web`. Run it from the repository root:
+The Blazor frontend is located in `web/src/Beatport2Rss.Web` and is also included in the normal full-stack Compose startup. To run only the web service, use the commands below from the `docker` directory:
+
+```powershell
+docker compose up -d --build web
+docker compose ps web
+docker compose logs web
+```
+
+Browse to `http://localhost:8081` by default. Set `WEB_PORT` in `docker/.env` to use a different host port; the container continues to listen on port 8080. If you need a local Compose environment file, create one from the template with `Copy-Item .env.example .env`.
+
+Starting only `web` does not start or require the API, database, messaging services, or valid Beatport credentials. Rebuild the frontend after making changes with:
+
+```powershell
+docker compose up -d --build web
+```
+
+Stop only the frontend with:
+
+```powershell
+docker compose stop web
+```
+
+For local development without Docker, run the web project from the repository root:
 
 ```powershell
 dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
 ```
-
-The initial frontend runs independently of the API and other backend services.
 
 ## Build and tests
 
