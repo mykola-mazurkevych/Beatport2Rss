@@ -19,8 +19,8 @@ public sealed class CreateGenreCommandHandlerTests
         var genreId = Guid.NewGuid();
         Genre? addedGenre = null;
         var repository = new Mock<IGenreCommandRepository>();
-        repository.Setup(value => value.FindAsync(GenreId.Create(genreId), cancellationToken))
-            .ReturnsAsync((Genre?)null);
+        repository.Setup(value => value.ExistsAsync(GenreId.Create(genreId), cancellationToken))
+            .ReturnsAsync(false);
         repository.Setup(value => value.AddAsync(It.IsAny<Genre>(), cancellationToken))
             .Callback<Genre, CancellationToken>((genre, _) => addedGenre = genre)
             .ReturnsAsync((Genre genre, CancellationToken _) => genre);
@@ -35,7 +35,7 @@ public sealed class CreateGenreCommandHandlerTests
         Assert.NotNull(addedGenre);
         Assert.Equal(GenreId.Create(genreId), addedGenre.Id);
         Assert.Equal(5, addedGenre.BeatportId.Value);
-        Assert.Equal("House", addedGenre.Name);
+        Assert.Equal("House", addedGenre.Name.Value);
         unitOfWork.Verify(value => value.SaveChangesAsync(cancellationToken), Times.Once);
     }
 
@@ -45,8 +45,7 @@ public sealed class CreateGenreCommandHandlerTests
         var cancellationToken = TestContext.Current.CancellationToken;
         var genreId = GenreId.Create(Guid.NewGuid());
         var repository = new Mock<IGenreCommandRepository>();
-        repository.Setup(value => value.FindAsync(genreId, cancellationToken))
-            .ReturnsAsync(Genre.Create(genreId, DateTimeOffset.UtcNow, Beatport2Rss.Common.Domain.Beatport.BeatportId.Create(5), "House"));
+        repository.Setup(value => value.ExistsAsync(genreId, cancellationToken)).ReturnsAsync(true);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var handler = new CreateGenreCommandHandler(repository.Object, unitOfWork.Object);
 

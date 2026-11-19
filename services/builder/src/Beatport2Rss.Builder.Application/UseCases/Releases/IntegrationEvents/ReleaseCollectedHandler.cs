@@ -3,7 +3,6 @@ using Beatport2Rss.Builder.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Tracks;
 using Beatport2Rss.Common.Domain.Beatport;
-using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 
@@ -34,8 +33,8 @@ public static class ReleaseCollectedHandler
                             MixName.Create(track.MixName),
                             [.. track.ArtistBeatportIds.Select(BeatportId.Create)],
                             [.. track.RemixerBeatportIds.Select(BeatportId.Create)],
-                            GenreId.Create(track.GenreId),
                             track.Length,
-                            track.SampleUri))
+                            track.SampleUri,
+                            BeatportId.Create(track.GenreId)))
             ]);
 }

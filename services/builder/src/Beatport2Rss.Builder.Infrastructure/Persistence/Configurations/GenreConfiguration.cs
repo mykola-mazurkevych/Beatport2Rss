@@ -1,5 +1,4 @@
 using Beatport2Rss.Builder.Domain.Genres;
-using Beatport2Rss.Common.Domain.Constants;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -25,11 +24,14 @@ internal sealed class GenreConfiguration :
         builder.Property(genre => genre.BeatportId)
             .IsRequired();
 
+        builder.Property(genre => genre.Name)
+            .HasMaxLength(GenreName.MaxLength)
+            .IsRequired();
+
         builder.HasIndex(genre => genre.BeatportId)
             .IsUnique();
 
-        builder.Property(genre => genre.Name)
-            .HasMaxLength(MaxLengthConstants.Name)
-            .IsRequired();
+        builder.HasIndex(genre => genre.Name)
+            .IsUnique();
     }
 }

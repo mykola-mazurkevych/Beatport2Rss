@@ -10,7 +10,6 @@ using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.Domain.Beatport;
-using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
@@ -45,10 +44,12 @@ public sealed class CollectReleasesCommandTests
             .ReturnsAsync([]);
         releaseRepository.Setup(value => value.AddAsync(It.IsAny<Release>(), cancellationToken))
             .ReturnsAsync((Release release, CancellationToken _) => release);
+        Genre? addedGenre = null;
         var genreRepository = new Mock<IGenreCommandRepository>();
-        genreRepository.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken))
-            .ReturnsAsync([]);
+        genreRepository.Setup(value => value.ExistsAsync(BeatportId.Create(5), cancellationToken))
+            .ReturnsAsync(false);
         genreRepository.Setup(value => value.AddAsync(It.IsAny<Genre>(), cancellationToken))
+            .Callback<Genre, CancellationToken>((genre, _) => addedGenre = genre)
             .ReturnsAsync((Genre genre, CancellationToken _) => genre);
         var release = new BeatportReleaseDto(
             1, "release", [], [], new BeatportReleaseLabelDto(10, "label"),
@@ -99,7 +100,9 @@ public sealed class CollectReleasesCommandTests
         var releaseCollected = Assert.IsType<ReleaseCollected>(events[1]);
         Assert.Equal(5, genreCreated.BeatportId);
         Assert.Equal("House", genreCreated.Name);
-        Assert.Equal(genreCreated.GenreId, Assert.Single(releaseCollected.Tracks).GenreId);
+        Assert.NotNull(addedGenre);
+        Assert.Equal(genreCreated.GenreId, addedGenre.Id.Value);
+        Assert.Equal(genreCreated.BeatportId, Assert.Single(releaseCollected.Tracks).GenreId);
     }
 
     [Fact]

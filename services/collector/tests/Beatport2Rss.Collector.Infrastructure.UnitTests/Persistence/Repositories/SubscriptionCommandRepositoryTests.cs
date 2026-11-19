@@ -38,7 +38,7 @@ public sealed class SubscriptionCommandRepositoryTests
         AddFeed(context, pending.Id);
         await context.SaveChangesAsync(cancellationToken);
 
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, clock);
+        var repository = new SubscriptionCommandRepository(context.Feeds, context.Subscriptions, clock);
         var result = await repository.FindAllToRefreshAsync(cancellationToken);
 
         Assert.Equal([pending.Id], result);
@@ -54,7 +54,7 @@ public sealed class SubscriptionCommandRepositoryTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         await using var context = new CollectorDbContext(options);
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Feeds, context.Subscriptions, new TestClock());
         var beatportId = BeatportId.Create(42);
         Assert.False(await repository.ExistsAsync(SubscriptionType.Artist, beatportId, cancellationToken));
         var subscription = Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, SubscriptionType.Artist, beatportId);
@@ -82,7 +82,7 @@ public sealed class SubscriptionCommandRepositoryTests
         context.Subscriptions.Add(Subscription.Create(SubscriptionId.Create(Guid.NewGuid()), DateTimeOffset.UtcNow, SubscriptionType.Label, beatportId));
         await context.SaveChangesAsync(cancellationToken);
         context.ChangeTracker.Clear();
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Feeds, context.Subscriptions, new TestClock());
 
         Assert.True(await repository.ExistsAsync(SubscriptionType.Label, beatportId, cancellationToken));
         Assert.False(await repository.ExistsAsync(SubscriptionType.Artist, beatportId, cancellationToken));

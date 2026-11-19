@@ -45,11 +45,6 @@ internal sealed class TrackConfiguration :
         builder.Property(track => track.ReleaseId)
             .IsRequired();
 
-        builder.HasOne<Genre>()
-            .WithMany()
-            .HasForeignKey(track => track.GenreId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.OwnsMany(
             track => track.Artists,
             navigationBuilder =>
@@ -77,6 +72,11 @@ internal sealed class TrackConfiguration :
 
                 navigationBuilder.HasIndex(trackArtist => trackArtist.ArtistId);
             });
+
+        builder.HasOne<Genre>()
+            .WithMany()
+            .HasForeignKey(track => track.GenreId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<Release>()
             .WithMany(release => release.Tracks)

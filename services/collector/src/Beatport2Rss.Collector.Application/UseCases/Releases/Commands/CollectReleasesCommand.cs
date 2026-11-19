@@ -130,7 +130,6 @@ public sealed class CollectReleasesCommandHandler(
                     return Result.Fail(processGenresResult);
                 }
 
-                var genresMap = processGenresResult.Value;
                 var releaseId = ReleaseId.Create(Guid.CreateVersion7());
                 var release = Release.Create(
                     releaseId,
@@ -154,16 +153,16 @@ public sealed class CollectReleasesCommandHandler(
                     beatportRelease.Image.Uri,
                     beatportRelease.TracksCount,
                     [
-                        .. beatportTracks.Select(track => new ReleaseCollectedTrack(
-                            track.Id,
-                            track.Number,
-                            track.Name,
-                            track.MixName,
-                            [.. track.Artists.Select(artist => artist.Id)],
-                            [.. track.Remixers.Select(remixer => remixer.Id)],
-                            Length: TimeSpan.FromMilliseconds(track.LengthMilliseconds),
-                            track.SampleUri,
-                            genresMap[BeatportId.Create(track.Genre.Id)].Id.Value))
+                        .. beatportTracks.Select(beatportTrack => new ReleaseCollectedTrack(
+                            beatportTrack.Id,
+                            beatportTrack.Number,
+                            beatportTrack.Name,
+                            beatportTrack.MixName,
+                            [.. beatportTrack.Artists.Select(artist => artist.Id)],
+                            [.. beatportTrack.Remixers.Select(remixer => remixer.Id)],
+                            Length: TimeSpan.FromMilliseconds(beatportTrack.LengthMilliseconds),
+                            beatportTrack.SampleUri,
+                            beatportTrack.Genre.Id))
                     ]);
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }
@@ -226,16 +225,16 @@ public sealed class CollectReleasesCommandHandler(
         IReadOnlyCollection<BeatportTrackDto> beatportTracks,
         CancellationToken cancellationToken)
     {
-        var subscriptionTargets = new HashSet<(SubscriptionType Type, BeatportId BeatportId)>
+        var subscriptions = new HashSet<(SubscriptionType Type, BeatportId BeatportId)>
         {
             (SubscriptionType.Label, BeatportId.Create(beatportRelease.Label.Id))
         };
-        subscriptionTargets.UnionWith(beatportRelease.Artists.Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
-        subscriptionTargets.UnionWith(beatportRelease.Remixers.Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
-        subscriptionTargets.UnionWith(beatportTracks.SelectMany(track => track.Artists).Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
-        subscriptionTargets.UnionWith(beatportTracks.SelectMany(track => track.Remixers).Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
+        subscriptions.UnionWith(beatportRelease.Artists.Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
+        subscriptions.UnionWith(beatportRelease.Remixers.Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
+        subscriptions.UnionWith(beatportTracks.SelectMany(track => track.Artists).Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
+        subscriptions.UnionWith(beatportTracks.SelectMany(track => track.Remixers).Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
 
-        foreach ((SubscriptionType type, BeatportId beatportId) in subscriptionTargets)
+        foreach ((SubscriptionType type, BeatportId beatportId) in subscriptions)
         {
             var result = await subscriptionService.EnsureSubscriptionExistsAsync(type, beatportId, cancellationToken);
             if (result.IsFailed)
@@ -247,35 +246,25 @@ public sealed class CollectReleasesCommandHandler(
         return Result.Ok();
     }
 
-    private async Task<Result<IReadOnlyDictionary<BeatportId, Genre>>> ProcessGenresAsync(
+    private async Task<Result> ProcessGenresAsync(
         IReadOnlyCollection<BeatportTrackDto> beatportTracks,
         CancellationToken cancellationToken)
     {
-        var beatportGenres = beatportTracks
-            .Select(track => track.Genre)
-            .DistinctBy(genre => genre.Id)
-            .ToArray();
-        if (beatportGenres.Length == 0)
-        {
-            return Result.Ok<IReadOnlyDictionary<BeatportId, Genre>>(
-                new Dictionary<BeatportId, Genre>());
-        }
+        var beatportGenresMap = beatportTracks
+            .Select(beatportTrack => beatportTrack.Genre)
+            .DistinctBy(beatportGenre => beatportGenre.Id)
+            .ToDictionary(beatportGenre => BeatportId.Create(beatportGenre.Id));
 
-        var beatportIds = beatportGenres.Select(genre => BeatportId.Create(genre.Id)).ToArray();
-        var existingGenres = await genreCommandRepository.FindAllAsync(beatportIds, cancellationToken);
-        var genresMap = existingGenres.ToDictionary(genre => genre.BeatportId);
-
-        foreach (var beatportGenre in beatportGenres)
+        foreach ((BeatportId beatportId, BeatportGenreDto beatportGenre) in beatportGenresMap)
         {
-            var beatportId = BeatportId.Create(beatportGenre.Id);
-            if (genresMap.ContainsKey(beatportId))
+            if (await genreCommandRepository.ExistsAsync(beatportId, cancellationToken))
             {
                 continue;
             }
 
             var genre = Genre.Create(
-                GenreId.Create(Guid.CreateVersion7()),
-                clock.UtcNow,
+                id: GenreId.Create(Guid.CreateVersion7()),
+                createdAt: clock.UtcNow,
                 beatportId);
             await genreCommandRepository.AddAsync(genre, cancellationToken);
 
@@ -283,13 +272,12 @@ public sealed class CollectReleasesCommandHandler(
                 Id: Guid.CreateVersion7(),
                 OccurredAt: clock.UtcNow,
                 genre.Id.Value,
-                beatportGenre.Id,
+                BeatportId: beatportGenre.Id,
                 beatportGenre.Name);
             await integrationEventOutbox.EnqueueAsync(genreCreated, cancellationToken);
-            genresMap.Add(beatportId, genre);
         }
 
-        return genresMap;
+        return Result.Ok();
     }
 }
 

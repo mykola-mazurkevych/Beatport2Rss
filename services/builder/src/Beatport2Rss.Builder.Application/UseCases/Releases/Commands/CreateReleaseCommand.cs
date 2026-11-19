@@ -7,7 +7,6 @@ using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Domain.Beatport;
-using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -68,7 +67,7 @@ public sealed class CreateReleaseCommandHandler(
             .Distinct()
             .ToArray();
         var genres = await genreCommandRepository.FindAllAsync(trackGenres, cancellationToken);
-        var genresMap = genres.ToDictionary(genre => genre.Id);
+        var genresMap = genres.ToDictionary(genre => genre.BeatportId);
         foreach (var trackGenreId in trackGenres)
         {
             if (!genresMap.ContainsKey(trackGenreId))
@@ -124,7 +123,7 @@ public sealed class CreateReleaseCommandHandler(
     private static HashSet<Track> GetTracks(
         ReleaseId releaseId,
         IEnumerable<TrackDto> trackDtos,
-        Dictionary<GenreId, Genre> genresMap,
+        Dictionary<BeatportId, Genre> genresMap,
         Dictionary<(SubscriptionType Type, BeatportId BeatportId), Subscription> subscriptionsMap,
         IClock clock)
     {

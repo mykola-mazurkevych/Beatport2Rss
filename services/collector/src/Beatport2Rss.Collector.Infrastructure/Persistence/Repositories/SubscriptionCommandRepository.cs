@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubscriptionCommandRepository(
-    DbSet<Subscription> subscriptions,
     DbSet<Feed> feeds,
+    DbSet<Subscription> subscriptions,
     IClock clock) :
     CommandRepository<Subscription, SubscriptionId>(subscriptions),
     ISubscriptionCommandRepository
@@ -20,7 +20,7 @@ internal sealed class SubscriptionCommandRepository(
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
 
     public Task<bool> HasFeedsAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
-        feeds.AnyAsync(feed => feed.Subscriptions.Any(link => link.SubscriptionId == subscriptionId), cancellationToken);
+        feeds.AnyAsync(feed => feed.Subscriptions.Any(feedSubscription => feedSubscription.SubscriptionId == subscriptionId), cancellationToken);
 
     public Task<bool> ExistsAsync(SubscriptionType type, BeatportId beatportId, CancellationToken cancellationToken = default) =>
         _subscriptions.Local.Any(subscription => subscription.Type == type && subscription.BeatportId == beatportId)

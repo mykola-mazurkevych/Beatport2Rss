@@ -39,7 +39,7 @@ public sealed class QueueReleaseCollectionCommandHandlerTests
         }
         await context.SaveChangesAsync(cancellationToken);
 
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Feeds, context.Subscriptions, new TestClock());
         var commands = (await new QueueReleaseCollectionCommandHandler(repository)
             .HandleAsync(new QueueReleaseCollectionCommand(), cancellationToken)).Cast<CollectReleasesCommand>().ToArray();
 

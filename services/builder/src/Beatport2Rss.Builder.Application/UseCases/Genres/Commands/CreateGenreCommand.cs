@@ -19,7 +19,7 @@ public sealed class CreateGenreCommandHandler(
     public async Task HandleAsync(CreateGenreCommand command, CancellationToken cancellationToken)
     {
         var genreId = GenreId.Create(command.GenreId);
-        if (await genreCommandRepository.FindAsync(genreId, cancellationToken) is not null)
+        if (await genreCommandRepository.ExistsAsync(genreId, cancellationToken))
         {
             return;
         }
@@ -28,7 +28,7 @@ public sealed class CreateGenreCommandHandler(
             genreId,
             command.CreatedAt,
             BeatportId.Create(command.BeatportId),
-            command.Name);
+            GenreName.Create(command.Name));
         await genreCommandRepository.AddAsync(genre, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }

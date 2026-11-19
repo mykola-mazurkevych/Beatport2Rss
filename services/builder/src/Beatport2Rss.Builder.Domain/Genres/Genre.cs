@@ -17,13 +17,13 @@ public sealed class Genre :
 
     public BeatportId BeatportId { get; private set; }
 
-    public string Name { get; private set; } = null!;
+    public GenreName Name { get; private set; }
 
     public static Genre Create(
         GenreId id,
         DateTimeOffset createdAt,
         BeatportId beatportId,
-        string name) =>
+        GenreName name) =>
         new()
         {
             Id = id,
@@ -31,7 +31,4 @@ public sealed class Genre :
             BeatportId = beatportId,
             Name = name,
         };
-
-    public void UpdateName(string name) =>
-        Name = name;
 }

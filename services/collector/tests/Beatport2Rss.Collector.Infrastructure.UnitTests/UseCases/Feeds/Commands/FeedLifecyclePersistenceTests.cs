@@ -111,7 +111,7 @@ public sealed class FeedLifecyclePersistenceTests
             await handler.HandleAsync(new DeleteFeedCommand(feed.Id.Value), token);
         }
 
-        var repository = new SubscriptionCommandRepository(context.Subscriptions, context.Feeds, new TestClock());
+        var repository = new SubscriptionCommandRepository(context.Feeds, context.Subscriptions, new TestClock());
         Assert.Equal([shared.Id], await repository.FindAllToRefreshAsync(token));
         Assert.Equal(2, await context.Subscriptions.CountAsync(token));
         Assert.Equal(otherFeed.Id, (await context.Feeds.SingleAsync(token)).Id);
