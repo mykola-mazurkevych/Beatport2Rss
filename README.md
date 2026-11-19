@@ -67,6 +67,16 @@ Stop the services with:
 docker compose down
 ```
 
+## Frontend
+
+The Blazor frontend is located in `web/src/Beatport2Rss.Web`. Run it from the repository root:
+
+```powershell
+dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
+```
+
+The initial frontend runs independently of the API and other backend services.
+
 ## Build and tests
 
 Install the .NET 10 SDK, then run these commands from the repository root:
@@ -81,6 +91,7 @@ dotnet test Beatport2Rss.slnx
 | Path | Contents |
 | --- | --- |
 | `api/` | REST API, application/domain logic, persistence, and tests |
+| `web/` | Standalone Blazor frontend |
 | `services/collector/` | Beatport release collection worker |
 | `services/builder/` | Release and feed-related event processing worker |
 | `services/interceptor/` | Beatport token interception gRPC service |
