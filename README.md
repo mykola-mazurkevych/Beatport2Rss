@@ -76,6 +76,7 @@ dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
 ```
 
 The initial frontend runs independently of the API and other backend services.
+The `/register` and `/login` pages are informational placeholders. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
 
 ## Build and tests
 

@@ -1,6 +1,20 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+@inject IStringLocalizer<PublicPages> Text
+@inject NavigationManager Navigation
+
+<header>
+    <nav aria-label="@Text["Language"]" data-enhance-nav="false">
+        <a href="@Navigation.GetUriWithQueryParameter("culture", "en")" lang="en" hreflang="en"
+           aria-current="@(CultureInfo.CurrentUICulture.Name == "en" ? "true" : null)">English</a>
+        <a href="@Navigation.GetUriWithQueryParameter("culture", "uk")" lang="uk" hreflang="uk"
+           aria-current="@(CultureInfo.CurrentUICulture.Name == "uk" ? "true" : null)">Українська</a>
+    </nav>
+</header>
+
+<main>
+    @Body
+</main>
 
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
