@@ -63,7 +63,7 @@ public sealed class CreateReleaseCommandHandler(
         var label = GetSubscription(subscriptionsMap, SubscriptionType.Label, createReleaseCommand.LabelBeatportId);
 
         var trackGenres = createReleaseCommand.Tracks
-            .Select(track => track.GenreId)
+            .Select(track => track.GenreBeatportId)
             .Distinct()
             .ToArray();
         var genres = await genreCommandRepository.FindAllAsync(trackGenres, cancellationToken);
@@ -149,7 +149,7 @@ public sealed class CreateReleaseCommandHandler(
                 trackDto.MixName,
                 trackDto.Length,
                 trackDto.SampleUri,
-                genresMap[trackDto.GenreId].Id,
+                genresMap[trackDto.GenreBeatportId].Id,
                 trackArtsits);
 
             tracks.Add(track);

@@ -102,7 +102,7 @@ public sealed class CollectReleasesCommandTests
         Assert.Equal("House", genreCreated.Name);
         Assert.NotNull(addedGenre);
         Assert.Equal(genreCreated.GenreId, addedGenre.Id.Value);
-        Assert.Equal(genreCreated.BeatportId, Assert.Single(releaseCollected.Tracks).GenreId);
+        Assert.Equal(genreCreated.BeatportId, Assert.Single(releaseCollected.Tracks).GenreBeatportId);
     }
 
     [Fact]

@@ -69,6 +69,6 @@ public sealed class ReleaseCollectedHandlerTests
         Assert.Equal([BeatportId.Create(601)], track.RemixerBeatportIds);
         Assert.Equal(TimeSpan.FromMinutes(5), track.Length);
         Assert.Equal(sampleUri, track.SampleUri);
-        Assert.Equal(BeatportId.Create(701), track.GenreId);
+        Assert.Equal(BeatportId.Create(701), track.GenreBeatportId);
     }
 }
