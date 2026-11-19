@@ -13,6 +13,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SetDefaultCulture("en")
         .AddSupportedCultures("en", "uk")
         .AddSupportedUICultures("en", "uk");
+    options.RequestCultureProviders.Remove(
+        options.RequestCultureProviders.OfType<AcceptLanguageHeaderRequestCultureProvider>().Single());
 });
 
 var app = builder.Build();
