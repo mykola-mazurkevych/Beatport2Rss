@@ -202,6 +202,7 @@ services:
       start_period: 10s
 
   web:
+    container_name: web
     build:
       context: ..
       dockerfile: web/src/Beatport2Rss.Web/Dockerfile
