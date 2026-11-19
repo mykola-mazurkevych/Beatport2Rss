@@ -18,6 +18,8 @@ public sealed class CreateFeedSubscriptionCommandHandler(
         CreateFeedSubscriptionCommand command,
         CancellationToken cancellationToken)
     {
+        List<object> nextCommands = [];
+
         var feedId = FeedId.Create(command.FeedId);
         var feed =
             await feedCommandRepository.FindAsync(feedId, cancellationToken) ??
@@ -26,7 +28,7 @@ public sealed class CreateFeedSubscriptionCommandHandler(
         var subscriptionId = SubscriptionId.Create(command.SubscriptionId);
         if (feed.HasSubscription(subscriptionId))
         {
-            return [];
+            return nextCommands;
         }
 
         if (!await subscriptionCommandRepository.ExistsAsync(subscriptionId, cancellationToken))
@@ -34,10 +36,14 @@ public sealed class CreateFeedSubscriptionCommandHandler(
             throw new RetryableException($"Subscription {command.SubscriptionId} is not available yet.");
         }
 
-        var isFirstFeed = !await subscriptionCommandRepository.HasFeedsAsync(subscriptionId, cancellationToken);
+        if (!await subscriptionCommandRepository.HasFeedsAsync(subscriptionId, cancellationToken))
+        {
+            nextCommands.Add(new CollectReleasesCommand(subscriptionId.Value));
+        }
+
         feed.AddSubscription(subscriptionId);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return isFirstFeed ? [new CollectReleasesCommand(subscriptionId.Value)] : [];
+        return nextCommands;
     }
 }

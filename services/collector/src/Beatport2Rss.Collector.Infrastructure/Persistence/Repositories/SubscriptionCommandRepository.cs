@@ -19,9 +19,6 @@ internal sealed class SubscriptionCommandRepository(
 {
     private readonly DbSet<Subscription> _subscriptions = subscriptions;
 
-    public Task<bool> HasFeedsAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
-        feeds.AnyAsync(feed => feed.Subscriptions.Any(link => link.SubscriptionId == subscriptionId), cancellationToken);
-
     public Task<bool> ExistsAsync(SubscriptionType type, BeatportId beatportId, CancellationToken cancellationToken = default) =>
         _subscriptions.Local.Any(subscription => subscription.Type == type && subscription.BeatportId == beatportId)
             ? Task.FromResult(true)
@@ -30,6 +27,9 @@ internal sealed class SubscriptionCommandRepository(
                     subscription.Type == type &&
                     subscription.BeatportId == beatportId,
                 cancellationToken);
+
+    public Task<bool> HasFeedsAsync(SubscriptionId subscriptionId, CancellationToken cancellationToken = default) =>
+        feeds.AnyAsync(feed => feed.Subscriptions.Any(feedSubscriptions => feedSubscriptions.SubscriptionId == subscriptionId), cancellationToken);
 
     public async Task<IReadOnlyCollection<SubscriptionId>> FindAllToRefreshAsync(CancellationToken cancellationToken = default) =>
         await _subscriptions
