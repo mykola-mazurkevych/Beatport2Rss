@@ -11,4 +11,46 @@
   <data name="LoginTitle" xml:space="preserve"><value>Увійти</value></data>
   <data name="LoginMessage" xml:space="preserve"><value>Вхід буде доступний незабаром.</value></data>
   <data name="BackToHome" xml:space="preserve"><value>На головну</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>Beatport2Rss — нові релізи у твоєму RSS</value></data>
+  <data name="PrimaryNavigation" xml:space="preserve"><value>Головна навігація</value></data>
+  <data name="FeaturesNav" xml:space="preserve"><value>Як це працює</value></data>
+  <data name="PreviewNav" xml:space="preserve"><value>Попередній перегляд</value></data>
+  <data name="PricingNav" xml:space="preserve"><value>Ціни</value></data>
+  <data name="HeroEyebrow" xml:space="preserve"><value>ТВОЯ МУЗИКА — ТВОЇ ПРАВИЛА</value></data>
+  <data name="HeroHeadline" xml:space="preserve"><value>Нові релізи улюблених артистів і лейблів — у твоєму RSS.</value></data>
+  <data name="HeroDescription" xml:space="preserve"><value>Стеж за артистами й лейблами на Beatport, об’єднуй їх у стрічки та читай оновлення про релізи у своєму RSS-рідері.</value></data>
+  <data name="PreviewAction" xml:space="preserve"><value>Приклад RSS</value></data>
+  <data name="ReaderPreviewLabel" xml:space="preserve"><value>Ілюстративний приклад RSS-рідера з трьома вигаданими релізами</value></data>
+  <data name="ReaderCaption" xml:space="preserve"><value>ЯК ЦЕ ВИГЛЯДАЄ</value></data>
+  <data name="ReaderTitle" xml:space="preserve"><value>Твоя стрічка релізів</value></data>
+  <data name="SampleBadge" xml:space="preserve"><value>Приклад</value></data>
+  <data name="SampleFeedName" xml:space="preserve"><value>Електронні знахідки</value></data>
+  <data name="SampleArtistOne" xml:space="preserve"><value>Mira Sol</value></data>
+  <data name="SampleReleaseOne" xml:space="preserve"><value>Soft Signal</value></data>
+  <data name="SampleLabelOne" xml:space="preserve"><value>Northbound Sounds</value></data>
+  <data name="SampleArtistTwo" xml:space="preserve"><value>Kairo Grey</value></data>
+  <data name="SampleReleaseTwo" xml:space="preserve"><value>Night Transit</value></data>
+  <data name="SampleLabelTwo" xml:space="preserve"><value>Still Form Records</value></data>
+  <data name="SampleArtistThree" xml:space="preserve"><value>Luma Vale</value></data>
+  <data name="SampleReleaseThree" xml:space="preserve"><value>One More Light</value></data>
+  <data name="SampleLabelThree" xml:space="preserve"><value>Local Motion</value></data>
+  <data name="ReleaseType" xml:space="preserve"><value>РЕЛІЗ</value></data>
+  <data name="ReaderFootnote" xml:space="preserve"><value>Вигадані записи · без живої стрічки</value></data>
+  <data name="FeaturesEyebrow" xml:space="preserve"><value>ПРОСТА ПОСЛІДОВНІСТЬ</value></data>
+  <data name="FeaturesTitle" xml:space="preserve"><value>Від артиста до RSS-рідера.</value></data>
+  <data name="FeatureFollowTitle" xml:space="preserve"><value>Стеж</value></data>
+  <data name="FeatureFollowDescription" xml:space="preserve"><value>Обирай артистів і лейбли на Beatport, за новими релізами яких хочеш стежити.</value></data>
+  <data name="FeatureOrganizeTitle" xml:space="preserve"><value>Упорядковуй</value></data>
+  <data name="FeatureOrganizeDescription" xml:space="preserve"><value>Об’єднуй артистів і лейбли, за якими стежиш, у зручні для тебе стрічки.</value></data>
+  <data name="FeatureReadTitle" xml:space="preserve"><value>Читай</value></data>
+  <data name="FeatureReadDescription" xml:space="preserve"><value>Отримуй оновлення про релізи у своєму звичному RSS-рідері.</value></data>
+  <data name="PreviewEyebrow" xml:space="preserve"><value>ПОГЛЯНЬ</value></data>
+  <data name="PreviewTitle" xml:space="preserve"><value>Це приклад, а не жива стрічка.</value></data>
+  <data name="PreviewDescription" xml:space="preserve"><value>Оновлення про релізи з’являтимуться поруч з іншими підписками у твоєму RSS-рідері.</value></data>
+  <data name="IllustrativeNotice" xml:space="preserve"><value>Ілюстративний приклад · вигадані записи · не наживо</value></data>
+  <data name="PricingEyebrow" xml:space="preserve"><value>ВАЖЛИВО</value></data>
+  <data name="PricingTitle" xml:space="preserve"><value>Ціни</value></data>
+  <data name="ComingSoon" xml:space="preserve"><value>Незабаром</value></data>
+  <data name="FooterMessage" xml:space="preserve"><value>Оновлення про релізи — у твоєму RSS-рідері.</value></data>
+  <data name="BackToTop" xml:space="preserve"><value>На початок</value></data>
 </root>

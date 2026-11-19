@@ -3,13 +3,25 @@
 @inject IStringLocalizer<PublicPages> Text
 @inject NavigationManager Navigation
 
-<header>
-    <nav aria-label="@Text["Language"]" data-enhance-nav="false">
-        <a href="@Navigation.GetUriWithQueryParameter("culture", "en")" lang="en" hreflang="en"
-           aria-current="@(CultureInfo.CurrentUICulture.Name == "en" ? "true" : null)">English</a>
-        <a href="@Navigation.GetUriWithQueryParameter("culture", "uk")" lang="uk" hreflang="uk"
-           aria-current="@(CultureInfo.CurrentUICulture.Name == "uk" ? "true" : null)">Українська</a>
-    </nav>
+<header class="site-header">
+    <div class="site-header-inner">
+        <a class="brand" href="/">Beatport<span>2Rss</span></a>
+        <nav class="section-nav" aria-label="@Text["PrimaryNavigation"]">
+            <a href="/#how-it-works">@Text["FeaturesNav"]</a>
+            <a href="/#preview">@Text["PreviewNav"]</a>
+            <a href="/#pricing">@Text["PricingNav"]</a>
+        </nav>
+        <div class="header-actions">
+            <a href="/login">@Text["LoginTitle"]</a>
+            <a class="header-register" href="/register">@Text["RegisterTitle"]</a>
+        </div>
+        <nav class="language-switch" aria-label="@Text["Language"]" data-enhance-nav="false">
+            <a href="@Navigation.GetUriWithQueryParameter("culture", "en")" lang="en" hreflang="en"
+               aria-current="@(CultureInfo.CurrentUICulture.Name == "en" ? "true" : null)">English</a>
+            <a href="@Navigation.GetUriWithQueryParameter("culture", "uk")" lang="uk" hreflang="uk"
+               aria-current="@(CultureInfo.CurrentUICulture.Name == "uk" ? "true" : null)">Українська</a>
+        </nav>
+    </div>
 </header>
 
 <main>
