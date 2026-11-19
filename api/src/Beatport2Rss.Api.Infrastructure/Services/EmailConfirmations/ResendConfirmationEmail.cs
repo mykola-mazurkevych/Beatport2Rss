@@ -25,6 +25,8 @@ internal sealed class ResendConfirmationEmail(
         var baseUri = new Uri($"{settings.PublicWebBaseUrl.TrimEnd('/')}/", UriKind.Absolute);
         var link = new Uri(baseUri, $"confirm-email?token={Uri.EscapeDataString(identifier)}").AbsoluteUri;
         var expiresAt = verification.ExpiresAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
+        var hours = (verification.ExpiresAt - verification.CreatedAt).TotalHours.ToString("0.###########", CultureInfo.InvariantCulture);
+        var validity = $"This link is valid for {hours} hours from issuance. This link expires at {expiresAt}.";
         var email = new EmailMessage
         {
             From = new Resend.EmailAddress
@@ -34,10 +36,10 @@ internal sealed class ResendConfirmationEmail(
             },
             To = new Resend.EmailAddress { Email = verification.EmailAddress.Value },
             Subject = "Confirm your Beatport2Rss email address",
-            TextBody = $"Confirm your Beatport2Rss email address:\n\n{link}\n\nThis link expires at {expiresAt}.\n\nIf you did not sign up, you can ignore this email.",
+            TextBody = $"Confirm your Beatport2Rss email address:\n\n{link}\n\n{validity}\n\nIf you did not sign up, you can ignore this email.",
             HtmlBody = $"""
                 <p><a href="{HtmlEncoder.Default.Encode(link)}">Confirm your Beatport2Rss email address</a></p>
-                <p>This link expires at {expiresAt}.</p>
+                <p>{validity}</p>
                 <p>If you did not sign up, you can ignore this email.</p>
                 """,
         };

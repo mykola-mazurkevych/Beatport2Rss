@@ -12,6 +12,8 @@ namespace Beatport2Rss.Api.Endpoints.EmailConfirmations;
 internal static class EmailConfirmationEndpoints
 {
     public const string Route = "/api/email-confirmations";
+    private const string IdentifierRoute = "/{id}";
+    public const string ResourceRoute = Route + IdentifierRoute;
 
     public static void BuildEmailConfirmationEndpoints(this IEndpointRouteBuilder builder, ApiVersionSet versionSet)
     {
@@ -21,13 +23,13 @@ internal static class EmailConfirmationEndpoints
             .WithTags("Email confirmations")
             .AllowAnonymous();
 
-        group.MapGet("/{id}", GetAsync)
-            .WithDescription("Read confirmation by secret identifier without changing account state. Invalid or expired unused links return 400.")
+        group.MapGet(IdentifierRoute, GetAsync)
+            .WithDescription("Anonymous. Read confirmation by secret identifier without changing account state. Invalid or expired unused links return 400.")
             .Produces<EmailConfirmationState>()
             .ProducesProblem(StatusCodes.Status400BadRequest);
 
-        group.MapPut("/{id}", PutAsync)
-            .WithDescription("Confirm only with confirmed:true. Repeating a completed confirmation returns 204 without changing account status, even after expiry. Invalid or expired unused links return 400.")
+        group.MapPut(IdentifierRoute, PutAsync)
+            .WithDescription("Anonymous. Confirm only with confirmed:true. Repeating a completed confirmation returns 204 without changing account status, even after expiry. Invalid or expired unused links return 400.")
             .Accepts<ConfirmEmailRequest>("application/json")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status400BadRequest);
