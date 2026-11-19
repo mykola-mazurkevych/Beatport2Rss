@@ -43,7 +43,7 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
       interval: 30s
       timeout: 3s
       retries: 5
@@ -78,7 +78,7 @@ services:
     container_name: api-migrator
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
+      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION};GSS Encryption Mode=Disable
 
   builder-migrator:
     <<: *migrator
@@ -86,7 +86,7 @@ services:
     container_name: builder-migrator
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION}
+      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION};GSS Encryption Mode=Disable
 
   collector-migrator:
     <<: *migrator
@@ -94,7 +94,7 @@ services:
     container_name: collector-migrator
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
+      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION};GSS Encryption Mode=Disable
 
   builder:
     build:
@@ -103,7 +103,7 @@ services:
     container_name: builder
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION}
+      - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION};GSS Encryption Mode=Disable
       - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}
       - RabbitMQOptions__Port=${RABBITMQ_PORT}
       - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
@@ -127,6 +127,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+        restart: true
       builder-migrator:
         condition: service_completed_successfully
     restart: unless-stopped
@@ -138,7 +139,7 @@ services:
     container_name: collector
     environment:
       - DOTNET_ENVIRONMENT=Production
-      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
+      - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION};GSS Encryption Mode=Disable
       - RabbitMQOptions__HostName=${RABBITMQ_HOSTNAME}
       - RabbitMQOptions__Port=${RABBITMQ_PORT}
       - RabbitMQOptions__UserName=${RABBITMQ_USERNAME}
@@ -151,6 +152,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+        restart: true
       collector-migrator:
         condition: service_completed_successfully
       interceptor:
@@ -166,7 +168,7 @@ services:
       - "${API_PORT}:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
+      - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION};GSS Encryption Mode=Disable
       - GrpcOptions__BeatportTokenProvider__Address=${INTERCEPTOR_GRPC_URI}
       - GrpcOptions__RssFeedDocumentGrpcClient__Address=http://builder:5000
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
@@ -186,6 +188,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+        restart: true
       interceptor:
         condition: service_healthy
       api-migrator:
