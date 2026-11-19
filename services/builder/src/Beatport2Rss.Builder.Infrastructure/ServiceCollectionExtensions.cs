@@ -8,6 +8,7 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
@@ -58,6 +59,7 @@ public static class ServiceCollectionExtensions
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<FeedUpdated>()
+                        .ListensTo<GenreCreated>()
                         .ListensTo<ReleaseCollected>()
                         .ListensTo<SubscriptionCreated>()
                         .ListensTo<SubscriptionTagCreated>()
@@ -73,12 +75,14 @@ public static class ServiceCollectionExtensions
                 .AddDbContext(configuration)
                 .AddUnitOfWork<BuilderDbContext>()
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Feeds)
+                .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Genres)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Releases)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Tags)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().Users)
                 .AddTransient(provider => provider.GetRequiredService<BuilderDbContext>().RssFeedDocumentQueryModels.AsNoTracking())
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
+                .AddTransient<IGenreCommandRepository, GenreCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()

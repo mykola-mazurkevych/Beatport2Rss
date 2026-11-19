@@ -1,5 +1,15 @@
 name: beatport2rss
 
+x-migrator: &migrator
+  build:
+    context: ..
+    dockerfile: tools/src/Beatport2Rss.Migrator/Dockerfile
+  image: beatport2rss-migrator
+  depends_on:
+    postgres:
+      condition: service_healthy
+  restart: "no"
+
 services:
   postgres:
     image: postgres:latest
@@ -47,7 +57,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - Kestrel__Endpoints__gRpc__Url=${INTERCEPTOR_GRPC_URI}
       - BeatportCredentials__Username=${BEATPORT_USERNAME}
       - BeatportCredentials__Password=${BEATPORT_PASSWORD}
@@ -62,20 +72,29 @@ services:
       retries: 3
       start_period: 10s
 
-  migrator:
-    build:
-      context: ..
-      dockerfile: tools/src/Beatport2Rss.Migrator/Dockerfile
-    container_name: migrator
+  api-migrator:
+    <<: *migrator
+    command: ["api"]
+    container_name: api-migrator
     environment:
       - DOTNET_ENVIRONMENT=Production
       - ConnectionStrings__ApiDbContext=${API_DB_CONNECTION}
+
+  builder-migrator:
+    <<: *migrator
+    command: ["builder"]
+    container_name: builder-migrator
+    environment:
+      - DOTNET_ENVIRONMENT=Production
       - ConnectionStrings__BuilderDbContext=${BUILDER_DB_CONNECTION}
+
+  collector-migrator:
+    <<: *migrator
+    command: ["collector"]
+    container_name: collector-migrator
+    environment:
+      - DOTNET_ENVIRONMENT=Production
       - ConnectionStrings__CollectorDbContext=${COLLECTOR_DB_CONNECTION}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: "no"
 
   builder:
     build:
@@ -108,7 +127,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      migrator:
+      builder-migrator:
         condition: service_completed_successfully
     restart: unless-stopped
 
@@ -132,7 +151,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      migrator:
+      collector-migrator:
         condition: service_completed_successfully
       interceptor:
         condition: service_healthy
@@ -169,7 +188,7 @@ services:
         condition: service_healthy
       interceptor:
         condition: service_healthy
-      migrator:
+      api-migrator:
         condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:

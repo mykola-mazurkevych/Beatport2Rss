@@ -5,16 +5,19 @@ using System.Globalization;
 using Beatport2Rss.Collector.Application.Extensions;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
+using Beatport2Rss.Collector.Domain.Genres;
 using Beatport2Rss.Collector.Domain.Releases;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -32,6 +35,7 @@ public sealed class CollectReleasesCommandHandler(
     IClock clock,
     IBeatportClient beatportClient,
     IReleaseCommandRepository releaseCommandRepository,
+    IGenreCommandRepository genreCommandRepository,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
@@ -120,6 +124,12 @@ public sealed class CollectReleasesCommandHandler(
                     return Result.Fail(processSubscriptionsResult);
                 }
 
+                var processGenresResult = await ProcessGenresAsync(beatportTracks, cancellationToken);
+                if (processGenresResult.IsFailed)
+                {
+                    return Result.Fail(processGenresResult);
+                }
+
                 var releaseId = ReleaseId.Create(Guid.CreateVersion7());
                 var release = Release.Create(
                     releaseId,
@@ -143,15 +153,16 @@ public sealed class CollectReleasesCommandHandler(
                     beatportRelease.Image.Uri,
                     beatportRelease.TracksCount,
                     [
-                        .. beatportTracks.Select(track => new ReleaseCollectedTrack(
-                            track.Id,
-                            track.Number,
-                            track.Name,
-                            track.MixName,
-                            [.. track.Artists.Select(artist => artist.Id)],
-                            [.. track.Remixers.Select(remixer => remixer.Id)],
-                            Length: TimeSpan.FromMilliseconds(track.LengthMilliseconds),
-                            track.SampleUri))
+                        .. beatportTracks.Select(beatportTrack => new ReleaseCollectedTrack(
+                            beatportTrack.Id,
+                            beatportTrack.Number,
+                            beatportTrack.Name,
+                            beatportTrack.MixName,
+                            [.. beatportTrack.Artists.Select(artist => artist.Id)],
+                            [.. beatportTrack.Remixers.Select(remixer => remixer.Id)],
+                            Length: TimeSpan.FromMilliseconds(beatportTrack.LengthMilliseconds),
+                            beatportTrack.SampleUri,
+                            beatportTrack.Genre.Id))
                     ]);
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }
@@ -214,22 +225,56 @@ public sealed class CollectReleasesCommandHandler(
         IReadOnlyCollection<BeatportTrackDto> beatportTracks,
         CancellationToken cancellationToken)
     {
-        var subscriptionTargets = new HashSet<(SubscriptionType Type, BeatportId BeatportId)>
+        var subscriptions = new HashSet<(SubscriptionType Type, BeatportId BeatportId)>
         {
             (SubscriptionType.Label, BeatportId.Create(beatportRelease.Label.Id))
         };
-        subscriptionTargets.UnionWith(beatportRelease.Artists.Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
-        subscriptionTargets.UnionWith(beatportRelease.Remixers.Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
-        subscriptionTargets.UnionWith(beatportTracks.SelectMany(track => track.Artists).Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
-        subscriptionTargets.UnionWith(beatportTracks.SelectMany(track => track.Remixers).Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
+        subscriptions.UnionWith(beatportRelease.Artists.Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
+        subscriptions.UnionWith(beatportRelease.Remixers.Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
+        subscriptions.UnionWith(beatportTracks.SelectMany(track => track.Artists).Select(artist => (SubscriptionType.Artist, BeatportId.Create(artist.Id))));
+        subscriptions.UnionWith(beatportTracks.SelectMany(track => track.Remixers).Select(remixer => (SubscriptionType.Artist, BeatportId.Create(remixer.Id))));
 
-        foreach ((SubscriptionType type, BeatportId beatportId) in subscriptionTargets)
+        foreach ((SubscriptionType type, BeatportId beatportId) in subscriptions)
         {
             var result = await subscriptionService.EnsureSubscriptionExistsAsync(type, beatportId, cancellationToken);
             if (result.IsFailed)
             {
                 return Result.Fail(result);
             }
+        }
+
+        return Result.Ok();
+    }
+
+    private async Task<Result> ProcessGenresAsync(
+        IReadOnlyCollection<BeatportTrackDto> beatportTracks,
+        CancellationToken cancellationToken)
+    {
+        var beatportGenresMap = beatportTracks
+            .Select(beatportTrack => beatportTrack.Genre)
+            .DistinctBy(beatportGenre => beatportGenre.Id)
+            .ToDictionary(beatportGenre => BeatportId.Create(beatportGenre.Id));
+
+        foreach ((BeatportId beatportId, BeatportGenreDto beatportGenre) in beatportGenresMap)
+        {
+            if (await genreCommandRepository.ExistsAsync(beatportId, cancellationToken))
+            {
+                continue;
+            }
+
+            var genre = Genre.Create(
+                id: GenreId.Create(Guid.CreateVersion7()),
+                createdAt: clock.UtcNow,
+                beatportId);
+            await genreCommandRepository.AddAsync(genre, cancellationToken);
+
+            var genreCreated = new GenreCreated(
+                Id: Guid.CreateVersion7(),
+                OccurredAt: clock.UtcNow,
+                genre.Id.Value,
+                BeatportId: beatportGenre.Id,
+                beatportGenre.Name);
+            await integrationEventOutbox.EnqueueAsync(genreCreated, cancellationToken);
         }
 
         return Result.Ok();

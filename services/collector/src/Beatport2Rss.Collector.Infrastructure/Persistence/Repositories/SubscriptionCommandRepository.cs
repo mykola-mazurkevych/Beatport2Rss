@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 
 internal sealed class SubscriptionCommandRepository(
-    DbSet<Subscription> subscriptions,
     DbSet<Feed> feeds,
+    DbSet<Subscription> subscriptions,
     IClock clock) :
     CommandRepository<Subscription, SubscriptionId>(subscriptions),
     ISubscriptionCommandRepository

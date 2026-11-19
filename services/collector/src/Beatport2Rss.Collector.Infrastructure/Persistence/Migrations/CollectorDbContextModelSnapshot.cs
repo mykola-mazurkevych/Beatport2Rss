@@ -41,6 +41,25 @@ namespace Beatport2Rss.Collector.Infrastructure.Persistence.Migrations
                     b.ToTable("Feeds", "collector");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Collector.Domain.Genres.Genre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeatportId")
+                        .IsUnique();
+
+                    b.ToTable("Genres", "collector");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Collector.Domain.Releases.Release", b =>
                 {
                     b.Property<Guid>("Id")

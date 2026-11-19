@@ -9,6 +9,7 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Users;
@@ -54,6 +55,7 @@ public static class ServiceCollectionExtensions
                 .AddWolverine<CollectorDbContext, CollectorApplication>(
                     configuration,
                     configurePublisher: options => options
+                        .Publishes<GenreCreated>()
                         .Publishes<ReleaseCollected>()
                         .Publishes<SubscriptionCreated>()
                         .LocalQueueFor<CollectReleasesCommand>().Sequential().UseDurableInbox(),
@@ -73,10 +75,12 @@ public static class ServiceCollectionExtensions
             services
                 .AddDbContext(configuration)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Feeds)
+                .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Genres)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Releases)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions)
                 .AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Users)
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
+                .AddTransient<IGenreCommandRepository, GenreCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>();

@@ -84,6 +84,34 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.ToTable("RssFeedDocuments", "builder");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Builder.Domain.Genres.Genre", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BeatportId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BeatportId")
+                        .IsUnique();
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Genres", "builder");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Releases.Release", b =>
                 {
                     b.Property<Guid>("Id")
@@ -208,6 +236,9 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid>("GenreId")
+                        .HasColumnType("uuid");
+
                     b.Property<TimeSpan>("Length")
                         .HasColumnType("interval");
 
@@ -233,6 +264,8 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GenreId");
 
                     b.HasIndex("ReleaseId");
 
@@ -398,6 +431,12 @@ namespace Beatport2Rss.Builder.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Beatport2Rss.Builder.Domain.Tracks.Track", b =>
                 {
+                    b.HasOne("Beatport2Rss.Builder.Domain.Genres.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Beatport2Rss.Builder.Domain.Releases.Release", null)
                         .WithMany("Tracks")
                         .HasForeignKey("ReleaseId")

@@ -1,3 +1,4 @@
+using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Releases;
 
@@ -28,6 +29,7 @@ public sealed class Track :
 
     public Uri SampleUri { get; private set; } = null!;
 
+    public GenreId GenreId { get; private set; }
     public ReleaseId ReleaseId { get; private set; }
 
     public IReadOnlyCollection<TrackArtist> Artists => _artists.AsReadOnly();
@@ -41,6 +43,7 @@ public sealed class Track :
         MixName mixName,
         TimeSpan length,
         Uri sampleUri,
+        GenreId genreId,
         IEnumerable<TrackArtist> artists) =>
         new(artists)
         {
@@ -52,5 +55,6 @@ public sealed class Track :
             MixName = mixName,
             Length = length,
             SampleUri = sampleUri,
+            GenreId = genreId,
         };
 }

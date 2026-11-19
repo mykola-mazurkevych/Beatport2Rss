@@ -34,6 +34,7 @@ public static class ReleaseCollectedHandler
                             [.. track.ArtistBeatportIds.Select(BeatportId.Create)],
                             [.. track.RemixerBeatportIds.Select(BeatportId.Create)],
                             track.Length,
-                            track.SampleUri))
+                            track.SampleUri,
+                            BeatportId.Create(track.GenreBeatportId)))
             ]);
 }
