@@ -205,7 +205,13 @@ public sealed class PageBuilderTests : IAsyncLifetime
         const int indexAge = 2;
         const int indexCreatedAt = 3;
 
-        var lines = await File.ReadAllLinesAsync(@"Services\Querying\Paging\PageBuilderTestsData.csv");
+        var dataFilePath = Path.Combine(
+            AppContext.BaseDirectory,
+            "Services",
+            "Querying",
+            "Paging",
+            "PageBuilderTestsData.csv");
+        var lines = await File.ReadAllLinesAsync(dataFilePath);
 
         var persons = lines
             .Select(line =>
