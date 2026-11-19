@@ -73,4 +73,8 @@
   <Folder Name="/tools/tests/">
     <Project Path="tools/tests/Beatport2Rss.SourceGenerator.UnitTests/Beatport2Rss.SourceGenerator.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/web/" />
+  <Folder Name="/web/src/">
+    <Project Path="web/src/Beatport2Rss.Web/Beatport2Rss.Web.csproj" />
+  </Folder>
 </Solution>
