@@ -1,5 +1,6 @@
 using Beatport2Rss.Builder.Application.UseCases.Releases.IntegrationEvents;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 
@@ -41,7 +42,7 @@ public sealed class ReleaseCollectedHandlerTests
                     [601],
                     TimeSpan.FromMinutes(5),
                     sampleUri,
-                    new ReleaseCollectedGenre(701, "House"))
+                    Guid.Parse("00000000-0000-0000-0000-000000000701"))
             ]);
 
         var command = ReleaseCollectedHandler.Handle(integrationEvent);
@@ -69,7 +70,6 @@ public sealed class ReleaseCollectedHandlerTests
         Assert.Equal([BeatportId.Create(601)], track.RemixerBeatportIds);
         Assert.Equal(TimeSpan.FromMinutes(5), track.Length);
         Assert.Equal(sampleUri, track.SampleUri);
-        Assert.Equal(BeatportId.Create(701), track.Genre?.BeatportId);
-        Assert.Equal("House", track.Genre?.Name);
+        Assert.Equal(GenreId.Create(Guid.Parse("00000000-0000-0000-0000-000000000701")), track.GenreId);
     }
 }

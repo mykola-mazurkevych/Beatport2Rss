@@ -1,4 +1,5 @@
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Interfaces;
 
 namespace Beatport2Rss.Builder.Domain.Genres;

@@ -28,8 +28,4 @@ public sealed record ReleaseCollectedTrack(
     IReadOnlyCollection<int> RemixerBeatportIds,
     TimeSpan Length,
     Uri SampleUri,
-    ReleaseCollectedGenre? Genre = null);
-
-public sealed record ReleaseCollectedGenre(
-    int BeatportId,
-    string Name);
+    Guid GenreId);

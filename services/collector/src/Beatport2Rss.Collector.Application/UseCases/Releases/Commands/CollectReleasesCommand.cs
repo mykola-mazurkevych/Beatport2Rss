@@ -5,16 +5,19 @@ using System.Globalization;
 using Beatport2Rss.Collector.Application.Extensions;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
+using Beatport2Rss.Collector.Domain.Genres;
 using Beatport2Rss.Collector.Domain.Releases;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
 using Beatport2Rss.Common.Beatport.Models;
 using Beatport2Rss.Common.Domain.Beatport;
+using Beatport2Rss.Common.Domain.Genres;
 using Beatport2Rss.Common.Domain.Releases;
 using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -32,6 +35,7 @@ public sealed class CollectReleasesCommandHandler(
     IClock clock,
     IBeatportClient beatportClient,
     IReleaseCommandRepository releaseCommandRepository,
+    IGenreCommandRepository genreCommandRepository,
     ISubscriptionCommandRepository subscriptionCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
@@ -120,6 +124,13 @@ public sealed class CollectReleasesCommandHandler(
                     return Result.Fail(processSubscriptionsResult);
                 }
 
+                var processGenresResult = await ProcessGenresAsync(beatportTracks, cancellationToken);
+                if (processGenresResult.IsFailed)
+                {
+                    return Result.Fail(processGenresResult);
+                }
+
+                var genresMap = processGenresResult.Value;
                 var releaseId = ReleaseId.Create(Guid.CreateVersion7());
                 var release = Release.Create(
                     releaseId,
@@ -152,7 +163,7 @@ public sealed class CollectReleasesCommandHandler(
                             [.. track.Remixers.Select(remixer => remixer.Id)],
                             Length: TimeSpan.FromMilliseconds(track.LengthMilliseconds),
                             track.SampleUri,
-                            new ReleaseCollectedGenre(track.Genre.Id, track.Genre.Name)))
+                            genresMap[BeatportId.Create(track.Genre.Id)].Id.Value))
                     ]);
                 await integrationEventOutbox.EnqueueAsync(releaseCollected, cancellationToken);
             }
@@ -234,6 +245,51 @@ public sealed class CollectReleasesCommandHandler(
         }
 
         return Result.Ok();
+    }
+
+    private async Task<Result<IReadOnlyDictionary<BeatportId, Genre>>> ProcessGenresAsync(
+        IReadOnlyCollection<BeatportTrackDto> beatportTracks,
+        CancellationToken cancellationToken)
+    {
+        var beatportGenres = beatportTracks
+            .Select(track => track.Genre)
+            .DistinctBy(genre => genre.Id)
+            .ToArray();
+        if (beatportGenres.Length == 0)
+        {
+            return Result.Ok<IReadOnlyDictionary<BeatportId, Genre>>(
+                new Dictionary<BeatportId, Genre>());
+        }
+
+        var beatportIds = beatportGenres.Select(genre => BeatportId.Create(genre.Id)).ToArray();
+        var existingGenres = await genreCommandRepository.FindAllAsync(beatportIds, cancellationToken);
+        var genresMap = existingGenres.ToDictionary(genre => genre.BeatportId);
+
+        foreach (var beatportGenre in beatportGenres)
+        {
+            var beatportId = BeatportId.Create(beatportGenre.Id);
+            if (genresMap.ContainsKey(beatportId))
+            {
+                continue;
+            }
+
+            var genre = Genre.Create(
+                GenreId.Create(Guid.CreateVersion7()),
+                clock.UtcNow,
+                beatportId);
+            await genreCommandRepository.AddAsync(genre, cancellationToken);
+
+            var genreCreated = new GenreCreated(
+                Id: Guid.CreateVersion7(),
+                OccurredAt: clock.UtcNow,
+                genre.Id.Value,
+                beatportGenre.Id,
+                beatportGenre.Name);
+            await integrationEventOutbox.EnqueueAsync(genreCreated, cancellationToken);
+            genresMap.Add(beatportId, genre);
+        }
+
+        return genresMap;
     }
 }
 

@@ -3,7 +3,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Builder.Domain.Genres;
+namespace Beatport2Rss.Common.Domain.Genres;
 
 public readonly record struct GenreId :
     IId<GenreId>
@@ -21,7 +21,7 @@ public readonly record struct GenreId :
         new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(GenreId)} cannot be empty")));
 
     public int CompareTo(GenreId other) => Value.CompareTo(other.Value);
-    public bool Equals(GenreId other) => Value == other.Value;
+    public bool Equals(GenreId other) => Value.Equals(other.Value);
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();
 }

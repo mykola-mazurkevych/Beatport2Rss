@@ -8,6 +8,7 @@ using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.EntityFrameworkCore;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
@@ -58,6 +59,7 @@ public static class ServiceCollectionExtensions
                         .ListensTo<FeedSubscriptionCreated>()
                         .ListensTo<FeedSubscriptionDeleted>()
                         .ListensTo<FeedUpdated>()
+                        .ListensTo<GenreCreated>()
                         .ListensTo<ReleaseCollected>()
                         .ListensTo<SubscriptionCreated>()
                         .ListensTo<SubscriptionTagCreated>()

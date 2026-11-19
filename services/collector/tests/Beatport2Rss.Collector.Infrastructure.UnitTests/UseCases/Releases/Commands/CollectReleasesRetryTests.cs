@@ -310,12 +310,14 @@ public sealed class CollectReleasesRetryTests
                     }
                 });
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Subscriptions);
+                services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Genres);
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Releases);
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Users);
                 services.AddTransient(provider => provider.GetRequiredService<CollectorDbContext>().Feeds);
                 services.AddTransient<IUserCommandRepository, UserCommandRepository>();
                 services.AddTransient<IFeedCommandRepository, FeedCommandRepository>();
                 services.AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>();
+                services.AddTransient<IGenreCommandRepository, GenreCommandRepository>();
                 services.AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>();
                 services.AddScoped<TestOutbox>();
                 services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<TestOutbox>());

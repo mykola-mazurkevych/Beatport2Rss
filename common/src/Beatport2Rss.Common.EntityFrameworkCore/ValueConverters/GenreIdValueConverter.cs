@@ -1,8 +1,8 @@
-using Beatport2Rss.Builder.Domain.Genres;
+using Beatport2Rss.Common.Domain.Genres;
 
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Beatport2Rss.Builder.Infrastructure.Persistence.ValueConverters;
+namespace Beatport2Rss.Common.EntityFrameworkCore.ValueConverters;
 
 internal sealed class GenreIdValueConverter() :
     ValueConverter<GenreId, Guid>(
