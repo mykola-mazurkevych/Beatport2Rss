@@ -27,4 +27,5 @@ public sealed record ReleaseCollectedTrack(
     IReadOnlyCollection<int> ArtistBeatportIds,
     IReadOnlyCollection<int> RemixerBeatportIds,
     TimeSpan Length,
-    Uri SampleUri);
+    Uri SampleUri,
+    int GenreBeatportId);

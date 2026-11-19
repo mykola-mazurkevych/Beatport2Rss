@@ -10,6 +10,7 @@ public static class MaxLengthConstants
     public const int EmailAddress = 100;
     public const int Enum = 50;
     public const int FeedName = 200;
+    public const int GenreName = 100;
     public const int IpAddress = 45;
     public const int MixName = 200;
     public const int Name = 100;

@@ -1,3 +1,4 @@
+using Beatport2Rss.Builder.Domain.Genres;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tracks;
@@ -71,6 +72,11 @@ internal sealed class TrackConfiguration :
 
                 navigationBuilder.HasIndex(trackArtist => trackArtist.ArtistId);
             });
+
+        builder.HasOne<Genre>()
+            .WithMany()
+            .HasForeignKey(track => track.GenreId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne<Release>()
             .WithMany(release => release.Tracks)

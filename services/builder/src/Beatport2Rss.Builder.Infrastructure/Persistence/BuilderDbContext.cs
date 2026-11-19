@@ -1,4 +1,5 @@
 using Beatport2Rss.Builder.Domain.Feeds;
+using Beatport2Rss.Builder.Domain.Genres;
 using Beatport2Rss.Builder.Domain.Releases;
 using Beatport2Rss.Builder.Domain.Subscriptions;
 using Beatport2Rss.Builder.Domain.Tags;
@@ -20,6 +21,7 @@ internal sealed class BuilderDbContext(DbContextOptions<BuilderDbContext> option
 
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
+    public DbSet<Genre> Genres => Set<Genre>();
     public DbSet<Release> Releases => Set<Release>();
     public DbSet<ReleaseArtist> ReleaseArtists => Set<ReleaseArtist>();
     public DbSet<RssFeedDocument> RssFeedDocuments => Set<RssFeedDocument>();

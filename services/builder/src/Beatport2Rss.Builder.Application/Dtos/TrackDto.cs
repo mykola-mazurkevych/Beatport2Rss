@@ -11,4 +11,5 @@ public sealed record TrackDto(
     IReadOnlyCollection<BeatportId> ArtistBeatportIds,
     IReadOnlyCollection<BeatportId> RemixerBeatportIds,
     TimeSpan Length,
-    Uri SampleUri);
+    Uri SampleUri,
+    BeatportId GenreBeatportId);

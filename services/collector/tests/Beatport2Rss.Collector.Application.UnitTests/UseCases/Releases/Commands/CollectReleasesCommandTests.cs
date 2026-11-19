@@ -4,6 +4,7 @@ using System.Net;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.Interfaces.Services;
 using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
+using Beatport2Rss.Collector.Domain.Genres;
 using Beatport2Rss.Collector.Domain.Releases;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Common.Beatport.Interfaces;
@@ -13,6 +14,7 @@ using Beatport2Rss.Common.Domain.Subscriptions;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.IntegrationEvents;
+using Beatport2Rss.Common.IntegrationEvents.Genres;
 using Beatport2Rss.Common.IntegrationEvents.Releases;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -29,6 +31,80 @@ namespace Beatport2Rss.Collector.Application.UnitTests.UseCases.Releases.Command
 
 public sealed class CollectReleasesCommandTests
 {
+    [Fact]
+    public async Task HandleAsync_CreatesGenreBeforePublishingReleaseWithGenreId()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var subscription = CreateSubscription();
+        var subscriptions = new Mock<ISubscriptionCommandRepository>();
+        subscriptions.Setup(value => value.FindAsync(subscription.Id, cancellationToken)).ReturnsAsync(subscription);
+        subscriptions.Setup(value => value.HasFeedsAsync(subscription.Id, cancellationToken)).ReturnsAsync(true);
+        var releaseRepository = new Mock<IReleaseCommandRepository>();
+        releaseRepository.Setup(value => value.FindAllAsync(It.IsAny<IEnumerable<BeatportId>>(), cancellationToken))
+            .ReturnsAsync([]);
+        releaseRepository.Setup(value => value.AddAsync(It.IsAny<Release>(), cancellationToken))
+            .ReturnsAsync((Release release, CancellationToken _) => release);
+        Genre? addedGenre = null;
+        var genreRepository = new Mock<IGenreCommandRepository>();
+        genreRepository.Setup(value => value.ExistsAsync(BeatportId.Create(5), cancellationToken))
+            .ReturnsAsync(false);
+        genreRepository.Setup(value => value.AddAsync(It.IsAny<Genre>(), cancellationToken))
+            .Callback<Genre, CancellationToken>((genre, _) => addedGenre = genre)
+            .ReturnsAsync((Genre genre, CancellationToken _) => genre);
+        var release = new BeatportReleaseDto(
+            1, "release", [], [], new BeatportReleaseLabelDto(10, "label"),
+            "catalog", "Release", null, new DateOnly(2026, 11, 12), new DateOnly(2026, 11, 12),
+            new BeatportImageDto(new Uri("https://example.com/image")), 1,
+            [new Uri("https://api.beatport.com/v4/catalog/tracks/101/")]);
+        var track = new BeatportTrackDto(
+            101, "track", 1, "Track", "Original Mix", 120_000,
+            new Uri("https://example.com/sample"),
+            new BeatportGenreDto(5, "house", "House"),
+            [], []);
+        var client = new Mock<IBeatportClient>();
+        client.Setup(value => value.SearchForIdsAsync<BeatportReleaseDto>(
+                It.IsAny<IReadOnlyDictionary<string, string?>>(), cancellationToken))
+            .ReturnsAsync(Result.Ok<IReadOnlyCollection<int>>([1]));
+        client.Setup(value => value.GetAsync<BeatportReleaseDto>(1, cancellationToken))
+            .ReturnsAsync(Result.Ok<BeatportReleaseDto?>(release));
+        client.Setup(value => value.GetAsync<BeatportTrackDto>(101, cancellationToken))
+            .ReturnsAsync(Result.Ok<BeatportTrackDto?>(track));
+        var subscriptionService = new Mock<ISubscriptionService>();
+        subscriptionService.Setup(value => value.EnsureSubscriptionExistsAsync(
+                It.IsAny<SubscriptionType>(), It.IsAny<BeatportId>(), cancellationToken))
+            .ReturnsAsync(Result.Ok());
+        var events = new List<IIntegrationEvent>();
+        var outbox = new Mock<IIntegrationEventOutbox>();
+        outbox.Setup(value => value.EnqueueAsync(It.IsAny<GenreCreated>(), cancellationToken))
+            .Callback<GenreCreated, CancellationToken>((message, _) => events.Add(message))
+            .Returns(Task.CompletedTask);
+        outbox.Setup(value => value.EnqueueAsync(It.IsAny<ReleaseCollected>(), cancellationToken))
+            .Callback<ReleaseCollected, CancellationToken>((message, _) => events.Add(message))
+            .Returns(Task.CompletedTask);
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(value => value.SaveChangesAsync(cancellationToken)).Returns(Task.CompletedTask);
+        var handler = new CollectReleasesCommandHandler(
+            Mock.Of<IClock>(value => value.UtcToday == new DateOnly(2026, 11, 12)),
+            client.Object,
+            releaseRepository.Object,
+            genreRepository.Object,
+            subscriptions.Object,
+            outbox.Object,
+            unitOfWork.Object,
+            subscriptionService.Object,
+            NullLogger<CollectReleasesCommand>.Instance);
+
+        await handler.HandleAsync(new CollectReleasesCommand(subscription.Id.Value), cancellationToken);
+
+        var genreCreated = Assert.IsType<GenreCreated>(events[0]);
+        var releaseCollected = Assert.IsType<ReleaseCollected>(events[1]);
+        Assert.Equal(5, genreCreated.BeatportId);
+        Assert.Equal("House", genreCreated.Name);
+        Assert.NotNull(addedGenre);
+        Assert.Equal(genreCreated.GenreId, addedGenre.Id.Value);
+        Assert.Equal(genreCreated.BeatportId, Assert.Single(releaseCollected.Tracks).GenreBeatportId);
+    }
+
     [Fact]
     public async Task HandleAsync_AbortsWhenPermanentFailureOccursAfterAReleaseWasStaged()
     {
@@ -57,7 +133,8 @@ public sealed class CollectReleasesCommandTests
         var unitOfWork = new Mock<IUnitOfWork>();
         var handler = new CollectReleasesCommandHandler(
             Mock.Of<IClock>(value => value.UtcToday == new DateOnly(2026, 11, 12)), client.Object,
-            releases.Object, subscriptions.Object, outbox.Object, unitOfWork.Object, subscriptionService.Object,
+            releases.Object, Mock.Of<IGenreCommandRepository>(), subscriptions.Object, outbox.Object,
+            unitOfWork.Object, subscriptionService.Object,
             NullLogger<CollectReleasesCommand>.Instance);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -267,6 +344,7 @@ public sealed class CollectReleasesCommandTests
             clock,
             client,
             releases.Object,
+            Mock.Of<IGenreCommandRepository>(),
             subscriptions.Object,
             Mock.Of<IIntegrationEventOutbox>(),
             unitOfWork,
