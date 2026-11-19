@@ -11,4 +11,46 @@
   <data name="LoginTitle" xml:space="preserve"><value>Sign in</value></data>
   <data name="LoginMessage" xml:space="preserve"><value>Sign-in is coming soon.</value></data>
   <data name="BackToHome" xml:space="preserve"><value>Back to home</value></data>
+  <data name="PageTitle" xml:space="preserve"><value>Beatport2Rss — New releases in your RSS feed</value></data>
+  <data name="PrimaryNavigation" xml:space="preserve"><value>Main navigation</value></data>
+  <data name="FeaturesNav" xml:space="preserve"><value>How it works</value></data>
+  <data name="PreviewNav" xml:space="preserve"><value>Preview</value></data>
+  <data name="PricingNav" xml:space="preserve"><value>Pricing</value></data>
+  <data name="HeroEyebrow" xml:space="preserve"><value>YOUR MUSIC, YOUR WAY</value></data>
+  <data name="HeroHeadline" xml:space="preserve"><value>New releases from your favorite artists and labels — in your RSS feed.</value></data>
+  <data name="HeroDescription" xml:space="preserve"><value>Follow Beatport artists and labels, organize them into feeds, and read release updates in your RSS reader.</value></data>
+  <data name="PreviewAction" xml:space="preserve"><value>RSS preview</value></data>
+  <data name="ReaderPreviewLabel" xml:space="preserve"><value>Illustrative RSS reader preview with three fictional release entries</value></data>
+  <data name="ReaderCaption" xml:space="preserve"><value>A GLIMPSE INSIDE</value></data>
+  <data name="ReaderTitle" xml:space="preserve"><value>Your release feed</value></data>
+  <data name="SampleBadge" xml:space="preserve"><value>Sample</value></data>
+  <data name="SampleFeedName" xml:space="preserve"><value>Electronic discoveries</value></data>
+  <data name="SampleArtistOne" xml:space="preserve"><value>Mira Sol</value></data>
+  <data name="SampleReleaseOne" xml:space="preserve"><value>Soft Signal</value></data>
+  <data name="SampleLabelOne" xml:space="preserve"><value>Northbound Sounds</value></data>
+  <data name="SampleArtistTwo" xml:space="preserve"><value>Kairo Grey</value></data>
+  <data name="SampleReleaseTwo" xml:space="preserve"><value>Night Transit</value></data>
+  <data name="SampleLabelTwo" xml:space="preserve"><value>Still Form Records</value></data>
+  <data name="SampleArtistThree" xml:space="preserve"><value>Luma Vale</value></data>
+  <data name="SampleReleaseThree" xml:space="preserve"><value>One More Light</value></data>
+  <data name="SampleLabelThree" xml:space="preserve"><value>Local Motion</value></data>
+  <data name="ReleaseType" xml:space="preserve"><value>RELEASE</value></data>
+  <data name="ReaderFootnote" xml:space="preserve"><value>Fictional entries · no live feed</value></data>
+  <data name="FeaturesEyebrow" xml:space="preserve"><value>A SIMPLE ROUTINE</value></data>
+  <data name="FeaturesTitle" xml:space="preserve"><value>From artist to RSS reader.</value></data>
+  <data name="FeatureFollowTitle" xml:space="preserve"><value>Follow</value></data>
+  <data name="FeatureFollowDescription" xml:space="preserve"><value>Choose the Beatport artists and labels whose releases you want to keep up with.</value></data>
+  <data name="FeatureOrganizeTitle" xml:space="preserve"><value>Organize</value></data>
+  <data name="FeatureOrganizeDescription" xml:space="preserve"><value>Group the artists and labels you follow into feeds that make sense to you.</value></data>
+  <data name="FeatureReadTitle" xml:space="preserve"><value>Read</value></data>
+  <data name="FeatureReadDescription" xml:space="preserve"><value>Catch release updates in the RSS reader you already use.</value></data>
+  <data name="PreviewEyebrow" xml:space="preserve"><value>TAKE A LOOK</value></data>
+  <data name="PreviewTitle" xml:space="preserve"><value>A preview, not a live feed.</value></data>
+  <data name="PreviewDescription" xml:space="preserve"><value>Release updates can sit alongside the rest of your subscriptions, ready in your RSS reader.</value></data>
+  <data name="IllustrativeNotice" xml:space="preserve"><value>Illustrative preview · fictional entries · not live</value></data>
+  <data name="PricingEyebrow" xml:space="preserve"><value>GOOD TO KNOW</value></data>
+  <data name="PricingTitle" xml:space="preserve"><value>Pricing</value></data>
+  <data name="ComingSoon" xml:space="preserve"><value>Coming soon</value></data>
+  <data name="FooterMessage" xml:space="preserve"><value>Release updates, in your RSS reader.</value></data>
+  <data name="BackToTop" xml:space="preserve"><value>Back to top</value></data>
 </root>

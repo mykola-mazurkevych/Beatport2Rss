@@ -1,10 +1,115 @@
-﻿@page "/"
+@page "/"
 
 @inject IStringLocalizer<PublicPages> Text
 
-<PageTitle>Beatport2Rss</PageTitle>
-<h1>Beatport2Rss</h1>
+<PageTitle>@Text["PageTitle"]</PageTitle>
 
-<p>@Text["HomeMessage"]</p>
-<p><a href="/register">@Text["RegisterTitle"]</a></p>
-<p><a href="/login">@Text["LoginTitle"]</a></p>
+<div class="landing-page">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+            <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span>@Text["HeroEyebrow"]</p>
+            <h1 id="hero-title">@Text["HeroHeadline"]</h1>
+            <p class="hero-description">@Text["HeroDescription"]</p>
+            <div class="hero-actions">
+                <a class="button button-primary" href="/register">@Text["RegisterTitle"]</a>
+                <a class="button button-secondary" href="/login">@Text["LoginTitle"]</a>
+                <a class="preview-link" href="#preview">@Text["PreviewAction"] <span aria-hidden="true">↓</span></a>
+            </div>
+        </div>
+
+        <section class="reader-card" id="preview" aria-label="@Text["ReaderPreviewLabel"]">
+            <div class="reader-topline">
+                <div class="reader-brand">
+                    <span class="rss-mark" aria-hidden="true">RSS</span>
+                    <div>
+                        <p class="reader-caption">@Text["ReaderCaption"]</p>
+                        <p class="reader-title">@Text["ReaderTitle"]</p>
+                    </div>
+                </div>
+                <span class="sample-badge"><span aria-hidden="true"></span>@Text["SampleBadge"]</span>
+            </div>
+            <div class="feed-label">
+                <span class="feed-icon" aria-hidden="true">♫</span>
+                <span>@Text["SampleFeedName"]</span>
+                <span class="feed-count">03</span>
+            </div>
+            <div class="release-list">
+                <article class="release-entry">
+                    <div class="cover cover-one" aria-hidden="true"><span></span></div>
+                    <div class="release-copy">
+                        <p class="release-artist">@Text["SampleArtistOne"]</p>
+                        <h3>@Text["SampleReleaseOne"]</h3>
+                        <p class="release-label">@Text["SampleLabelOne"]</p>
+                    </div>
+                    <span class="release-type">@Text["ReleaseType"]</span>
+                </article>
+                <article class="release-entry">
+                    <div class="cover cover-two" aria-hidden="true"><span></span></div>
+                    <div class="release-copy">
+                        <p class="release-artist">@Text["SampleArtistTwo"]</p>
+                        <h3>@Text["SampleReleaseTwo"]</h3>
+                        <p class="release-label">@Text["SampleLabelTwo"]</p>
+                    </div>
+                    <span class="release-type">@Text["ReleaseType"]</span>
+                </article>
+                <article class="release-entry">
+                    <div class="cover cover-three" aria-hidden="true"><span></span></div>
+                    <div class="release-copy">
+                        <p class="release-artist">@Text["SampleArtistThree"]</p>
+                        <h3>@Text["SampleReleaseThree"]</h3>
+                        <p class="release-label">@Text["SampleLabelThree"]</p>
+                    </div>
+                    <span class="release-type">@Text["ReleaseType"]</span>
+                </article>
+            </div>
+            <p class="reader-footnote">@Text["ReaderFootnote"]</p>
+        </section>
+    </section>
+
+    <section class="features-section" id="how-it-works" aria-labelledby="features-title">
+        <div class="section-heading">
+            <p class="eyebrow">@Text["FeaturesEyebrow"]</p>
+            <h2 id="features-title">@Text["FeaturesTitle"]</h2>
+        </div>
+        <div class="feature-grid">
+            <article class="feature-card">
+                <span class="feature-number">01</span>
+                <h3>@Text["FeatureFollowTitle"]</h3>
+                <p>@Text["FeatureFollowDescription"]</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-number">02</span>
+                <h3>@Text["FeatureOrganizeTitle"]</h3>
+                <p>@Text["FeatureOrganizeDescription"]</p>
+            </article>
+            <article class="feature-card">
+                <span class="feature-number">03</span>
+                <h3>@Text["FeatureReadTitle"]</h3>
+                <p>@Text["FeatureReadDescription"]</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="preview-section" aria-labelledby="preview-title">
+        <div>
+            <p class="eyebrow">@Text["PreviewEyebrow"]</p>
+            <h2 id="preview-title">@Text["PreviewTitle"]</h2>
+            <p class="preview-description">@Text["PreviewDescription"]</p>
+        </div>
+        <p class="illustrative-notice"><span aria-hidden="true">✳</span>@Text["IllustrativeNotice"]</p>
+    </section>
+
+    <section class="pricing-section" id="pricing" aria-labelledby="pricing-title">
+        <div>
+            <p class="eyebrow">@Text["PricingEyebrow"]</p>
+            <h2 id="pricing-title">@Text["PricingTitle"]</h2>
+        </div>
+        <span class="coming-soon"><span aria-hidden="true"></span>@Text["ComingSoon"]</span>
+    </section>
+
+    <footer class="landing-footer">
+        <a class="footer-brand" href="/">Beatport<span>2Rss</span></a>
+        <span>@Text["FooterMessage"]</span>
+        <a href="#top">@Text["BackToTop"] ↑</a>
+    </footer>
+</div>
