@@ -3,6 +3,7 @@
 using System.Reflection;
 
 using Beatport2Rss.Migrator;
+using Beatport2Rss.Migrator.Enums;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,11 +22,20 @@ var configurationRoot = new ConfigurationBuilder()
 
 var serviceCollection = new ServiceCollection();
 
-Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
-Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
-Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator(serviceCollection, configurationRoot);
+if (!Enum.TryParse<ServiceName>(args.FirstOrDefault(), ignoreCase: true, out var serviceName))
+{
+    throw new ArgumentException("Service name cannot be inferred from arguments");
+}
 
-var serviceProvider = serviceCollection
+Func<IServiceCollection, IConfigurationRoot, IServiceCollection> addMigrator = serviceName switch
+{
+    ServiceName.Api => Beatport2Rss.Api.Infrastructure.ServiceCollectionExtensions.AddMigrator,
+    ServiceName.Builder => Beatport2Rss.Builder.Infrastructure.ServiceCollectionExtensions.AddMigrator,
+    ServiceName.Collector => Beatport2Rss.Collector.Infrastructure.ServiceCollectionExtensions.AddMigrator,
+    _ => throw new NotSupportedException($"Service {serviceName} is not supported")
+};
+
+var serviceProvider = addMigrator(serviceCollection, configurationRoot)
     .AddLogging(builder => builder.AddConsole())
     .AddSingleton<IApplication, Application>()
     .BuildServiceProvider();
