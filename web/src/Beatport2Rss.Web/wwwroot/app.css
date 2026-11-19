@@ -5,6 +5,10 @@ body {
     margin: 0;
 }
 
+#blazor-error-ui {
+    color: #111;
+}
+
 a {
     color: inherit;
 }
