@@ -68,6 +68,8 @@ header {
 
 .language-switch a[aria-current="true"] {
     color: #d3ef67;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
 }
 
 main {
