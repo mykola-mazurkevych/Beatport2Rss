@@ -142,7 +142,7 @@ public sealed class ConfirmationEmailDeliveryTests
             new ResendClient(new ResendOptionsSnapshot(), client),
             new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions
             {
-                PublicWebBaseUrl = "https://example.test/base",
+                PublicWebBaseUrl = new Uri("https://example.test/base"),
                 SenderName = "Beatport2Rss",
                 SenderAddress = "noreply@example.test",
             }));

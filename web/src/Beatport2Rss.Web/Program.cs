@@ -1,14 +1,24 @@
 using Beatport2Rss.Web.Components;
-<<<<<<< HEAD
 using Beatport2Rss.Web.EmailConfirmations;
+using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Hosting and circuit diagnostics can include the original confirmation URL.
 builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.None);
 
+builder.Services.AddHealthChecks();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(options => options.DetailedErrors = false);
+builder.Services.AddLocalization();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture("en")
+        .AddSupportedCultures("en", "uk")
+        .AddSupportedUICultures("en", "uk");
+    options.RequestCultureProviders.Remove(
+        options.RequestCultureProviders.OfType<AcceptLanguageHeaderRequestCultureProvider>().Single());
+});
 
 var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5162";
 if (!Uri.TryCreate(apiBaseUrl, UriKind.Absolute, out var apiAddress)
@@ -31,25 +41,6 @@ builder.Services.AddHttpClient<EmailConfirmationClient>(client =>
         UseCookies = false
     })
     .RemoveAllLoggers();
-=======
-using Microsoft.AspNetCore.Localization;
-
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddHealthChecks();
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-builder.Services.AddLocalization();
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    options.SetDefaultCulture("en")
-        .AddSupportedCultures("en", "uk")
-        .AddSupportedUICultures("en", "uk");
-    options.RequestCultureProviders.Remove(
-        options.RequestCultureProviders.OfType<AcceptLanguageHeaderRequestCultureProvider>().Single());
-});
->>>>>>> origin/main
 
 var app = builder.Build();
 

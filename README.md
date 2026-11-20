@@ -57,11 +57,7 @@ Start the services in the same terminal:
 docker compose up --build
 ```
 
-<<<<<<< HEAD
-Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the API and workers, and the standalone web service. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
-=======
-Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the three backend application services, and the standalone web frontend. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
->>>>>>> origin/main
+Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the API and workers, and the standalone web frontend. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
 
 By default, the API is available at `http://localhost:8080` and its development API reference at `http://localhost:8080/scalar`. RabbitMQ management is available at `http://localhost:15672`. Ports and service settings can be changed in `docker/.env`.
 
@@ -101,7 +97,6 @@ For local development without Docker, run the web project from the repository ro
 dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
 ```
 
-<<<<<<< HEAD
 The frontend starts independently of the API and other backend services. The confirmation page uses the server-side `ApiBaseUrl` (default `http://localhost:5162`); with Compose the web service listens on `http://localhost:8081` and calls the API at `http://api:8080`. It shows a retryable error if the API is unavailable.
 
 ## Email confirmation
@@ -121,10 +116,8 @@ When delivery is disabled (the default), no new verification or delivery work is
 Opening a confirmation email link only reads state; the recipient must press **Confirm email**. The API does not sign the recipient in. Expiry does not change account status; a completed confirmation can still be acknowledged, but cannot reactivate a user deactivated after confirmation. The Wolverine job checks that its verification is still applicable before sending, retries transient failures and uses a stable Resend idempotency key. This does not guarantee exactly-once delivery. Restrict access to the API's Wolverine message tables, backups, and dead letters: delivery envelopes carry sensitive confirmation material. Configure external access logs and telemetry to omit/redact the full `/api/email-confirmations/{id}` path and `/confirm-email` query string. Do not enable provider link tracking for these capability URLs.
 
 **Database handoff:** Before deployment, manually add the EF migration for `api."EmailVerifications"`: UUID primary key `Id`; non-null UUID `UserId` (indexed FK to `api."Users"."Id"` with cascade delete); required `EmailAddress` using the existing user email column length; required `SecretHash` (`varchar(64)` with a unique index); required `CreatedAt` and `ExpiresAt` and nullable `ConfirmedAt` (all `timestamp with time zone`). No plaintext identifier belongs in this table. No migration is included here; the Compose API migrator requires the new migration even when delivery is disabled. The delivery queue uses the existing `api_messaging` Wolverine storage.
-=======
-The initial frontend runs independently of the API and other backend services.
-The `/register` and `/login` pages are informational placeholders. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
->>>>>>> origin/main
+
+The landing page and the `/register` and `/login` informational placeholders run independently of the API and other backend services. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
 
 ## Build and tests
 

@@ -6,7 +6,7 @@ internal sealed partial class EmailConfirmationPrivacyMiddleware(RequestDelegate
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        if (!context.Request.Path.StartsWithSegments(EmailConfirmationEndpoints.Route))
+        if (!context.Request.Path.StartsWithSegments(EmailConfirmationEndpoints.Route, StringComparison.Ordinal))
         {
             await next(context);
             return;
