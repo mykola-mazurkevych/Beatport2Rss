@@ -3,6 +3,7 @@
 using Beatport2Rss.Collector.Application;
 using Beatport2Rss.Collector.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
+using Beatport2Rss.Collector.Infrastructure.Messaging;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Common.Beatport;
@@ -54,11 +55,17 @@ public static class ServiceCollectionExtensions
             services
                 .AddWolverine<CollectorDbContext, CollectorApplication>(
                     configuration,
-                    configurePublisher: options => options
-                        .Publishes<GenreCreated>()
-                        .Publishes<ReleaseCollected>()
-                        .Publishes<SubscriptionCreated>()
-                        .LocalQueueFor<CollectReleasesCommand>().Sequential().UseDurableInbox(),
+                    configurePublisher: options =>
+                    {
+                        options.Policies.Add<TimeoutHandlerPolicy>();
+
+                        options
+                            .Publishes<GenreCreated>()
+                            .Publishes<ReleaseCollected>()
+                            .Publishes<SubscriptionCreated>();
+
+                        options.LocalQueueFor<CollectReleasesCommand>().Sequential().UseDurableInbox();
+                    },
                     configureListener: listener => listener
                         .ListensTo<FeedCreated>()
                         .ListensTo<FeedDeleted>()
