@@ -57,7 +57,7 @@ Start the services in the same terminal:
 docker compose up --build
 ```
 
-Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the three backend application services, and the standalone web frontend. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
+Compose starts PostgreSQL, RabbitMQ, the token interceptor, separate API, Builder, and Collector migrators, the API and workers, and the standalone web frontend. Each migrator runs after PostgreSQL is healthy and applies migrations only to its service's database. The API and workers wait for their own migrator to finish successfully, so a migration failure in one service does not block the others.
 
 By default, the API is available at `http://localhost:8080` and its development API reference at `http://localhost:8080/scalar`. RabbitMQ management is available at `http://localhost:15672`. Ports and service settings can be changed in `docker/.env`.
 
@@ -97,8 +97,27 @@ For local development without Docker, run the web project from the repository ro
 dotnet run --project .\web\src\Beatport2Rss.Web\Beatport2Rss.Web.csproj
 ```
 
-The initial frontend runs independently of the API and other backend services.
-The `/register` and `/login` pages are informational placeholders. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
+The frontend starts independently of the API and other backend services. The confirmation page uses the server-side `ApiBaseUrl` (default `http://localhost:5162`); with Compose the web service listens on `http://localhost:8081` and calls the API at `http://api:8080`. It shows a retryable error if the API is unavailable.
+
+## Email confirmation
+
+Registration always creates a Pending account. To enable automatic delivery, set `EmailConfirmation__Enabled=true` on the API (or `EMAIL_CONFIRMATION_ENABLED=true` in Compose) and configure:
+
+| API setting | Compose variable | Purpose |
+| --- | --- | --- |
+| `EmailConfirmation__ApiKey` | `RESEND_API_KEY` | Valid Resend API key. Keep it in API user secrets, environment or a secret manager, never in the web container. |
+| `EmailConfirmation__SenderAddress` | `EMAIL_CONFIRMATION_SENDER_ADDRESS` | Resend sender address on an appropriately verified sender/domain. |
+| `EmailConfirmation__SenderName` | `EMAIL_CONFIRMATION_SENDER_NAME` | Email display name, such as `Beatport2Rss`. |
+| `EmailConfirmation__PublicWebBaseUrl` | `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL` | Public, browser-reachable web URL used in links, not the API address. Use HTTPS in production. |
+| `EmailConfirmation__Lifetime` | `EMAIL_CONFIRMATION_LIFETIME` | Positive duration, default `1.00:00:00` (24 hours), maximum 365 days. |
+
+When delivery is disabled (the default), no new verification or delivery work is generated, and public confirmation links cannot be used. When enabling delivery, explicitly set `EmailConfirmation__PublicWebBaseUrl` (Compose: `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL`) to the browser-reachable URL of the web application; there is no localhost fallback. To allow manual activation, set `EmailConfirmation__AdministratorUserId` (Compose: `EMAIL_CONFIRMATION_ADMIN_USER_ID`) to the immutable database UUID of a trusted, operator-verified existing account. Obtain this ID through trusted database access, not an email address supplied by a registrant. That authenticated account can use `PUT /users/{id}/activation` with its bearer token to activate **another** user regardless of whether email delivery is enabled. Activation changes account status only; it does not create or confirm an email verification and is not proof of email ownership. Without a configured administrator, nobody can use this operation.
+
+Opening a confirmation email link only reads state; the recipient must press **Confirm email**. The API does not sign the recipient in. Expiry does not change account status; a completed confirmation can still be acknowledged, but cannot reactivate a user deactivated after confirmation. The Wolverine job checks that its verification is still applicable before sending, retries transient failures and uses a stable Resend idempotency key. This does not guarantee exactly-once delivery. Restrict access to the API's Wolverine message tables, backups, and dead letters: delivery envelopes carry sensitive confirmation material. Configure external access logs and telemetry to omit/redact the full `/api/email-confirmations/{id}` path and `/confirm-email` query string. Do not enable provider link tracking for these capability URLs.
+
+**Database handoff:** Before deployment, manually add the EF migration for `api."EmailVerifications"`: UUID primary key `Id`; non-null UUID `UserId` (indexed FK to `api."Users"."Id"` with cascade delete); required `EmailAddress` using the existing user email column length; required `SecretHash` (`varchar(64)` with a unique index); required `CreatedAt` and `ExpiresAt` and nullable `ConfirmedAt` (all `timestamp with time zone`). No plaintext identifier belongs in this table. No migration is included here; the Compose API migrator requires the new migration even when delivery is disabled. The delivery queue uses the existing `api_messaging` Wolverine storage.
+
+The landing page and the `/register` and `/login` informational placeholders run independently of the API and other backend services. Use the shared language switch to choose English or Ukrainian; the choice is remembered in the browser.
 
 ## Build and tests
 
@@ -108,6 +127,8 @@ Install the .NET 10 SDK, then run these commands from the repository root:
 dotnet restore Beatport2Rss.slnx
 dotnet test Beatport2Rss.slnx
 ```
+
+The confirmation concurrency integration test also runs against PostgreSQL when `EMAIL_CONFIRMATION_TEST_POSTGRES` is set to a local test-server connection string with permission to create and drop a disposable database. No real emails or Resend credentials are needed for tests.
 
 ## Repository layout
 

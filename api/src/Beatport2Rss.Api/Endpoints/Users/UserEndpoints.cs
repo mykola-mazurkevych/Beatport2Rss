@@ -79,15 +79,16 @@ internal static class UserEndpoints
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
-            // Temporary
             groupBuilder
-                .MapPut("/current/status", UpdateCurrentUserStatusEndpointHandler.Handle)
-                .WithName(UserEndpointNames.UpdateCurrentStatus)
-                .WithDescription("Update current user status (temporary for testing)")
-                .WithSummary("Update Status")
-                .Accepts<UpdateUserStatusRequest>(MediaTypeNames.Application.Json)
+                .MapPut("/{id:guid}/activation", ActivateUserEndpointHandler.Handle)
+                .WithName(UserEndpointNames.Activate)
+                .WithDescription("Activate another user by ID. Only the configured administrator can do this, regardless of email confirmation delivery settings. This only changes account status and does not verify the user's email address.")
+                .WithSummary("Activate User")
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status401Unauthorized, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status403Forbidden, MediaTypeNames.Application.Json)
+                .Produces<ProblemDetails>(StatusCodes.Status404NotFound, MediaTypeNames.Application.Json)
                 .Produces<ProblemDetails>(StatusCodes.Status500InternalServerError, MediaTypeNames.Application.Json);
 
             //// groupBuilder.MapPut("/{id:guid}", ...); // Update user by id (by admin?)
