@@ -1,3 +1,136 @@
+header {
+    border-bottom: 1px solid #252627;
+}
+
+.site-header-inner {
+    align-items: center;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+    margin-inline: auto;
+    max-width: 80rem;
+    min-height: 5rem;
+    padding: 0 2rem;
+}
+
+.brand,
+.footer-brand {
+    color: #f3f1e9;
+    font-size: 1.05rem;
+    font-weight: 750;
+    letter-spacing: -0.05em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.brand span,
+.footer-brand span {
+    color: #d3ef67;
+}
+
+.section-nav,
+.header-actions,
+.language-switch {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.section-nav {
+    margin-inline: auto;
+}
+
+.site-header-inner nav a,
+.header-actions > a {
+    color: #a4a5a1;
+    font-size: 0.78rem;
+    text-decoration: none;
+}
+
+.site-header-inner nav a:hover,
+.header-actions > a:hover {
+    color: #f3f1e9;
+}
+
+.header-actions .header-register {
+    border: 1px solid #464842;
+    border-radius: 999px;
+    color: #f3f1e9;
+    padding: 0.55rem 0.9rem;
+}
+
+.site-header-inner .language-switch {
+    border-left: 1px solid #333431;
+    gap: 0.7rem;
+    padding-left: 1.2rem;
+}
+
+.language-switch a[aria-current="true"] {
+    color: #d3ef67;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+main {
+    margin-inline: auto;
+    max-width: 80rem;
+    padding: 0 2rem;
+}
+
+a:focus-visible {
+    outline: 2px solid #d3ef67;
+    outline-offset: 4px;
+}
+
+@media (max-width: 62rem) {
+    .site-header-inner {
+        flex-wrap: wrap;
+        gap: 0.75rem 1.25rem;
+        padding-block: 0.9rem;
+    }
+
+    .section-nav {
+        order: 4;
+        width: 100%;
+    }
+
+    .header-actions {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 38rem) {
+    .site-header-inner,
+    main {
+        padding-inline: 1.1rem;
+    }
+
+    .site-header-inner {
+        gap: 0.85rem;
+    }
+
+    .section-nav {
+        gap: 1rem;
+        justify-content: space-between;
+    }
+
+    .header-actions {
+        gap: 0.8rem;
+    }
+
+    .site-header-inner nav a,
+    .header-actions > a {
+        font-size: 0.72rem;
+    }
+
+    .site-header-inner .language-switch {
+        border: 0;
+        gap: 0.5rem;
+        padding-left: 0;
+    }
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
