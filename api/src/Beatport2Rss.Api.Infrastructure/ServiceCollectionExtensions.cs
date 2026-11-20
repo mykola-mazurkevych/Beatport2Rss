@@ -222,12 +222,12 @@ public static class ServiceCollectionExtensions
                      !options.SenderName.Any(char.IsControl)),
                     "EmailConfirmation requires a valid SenderAddress and SenderName when enabled.")
                 .Validate(options => !options.Enabled ||
-                    (options.PublicWebBaseUrl.IsAbsoluteUri &&
-                     options.PublicWebBaseUrl.Scheme is "http" or "https" &&
-                     options.PublicWebBaseUrl.Host.Length > 0 &&
-                     options.PublicWebBaseUrl.UserInfo.Length == 0 &&
-                     options.PublicWebBaseUrl.Query.Length == 0 &&
-                     options.PublicWebBaseUrl.Fragment.Length == 0),
+                    (options.PublicWebBaseUrl is { IsAbsoluteUri: true } uri &&
+                     uri.Scheme is "http" or "https" &&
+                     uri.Host.Length > 0 &&
+                     uri.UserInfo.Length == 0 &&
+                     uri.Query.Length == 0 &&
+                     uri.Fragment.Length == 0),
                     "EmailConfirmation:PublicWebBaseUrl must be an absolute HTTP(S) URL without credentials, query, or fragment.")
                 .ValidateOnStart();
 

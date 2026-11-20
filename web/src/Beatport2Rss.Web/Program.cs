@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Hosting and circuit diagnostics can include the original confirmation URL.
-builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.None);
+// Suppress only routine request diagnostics, which include confirmation URL paths.
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
 builder.Services.AddHealthChecks();
 builder.Services.AddRazorComponents()
@@ -44,6 +44,14 @@ builder.Services.AddHttpClient<EmailConfirmationClient>(client =>
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
 app.Use(async (context, next) =>
 {
     var sensitive = context.Request.Path.StartsWithSegments("/confirm-email", StringComparison.OrdinalIgnoreCase)
@@ -60,16 +68,31 @@ app.Use(async (context, next) =>
         return Task.CompletedTask;
     });
 
-    await next(context);
-});
+    try
+    {
+        await next(context);
+    }
+    catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+    {
+        context.Abort();
+    }
+#pragma warning disable CA1031 // Avoid logging confirmation URL paths or exception data.
+    catch (Exception exception) when (sensitive)
+#pragma warning restore CA1031
+    {
+        app.Logger.LogError(
+            "Confirmation web request failed ({ExceptionType}); trace {TraceId}.",
+            exception.GetType().Name,
+            context.TraceIdentifier);
+        if (context.Response.HasStarted)
+        {
+            context.Abort();
+            return;
+        }
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+        await Results.Problem(statusCode: StatusCodes.Status500InternalServerError).ExecuteAsync(context);
+    }
+});
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 if (app.Environment.IsDevelopment())
 {

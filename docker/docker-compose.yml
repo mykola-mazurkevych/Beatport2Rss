@@ -185,7 +185,7 @@ services:
       - RefreshTokenOptions__ExpiresIn=${REFRESH_TOKEN_EXPIRES_IN}
       - EmailConfirmation__Enabled=${EMAIL_CONFIRMATION_ENABLED:-false}
       - EmailConfirmation__Lifetime=${EMAIL_CONFIRMATION_LIFETIME:-1.00:00:00}
-      - EmailConfirmation__PublicWebBaseUrl=${EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL:-http://localhost:8081}
+      - EmailConfirmation__PublicWebBaseUrl=${EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL:-}
       - EmailConfirmation__AdministratorUserId=${EMAIL_CONFIRMATION_ADMIN_USER_ID:-}
       - EmailConfirmation__ApiKey=${RESEND_API_KEY:-}
       - EmailConfirmation__SenderAddress=${EMAIL_CONFIRMATION_SENDER_ADDRESS:-}

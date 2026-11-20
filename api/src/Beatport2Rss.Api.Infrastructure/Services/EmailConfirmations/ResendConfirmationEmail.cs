@@ -22,7 +22,7 @@ internal sealed class ResendConfirmationEmail(
         CancellationToken cancellationToken)
     {
         var settings = options.Value;
-        var baseUri = new Uri($"{settings.PublicWebBaseUrl.AbsoluteUri.TrimEnd('/')}/", UriKind.Absolute);
+        var baseUri = new Uri($"{settings.PublicWebBaseUrl!.AbsoluteUri.TrimEnd('/')}/", UriKind.Absolute);
         var link = new Uri(baseUri, $"confirm-email?token={Uri.EscapeDataString(identifier)}").AbsoluteUri;
         var expiresAt = verification.ExpiresAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
         var hours = (verification.ExpiresAt - verification.CreatedAt).TotalHours.ToString("0.###########", CultureInfo.InvariantCulture);

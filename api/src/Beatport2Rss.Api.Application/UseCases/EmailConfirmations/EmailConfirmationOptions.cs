@@ -8,7 +8,7 @@ public sealed class EmailConfirmationOptions
     public string ApiKey { get; set; } = string.Empty;
     public string SenderAddress { get; set; } = string.Empty;
     public string SenderName { get; set; } = string.Empty;
-    public Uri PublicWebBaseUrl { get; set; } = new("http://localhost:8081");
+    public Uri? PublicWebBaseUrl { get; set; }
     public TimeSpan Lifetime { get; set; } = TimeSpan.FromHours(24);
     public Guid? AdministratorUserId { get; set; }
 }
