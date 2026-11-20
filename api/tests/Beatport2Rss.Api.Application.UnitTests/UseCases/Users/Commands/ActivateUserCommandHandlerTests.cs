@@ -23,10 +23,16 @@ public sealed class ActivateUserCommandHandlerTests
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
 
     [Theory]
-    [InlineData(UserStatus.Pending, 1)]
-    [InlineData(UserStatus.Inactive, 1)]
-    [InlineData(UserStatus.Active, 0)]
-    public async Task ConfiguredAdministratorCanActivateAnotherUser(UserStatus initialStatus, int saveCount)
+    [InlineData(false, UserStatus.Pending, 1)]
+    [InlineData(false, UserStatus.Inactive, 1)]
+    [InlineData(false, UserStatus.Active, 0)]
+    [InlineData(true, UserStatus.Pending, 1)]
+    [InlineData(true, UserStatus.Inactive, 1)]
+    [InlineData(true, UserStatus.Active, 0)]
+    public async Task ConfiguredAdministratorCanActivateAnotherUserWithoutConfirmingEmail(
+        bool emailConfirmationEnabled,
+        UserStatus initialStatus,
+        int saveCount)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var user = User.Create(
@@ -38,21 +44,28 @@ public sealed class ActivateUserCommandHandlerTests
             lastName: null,
             initialStatus,
             countryCode: null);
+        var verification = EmailVerification.Create(user, "secret-hash", DateTimeOffset.UnixEpoch.AddDays(1));
+        Assert.Null(verification.ConfirmedAt);
+
         _userQueryRepository.Setup(repository => repository.ExistsAsync(_administratorId, cancellationToken))
             .ReturnsAsync(true);
         _userCommandRepository.Setup(repository => repository.FindAsync(_targetId, cancellationToken))
             .ReturnsAsync(user);
 
-        var result = await CreateHandler(new EmailConfirmationOptions { AdministratorUserId = _administratorId.Value })
+        var result = await CreateHandler(new EmailConfirmationOptions
+            {
+                Enabled = emailConfirmationEnabled,
+                AdministratorUserId = _administratorId.Value,
+            })
             .Handle(new ActivateUserCommand(_targetId, _administratorId), cancellationToken);
 
         Assert.True(result.IsSuccess);
         Assert.Equal(UserStatus.Active, user.Status);
+        Assert.Null(verification.ConfirmedAt);
         _unitOfWork.Verify(unitOfWork => unitOfWork.SaveChangesAsync(cancellationToken), Times.Exactly(saveCount));
     }
 
     [Theory]
-    [InlineData("confirmation enabled")]
     [InlineData("no administrator")]
     [InlineData("empty administrator")]
     [InlineData("different caller")]

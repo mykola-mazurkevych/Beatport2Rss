@@ -30,8 +30,7 @@ internal sealed class ActivateUserCommandHandler(
         CancellationToken cancellationToken)
     {
         var options = emailConfirmationOptions.Value;
-        if (options.Enabled ||
-            options.AdministratorUserId is not { } administratorUserId ||
+        if (options.AdministratorUserId is not { } administratorUserId ||
             administratorUserId == Guid.Empty ||
             administratorUserId != command.CallerUserId.Value ||
             command.CallerUserId == command.UserId ||
