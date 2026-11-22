@@ -3,7 +3,7 @@ using Asp.Versioning;
 using Beatport2Rss.Api;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Constants;
-using Beatport2Rss.Api.Endpoints.EmailConfirmations;
+using Beatport2Rss.Api.Endpoints.EmailVerifications;
 using Beatport2Rss.Api.Endpoints.Feeds;
 using Beatport2Rss.Api.Endpoints.Rss;
 using Beatport2Rss.Api.Endpoints.Sessions;
@@ -12,6 +12,7 @@ using Beatport2Rss.Api.Endpoints.Tags;
 using Beatport2Rss.Api.Endpoints.Users;
 using Beatport2Rss.Api.Infrastructure;
 using Beatport2Rss.Api.Middlewares;
+using Beatport2Rss.Api.Middlewares.EmailVerifications;
 using Beatport2Rss.Api.Transformers;
 using Beatport2Rss.Api.Jobs;
 

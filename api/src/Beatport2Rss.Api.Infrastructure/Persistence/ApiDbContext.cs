@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Domain.Countries;
+using Beatport2Rss.Api.Domain.EmailVerifications;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Domain.Subscriptions;

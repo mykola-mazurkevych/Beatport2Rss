@@ -1,0 +1,202 @@
+using System.Net;
+using System.Text;
+using System.Text.Json;
+
+using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailVerifications;
+using Beatport2Rss.Api.Domain.EmailVerifications;
+using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Api.Infrastructure.Extensions.EmailVerifications;
+using Beatport2Rss.Api.Infrastructure.Services.EmailVerifications;
+using Beatport2Rss.Common.Domain.Users;
+using Beatport2Rss.Common.Miscellaneous.Exceptions;
+using Beatport2Rss.Common.Miscellaneous.Interfaces;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+
+using Resend;
+
+using Wolverine;
+
+using Xunit;
+
+namespace Beatport2Rss.Api.Infrastructure.UnitTests.Services.EmailVerifications;
+
+public sealed class ConfirmationEmailDeliveryTests
+{
+    [Fact]
+    public async Task WolverineRoutesConfirmationToTheApiLocalQueueAndResolvesItsInternalHandler()
+    {
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddOptions<EmailConfirmationOptions>();
+                services.AddConfirmationEmailDelivery();
+                services.AddWolverine(options => options.ConfigureConfirmationEmailDelivery());
+            })
+            .Build();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await host.StartAsync(cancellationToken);
+
+        var bus = host.Services.GetRequiredService<IMessageBus>();
+        var message = new SendConfirmationEmail(EmailConfirmationIdentifier.Generate());
+        var destination = Assert.Single(bus.PreviewSubscriptions(message)).Destination;
+        Assert.Equal("local://confirmation-email-delivery/", destination?.AbsoluteUri);
+        await bus.InvokeAsync(message, cancellationToken);
+
+        await host.StopAsync(cancellationToken);
+    }
+
+    [Fact]
+    public void DurableMessageRoundTripsWithoutExposingIdentifierInToString()
+    {
+        var identifier = EmailConfirmationIdentifier.Generate();
+        var message = new SendConfirmationEmail(identifier);
+        var payload = JsonSerializer.SerializeToUtf8Bytes(message);
+        var restored = JsonSerializer.Deserialize<SendConfirmationEmail>(payload);
+
+        Assert.NotNull(restored);
+        Assert.Equal(identifier, restored.Identifier);
+        Assert.DoesNotContain(identifier, message.ToString(), StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("disabled")]
+    [InlineData("invalid")]
+    [InlineData("missing")]
+    [InlineData("expired")]
+    [InlineData("confirmed")]
+    public async Task UndeliverableMessageDoesNotResolveProvider(string scenario)
+    {
+        var identifier = EmailConfirmationIdentifier.Generate();
+        var clock = new FixedClock();
+        var (user, verification) = CreateVerification(identifier, clock, expired: scenario == "expired");
+        if (scenario == "confirmed")
+        {
+            Assert.True(verification.TryConfirm(user, clock.UtcNow));
+        }
+
+        await using var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<IClock>(clock)
+            .AddSingleton<IOptions<EmailConfirmationOptions>>(
+                new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = scenario != "disabled" }))
+            .AddSingleton<IEmailVerificationQueryRepository>(new VerificationRepository(scenario == "missing" ? null : verification))
+            .BuildServiceProvider();
+
+        var message = new SendConfirmationEmail(scenario == "invalid" ? "invalid" : identifier);
+        await SendConfirmationEmailHandler.DeliverAsync(message, services, TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task SdkRequestHasStableIdempotencyKeyAndBothMessageFormats()
+    {
+        var identifier = EmailConfirmationIdentifier.Generate();
+        var (_, verification) = CreateVerification(identifier, new FixedClock());
+        using var transport = new FakeResendTransport(HttpStatusCode.OK, """{"id":"c3dcb630-9e41-4f90-bccc-87267425c12e"}""");
+        using var client = new HttpClient(transport);
+        var sender = CreateSender(client);
+
+        await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
+        await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
+
+        Assert.Equal([$"email-confirmation/{verification.Id:N}", $"email-confirmation/{verification.Id:N}"], transport.Keys);
+        Assert.NotNull(transport.Body);
+        using var payload = JsonDocument.Parse(transport.Body);
+        var expectedLink = $"https://example.test/base/confirm-email?token={identifier}";
+        Assert.Equal(verification.EmailAddress.Value, payload.RootElement.GetProperty("to")[0].GetString());
+        Assert.Equal("Beatport2Rss <noreply@example.test>", payload.RootElement.GetProperty("from").GetString());
+        var html = payload.RootElement.GetProperty("html").GetString();
+        var text = payload.RootElement.GetProperty("text").GetString();
+        Assert.Contains($"href=\"{expectedLink}\"", html, StringComparison.Ordinal);
+        Assert.Contains(expectedLink, text, StringComparison.Ordinal);
+        Assert.Contains("This link expires at 2026-11-19 12:01:00 UTC.", html, StringComparison.Ordinal);
+        Assert.Contains("This link expires at 2026-11-19 12:01:00 UTC.", text, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData(429, "rate_limit_exceeded", true)]
+    [InlineData(503, "internal_server_error", true)]
+    [InlineData(409, "concurrent_idempotent_requests", true)]
+    [InlineData(409, "invalid_idempotent_request", false)]
+    [InlineData(422, "validation_error", false)]
+    public async Task ProviderFailuresAreClassifiedAndDoNotExposeResponseDetails(int status, string errorName, bool retry)
+    {
+        var identifier = EmailConfirmationIdentifier.Generate();
+        var (_, verification) = CreateVerification(identifier, new FixedClock());
+        using var transport = new FakeResendTransport(
+            (HttpStatusCode)status, JsonSerializer.Serialize(new { statusCode = status, name = errorName, message = identifier }));
+        using var client = new HttpClient(transport);
+        var sender = CreateSender(client);
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        var expectedException = retry ? typeof(RetryableException) : typeof(PermanentConfirmationEmailException);
+        var failure = await Assert.ThrowsAsync(expectedException, () => sender.SendAsync(verification, identifier, cancellationToken));
+        Assert.Null(failure.InnerException);
+        Assert.DoesNotContain(identifier, failure.ToString(), StringComparison.Ordinal);
+        Assert.Single(transport.Keys);
+    }
+
+    private static ResendConfirmationEmail CreateSender(HttpClient client) =>
+        new(
+            new ResendClient(new ResendOptionsSnapshot(), client),
+            new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions
+            {
+                PublicWebBaseUrl = new Uri("https://example.test/base"),
+                SenderName = "Beatport2Rss",
+                SenderAddress = "noreply@example.test",
+            }));
+
+    private static (User, EmailVerification) CreateVerification(string identifier, FixedClock clock, bool expired = false)
+    {
+        var user = User.Create(
+            UserId.Create(Guid.NewGuid()),
+            clock.UtcNow.AddMinutes(-2),
+            Beatport2Rss.Api.Domain.Users.EmailAddress.Create("user@example.test"),
+            PasswordHash.Create("unused-hash"),
+            null,
+            null,
+            UserStatus.Pending,
+            null);
+        var expiresAt = clock.UtcNow.AddMinutes(expired ? -1 : 1);
+        return (user, EmailVerification.Create(
+            EmailVerificationId.Create(Guid.NewGuid()),
+            user,
+            EmailConfirmationIdentifier.Hash(identifier)!.Value,
+            expiresAt));
+    }
+
+    private sealed class FixedClock : IClock
+    {
+        public DateTimeOffset UtcNow { get; } = new(2026, 11, 19, 12, 0, 0, TimeSpan.Zero);
+        public DateOnly UtcToday => DateOnly.FromDateTime(UtcNow.UtcDateTime);
+    }
+
+    private sealed class VerificationRepository(EmailVerification? verification) : IEmailVerificationQueryRepository
+    {
+        public ValueTask<EmailVerification?> FindAsync(EmailVerificationSecretHash hash, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(verification?.SecretHash == hash ? verification : null);
+    }
+
+    private sealed class ResendOptionsSnapshot : IOptionsSnapshot<ResendClientOptions>
+    {
+        public ResendClientOptions Value { get; } = new() { ApiToken = "test-key-not-sent" };
+
+        public ResendClientOptions Get(string? name) => Value;
+    }
+
+    private sealed class FakeResendTransport(HttpStatusCode status, string response) : HttpMessageHandler
+    {
+        public List<string> Keys { get; } = [];
+        public string? Body { get; private set; }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Keys.Add(Assert.Single(request.Headers.GetValues("Idempotency-Key")));
+            Body = await request.Content!.ReadAsStringAsync(cancellationToken);
+            return new HttpResponseMessage(status) { Content = new StringContent(response, Encoding.UTF8, "application/json") };
+        }
+    }
+}
