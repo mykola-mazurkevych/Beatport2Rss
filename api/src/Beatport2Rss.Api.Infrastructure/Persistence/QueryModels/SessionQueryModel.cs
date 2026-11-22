@@ -1,5 +1,5 @@
 using Beatport2Rss.Api.Domain.Sessions;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.SharedKernel.Interfaces;
 
