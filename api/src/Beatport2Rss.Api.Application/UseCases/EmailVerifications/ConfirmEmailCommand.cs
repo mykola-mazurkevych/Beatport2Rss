@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailVerifications;
 
-public sealed record ConfirmEmailCommand(EmailVerificationSecretHash? Hash, bool? Confirmed) : ICommand<Result>;
+public sealed record ConfirmEmailCommand(SecretHash? Hash, bool? Confirmed) : ICommand<Result>;
 
 internal sealed class ConfirmEmailCommandHandler(
     IEmailVerificationCommandRepository repository,

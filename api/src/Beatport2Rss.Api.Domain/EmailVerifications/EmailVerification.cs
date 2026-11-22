@@ -14,7 +14,7 @@ public sealed class EmailVerification :
     public EmailVerificationId Id { get; private set; }
     public UserId UserId { get; private set; }
     public EmailAddress EmailAddress { get; private set; }
-    public EmailVerificationSecretHash SecretHash { get; private set; }
+    public SecretHash SecretHash { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset ExpiresAt { get; private set; }
     public DateTimeOffset? ConfirmedAt { get; private set; }
@@ -22,7 +22,7 @@ public sealed class EmailVerification :
     public static EmailVerification Create(
         EmailVerificationId id,
         User user,
-        EmailVerificationSecretHash secretHash,
+        SecretHash secretHash,
         DateTimeOffset expiresAt) =>
         new()
         {

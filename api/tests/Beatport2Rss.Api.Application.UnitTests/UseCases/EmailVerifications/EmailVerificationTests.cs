@@ -64,7 +64,7 @@ public sealed class EmailConfirmationTests
         var now = verification.ExpiresAt;
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(now);
-        EmailVerificationSecretHash? hash = scenario switch
+        SecretHash? hash = scenario switch
         {
             "missing" => null,
             "unknown" => CreateHash('B'),
@@ -131,6 +131,6 @@ public sealed class EmailConfirmationTests
             EmailVerificationId.Create(Guid.NewGuid()), user, CreateHash('A'), IssuedAt.AddHours(24)));
     }
 
-    private static EmailVerificationSecretHash CreateHash(char character) =>
-        EmailVerificationSecretHash.Create(new string(character, EmailVerificationSecretHash.MaxLength));
+    private static SecretHash CreateHash(char character) =>
+        SecretHash.Create(new string(character, SecretHash.MaxLength));
 }

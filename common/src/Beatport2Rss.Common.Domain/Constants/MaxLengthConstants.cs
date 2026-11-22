@@ -17,6 +17,7 @@ public static class MaxLengthConstants
     public const int Password = 100;
     public const int PasswordHash = 500;
     public const int ReleaseName = 500;
+    public const int SecretHash = 64;
     public const int Slug = 200;
     public const int SubscriptionName = 200;
     public const int TagName = 200;

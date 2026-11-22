@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.ValueConverters.EmailVerifications;
 
-internal sealed class EmailVerificationSecretHashValueConverter() :
-    ValueConverter<EmailVerificationSecretHash, string>(
+internal sealed class SecretHashValueConverter() :
+    ValueConverter<SecretHash, string>(
         secretHash => secretHash.Value,
-        value => EmailVerificationSecretHash.Create(value));
+        value => SecretHash.Create(value));

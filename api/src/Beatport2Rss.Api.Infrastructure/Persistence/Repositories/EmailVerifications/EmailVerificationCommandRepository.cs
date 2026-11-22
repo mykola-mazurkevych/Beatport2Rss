@@ -19,7 +19,7 @@ internal sealed class EmailVerificationCommandRepository(ApiDbContext dbContext)
         await AddAsync(verification, cancellationToken);
 
     public async Task<bool> ConfirmAsync(
-        EmailVerificationSecretHash secretHash,
+        SecretHash secretHash,
         IClock clock,
         CancellationToken cancellationToken)
     {

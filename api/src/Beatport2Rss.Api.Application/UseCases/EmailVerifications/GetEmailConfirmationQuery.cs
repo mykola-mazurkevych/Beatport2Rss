@@ -13,7 +13,7 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailVerifications;
 
 public sealed record EmailConfirmationState(bool Confirmed, DateTimeOffset ExpiresAt);
 
-public sealed record GetEmailConfirmationQuery(EmailVerificationSecretHash? Hash) : IQuery<Result<EmailConfirmationState>>;
+public sealed record GetEmailConfirmationQuery(SecretHash? Hash) : IQuery<Result<EmailConfirmationState>>;
 
 internal sealed class GetEmailConfirmationQueryHandler(
     IEmailVerificationQueryRepository repository,

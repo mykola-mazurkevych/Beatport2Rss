@@ -48,7 +48,7 @@ public sealed class ActivateUserCommandHandlerTests
         var verification = EmailVerification.Create(
             EmailVerificationId.Create(Guid.NewGuid()),
             user,
-            EmailVerificationSecretHash.Create(new string('A', EmailVerificationSecretHash.MaxLength)),
+            SecretHash.Create(new string('A', SecretHash.MaxLength)),
             DateTimeOffset.UnixEpoch.AddDays(1));
         Assert.Null(verification.ConfirmedAt);
 

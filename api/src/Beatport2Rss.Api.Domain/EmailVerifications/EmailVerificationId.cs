@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 using Beatport2Rss.Common.Domain.Exceptions;
 using Beatport2Rss.Common.Domain.Interfaces;
 
@@ -8,7 +6,7 @@ using Light.GuardClauses;
 namespace Beatport2Rss.Api.Domain.EmailVerifications;
 
 public readonly record struct EmailVerificationId :
-    IId<EmailVerificationId>, IParsable<EmailVerificationId>
+    IId<EmailVerificationId>
 {
     private EmailVerificationId(Guid value) => Value = value;
 
@@ -21,29 +19,6 @@ public readonly record struct EmailVerificationId :
 
     public static EmailVerificationId Create(Guid value) =>
         new(value.MustNotBeEmpty(() => new InvalidValueObjectValueException($"{nameof(EmailVerificationId)} cannot be empty")));
-
-    public static EmailVerificationId Parse(string s, IFormatProvider? provider) =>
-        Create(Guid.Parse(s, provider));
-
-    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out EmailVerificationId result)
-    {
-        result = default;
-
-        try
-        {
-            if (!Guid.TryParse(s, provider, out var value))
-            {
-                return false;
-            }
-
-            result = Create(value);
-            return true;
-        }
-        catch (InvalidValueObjectValueException)
-        {
-            return false;
-        }
-    }
 
     public int CompareTo(EmailVerificationId other) => Value.CompareTo(other.Value);
     public bool Equals(EmailVerificationId other) => Value == other.Value;

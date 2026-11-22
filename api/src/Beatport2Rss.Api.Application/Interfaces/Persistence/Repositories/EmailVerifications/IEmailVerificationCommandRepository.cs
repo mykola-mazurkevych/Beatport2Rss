@@ -6,5 +6,5 @@ namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.Email
 public interface IEmailVerificationCommandRepository
 {
     Task AddAsync(EmailVerification verification, CancellationToken cancellationToken = default);
-    Task<bool> ConfirmAsync(EmailVerificationSecretHash secretHash, IClock clock, CancellationToken cancellationToken = default);
+    Task<bool> ConfirmAsync(SecretHash secretHash, IClock clock, CancellationToken cancellationToken = default);
 }

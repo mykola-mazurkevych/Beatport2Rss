@@ -9,7 +9,7 @@ internal sealed class EmailVerificationQueryRepository(ApiDbContext dbContext) :
     IEmailVerificationQueryRepository
 {
     public async ValueTask<EmailVerification?> FindAsync(
-        EmailVerificationSecretHash secretHash,
+        SecretHash secretHash,
         CancellationToken cancellationToken = default)
     {
         var match = await (

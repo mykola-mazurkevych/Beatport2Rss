@@ -176,7 +176,7 @@ public sealed class ConfirmationEmailDeliveryTests
 
     private sealed class VerificationRepository(EmailVerification? verification) : IEmailVerificationQueryRepository
     {
-        public ValueTask<EmailVerification?> FindAsync(EmailVerificationSecretHash hash, CancellationToken cancellationToken = default) =>
+        public ValueTask<EmailVerification?> FindAsync(SecretHash hash, CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(verification?.SecretHash == hash ? verification : null);
     }
 

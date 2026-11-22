@@ -10,7 +10,7 @@ public static class EmailConfirmationIdentifier
 {
     public static string Generate() => Base64Url.EncodeToString(RandomNumberGenerator.GetBytes(32));
 
-    public static EmailVerificationSecretHash? Hash(string? identifier)
+    public static SecretHash? Hash(string? identifier)
     {
         if (identifier is null ||
             identifier.Length != 43 ||
@@ -19,6 +19,6 @@ public static class EmailConfirmationIdentifier
             return null;
         }
 
-        return EmailVerificationSecretHash.Create(Convert.ToHexString(SHA256.HashData(Encoding.ASCII.GetBytes(identifier))));
+        return SecretHash.Create(Convert.ToHexString(SHA256.HashData(Encoding.ASCII.GetBytes(identifier))));
     }
 }

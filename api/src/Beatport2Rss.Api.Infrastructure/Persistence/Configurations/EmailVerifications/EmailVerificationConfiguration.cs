@@ -13,7 +13,7 @@ internal sealed class EmailVerificationConfiguration : IEntityTypeConfiguration<
         builder.ToTable(nameof(ApiDbContext.EmailVerifications));
         builder.HasKey(verification => verification.Id);
         builder.Property(verification => verification.EmailAddress).HasMaxLength(EmailAddress.MaxLength).IsRequired();
-        builder.Property(verification => verification.SecretHash).HasMaxLength(EmailVerificationSecretHash.MaxLength).IsRequired();
+        builder.Property(verification => verification.SecretHash).HasMaxLength(SecretHash.MaxLength).IsRequired();
         builder.HasIndex(verification => verification.SecretHash).IsUnique();
         builder.HasOne<User>()
             .WithMany()
