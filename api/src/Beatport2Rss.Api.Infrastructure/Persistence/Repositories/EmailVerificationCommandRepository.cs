@@ -1,32 +1,29 @@
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Users;
+using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 
-internal sealed class EmailVerificationRepository(ApiDbContext dbContext) : IEmailVerificationRepository
+internal sealed class EmailVerificationCommandRepository(ApiDbContext dbContext) :
+    CommandRepository<EmailVerification, EmailVerificationId>(dbContext.EmailVerifications),
+    IEmailVerificationCommandRepository
 {
-    public async ValueTask AddAsync(EmailVerification verification, CancellationToken cancellationToken) =>
-        await dbContext.EmailVerifications.AddAsync(verification, cancellationToken);
+    async Task IEmailVerificationCommandRepository.AddAsync(
+        EmailVerification verification,
+        CancellationToken cancellationToken) =>
+        await AddAsync(verification, cancellationToken);
 
-    public async ValueTask<EmailVerification?> FindAsync(string hash, CancellationToken cancellationToken)
-    {
-        var match = await (
-            from verification in dbContext.EmailVerifications.AsNoTracking()
-            join user in dbContext.Users.AsNoTracking() on verification.UserId equals user.Id
-            where verification.SecretHash == hash
-            select new { Verification = verification, User = user })
-            .SingleOrDefaultAsync(cancellationToken);
-
-        return match is not null && match.Verification.AppliesTo(match.User) ? match.Verification : null;
-    }
-
-    public async ValueTask<bool> ConfirmAsync(string hash, IClock clock, CancellationToken cancellationToken)
+    public async Task<bool> ConfirmAsync(
+        EmailVerificationSecretHash secretHash,
+        IClock clock,
+        CancellationToken cancellationToken)
     {
         var candidate = await dbContext.EmailVerifications.AsNoTracking()
-            .SingleOrDefaultAsync(verification => verification.SecretHash == hash, cancellationToken);
+            .SingleOrDefaultAsync(verification => verification.SecretHash == secretHash, cancellationToken);
 
         if (candidate is null)
         {

@@ -1,4 +1,3 @@
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +12,7 @@ internal sealed class EmailVerificationConfiguration : IEntityTypeConfiguration<
         builder.ToTable(nameof(ApiDbContext.EmailVerifications));
         builder.HasKey(verification => verification.Id);
         builder.Property(verification => verification.EmailAddress).HasMaxLength(EmailAddress.MaxLength).IsRequired();
-        builder.Property(verification => verification.SecretHash).HasMaxLength(EmailConfirmationIdentifier.HashLength).IsRequired();
+        builder.Property(verification => verification.SecretHash).HasMaxLength(EmailVerificationSecretHash.MaxLength).IsRequired();
         builder.HasIndex(verification => verification.SecretHash).IsUnique();
         builder.HasOne<User>()
             .WithMany()

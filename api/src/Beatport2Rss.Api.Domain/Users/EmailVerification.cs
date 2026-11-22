@@ -1,25 +1,31 @@
+using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Api.Domain.Users;
 
-public sealed class EmailVerification
+public sealed class EmailVerification :
+    IAggregateRoot<EmailVerificationId>
 {
     private EmailVerification()
     {
     }
 
-    public Guid Id { get; private set; }
+    public EmailVerificationId Id { get; private set; }
     public UserId UserId { get; private set; }
     public EmailAddress EmailAddress { get; private set; }
-    public string SecretHash { get; private set; } = null!;
+    public EmailVerificationSecretHash SecretHash { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
     public DateTimeOffset ExpiresAt { get; private set; }
     public DateTimeOffset? ConfirmedAt { get; private set; }
 
-    public static EmailVerification Create(User user, string secretHash, DateTimeOffset expiresAt) =>
+    public static EmailVerification Create(
+        EmailVerificationId id,
+        User user,
+        EmailVerificationSecretHash secretHash,
+        DateTimeOffset expiresAt) =>
         new()
         {
-            Id = Guid.CreateVersion7(),
+            Id = id,
             UserId = user.Id,
             EmailAddress = user.EmailAddress,
             SecretHash = secretHash,

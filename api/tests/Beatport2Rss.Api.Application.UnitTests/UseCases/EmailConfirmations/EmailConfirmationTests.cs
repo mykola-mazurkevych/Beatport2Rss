@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -14,7 +15,8 @@ namespace Beatport2Rss.Api.Application.UnitTests.UseCases.EmailConfirmations;
 public sealed class EmailConfirmationTests
 {
     private static readonly DateTimeOffset IssuedAt = new(2026, 11, 19, 12, 0, 0, TimeSpan.Zero);
-    private readonly Mock<IEmailVerificationRepository> _repository = new(MockBehavior.Strict);
+    private readonly Mock<IEmailVerificationCommandRepository> _commandRepository = new(MockBehavior.Strict);
+    private readonly Mock<IEmailVerificationQueryRepository> _queryRepository = new(MockBehavior.Strict);
     private readonly Mock<IClock> _clock = new(MockBehavior.Strict);
     private readonly IOptions<EmailConfirmationOptions> _options = Options.Create(new EmailConfirmationOptions { Enabled = true });
 
@@ -38,19 +40,19 @@ public sealed class EmailConfirmationTests
     [InlineData(false)]
     public async Task Put_RequiresAnExplicitTrue(bool? confirmed)
     {
-        var handler = new ConfirmEmailCommandHandler(_repository.Object, _clock.Object, _options);
-        var result = await handler.Handle(new ConfirmEmailCommand("hash", confirmed), TestContext.Current.CancellationToken);
+        var handler = new ConfirmEmailCommandHandler(_commandRepository.Object, _clock.Object, _options);
+        var result = await handler.Handle(new ConfirmEmailCommand(CreateHash('A'), confirmed), TestContext.Current.CancellationToken);
 
         Assert.Equal(EmailConfirmationErrors.ConfirmationRequired, Assert.Single(result.Errors).Message);
-        _repository.VerifyNoOtherCalls();
+        _commandRepository.VerifyNoOtherCalls();
     }
 
     [Theory]
-    [InlineData(null, false)]
+    [InlineData("missing", false)]
     [InlineData("unknown", false)]
-    [InlineData("hash", false)]
-    [InlineData("hash", true)]
-    public async Task Get_ReadsOnlyMatchingResources_AndHonorsExpiry(string? hash, bool confirmed)
+    [InlineData("unused", false)]
+    [InlineData("confirmed", true)]
+    public async Task Get_ReadsOnlyMatchingResources_AndHonorsExpiry(string scenario, bool confirmed)
     {
         var (user, verification) = CreateVerification(UserStatus.Pending);
         if (confirmed)
@@ -61,13 +63,19 @@ public sealed class EmailConfirmationTests
         var now = verification.ExpiresAt;
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(now);
-        if (hash is not null)
+        EmailVerificationSecretHash? hash = scenario switch
         {
-            _repository.Setup(repository => repository.FindAsync(hash, cancellationToken))
-                .ReturnsAsync(hash == verification.SecretHash ? verification : null);
+            "missing" => null,
+            "unknown" => CreateHash('B'),
+            _ => verification.SecretHash,
+        };
+        if (scenario != "missing")
+        {
+            _queryRepository.Setup(repository => repository.FindAsync(hash!.Value, cancellationToken))
+                .ReturnsAsync(scenario == "confirmed" ? verification : null);
         }
 
-        var handler = new GetEmailConfirmationQueryHandler(_repository.Object, _clock.Object, _options);
+        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
         var result = await handler.Handle(new GetEmailConfirmationQuery(hash), cancellationToken);
 
         if (confirmed)
@@ -88,10 +96,10 @@ public sealed class EmailConfirmationTests
         var (user, verification) = CreateVerification(UserStatus.Pending);
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(IssuedAt);
-        _repository.Setup(repository => repository.FindAsync(verification.SecretHash, cancellationToken))
+        _queryRepository.Setup(repository => repository.FindAsync(verification.SecretHash, cancellationToken))
             .ReturnsAsync(verification);
 
-        var handler = new GetEmailConfirmationQueryHandler(_repository.Object, _clock.Object, _options);
+        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
         var result = await handler.Handle(new GetEmailConfirmationQuery(verification.SecretHash), cancellationToken);
 
         Assert.Equal(new EmailConfirmationState(false, verification.ExpiresAt), result.Value);
@@ -107,7 +115,8 @@ public sealed class EmailConfirmationTests
         Assert.NotEqual(first, second);
         Assert.Matches("^[A-Za-z0-9_-]{43}$", first);
         var hash = EmailConfirmationIdentifier.Hash(first);
-        Assert.NotEqual(first, hash);
+        Assert.NotNull(hash);
+        Assert.NotEqual(first, hash.Value.Value);
         Assert.Equal(hash, EmailConfirmationIdentifier.Hash(first));
         Assert.NotEqual(hash, EmailConfirmationIdentifier.Hash(second));
         Assert.Null(EmailConfirmationIdentifier.Hash("not a token"));
@@ -117,6 +126,10 @@ public sealed class EmailConfirmationTests
     {
         var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
             PasswordHash.Create("test-hash"), null, null, status, null);
-        return (user, EmailVerification.Create(user, "hash", IssuedAt.AddHours(24)));
+        return (user, EmailVerification.Create(
+            EmailVerificationId.Create(Guid.NewGuid()), user, CreateHash('A'), IssuedAt.AddHours(24)));
     }
+
+    private static EmailVerificationSecretHash CreateHash(char character) =>
+        EmailVerificationSecretHash.Create(new string(character, EmailVerificationSecretHash.MaxLength));
 }

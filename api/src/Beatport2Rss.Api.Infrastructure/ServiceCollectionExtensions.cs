@@ -189,7 +189,8 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
-                .AddTransient<IEmailVerificationRepository, EmailVerificationRepository>()
+                .AddTransient<IEmailVerificationCommandRepository, EmailVerificationCommandRepository>()
+                .AddTransient<IEmailVerificationQueryRepository, EmailVerificationQueryRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
         private IServiceCollection AddSecurityServices() =>

@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
@@ -37,45 +38,47 @@ public sealed class EmailVerificationRepositoryTests
         {
             var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Inactive, null);
-            var hash = EmailConfirmationIdentifier.Hash(EmailConfirmationIdentifier.Generate())!;
-            var verification = EmailVerification.Create(user, hash, IssuedAt.AddHours(24));
+            var hash = EmailConfirmationIdentifier.Hash(EmailConfirmationIdentifier.Generate())!.Value;
+            var verification = EmailVerification.Create(
+                EmailVerificationId.Create(Guid.NewGuid()), user, hash, IssuedAt.AddHours(24));
             await db.Users.AddAsync(user, cancellationToken);
             await db.EmailVerifications.AddAsync(verification, cancellationToken);
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
 
-            var repository = new EmailVerificationRepository(db);
-            Assert.Null((await repository.FindAsync(hash, cancellationToken))!.ConfirmedAt);
-            Assert.False(await repository.ConfirmAsync(hash, new FixedClock(verification.ExpiresAt), cancellationToken));
+            var commandRepository = new EmailVerificationCommandRepository(db);
+            var queryRepository = new EmailVerificationQueryRepository(db);
+            Assert.Null((await queryRepository.FindAsync(hash, cancellationToken))!.ConfirmedAt);
+            Assert.False(await commandRepository.ConfirmAsync(hash, new FixedClock(verification.ExpiresAt), cancellationToken));
             db.ChangeTracker.Clear();
 
             var firstTime = new FixedClock(IssuedAt.AddHours(1));
             var secondTime = new FixedClock(IssuedAt.AddHours(2));
             await using var parallelDb = new ApiDbContext(options);
-            var parallelRepository = new EmailVerificationRepository(parallelDb);
-            var outcomes = await Task.WhenAll(repository.ConfirmAsync(hash, firstTime, cancellationToken).AsTask(),
-                parallelRepository.ConfirmAsync(hash, secondTime, cancellationToken).AsTask());
+            var parallelRepository = new EmailVerificationCommandRepository(parallelDb);
+            var outcomes = await Task.WhenAll(commandRepository.ConfirmAsync(hash, firstTime, cancellationToken),
+                parallelRepository.ConfirmAsync(hash, secondTime, cancellationToken));
             Assert.All(outcomes, outcome => Assert.True(outcome));
 
             db.ChangeTracker.Clear();
             var persisted = await db.Users.SingleAsync(cancellationToken);
             Assert.Equal(UserStatus.Active, persisted.Status);
-            var confirmedAt = (await repository.FindAsync(hash, cancellationToken))!.ConfirmedAt;
+            var confirmedAt = (await queryRepository.FindAsync(hash, cancellationToken))!.ConfirmedAt;
             Assert.Contains(confirmedAt, new DateTimeOffset?[] { firstTime.UtcNow, secondTime.UtcNow });
 
             persisted.UpdateStatus(isActive: false);
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
-            Assert.True(await repository.ConfirmAsync(hash, new FixedClock(verification.ExpiresAt.AddHours(1)), cancellationToken));
-            Assert.Equal(confirmedAt, (await repository.FindAsync(hash, cancellationToken))!.ConfirmedAt);
+            Assert.True(await commandRepository.ConfirmAsync(hash, new FixedClock(verification.ExpiresAt.AddHours(1)), cancellationToken));
+            Assert.Equal(confirmedAt, (await queryRepository.FindAsync(hash, cancellationToken))!.ConfirmedAt);
             Assert.Equal(UserStatus.Inactive, (await db.Users.SingleAsync(cancellationToken)).Status);
 
             var changedUser = await db.Users.SingleAsync(cancellationToken);
             changedUser.UpdateEmailAddress(EmailAddress.Create("new@example.test"));
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
-            Assert.Null(await repository.FindAsync(hash, cancellationToken));
-            Assert.False(await repository.ConfirmAsync(hash, firstTime, cancellationToken));
+            Assert.Null(await queryRepository.FindAsync(hash, cancellationToken));
+            Assert.False(await commandRepository.ConfirmAsync(hash, firstTime, cancellationToken));
         }
         finally
         {

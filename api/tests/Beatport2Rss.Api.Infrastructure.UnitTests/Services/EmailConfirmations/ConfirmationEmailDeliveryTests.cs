@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Extensions;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
@@ -81,7 +82,7 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddSingleton<IClock>(clock)
             .AddSingleton<IOptions<EmailConfirmationOptions>>(
                 new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = scenario != "disabled" }))
-            .AddSingleton<IEmailVerificationRepository>(new VerificationRepository(scenario == "missing" ? null : verification))
+            .AddSingleton<IEmailVerificationQueryRepository>(new VerificationRepository(scenario == "missing" ? null : verification))
             .BuildServiceProvider();
 
         var message = new SendConfirmationEmail(scenario == "invalid" ? "invalid" : identifier);
@@ -159,7 +160,11 @@ public sealed class ConfirmationEmailDeliveryTests
             UserStatus.Pending,
             null);
         var expiresAt = clock.UtcNow.AddMinutes(expired ? -1 : 1);
-        return (user, EmailVerification.Create(user, EmailConfirmationIdentifier.Hash(identifier)!, expiresAt));
+        return (user, EmailVerification.Create(
+            EmailVerificationId.Create(Guid.NewGuid()),
+            user,
+            EmailConfirmationIdentifier.Hash(identifier)!.Value,
+            expiresAt));
     }
 
     private sealed class FixedClock : IClock
@@ -168,14 +173,10 @@ public sealed class ConfirmationEmailDeliveryTests
         public DateOnly UtcToday => DateOnly.FromDateTime(UtcNow.UtcDateTime);
     }
 
-    private sealed class VerificationRepository(EmailVerification? verification) : IEmailVerificationRepository
+    private sealed class VerificationRepository(EmailVerification? verification) : IEmailVerificationQueryRepository
     {
-        public ValueTask<EmailVerification?> FindAsync(string hash, CancellationToken cancellationToken) =>
+        public ValueTask<EmailVerification?> FindAsync(EmailVerificationSecretHash hash, CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(verification?.SecretHash == hash ? verification : null);
-
-        public ValueTask AddAsync(EmailVerification verification, CancellationToken cancellationToken) => throw new NotSupportedException();
-
-        public ValueTask<bool> ConfirmAsync(string hash, IClock clock, CancellationToken cancellationToken) => throw new NotSupportedException();
     }
 
     private sealed class ResendOptionsSnapshot : IOptionsSnapshot<ResendClientOptions>

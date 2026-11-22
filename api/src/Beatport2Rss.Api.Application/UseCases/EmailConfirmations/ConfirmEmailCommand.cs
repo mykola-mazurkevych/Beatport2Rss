@@ -1,3 +1,5 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using FluentResults;
@@ -8,10 +10,10 @@ using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
-public sealed record ConfirmEmailCommand(string? Hash, bool? Confirmed) : ICommand<Result>;
+public sealed record ConfirmEmailCommand(EmailVerificationSecretHash? Hash, bool? Confirmed) : ICommand<Result>;
 
 internal sealed class ConfirmEmailCommandHandler(
-    IEmailVerificationRepository repository,
+    IEmailVerificationCommandRepository repository,
     IClock clock,
     IOptions<EmailConfirmationOptions> options) :
     ICommandHandler<ConfirmEmailCommand, Result>

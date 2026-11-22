@@ -48,7 +48,7 @@ internal sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
-    IEmailVerificationRepository verificationRepository,
+    IEmailVerificationCommandRepository verificationRepository,
     IConfirmationEmailOutbox confirmationEmailOutbox,
     IOptions<EmailConfirmationOptions> confirmationOptions,
     IUnitOfWork unitOfWork) :
@@ -87,9 +87,12 @@ internal sealed class CreateUserCommandHandler(
         if (confirmationOptions.Value.Enabled)
         {
             var identifier = EmailConfirmationIdentifier.Generate();
+            var secretHash = EmailConfirmationIdentifier.Hash(identifier)
+                ?? throw new InvalidOperationException("The generated confirmation identifier is invalid.");
             var verification = EmailVerification.Create(
+                EmailVerificationId.Create(Guid.CreateVersion7()),
                 user,
-                EmailConfirmationIdentifier.Hash(identifier)!,
+                secretHash,
                 user.CreatedAt + confirmationOptions.Value.Lifetime);
             await verificationRepository.AddAsync(verification, cancellationToken);
             await confirmationEmailOutbox.EnqueueAsync(identifier);

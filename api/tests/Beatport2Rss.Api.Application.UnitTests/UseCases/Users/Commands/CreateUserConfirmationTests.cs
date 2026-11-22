@@ -31,7 +31,7 @@ public sealed class CreateUserConfirmationTests
         hasher.Setup(value => value.Hash(It.IsAny<Password>())).Returns(PasswordHash.Create("test-hash"));
         var users = new Mock<IUserCommandRepository>(MockBehavior.Strict);
         var events = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
-        var verifications = new Mock<IEmailVerificationRepository>(MockBehavior.Strict);
+        var verifications = new Mock<IEmailVerificationCommandRepository>(MockBehavior.Strict);
         var delivery = new Mock<IConfirmationEmailOutbox>(MockBehavior.Strict);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var options = Options.Create(new EmailConfirmationOptions { Enabled = enabled });
@@ -47,7 +47,7 @@ public sealed class CreateUserConfirmationTests
         if (enabled)
         {
             verifications.Setup(value => value.AddAsync(It.IsAny<EmailVerification>(), cancellationToken))
-                .Callback<EmailVerification, CancellationToken>((value, _) => verification = value).Returns(ValueTask.CompletedTask);
+                .Callback<EmailVerification, CancellationToken>((value, _) => verification = value).Returns(Task.CompletedTask);
             delivery.Setup(value => value.EnqueueAsync(It.IsAny<string>()))
                 .Callback<string>(value => identifier = value).Returns(ValueTask.CompletedTask);
         }
@@ -67,7 +67,7 @@ public sealed class CreateUserConfirmationTests
                 Assert.Equal(user.Id, verification.UserId);
                 Assert.Equal(user.EmailAddress, verification.EmailAddress);
                 Assert.Equal(now.AddHours(24), verification.ExpiresAt);
-                Assert.Equal(EmailConfirmationIdentifier.Hash(identifier), verification.SecretHash);
+                Assert.Equal(EmailConfirmationIdentifier.Hash(identifier)!.Value, verification.SecretHash);
                 Assert.Null(verification.ConfirmedAt);
             }
         }).Returns(Task.CompletedTask);

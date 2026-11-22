@@ -1,3 +1,5 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
@@ -11,10 +13,10 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
 public sealed record EmailConfirmationState(bool Confirmed, DateTimeOffset ExpiresAt);
 
-public sealed record GetEmailConfirmationQuery(string? Hash) : IQuery<Result<EmailConfirmationState>>;
+public sealed record GetEmailConfirmationQuery(EmailVerificationSecretHash? Hash) : IQuery<Result<EmailConfirmationState>>;
 
 internal sealed class GetEmailConfirmationQueryHandler(
-    IEmailVerificationRepository repository,
+    IEmailVerificationQueryRepository repository,
     IClock clock,
     IOptions<EmailConfirmationOptions> options) :
     IQueryHandler<GetEmailConfirmationQuery, Result<EmailConfirmationState>>

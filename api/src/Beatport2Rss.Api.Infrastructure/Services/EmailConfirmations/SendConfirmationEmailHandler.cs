@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +45,7 @@ internal sealed partial class SendConfirmationEmailHandler : MessageHandler<Send
             return;
         }
 
-        var repository = services.GetRequiredService<IEmailVerificationRepository>();
+        var repository = services.GetRequiredService<IEmailVerificationQueryRepository>();
         var clock = services.GetRequiredService<IClock>();
         var verification = await repository.FindAsync(hash, cancellationToken);
         if (verification is null || verification.ConfirmedAt is not null || verification.ExpiresAt <= clock.UtcNow)

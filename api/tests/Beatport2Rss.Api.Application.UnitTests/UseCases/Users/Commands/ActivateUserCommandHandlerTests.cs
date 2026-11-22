@@ -44,7 +44,11 @@ public sealed class ActivateUserCommandHandlerTests
             lastName: null,
             initialStatus,
             countryCode: null);
-        var verification = EmailVerification.Create(user, "secret-hash", DateTimeOffset.UnixEpoch.AddDays(1));
+        var verification = EmailVerification.Create(
+            EmailVerificationId.Create(Guid.NewGuid()),
+            user,
+            EmailVerificationSecretHash.Create(new string('A', EmailVerificationSecretHash.MaxLength)),
+            DateTimeOffset.UnixEpoch.AddDays(1));
         Assert.Null(verification.ConfirmedAt);
 
         _userQueryRepository.Setup(repository => repository.ExistsAsync(_administratorId, cancellationToken))
