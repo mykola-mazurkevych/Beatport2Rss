@@ -1,4 +1,4 @@
-using Beatport2Rss.Api.Endpoints.EmailVerifications;
+using Beatport2Rss.Api.Endpoints.EmailConfirmations;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;

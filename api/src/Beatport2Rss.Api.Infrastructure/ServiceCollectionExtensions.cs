@@ -6,20 +6,20 @@ using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailVerifications;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
-using Beatport2Rss.Api.Infrastructure.Extensions.EmailVerifications;
+using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailVerifications;
+using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Feeds;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
@@ -192,8 +192,8 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
-                .AddTransient<IEmailVerificationCommandRepository, EmailVerificationCommandRepository>()
-                .AddTransient<IEmailVerificationQueryRepository, EmailVerificationQueryRepository>()
+                .AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>()
+                .AddTransient<IEmailConfirmationQueryRepository, EmailConfirmationQueryRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
         private IServiceCollection AddSecurityServices() =>

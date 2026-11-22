@@ -1,10 +1,10 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailVerifications;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
-using Beatport2Rss.Api.Domain.EmailVerifications;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
@@ -51,7 +51,7 @@ internal sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
-    IEmailVerificationCommandRepository verificationRepository,
+    IEmailConfirmationCommandRepository confirmationRepository,
     IConfirmationEmailOutbox confirmationEmailOutbox,
     IOptions<EmailConfirmationOptions> confirmationOptions,
     IUnitOfWork unitOfWork) :
@@ -92,12 +92,12 @@ internal sealed class CreateUserCommandHandler(
             var identifier = EmailConfirmationIdentifier.Generate();
             var secretHash = EmailConfirmationIdentifier.Hash(identifier)
                 ?? throw new InvalidOperationException("The generated confirmation identifier is invalid.");
-            var verification = EmailVerification.Create(
-                EmailVerificationId.Create(Guid.CreateVersion7()),
+            var confirmation = EmailConfirmation.Create(
+                EmailConfirmationId.Create(Guid.CreateVersion7()),
                 user,
                 secretHash,
                 user.CreatedAt + confirmationOptions.Value.Lifetime);
-            await verificationRepository.AddAsync(verification, cancellationToken);
+            await confirmationRepository.AddAsync(confirmation, cancellationToken);
             await confirmationEmailOutbox.EnqueueAsync(identifier);
         }
 

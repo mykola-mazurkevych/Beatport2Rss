@@ -1,9 +1,9 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailVerifications;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.Users.Commands;
-using Beatport2Rss.Api.Domain.EmailVerifications;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -34,13 +34,13 @@ public sealed class CreateUserConfirmationTests
         hasher.Setup(value => value.Hash(It.IsAny<Password>())).Returns(PasswordHash.Create("test-hash"));
         var users = new Mock<IUserCommandRepository>(MockBehavior.Strict);
         var events = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
-        var verifications = new Mock<IEmailVerificationCommandRepository>(MockBehavior.Strict);
+        var confirmations = new Mock<IEmailConfirmationCommandRepository>(MockBehavior.Strict);
         var delivery = new Mock<IConfirmationEmailOutbox>(MockBehavior.Strict);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
         var options = Options.Create(new EmailConfirmationOptions { Enabled = enabled });
 
         User? user = null;
-        EmailVerification? verification = null;
+        EmailConfirmation? confirmation = null;
         string? identifier = null;
         UserCreated? userCreated = null;
 
@@ -49,8 +49,8 @@ public sealed class CreateUserConfirmationTests
             .Callback<User, CancellationToken>((value, _) => user = value).Returns(Task.CompletedTask);
         if (enabled)
         {
-            verifications.Setup(value => value.AddAsync(It.IsAny<EmailVerification>(), cancellationToken))
-                .Callback<EmailVerification, CancellationToken>((value, _) => verification = value).Returns(Task.CompletedTask);
+            confirmations.Setup(value => value.AddAsync(It.IsAny<EmailConfirmation>(), cancellationToken))
+                .Callback<EmailConfirmation, CancellationToken>((value, _) => confirmation = value).Returns(Task.CompletedTask);
             delivery.Setup(value => value.EnqueueAsync(It.IsAny<string>()))
                 .Callback<string>(value => identifier = value).Returns(ValueTask.CompletedTask);
         }
@@ -65,18 +65,18 @@ public sealed class CreateUserConfirmationTests
             Assert.Equal(user.Id.Value, userCreated.UserId);
             if (enabled)
             {
-                Assert.NotNull(verification);
+                Assert.NotNull(confirmation);
                 Assert.NotNull(identifier);
-                Assert.Equal(user.Id, verification.UserId);
-                Assert.Equal(user.EmailAddress, verification.EmailAddress);
-                Assert.Equal(now.AddHours(24), verification.ExpiresAt);
-                Assert.Equal(EmailConfirmationIdentifier.Hash(identifier)!.Value, verification.SecretHash);
-                Assert.Null(verification.ConfirmedAt);
+                Assert.Equal(user.Id, confirmation.UserId);
+                Assert.Equal(user.EmailAddress, confirmation.EmailAddress);
+                Assert.Equal(now.AddHours(24), confirmation.ExpiresAt);
+                Assert.Equal(EmailConfirmationIdentifier.Hash(identifier)!.Value, confirmation.SecretHash);
+                Assert.Null(confirmation.ConfirmedAt);
             }
         }).Returns(Task.CompletedTask);
 
         var handler = new CreateUserCommandHandler(clock.Object, hasher.Object, users.Object, events.Object,
-            verifications.Object, delivery.Object, options, unit.Object);
+            confirmations.Object, delivery.Object, options, unit.Object);
         var result = await handler.Handle(new CreateUserCommand("new@example.test", "validpassword123", null, null, null),
             cancellationToken);
 

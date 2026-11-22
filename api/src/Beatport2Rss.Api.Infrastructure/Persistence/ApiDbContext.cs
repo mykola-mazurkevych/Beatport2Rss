@@ -1,5 +1,5 @@
 using Beatport2Rss.Api.Domain.Countries;
-using Beatport2Rss.Api.Domain.EmailVerifications;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Feeds;
 using Beatport2Rss.Api.Domain.Sessions;
 using Beatport2Rss.Api.Domain.Subscriptions;
@@ -20,7 +20,7 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     public static string Schema => "api";
 
     public DbSet<Country> Countries => Set<Country>();
-    public DbSet<EmailVerification> EmailVerifications => Set<EmailVerification>();
+    public DbSet<EmailConfirmation> EmailConfirmations => Set<EmailConfirmation>();
     public DbSet<Feed> Feeds => Set<Feed>();
     public DbSet<FeedSubscription> FeedSubscriptions => Set<FeedSubscription>();
     public DbSet<Session> Sessions => Set<Session>();

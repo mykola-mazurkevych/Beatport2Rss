@@ -1,8 +1,8 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.Users.Commands;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Api.Domain.EmailVerifications;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -46,12 +46,12 @@ public sealed class ActivateUserCommandHandlerTests
             lastName: null,
             initialStatus,
             countryCode: null);
-        var verification = EmailVerification.Create(
-            EmailVerificationId.Create(Guid.NewGuid()),
+        var confirmation = EmailConfirmation.Create(
+            EmailConfirmationId.Create(Guid.NewGuid()),
             user,
             SecretHash.Create(new string('A', SecretHash.MaxLength)),
             DateTimeOffset.UnixEpoch.AddDays(1));
-        Assert.Null(verification.ConfirmedAt);
+        Assert.Null(confirmation.ConfirmedAt);
 
         _userQueryRepository.Setup(repository => repository.ExistsAsync(_administratorId, cancellationToken))
             .ReturnsAsync(true);
@@ -67,7 +67,7 @@ public sealed class ActivateUserCommandHandlerTests
 
         Assert.True(result.IsSuccess);
         Assert.Equal(UserStatus.Active, user.Status);
-        Assert.Null(verification.ConfirmedAt);
+        Assert.Null(confirmation.ConfirmedAt);
         _unitOfWork.Verify(unitOfWork => unitOfWork.SaveChangesAsync(cancellationToken), Times.Exactly(saveCount));
     }
 
