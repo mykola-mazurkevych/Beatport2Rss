@@ -102,7 +102,7 @@ public sealed class ConfirmationEmailDeliveryTests
         await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
         await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
 
-        var expectedIdempotencyKey = $"email-confirmation/{verification.Id.ToString().Replace("-", string.Empty, StringComparison.Ordinal)}";
+        var expectedIdempotencyKey = $"email-confirmation/{verification.Id.Value:D}";
         Assert.Equal([expectedIdempotencyKey, expectedIdempotencyKey], transport.Keys);
         Assert.NotNull(transport.Body);
         using var payload = JsonDocument.Parse(transport.Body);
