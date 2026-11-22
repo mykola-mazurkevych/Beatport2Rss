@@ -44,12 +44,18 @@ public sealed class BeatportV4ClientTests
         Assert.Equal("House", result.Value.Genre.Name);
     }
 
-    [Fact]
-    public async Task GetAsync_DeserializesEmptyArtistWebsiteAsNull()
+    [Theory]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    [InlineData("www.dosem.net", "https://www.dosem.net/")]
+    [InlineData("dosem.net/music", "https://dosem.net/music")]
+    [InlineData("http://www.dosem.net/music", "http://www.dosem.net/music")]
+    [InlineData("https://www.dosem.net/music", "https://www.dosem.net/music")]
+    public async Task GetAsync_DeserializesArtistWebsite(string? website, string? expectedWebsite)
     {
-        const string json = """
+        var json = $$"""
             {"id":42,"slug":"artist","name":"Artist","image":{"uri":"https://example.com/image.jpg"},
-             "bio":null,"website":""}
+             "bio":null,"website":{{JsonSerializer.Serialize(website)}}}
             """;
         var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
         using var handler = new StubHttpMessageHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
@@ -63,7 +69,25 @@ public sealed class BeatportV4ClientTests
 
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.Null(result.Value.Website);
+        Assert.Equal(expectedWebsite, result.Value.Website?.AbsoluteUri);
+    }
+
+    [Fact]
+    public async Task GetAsync_WhenArtistWebsiteIsMalformed_ShouldNotSilentlyDiscardIt()
+    {
+        const string json = """
+            {"id":42,"slug":"artist","name":"Artist","image":{"uri":"https://example.com/image.jpg"},
+             "bio":null,"website":"not a valid host"}
+            """;
+        var tokenProvider = new StubTokenProvider(_ => Task.FromResult(Result.Ok("token")));
+        using var handler = new StubHttpMessageHandler((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        }));
+        await using var provider = CreateProvider(tokenProvider, handler);
+
+        await Assert.ThrowsAsync<UriFormatException>(() => provider.GetRequiredService<IBeatportClient>()
+            .GetAsync<BeatportArtistDto>(42, TestContext.Current.CancellationToken));
     }
 
     [Fact]

@@ -102,7 +102,8 @@ public sealed class ConfirmationEmailDeliveryTests
         await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
         await sender.SendAsync(verification, identifier, TestContext.Current.CancellationToken);
 
-        Assert.Equal([$"email-confirmation/{verification.Id:N}", $"email-confirmation/{verification.Id:N}"], transport.Keys);
+        var expectedIdempotencyKey = $"email-confirmation/{verification.Id.ToString().Replace("-", string.Empty, StringComparison.Ordinal)}";
+        Assert.Equal([expectedIdempotencyKey, expectedIdempotencyKey], transport.Keys);
         Assert.NotNull(transport.Body);
         using var payload = JsonDocument.Parse(transport.Body);
         var expectedLink = $"https://example.test/base/confirm-email?token={identifier}";
@@ -154,7 +155,7 @@ public sealed class ConfirmationEmailDeliveryTests
         var user = User.Create(
             UserId.Create(Guid.NewGuid()),
             clock.UtcNow.AddMinutes(-2),
-            Beatport2Rss.Api.Domain.Users.EmailAddress.Create("user@example.test"),
+            Common.Domain.Common.EmailAddress.Create("user@example.test"),
             PasswordHash.Create("unused-hash"),
             null,
             null,

@@ -1,6 +1,7 @@
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Common;
 
 namespace Beatport2Rss.Api.Domain.EmailVerifications;
 

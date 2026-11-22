@@ -7,6 +7,7 @@ using Beatport2Rss.Collector.Application.UseCases.Releases.Commands;
 using Beatport2Rss.Collector.Domain.Subscriptions;
 using Beatport2Rss.Collector.Domain.Feeds;
 using Beatport2Rss.Collector.Domain.Users;
+using Beatport2Rss.Collector.Infrastructure.Messaging;
 using Beatport2Rss.Collector.Infrastructure.Persistence;
 using Beatport2Rss.Collector.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Collector.Jobs;
@@ -28,6 +29,8 @@ using Beatport2Rss.Common.Wolverine.Extensions;
 
 using FluentResults;
 
+using JasperFx;
+using JasperFx.CodeGeneration;
 using JasperFx.CodeGeneration.Model;
 using JasperFx.Resources;
 
@@ -43,8 +46,10 @@ using Npgsql;
 using Quartz;
 
 using Wolverine;
+using Wolverine.Configuration;
 using Wolverine.ErrorHandling;
 using Wolverine.Postgresql;
+using Wolverine.Runtime.Handlers;
 
 using Xunit;
 
@@ -52,6 +57,38 @@ namespace Beatport2Rss.Collector.Infrastructure.UnitTests.UseCases.Releases.Comm
 
 public sealed class CollectReleasesRetryTests
 {
+    [Fact]
+    public async Task OnlyCollectionCommandOverridesTheExecutionTimeout()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var observedChains = new ObserveHandlerChainsPolicy();
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services => services.AddWolverine(options =>
+            {
+                options.Discovery.IncludeAssembly(typeof(CollectorApplication).Assembly);
+                options.Policies.Add<TimeoutHandlerPolicy>();
+                options.Policies.Add(observedChains);
+            }))
+            .Build();
+
+        await host.StartAsync(cancellationToken);
+
+        var collection = Assert.Single(observedChains.Chains, chain => chain.MessageType == typeof(CollectReleasesCommand));
+        var queueing = Assert.Single(observedChains.Chains, chain => chain.MessageType == typeof(QueueReleaseCollectionCommand));
+        Assert.Equal(120, collection.ExecutionTimeoutInSeconds);
+        Assert.NotEqual(120, queueing.ExecutionTimeoutInSeconds);
+
+        await host.StopAsync(cancellationToken);
+    }
+
+    private sealed class ObserveHandlerChainsPolicy : IHandlerPolicy
+    {
+        public IReadOnlyList<HandlerChain> Chains { get; private set; } = [];
+
+        public void Apply(IReadOnlyList<HandlerChain> chains, GenerationRules rules, IServiceContainer container) =>
+            Chains = chains;
+    }
+
     [Fact]
     public async Task ConcurrentSubscriptionCreationIsRetriedOnUniqueConflict()
     {

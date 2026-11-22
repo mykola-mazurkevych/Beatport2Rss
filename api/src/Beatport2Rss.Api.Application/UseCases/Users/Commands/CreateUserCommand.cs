@@ -6,6 +6,7 @@ using Beatport2Rss.Api.Application.UseCases.EmailVerifications;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Domain.EmailVerifications;
 using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.FluentResults.Extensions;

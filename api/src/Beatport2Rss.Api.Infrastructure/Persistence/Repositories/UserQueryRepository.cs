@@ -1,7 +1,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.ReadModels.Users;
-using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence.QueryModels;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 

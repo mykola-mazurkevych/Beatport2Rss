@@ -6,7 +6,7 @@ using Beatport2Rss.Common.Domain.Interfaces;
 
 using Light.GuardClauses;
 
-namespace Beatport2Rss.Api.Domain.Users;
+namespace Beatport2Rss.Common.Domain.Common;
 
 public readonly record struct EmailAddress :
     IValueObject

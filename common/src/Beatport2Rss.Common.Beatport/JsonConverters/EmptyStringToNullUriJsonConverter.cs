@@ -17,9 +17,14 @@ public sealed class EmptyStringToNullUriJsonConverter :
         }
 
         var value = reader.GetString();
-        return string.IsNullOrEmpty(value)
-            ? null
-            : new Uri(value, UriKind.Absolute);
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri)
+            ? uri
+            : new Uri($"https://{value}", UriKind.Absolute);
     }
 
     public override void Write(
