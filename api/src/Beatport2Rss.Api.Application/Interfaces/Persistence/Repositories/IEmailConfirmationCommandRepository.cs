@@ -1,7 +1,7 @@
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
-namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 
 public interface IEmailConfirmationCommandRepository
 {

@@ -1,11 +1,11 @@
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
+namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 
 internal sealed class EmailConfirmationCommandRepository(ApiDbContext dbContext) :
     CommandRepository<EmailConfirmation, EmailConfirmationId>(dbContext.EmailConfirmations),

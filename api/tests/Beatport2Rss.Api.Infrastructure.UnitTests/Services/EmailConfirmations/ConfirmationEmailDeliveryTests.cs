@@ -3,7 +3,8 @@ using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
@@ -91,8 +92,8 @@ public sealed class ConfirmationEmailDeliveryTests
         var identifier = Guid.NewGuid();
         var created = new EmailConfirmationCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier);
         var command = new SendConfirmationEmailCommand(identifier);
-        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(created)).Destination?.AbsoluteUri);
-        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(command)).Destination?.AbsoluteUri);
+        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(created)).Destination?.AbsoluteUri, StringComparison.Ordinal);
+        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(command)).Destination?.AbsoluteUri, StringComparison.Ordinal);
 
         await host.StopAsync(cancellationToken);
     }
@@ -134,7 +135,7 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddSingleton<IClock>(clock)
             .AddSingleton<IOptions<EmailConfirmationOptions>>(
                 new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = scenario != "disabled" }))
-            .AddSingleton<IEmailConfirmationQueryRepository>(new ConfirmationRepository(scenario == "missing" ? null : confirmation))
+            .AddSingleton<IEmailConfirmationQueryRepository>(new ConfirmationRepository(scenario == "missing" ? null : ToReadModel(confirmation)))
             .AddSingleton<Func<IConfirmationEmailSender>>(() => throw new InvalidOperationException("The email sender must not be resolved."))
             .BuildServiceProvider();
 
@@ -203,8 +204,8 @@ public sealed class ConfirmationEmailDeliveryTests
         using var services = CreateSenderServices(transport);
         var sender = services.GetRequiredService<ResendConfirmationEmail>();
 
-        await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
-        await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
+        await sender.SendAsync(ToReadModel(confirmation), TestContext.Current.CancellationToken);
+        await sender.SendAsync(ToReadModel(confirmation), TestContext.Current.CancellationToken);
 
         var expectedIdempotencyKey = $"email-confirmation/{confirmation.Id.Value:D}";
         Assert.Equal([expectedIdempotencyKey, expectedIdempotencyKey], transport.Keys);
@@ -237,7 +238,7 @@ public sealed class ConfirmationEmailDeliveryTests
         var cancellationToken = TestContext.Current.CancellationToken;
 
         var expectedException = retry ? typeof(RetryableException) : typeof(PermanentConfirmationEmailException);
-        var failure = await Assert.ThrowsAsync(expectedException, () => sender.SendAsync(confirmation, cancellationToken));
+        var failure = await Assert.ThrowsAsync(expectedException, () => sender.SendAsync(ToReadModel(confirmation), cancellationToken));
         Assert.Null(failure.InnerException);
         Assert.DoesNotContain(identifier.ToString(), failure.ToString(), StringComparison.Ordinal);
         Assert.Single(transport.Keys);
@@ -263,6 +264,9 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddTransient<ResendConfirmationEmail>()
             .BuildServiceProvider();
     }
+
+    private static EmailConfirmationReadModel ToReadModel(EmailConfirmation confirmation) =>
+        new(confirmation.Id, confirmation.CreatedAt, confirmation.EmailAddress, confirmation.ExpiresAt, confirmation.ConfirmedAt);
 
     private static (User, EmailConfirmation) CreateConfirmation(EmailConfirmationId identifier, FixedClock clock, bool expired = false)
     {
@@ -290,10 +294,10 @@ public sealed class ConfirmationEmailDeliveryTests
         public DateOnly UtcToday => DateOnly.FromDateTime(UtcNow.UtcDateTime);
     }
 
-    private sealed class ConfirmationRepository(EmailConfirmation? confirmation) : IEmailConfirmationQueryRepository
+    private sealed class ConfirmationRepository(EmailConfirmationReadModel? confirmation) : IEmailConfirmationQueryRepository
     {
-        public ValueTask<EmailConfirmation?> FindAsync(EmailConfirmationId id, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(confirmation?.Id == id ? confirmation : null);
+        public Task<EmailConfirmationReadModel?> FindAsync(EmailConfirmationId id, CancellationToken cancellationToken = default) =>
+            Task.FromResult(confirmation?.Id == id ? confirmation : null);
     }
 
     private sealed class FakeResendTransport(HttpStatusCode status, string response) : HttpMessageHandler

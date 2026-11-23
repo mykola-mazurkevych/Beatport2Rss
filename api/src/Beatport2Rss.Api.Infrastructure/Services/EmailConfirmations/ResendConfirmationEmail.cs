@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Net;
 
+using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
-using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Email.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
@@ -19,7 +19,7 @@ internal sealed class ResendConfirmationEmail(
     IOptions<DeliveryConfirmationOptions> options) : IConfirmationEmailSender
 {
     public async Task SendAsync(
-        EmailConfirmation confirmation,
+        EmailConfirmationReadModel confirmation,
         CancellationToken cancellationToken)
     {
         var settings = options.Value;

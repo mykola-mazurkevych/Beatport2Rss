@@ -5,7 +5,6 @@ using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
@@ -18,7 +17,6 @@ using Beatport2Rss.Api.Infrastructure.Extensions;
 using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Feeds;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
@@ -190,6 +188,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
+                .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().SessionQueryModels.AsNoTracking())

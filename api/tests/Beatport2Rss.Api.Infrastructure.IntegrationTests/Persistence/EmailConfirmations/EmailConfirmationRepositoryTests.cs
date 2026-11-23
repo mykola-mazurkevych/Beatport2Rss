@@ -1,6 +1,6 @@
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Application.UseCases.Users.IntegrationEvents;
@@ -8,7 +8,6 @@ using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
-using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -60,19 +59,21 @@ public sealed class EmailConfirmationRepositoryTests
 
         try
         {
+            await CreateEmailConfirmationsViewAsync(db, cancellationToken);
             var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Pending, null);
 
             var received = new TaskCompletionSource<EmailConfirmationId>(TaskCreationOptions.RunContinuationsAsynchronously);
             var sender = new Mock<IConfirmationEmailSender>(MockBehavior.Strict);
-            sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmation>(), It.IsAny<CancellationToken>()))
-                .Callback<EmailConfirmation, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
+            sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmationReadModel>(), It.IsAny<CancellationToken>()))
+                .Callback<EmailConfirmationReadModel, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
                 .Returns(Task.CompletedTask);
             using var host = Host.CreateDefaultBuilder()
                 .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
                 .ConfigureServices(services =>
                 {
                     services.AddDbContext<ApiDbContext>(options => options.UseNpgsql(connection.ConnectionString));
+                    services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking());
                     services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users);
                     services.AddTransient<IUserCommandRepository, UserCommandRepository>();
                     services.AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>();
@@ -240,6 +241,7 @@ public sealed class EmailConfirmationRepositoryTests
 
         try
         {
+            await CreateEmailConfirmationsViewAsync(db, cancellationToken);
             var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Inactive, null);
             var id = EmailConfirmationId.Create(Guid.NewGuid());
@@ -251,8 +253,14 @@ public sealed class EmailConfirmationRepositoryTests
             db.ChangeTracker.Clear();
 
             var commandRepository = new EmailConfirmationCommandRepository(db);
-            var queryRepository = new EmailConfirmationQueryRepository(db);
-            Assert.Null((await queryRepository.FindAsync(id, cancellationToken))!.ConfirmedAt);
+            var queryRepository = new EmailConfirmationQueryRepository(db.EmailConfirmationQueryModels.AsNoTracking());
+            var readModel = await queryRepository.FindAsync(id, cancellationToken);
+            Assert.NotNull(readModel);
+            Assert.Equal(confirmation.Id, readModel.Id);
+            Assert.Equal(confirmation.CreatedAt, readModel.CreatedAt);
+            Assert.Equal(confirmation.EmailAddress.Value, readModel.EmailAddress.Value);
+            Assert.Equal(confirmation.ExpiresAt, readModel.ExpiresAt);
+            Assert.Null(readModel.ConfirmedAt);
             Assert.False(await commandRepository.ConfirmAsync(id, new FixedClock(confirmation.ExpiresAt), cancellationToken));
             db.ChangeTracker.Clear();
 
@@ -278,6 +286,13 @@ public sealed class EmailConfirmationRepositoryTests
             Assert.Equal(UserStatus.Inactive, (await db.Users.SingleAsync(cancellationToken)).Status);
 
             var changedUser = await db.Users.SingleAsync(cancellationToken);
+            changedUser.UpdateEmailAddress(EmailAddress.Create("USER@example.test"));
+            db.Entry(changedUser).Property(value => value.EmailAddress).IsModified = true;
+            await db.SaveChangesAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+            Assert.Null(await queryRepository.FindAsync(id, cancellationToken));
+
+            changedUser = await db.Users.SingleAsync(cancellationToken);
             changedUser.UpdateEmailAddress(EmailAddress.Create("new@example.test"));
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
@@ -288,6 +303,16 @@ public sealed class EmailConfirmationRepositoryTests
         {
             await db.Database.EnsureDeletedAsync(CancellationToken.None);
         }
+    }
+
+    private static async Task CreateEmailConfirmationsViewAsync(ApiDbContext db, CancellationToken cancellationToken)
+    {
+        await using var stream = typeof(ApiDbContext).Assembly.GetManifestResourceStream(
+            "Beatport2Rss.Api.Infrastructure.Persistence.Views.vwEmailConfirmations.Up.sql")
+            ?? throw new InvalidOperationException("The email confirmation view script was not found.");
+        using var reader = new StreamReader(stream);
+        var sql = await reader.ReadToEndAsync(cancellationToken);
+        await db.Database.ExecuteSqlRawAsync(sql, cancellationToken);
     }
 
     private sealed class FixedClock(DateTimeOffset utcNow) : IClock

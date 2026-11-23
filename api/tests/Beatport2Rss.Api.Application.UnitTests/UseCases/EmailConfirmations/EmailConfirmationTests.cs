@@ -1,7 +1,8 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
+using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
@@ -76,7 +77,7 @@ public sealed class EmailConfirmationTests
         if (scenario != "missing")
         {
             _queryRepository.Setup(repository => repository.FindAsync(id!.Value, cancellationToken))
-                .ReturnsAsync(scenario == "confirmed" ? confirmation : null);
+                .ReturnsAsync(scenario is "unused" or "confirmed" ? ToReadModel(confirmation) : null);
         }
 
         var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
@@ -101,7 +102,7 @@ public sealed class EmailConfirmationTests
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(IssuedAt);
         _queryRepository.Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken))
-            .ReturnsAsync(confirmation);
+            .ReturnsAsync(ToReadModel(confirmation));
 
         var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
         var result = await handler.Handle(new GetEmailConfirmationQuery(confirmation.Id), cancellationToken);
@@ -110,6 +111,9 @@ public sealed class EmailConfirmationTests
         Assert.Equal(UserStatus.Pending, user.Status);
         Assert.Null(confirmation.ConfirmedAt);
     }
+
+    private static EmailConfirmationReadModel ToReadModel(EmailConfirmation confirmation) =>
+        new(confirmation.Id, confirmation.CreatedAt, confirmation.EmailAddress, confirmation.ExpiresAt, confirmation.ConfirmedAt);
 
     private static (User, EmailConfirmation) CreateConfirmation(UserStatus status)
     {

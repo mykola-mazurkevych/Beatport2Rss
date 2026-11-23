@@ -1,5 +1,4 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
@@ -15,7 +14,7 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 public sealed record CreateEmailConfirmationCommand(Guid UserId);
 
 public sealed class CreateEmailConfirmationCommandHandler(
-    IUserCommandRepository users,
+    IUserCommandRepository userCommandRepository,
     IEmailConfirmationCommandRepository emailConfirmationCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
@@ -33,7 +32,8 @@ public sealed class CreateEmailConfirmationCommandHandler(
             return;
         }
 
-        var user = await users.FindAsync(UserId.Create(command.UserId), cancellationToken);
+        var userId = UserId.Create(command.UserId);
+        var user = await userCommandRepository.FindAsync(userId, cancellationToken);
         if (user is null)
         {
             CreateEmailConfirmationCommandHandlerLoggerMessages.UserNotFound(logger, command.UserId);

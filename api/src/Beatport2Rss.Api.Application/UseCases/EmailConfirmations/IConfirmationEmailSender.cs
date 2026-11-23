@@ -1,8 +1,8 @@
-using Beatport2Rss.Api.Domain.EmailConfirmations;
+using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
 public interface IConfirmationEmailSender
 {
-    Task SendAsync(EmailConfirmation confirmation, CancellationToken cancellationToken);
+    Task SendAsync(EmailConfirmationReadModel confirmation, CancellationToken cancellationToken);
 }

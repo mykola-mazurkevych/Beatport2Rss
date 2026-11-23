@@ -1,4 +1,4 @@
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.FluentResults.Extensions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -28,7 +28,7 @@ internal sealed class GetEmailConfirmationQueryHandler(
             ? await repository.FindAsync(id, cancellationToken)
             : null;
 
-        return confirmation is not null && confirmation.IsReadableAt(clock.UtcNow)
+        return confirmation is not null && (confirmation.ConfirmedAt is not null || clock.UtcNow < confirmation.ExpiresAt)
             ? Result.Ok(new EmailConfirmationState(confirmation.ConfirmedAt is not null, confirmation.ExpiresAt))
             : EmailConfirmationErrors.InvalidLinkResult().ToResult<EmailConfirmationState>();
     }
