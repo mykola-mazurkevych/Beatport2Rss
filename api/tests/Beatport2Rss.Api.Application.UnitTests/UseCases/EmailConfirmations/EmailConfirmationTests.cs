@@ -45,7 +45,7 @@ public sealed class EmailConfirmationTests
     public async Task Put_RequiresAnExplicitTrue(bool? confirmed)
     {
         var handler = new ConfirmEmailCommandHandler(_commandRepository.Object, _clock.Object, _options);
-        var result = await handler.Handle(new ConfirmEmailCommand(EmailConfirmationIdentifier.Generate(), confirmed), TestContext.Current.CancellationToken);
+        var result = await handler.Handle(new ConfirmEmailCommand(EmailConfirmationId.Create(Guid.NewGuid()), confirmed), TestContext.Current.CancellationToken);
 
         Assert.Equal(EmailConfirmationErrors.ConfirmationRequired, Assert.Single(result.Errors).Message);
         _commandRepository.VerifyNoOtherCalls();
@@ -70,7 +70,7 @@ public sealed class EmailConfirmationTests
         EmailConfirmationId? id = scenario switch
         {
             "missing" => null,
-            "unknown" => EmailConfirmationIdentifier.Generate(),
+            "unknown" => EmailConfirmationId.Create(Guid.NewGuid()),
             _ => confirmation.Id,
         };
         if (scenario != "missing")
@@ -109,18 +109,6 @@ public sealed class EmailConfirmationTests
         Assert.Equal(new EmailConfirmationState(false, confirmation.ExpiresAt), result.Value);
         Assert.Equal(UserStatus.Pending, user.Status);
         Assert.Null(confirmation.ConfirmedAt);
-    }
-
-    [Fact]
-    public void Identifier_GeneratesDistinctIdsAndRejectsInvalidInput()
-    {
-        var first = EmailConfirmationIdentifier.Generate();
-        var second = EmailConfirmationIdentifier.Generate();
-        Assert.NotEqual(first, second);
-        Assert.Equal(first, EmailConfirmationIdentifier.Parse(first.ToString()));
-        Assert.Null(EmailConfirmationIdentifier.Parse(null));
-        Assert.Null(EmailConfirmationIdentifier.Parse("not a token"));
-        Assert.Null(EmailConfirmationIdentifier.Parse(Guid.Empty.ToString()));
     }
 
     private static (User, EmailConfirmation) CreateConfirmation(UserStatus status)

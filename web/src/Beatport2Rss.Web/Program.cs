@@ -80,8 +80,8 @@ app.Use(async (context, next) =>
     catch (Exception exception) when (sensitive)
 #pragma warning restore CA1031
     {
-        app.Logger.LogError(
-            "Confirmation web request failed ({ExceptionType}); trace {TraceId}.",
+        ProgramLoggerMessages.ConfirmationRequestFailed(
+            app.Logger,
             exception.GetType().Name,
             context.TraceIdentifier);
         if (context.Response.HasStarted)
@@ -128,3 +128,9 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+internal static partial class ProgramLoggerMessages
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Confirmation web request failed ({ExceptionType}); trace {TraceId}.")]
+    public static partial void ConfirmationRequestFailed(ILogger logger, string exceptionType, string traceId);
+}

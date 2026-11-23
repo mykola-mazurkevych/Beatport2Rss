@@ -14,47 +14,56 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 
 public sealed record CreateEmailConfirmationCommand(Guid UserId);
 
-public sealed partial class CreateEmailConfirmationCommandHandler(
+public sealed class CreateEmailConfirmationCommandHandler(
     IUserCommandRepository users,
-    IEmailConfirmationCommandRepository confirmations,
-    IIntegrationEventOutbox outbox,
+    IEmailConfirmationCommandRepository emailConfirmationCommandRepository,
+    IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
     IClock clock,
-    IOptions<EmailConfirmationOptions> options,
+    IOptions<EmailConfirmationOptions> emailConfirmationOptions,
     ILogger<CreateEmailConfirmationCommandHandler> logger)
 {
+    private readonly EmailConfirmationOptions _emailConfirmationOptions = emailConfirmationOptions.Value;
+
     public async Task HandleAsync(CreateEmailConfirmationCommand command, CancellationToken cancellationToken)
     {
-        if (!options.Value.Enabled)
+        if (!_emailConfirmationOptions.Enabled)
         {
+            CreateEmailConfirmationCommandHandlerLoggerMessages.EmailConfirmationDisabled(logger);
             return;
         }
 
         var user = await users.FindAsync(UserId.Create(command.UserId), cancellationToken);
         if (user is null)
         {
-            LogMissingUser(logger, command.UserId);
+            CreateEmailConfirmationCommandHandlerLoggerMessages.UserNotFound(logger, command.UserId);
             return;
         }
 
-        var expiresAt = user.CreatedAt + options.Value.Lifetime;
-        if (expiresAt <= clock.UtcNow)
-        {
-            LogExpired(logger, command.UserId);
-            return;
-        }
+        var emailConfirmationId = EmailConfirmationId.Create(Guid.NewGuid());
+        var emailConfirmation = EmailConfirmation.Create(
+            emailConfirmationId,
+            createdAt: clock.UtcNow,
+            user.Id,
+            user.EmailAddress,
+            expiresAt: clock.UtcNow + _emailConfirmationOptions.Lifetime);
+        await emailConfirmationCommandRepository.AddAsync(emailConfirmation, cancellationToken);
 
-        var identifier = EmailConfirmationIdentifier.Generate();
-        var confirmation = EmailConfirmation.Create(
-            identifier, user.CreatedAt, user.Id, user.EmailAddress, expiresAt);
-        await confirmations.AddAsync(confirmation, cancellationToken);
-        await outbox.EnqueueAsync(new EmailConfirmationCreated(Guid.NewGuid(), clock.UtcNow, identifier.ToString()), cancellationToken);
+        var emailConfirmationCreated = new EmailConfirmationCreated(
+            Id: Guid.NewGuid(),
+            OccurredAt: clock.UtcNow,
+            emailConfirmationId.Value);
+        await integrationEventOutbox.EnqueueAsync(emailConfirmationCreated, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
+}
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Skipped confirmation email because user {UserId} no longer exists.")]
-    private static partial void LogMissingUser(ILogger logger, Guid userId);
+internal static partial class CreateEmailConfirmationCommandHandlerLoggerMessages
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email confirmation disabled.")]
+    public static partial void EmailConfirmationDisabled(ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Skipped confirmation email because the link for user {UserId} has expired.")]
-    private static partial void LogExpired(ILogger logger, Guid userId);
+    [LoggerMessage(Level = LogLevel.Information, Message = "User {UserId} not found.")]
+    public static partial void UserNotFound(ILogger logger, Guid userId);
 }

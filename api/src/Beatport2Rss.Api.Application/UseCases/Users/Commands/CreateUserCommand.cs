@@ -76,7 +76,6 @@ internal sealed class CreateUserCommandHandler(
             command.LastName,
             UserStatus.Pending,
             countryCode);
-
         await userCommandRepository.AddAsync(user, cancellationToken);
 
         var userCreated = new UserCreated(
@@ -84,6 +83,7 @@ internal sealed class CreateUserCommandHandler(
             OccurredAt: user.CreatedAt,
             user.Id.Value);
         await integrationEventOutbox.EnqueueAsync(userCreated, cancellationToken);
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();

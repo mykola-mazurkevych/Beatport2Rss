@@ -4,5 +4,6 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEv
 
 public static class EmailConfirmationCreatedHandler
 {
-    public static SendConfirmationEmailCommand Handle(EmailConfirmationCreated message) => new(message.Identifier);
+    public static SendConfirmationEmailCommand Handle(EmailConfirmationCreated message) =>
+        new(message.EmailConfirmationId);
 }

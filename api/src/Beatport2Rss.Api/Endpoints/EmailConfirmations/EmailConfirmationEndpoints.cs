@@ -6,6 +6,7 @@ using Asp.Versioning.Builder;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 
 using Mediator;
 
@@ -39,7 +40,7 @@ internal static class EmailConfirmationEndpoints
 
     private static async Task<IResult> GetAsync(string id, IMediator mediator, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetEmailConfirmationQuery(EmailConfirmationIdentifier.Parse(id)), cancellationToken);
+        var result = await mediator.Send(new GetEmailConfirmationQuery(ParseIdentifier(id)), cancellationToken);
         return result.IsSuccess ? Results.Ok(result.Value) : Invalid(result.Errors[0].Message);
     }
 
@@ -62,12 +63,17 @@ internal static class EmailConfirmationEndpoints
             }
         }
 
-        var result = await mediator.Send(new ConfirmEmailCommand(EmailConfirmationIdentifier.Parse(id), body?.Confirmed), cancellationToken);
+        var result = await mediator.Send(new ConfirmEmailCommand(ParseIdentifier(id), body?.Confirmed), cancellationToken);
         return result.IsSuccess ? Results.NoContent() : Invalid(result.Errors[0].Message);
     }
 
     private static IResult Invalid(string detail) =>
         Results.Problem(detail: detail, statusCode: StatusCodes.Status400BadRequest);
+
+    private static EmailConfirmationId? ParseIdentifier(string id) =>
+        Guid.TryParseExact(id, "D", out var value) && value != Guid.Empty
+            ? EmailConfirmationId.Create(value)
+            : null;
 
     internal sealed record ConfirmEmailRequest([property: JsonRequired] bool Confirmed);
 }

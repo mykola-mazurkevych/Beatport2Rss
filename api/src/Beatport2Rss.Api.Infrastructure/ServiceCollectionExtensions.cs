@@ -52,7 +52,6 @@ using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
-using Wolverine;
 using Wolverine.ErrorHandling;
 
 using ApplicationConfirmationOptions = Beatport2Rss.Api.Application.UseCases.EmailConfirmations.EmailConfirmationOptions;
@@ -72,8 +71,7 @@ public static class ServiceCollectionExtensions
                 .AddEmailClient(configuration)
                 .AddTransient<IConfirmationEmailSender>(provider =>
                     ActivatorUtilities.CreateInstance<ResendConfirmationEmail>(provider))
-                .AddTransient<Func<IConfirmationEmailSender>>(provider =>
-                    () => provider.GetRequiredService<IConfirmationEmailSender>())
+                .AddTransient<Func<IConfirmationEmailSender>>(provider => provider.GetRequiredService<IConfirmationEmailSender>)
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()

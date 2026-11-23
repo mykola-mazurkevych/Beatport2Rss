@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.Extensions.Logging;
@@ -6,48 +7,60 @@ using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 
-public sealed record SendConfirmationEmailCommand(string Identifier)
-{
-    public override string ToString() => nameof(SendConfirmationEmailCommand);
-}
+public sealed record SendConfirmationEmailCommand(Guid EmailConfirmationId);
 
-public sealed partial class SendConfirmationEmailCommandHandler(
-    IEmailConfirmationQueryRepository repository,
-    Func<IConfirmationEmailSender> delivery,
+public sealed class SendConfirmationEmailCommandHandler(
+    IEmailConfirmationQueryRepository emailConfirmationQueryRepository,
+    Func<IConfirmationEmailSender> delivery, // TOOD: WTF??
     IClock clock,
-    IOptions<EmailConfirmationOptions> options,
+    IOptions<EmailConfirmationOptions> emailConfirmationOptions,
     ILogger<SendConfirmationEmailCommandHandler> logger)
 {
+    private readonly EmailConfirmationOptions _emailConfirmationOptions = emailConfirmationOptions.Value;
+
     public async Task HandleAsync(SendConfirmationEmailCommand command, CancellationToken cancellationToken)
     {
-        if (!options.Value.Enabled)
+        if (!_emailConfirmationOptions.Enabled)
         {
-            LogDisabled(logger);
+            SendConfirmationEmailCommandHandlerLoggerMessages.EmailConfirmationDisabled(logger);
             return;
         }
 
-        if (EmailConfirmationIdentifier.Parse(command.Identifier) is not { } id)
+        var emailConfirmationId = EmailConfirmationId.Create(command.EmailConfirmationId);
+        var emailConfirmation = await emailConfirmationQueryRepository.FindAsync(emailConfirmationId, cancellationToken);
+        if (emailConfirmation is null)
         {
-            LogInvalidMessage(logger);
+            SendConfirmationEmailCommandHandlerLoggerMessages.EmailConfirmationNotFound(logger, emailConfirmationId.Value);
             return;
         }
 
-        var confirmation = await repository.FindAsync(id, cancellationToken);
-        if (confirmation is null || confirmation.ConfirmedAt is not null || confirmation.ExpiresAt <= clock.UtcNow)
+        if (emailConfirmation.ConfirmedAt is not null)
         {
-            LogUnsendableConfirmation(logger);
+            SendConfirmationEmailCommandHandlerLoggerMessages.EmailConfirmationAlreadyConfirmed(logger, emailConfirmationId.Value);
             return;
         }
 
-        await delivery().SendAsync(confirmation, cancellationToken);
+        if (emailConfirmation.ExpiresAt <= clock.UtcNow)
+        {
+            SendConfirmationEmailCommandHandlerLoggerMessages.EmailConfirmationExpired(logger, emailConfirmationId.Value);
+            return;
+        }
+
+        await delivery().SendAsync(emailConfirmation, cancellationToken);
     }
+}
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Skipped confirmation email because delivery is disabled.")]
-    private static partial void LogDisabled(ILogger logger);
+internal static partial class SendConfirmationEmailCommandHandlerLoggerMessages
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email confirmation disabled.")]
+    public static partial void EmailConfirmationDisabled(ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Skipped confirmation email because the delivery message is invalid.")]
-    private static partial void LogInvalidMessage(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email confirmation {EmailConfirmationId} not found.")]
+    public static partial void EmailConfirmationNotFound(ILogger logger, Guid emailConfirmationId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Skipped confirmation email because the confirmation is missing, expired, or already completed.")]
-    private static partial void LogUnsendableConfirmation(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email confirmation {EmailConfirmationId} is already confirmed.")]
+    public static partial void EmailConfirmationAlreadyConfirmed(ILogger logger, Guid emailConfirmationId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Email confirmation {EmailConfirmationId} is expired.")]
+    public static partial void EmailConfirmationExpired(ILogger logger, Guid emailConfirmationId);
 }

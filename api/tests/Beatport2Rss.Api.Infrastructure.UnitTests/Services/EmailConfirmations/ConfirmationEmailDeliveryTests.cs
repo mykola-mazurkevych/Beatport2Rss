@@ -10,6 +10,7 @@ using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
+using Beatport2Rss.Common.Domain.Exceptions;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.Email;
 using Beatport2Rss.Common.IntegrationEvents.Users;
@@ -87,7 +88,7 @@ public sealed class ConfirmationEmailDeliveryTests
         await host.StartAsync(cancellationToken);
 
         var bus = host.Services.GetRequiredService<IMessageBus>();
-        var identifier = EmailConfirmationIdentifier.Generate().ToString();
+        var identifier = Guid.NewGuid();
         var created = new EmailConfirmationCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier);
         var command = new SendConfirmationEmailCommand(identifier);
         Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(created)).Destination?.AbsoluteUri);
@@ -97,21 +98,20 @@ public sealed class ConfirmationEmailDeliveryTests
     }
 
     [Fact]
-    public void DurableMessageRoundTripsWithoutExposingIdentifierInToString()
+    public void DurableMessagesRoundTripAndEventDoesNotExposeIdentifierInToString()
     {
-        var identifier = EmailConfirmationIdentifier.Generate().ToString();
+        var identifier = Guid.NewGuid();
         var message = new SendConfirmationEmailCommand(identifier);
         var payload = JsonSerializer.SerializeToUtf8Bytes(message);
         var restored = JsonSerializer.Deserialize<SendConfirmationEmailCommand>(payload);
 
         Assert.NotNull(restored);
-        Assert.Equal(identifier, restored.Identifier);
-        Assert.DoesNotContain(identifier, message.ToString(), StringComparison.Ordinal);
+        Assert.Equal(identifier, restored.EmailConfirmationId);
         var created = new EmailConfirmationCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier);
         var restoredEvent = JsonSerializer.Deserialize<EmailConfirmationCreated>(JsonSerializer.Serialize(created));
         Assert.NotNull(restoredEvent);
-        Assert.Equal(identifier, restoredEvent.Identifier);
-        Assert.DoesNotContain(identifier, created.ToString(), StringComparison.Ordinal);
+        Assert.Equal(identifier, restoredEvent.EmailConfirmationId);
+        Assert.DoesNotContain(identifier.ToString(), created.ToString(), StringComparison.Ordinal);
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public sealed class ConfirmationEmailDeliveryTests
     [InlineData("confirmed")]
     public async Task UndeliverableMessageDoesNotResolveProvider(string scenario)
     {
-        var identifier = EmailConfirmationIdentifier.Generate();
+        var identifier = EmailConfirmationId.Create(Guid.NewGuid());
         var clock = new FixedClock();
         var (user, confirmation) = CreateConfirmation(identifier, clock, expired: scenario == "expired");
         if (scenario == "confirmed")
@@ -139,9 +139,17 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddSingleton<Func<IConfirmationEmailSender>>(() => throw new InvalidOperationException("The email sender must not be resolved."))
             .BuildServiceProvider();
 
-        var message = new SendConfirmationEmailCommand(scenario == "invalid" ? "invalid" : identifier.ToString());
-        await ActivatorUtilities.CreateInstance<SendConfirmationEmailCommandHandler>(services)
-            .HandleAsync(message, TestContext.Current.CancellationToken);
+        var message = new SendConfirmationEmailCommand(scenario == "invalid" ? Guid.Empty : identifier.Value);
+        var handler = ActivatorUtilities.CreateInstance<SendConfirmationEmailCommandHandler>(services);
+        if (scenario == "invalid")
+        {
+            await Assert.ThrowsAsync<InvalidValueObjectValueException>(() =>
+                handler.HandleAsync(message, TestContext.Current.CancellationToken));
+        }
+        else
+        {
+            await handler.HandleAsync(message, TestContext.Current.CancellationToken);
+        }
     }
 
     [Theory]
@@ -190,7 +198,7 @@ public sealed class ConfirmationEmailDeliveryTests
     [Fact]
     public async Task SdkRequestUsesTemplateVariablesAndStableIdempotencyKey()
     {
-        var identifier = EmailConfirmationIdentifier.Generate();
+        var identifier = EmailConfirmationId.Create(Guid.NewGuid());
         var (_, confirmation) = CreateConfirmation(identifier, new FixedClock());
         using var transport = new FakeResendTransport(HttpStatusCode.OK, """{"id":"c3dcb630-9e41-4f90-bccc-87267425c12e"}""");
         using var services = CreateSenderServices(transport);
@@ -221,7 +229,7 @@ public sealed class ConfirmationEmailDeliveryTests
     [InlineData(422, "validation_error", false)]
     public async Task ProviderFailuresAreClassifiedAndDoNotExposeResponseDetails(int status, string errorName, bool retry)
     {
-        var identifier = EmailConfirmationIdentifier.Generate();
+        var identifier = EmailConfirmationId.Create(Guid.NewGuid());
         var (_, confirmation) = CreateConfirmation(identifier, new FixedClock());
         using var transport = new FakeResendTransport(
             (HttpStatusCode)status, JsonSerializer.Serialize(new { statusCode = status, name = errorName, message = identifier.ToString() }));

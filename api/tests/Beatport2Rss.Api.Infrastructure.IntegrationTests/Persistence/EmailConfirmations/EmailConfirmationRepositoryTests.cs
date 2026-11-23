@@ -149,7 +149,7 @@ public sealed class EmailConfirmationRepositoryTests
         var identifiers = new List<EmailConfirmationId>();
         var delivery = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
         delivery.Setup(value => value.EnqueueAsync(It.IsAny<EmailConfirmationCreated>(), It.IsAny<CancellationToken>()))
-            .Callback<EmailConfirmationCreated, CancellationToken>((message, _) => identifiers.Add(EmailConfirmationIdentifier.Parse(message.Identifier)!.Value))
+            .Callback<EmailConfirmationCreated, CancellationToken>((message, _) => identifiers.Add(EmailConfirmationId.Create(message.EmailConfirmationId)))
             .Returns(Task.CompletedTask);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
         unit.Setup(value => value.SaveChangesAsync(cancellationToken))
@@ -160,7 +160,7 @@ public sealed class EmailConfirmationRepositoryTests
             .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users)
             .AddTransient<IUserCommandRepository, UserCommandRepository>()
             .AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>()
-            .AddSingleton<IClock>(new FixedClock(IssuedAt))
+            .AddSingleton<IClock>(new FixedClock(IssuedAt.AddHours(25)))
             .AddSingleton<IOptions<EmailConfirmationOptions>>(new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = true }))
             .AddSingleton(delivery.Object)
             .AddSingleton(unit.Object)
@@ -179,7 +179,8 @@ public sealed class EmailConfirmationRepositoryTests
             Assert.NotEqual(message.Id, confirmation.Id.Value);
             Assert.Equal(user.Id, confirmation.UserId);
             Assert.Equal(user.EmailAddress, confirmation.EmailAddress);
-            Assert.Equal(IssuedAt.AddHours(24), confirmation.ExpiresAt);
+            Assert.Equal(IssuedAt.AddHours(25), confirmation.CreatedAt);
+            Assert.Equal(IssuedAt.AddHours(49), confirmation.ExpiresAt);
         });
         delivery.Verify(value => value.EnqueueAsync(It.IsAny<EmailConfirmationCreated>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         unit.Verify(value => value.SaveChangesAsync(cancellationToken), Times.Exactly(2));
@@ -188,7 +189,6 @@ public sealed class EmailConfirmationRepositoryTests
     [Theory]
     [InlineData("disabled")]
     [InlineData("missing")]
-    [InlineData("expired")]
     public async Task UserCreated_DoesNotStageUnsendableConfirmation(string scenario)
     {
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -212,7 +212,7 @@ public sealed class EmailConfirmationRepositoryTests
             .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users)
             .AddTransient<IUserCommandRepository, UserCommandRepository>()
             .AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>()
-            .AddSingleton<IClock>(new FixedClock(scenario == "expired" ? IssuedAt.AddHours(24) : IssuedAt))
+            .AddSingleton<IClock>(new FixedClock(IssuedAt))
             .AddSingleton<IOptions<EmailConfirmationOptions>>(new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = scenario != "disabled" }))
             .AddSingleton(delivery.Object)
             .AddSingleton(unit.Object)
@@ -242,7 +242,7 @@ public sealed class EmailConfirmationRepositoryTests
         {
             var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Inactive, null);
-            var id = EmailConfirmationIdentifier.Generate();
+            var id = EmailConfirmationId.Create(Guid.NewGuid());
             var confirmation = EmailConfirmation.Create(
                 id, user.CreatedAt, user.Id, user.EmailAddress, IssuedAt.AddHours(24));
             await db.Users.AddAsync(user, cancellationToken);

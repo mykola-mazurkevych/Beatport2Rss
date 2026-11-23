@@ -5,5 +5,6 @@ namespace Beatport2Rss.Api.Application.UseCases.Users.IntegrationEvents;
 
 public static class UserCreatedHandler
 {
-    public static CreateEmailConfirmationCommand Handle(UserCreated message) => new(message.UserId);
+    public static CreateEmailConfirmationCommand Handle(UserCreated message) =>
+        new(message.UserId);
 }
