@@ -39,7 +39,7 @@ internal sealed partial class SendConfirmationEmailHandler : MessageHandler<Send
             return;
         }
 
-        if (message.Identifier is not { } identifier || EmailConfirmationIdentifier.Hash(identifier) is not { } hash)
+        if (EmailConfirmationIdentifier.Parse(message.Identifier) is not { } id)
         {
             LogInvalidMessage(logger);
             return;
@@ -47,7 +47,7 @@ internal sealed partial class SendConfirmationEmailHandler : MessageHandler<Send
 
         var repository = services.GetRequiredService<IEmailConfirmationQueryRepository>();
         var clock = services.GetRequiredService<IClock>();
-        var confirmation = await repository.FindAsync(hash, cancellationToken);
+        var confirmation = await repository.FindAsync(id, cancellationToken);
         if (confirmation is null || confirmation.ConfirmedAt is not null || confirmation.ExpiresAt <= clock.UtcNow)
         {
             LogUnsendableConfirmation(logger);
@@ -55,7 +55,7 @@ internal sealed partial class SendConfirmationEmailHandler : MessageHandler<Send
         }
 
         var delivery = services.GetRequiredService<ResendConfirmationEmail>();
-        await delivery.SendAsync(confirmation, identifier, cancellationToken);
+        await delivery.SendAsync(confirmation, cancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Skipped confirmation email because delivery is disabled.")]

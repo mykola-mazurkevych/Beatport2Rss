@@ -2,9 +2,8 @@ using System.Globalization;
 using System.Net;
 using System.Text.Encodings.Web;
 
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
-using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using Microsoft.Extensions.Options;
@@ -19,12 +18,11 @@ internal sealed class ResendConfirmationEmail(
 {
     public async Task SendAsync(
         EmailConfirmation confirmation,
-        string identifier,
         CancellationToken cancellationToken)
     {
         var settings = options.Value;
         var baseUri = new Uri($"{settings.PublicWebBaseUrl!.AbsoluteUri.TrimEnd('/')}/", UriKind.Absolute);
-        var link = new Uri(baseUri, $"confirm-email?token={Uri.EscapeDataString(identifier)}").AbsoluteUri;
+        var link = new Uri(baseUri, $"confirm-email?token={confirmation.Id}").AbsoluteUri;
         var expiresAt = confirmation.ExpiresAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
         var hours = (confirmation.ExpiresAt - confirmation.CreatedAt).TotalHours.ToString("0.###########", CultureInfo.InvariantCulture);
         var validity = $"This link is valid for {hours} hours from issuance. This link expires at {expiresAt}.";

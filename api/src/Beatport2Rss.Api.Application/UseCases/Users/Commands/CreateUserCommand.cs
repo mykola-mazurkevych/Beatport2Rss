@@ -1,10 +1,7 @@
 using Beatport2Rss.Api.Application.Interfaces.Messages;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
-using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
@@ -20,8 +17,6 @@ using FluentResults;
 using FluentValidation;
 
 using Mediator;
-
-using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.Users.Commands;
 
@@ -51,9 +46,6 @@ internal sealed class CreateUserCommandHandler(
     IPasswordHasher passwordHasher,
     IUserCommandRepository userCommandRepository,
     IIntegrationEventOutbox integrationEventOutbox,
-    IEmailConfirmationCommandRepository confirmationRepository,
-    IConfirmationEmailOutbox confirmationEmailOutbox,
-    IOptions<EmailConfirmationOptions> confirmationOptions,
     IUnitOfWork unitOfWork) :
     ICommandHandler<CreateUserCommand, Result>
 {
@@ -86,20 +78,6 @@ internal sealed class CreateUserCommandHandler(
             countryCode);
 
         await userCommandRepository.AddAsync(user, cancellationToken);
-
-        if (confirmationOptions.Value.Enabled)
-        {
-            var identifier = EmailConfirmationIdentifier.Generate();
-            var secretHash = EmailConfirmationIdentifier.Hash(identifier)
-                ?? throw new InvalidOperationException("The generated confirmation identifier is invalid.");
-            var confirmation = EmailConfirmation.Create(
-                EmailConfirmationId.Create(Guid.CreateVersion7()),
-                user,
-                secretHash,
-                user.CreatedAt + confirmationOptions.Value.Lifetime);
-            await confirmationRepository.AddAsync(confirmation, cancellationToken);
-            await confirmationEmailOutbox.EnqueueAsync(identifier);
-        }
 
         var userCreated = new UserCreated(
             Id: Guid.CreateVersion7(),

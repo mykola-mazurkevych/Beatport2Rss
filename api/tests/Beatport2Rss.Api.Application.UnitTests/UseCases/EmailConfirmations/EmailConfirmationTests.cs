@@ -43,7 +43,7 @@ public sealed class EmailConfirmationTests
     public async Task Put_RequiresAnExplicitTrue(bool? confirmed)
     {
         var handler = new ConfirmEmailCommandHandler(_commandRepository.Object, _clock.Object, _options);
-        var result = await handler.Handle(new ConfirmEmailCommand(CreateHash('A'), confirmed), TestContext.Current.CancellationToken);
+        var result = await handler.Handle(new ConfirmEmailCommand(EmailConfirmationIdentifier.Generate(), confirmed), TestContext.Current.CancellationToken);
 
         Assert.Equal(EmailConfirmationErrors.ConfirmationRequired, Assert.Single(result.Errors).Message);
         _commandRepository.VerifyNoOtherCalls();
@@ -65,20 +65,20 @@ public sealed class EmailConfirmationTests
         var now = confirmation.ExpiresAt;
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(now);
-        SecretHash? hash = scenario switch
+        EmailConfirmationId? id = scenario switch
         {
             "missing" => null,
-            "unknown" => CreateHash('B'),
-            _ => confirmation.SecretHash,
+            "unknown" => EmailConfirmationIdentifier.Generate(),
+            _ => confirmation.Id,
         };
         if (scenario != "missing")
         {
-            _queryRepository.Setup(repository => repository.FindAsync(hash!.Value, cancellationToken))
+            _queryRepository.Setup(repository => repository.FindAsync(id!.Value, cancellationToken))
                 .ReturnsAsync(scenario == "confirmed" ? confirmation : null);
         }
 
         var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
-        var result = await handler.Handle(new GetEmailConfirmationQuery(hash), cancellationToken);
+        var result = await handler.Handle(new GetEmailConfirmationQuery(id), cancellationToken);
 
         if (confirmed)
         {
@@ -98,11 +98,11 @@ public sealed class EmailConfirmationTests
         var (user, confirmation) = CreateConfirmation(UserStatus.Pending);
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(IssuedAt);
-        _queryRepository.Setup(repository => repository.FindAsync(confirmation.SecretHash, cancellationToken))
+        _queryRepository.Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken))
             .ReturnsAsync(confirmation);
 
         var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
-        var result = await handler.Handle(new GetEmailConfirmationQuery(confirmation.SecretHash), cancellationToken);
+        var result = await handler.Handle(new GetEmailConfirmationQuery(confirmation.Id), cancellationToken);
 
         Assert.Equal(new EmailConfirmationState(false, confirmation.ExpiresAt), result.Value);
         Assert.Equal(UserStatus.Pending, user.Status);
@@ -110,18 +110,15 @@ public sealed class EmailConfirmationTests
     }
 
     [Fact]
-    public void Identifier_IsUrlSafeAndNotStoredDirectly()
+    public void Identifier_GeneratesDistinctIdsAndRejectsInvalidInput()
     {
         var first = EmailConfirmationIdentifier.Generate();
         var second = EmailConfirmationIdentifier.Generate();
         Assert.NotEqual(first, second);
-        Assert.Matches("^[A-Za-z0-9_-]{43}$", first);
-        var hash = EmailConfirmationIdentifier.Hash(first);
-        Assert.NotNull(hash);
-        Assert.NotEqual(first, hash.Value.Value);
-        Assert.Equal(hash, EmailConfirmationIdentifier.Hash(first));
-        Assert.NotEqual(hash, EmailConfirmationIdentifier.Hash(second));
-        Assert.Null(EmailConfirmationIdentifier.Hash("not a token"));
+        Assert.Equal(first, EmailConfirmationIdentifier.Parse(first.ToString()));
+        Assert.Null(EmailConfirmationIdentifier.Parse(null));
+        Assert.Null(EmailConfirmationIdentifier.Parse("not a token"));
+        Assert.Null(EmailConfirmationIdentifier.Parse(Guid.Empty.ToString()));
     }
 
     private static (User, EmailConfirmation) CreateConfirmation(UserStatus status)
@@ -129,9 +126,6 @@ public sealed class EmailConfirmationTests
         var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
             PasswordHash.Create("test-hash"), null, null, status, null);
         return (user, EmailConfirmation.Create(
-            EmailConfirmationId.Create(Guid.NewGuid()), user, CreateHash('A'), IssuedAt.AddHours(24)));
+            EmailConfirmationId.Create(Guid.NewGuid()), user.CreatedAt, user.Id, user.EmailAddress, IssuedAt.AddHours(24)));
     }
-
-    private static SecretHash CreateHash(char character) =>
-        SecretHash.Create(new string(character, SecretHash.MaxLength));
 }

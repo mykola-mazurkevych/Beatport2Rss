@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
-public sealed record ConfirmEmailCommand(SecretHash? Hash, bool? Confirmed) : ICommand<Result>;
+public sealed record ConfirmEmailCommand(EmailConfirmationId? Id, bool? Confirmed) : ICommand<Result>;
 
 internal sealed class ConfirmEmailCommandHandler(
     IEmailConfirmationCommandRepository repository,
@@ -25,8 +25,8 @@ internal sealed class ConfirmEmailCommandHandler(
             return EmailConfirmationErrors.ConfirmationRequiredResult();
         }
 
-        return options.Value.Enabled && command.Hash is { } hash &&
-            await repository.ConfirmAsync(hash, clock, cancellationToken)
+        return options.Value.Enabled && command.Id is { } id &&
+            await repository.ConfirmAsync(id, clock, cancellationToken)
             ? Result.Ok()
             : EmailConfirmationErrors.InvalidLinkResult();
     }

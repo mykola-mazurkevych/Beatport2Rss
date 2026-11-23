@@ -29,6 +29,11 @@ public sealed class User :
 
     public CountryCode? CountryCode { get; private set; }
 
+    public string? FullName =>
+        string.IsNullOrWhiteSpace($"{FirstName} {LastName}")
+            ? null
+            : $"{FirstName} {LastName}".Trim();
+
     public static User Create(
         UserId id,
         DateTimeOffset createdAt,

@@ -9,8 +9,10 @@ using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Users;
+using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
+using Beatport2Rss.Common.Wolverine.Extensions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,13 +21,47 @@ using Microsoft.Extensions.Options;
 using Resend;
 
 using Wolverine;
+using Wolverine.RabbitMQ;
 
 using Xunit;
+
+using DeliveryConfirmationOptions = Beatport2Rss.Api.Infrastructure.Options.EmailConfirmationOptions;
 
 namespace Beatport2Rss.Api.Infrastructure.UnitTests.Services.EmailConfirmations;
 
 public sealed class ConfirmationEmailDeliveryTests
 {
+    [Fact]
+    public async Task UserCreatedIsPublishedToBothLocalQueueAndRabbitMq()
+    {
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddOptions<EmailConfirmationOptions>();
+                services.AddWolverine(options =>
+                {
+                    options.UseRabbitMq();
+                    options.Publishes<UserCreated>();
+                    options.ConfigureConfirmationEmailDelivery();
+                    options.StubAllExternalTransports();
+                });
+            })
+            .Build();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await host.StartAsync(cancellationToken);
+
+        var bus = host.Services.GetRequiredService<IMessageBus>();
+        var message = new UserCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, Guid.NewGuid());
+        var destinations = bus.PreviewSubscriptions(message)
+            .Select(subscription => subscription.Destination?.AbsoluteUri)
+            .ToArray();
+        Assert.Equal(2, destinations.Length);
+        Assert.Contains("local://user-created-confirmation/", destinations);
+        Assert.Contains(destinations, destination => destination is not null && destination.StartsWith("rabbitmq:", StringComparison.Ordinal));
+
+        await host.StopAsync(cancellationToken);
+    }
+
     [Fact]
     public async Task WolverineRoutesConfirmationToTheApiLocalQueueAndResolvesItsInternalHandler()
     {
@@ -41,7 +77,7 @@ public sealed class ConfirmationEmailDeliveryTests
         await host.StartAsync(cancellationToken);
 
         var bus = host.Services.GetRequiredService<IMessageBus>();
-        var message = new SendConfirmationEmail(EmailConfirmationIdentifier.Generate());
+        var message = new SendConfirmationEmail(EmailConfirmationIdentifier.Generate().ToString());
         var destination = Assert.Single(bus.PreviewSubscriptions(message)).Destination;
         Assert.Equal("local://confirmation-email-delivery/", destination?.AbsoluteUri);
         await bus.InvokeAsync(message, cancellationToken);
@@ -52,7 +88,7 @@ public sealed class ConfirmationEmailDeliveryTests
     [Fact]
     public void DurableMessageRoundTripsWithoutExposingIdentifierInToString()
     {
-        var identifier = EmailConfirmationIdentifier.Generate();
+        var identifier = EmailConfirmationIdentifier.Generate().ToString();
         var message = new SendConfirmationEmail(identifier);
         var payload = JsonSerializer.SerializeToUtf8Bytes(message);
         var restored = JsonSerializer.Deserialize<SendConfirmationEmail>(payload);
@@ -86,7 +122,7 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddSingleton<IEmailConfirmationQueryRepository>(new ConfirmationRepository(scenario == "missing" ? null : confirmation))
             .BuildServiceProvider();
 
-        var message = new SendConfirmationEmail(scenario == "invalid" ? "invalid" : identifier);
+        var message = new SendConfirmationEmail(scenario == "invalid" ? "invalid" : identifier.ToString());
         await SendConfirmationEmailHandler.DeliverAsync(message, services, TestContext.Current.CancellationToken);
     }
 
@@ -99,8 +135,8 @@ public sealed class ConfirmationEmailDeliveryTests
         using var client = new HttpClient(transport);
         var sender = CreateSender(client);
 
-        await sender.SendAsync(confirmation, identifier, TestContext.Current.CancellationToken);
-        await sender.SendAsync(confirmation, identifier, TestContext.Current.CancellationToken);
+        await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
+        await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
 
         var expectedIdempotencyKey = $"email-confirmation/{confirmation.Id.Value:D}";
         Assert.Equal([expectedIdempotencyKey, expectedIdempotencyKey], transport.Keys);
@@ -128,29 +164,29 @@ public sealed class ConfirmationEmailDeliveryTests
         var identifier = EmailConfirmationIdentifier.Generate();
         var (_, confirmation) = CreateConfirmation(identifier, new FixedClock());
         using var transport = new FakeResendTransport(
-            (HttpStatusCode)status, JsonSerializer.Serialize(new { statusCode = status, name = errorName, message = identifier }));
+            (HttpStatusCode)status, JsonSerializer.Serialize(new { statusCode = status, name = errorName, message = identifier.ToString() }));
         using var client = new HttpClient(transport);
         var sender = CreateSender(client);
         var cancellationToken = TestContext.Current.CancellationToken;
 
         var expectedException = retry ? typeof(RetryableException) : typeof(PermanentConfirmationEmailException);
-        var failure = await Assert.ThrowsAsync(expectedException, () => sender.SendAsync(confirmation, identifier, cancellationToken));
+        var failure = await Assert.ThrowsAsync(expectedException, () => sender.SendAsync(confirmation, cancellationToken));
         Assert.Null(failure.InnerException);
-        Assert.DoesNotContain(identifier, failure.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain(identifier.ToString(), failure.ToString(), StringComparison.Ordinal);
         Assert.Single(transport.Keys);
     }
 
     private static ResendConfirmationEmail CreateSender(HttpClient client) =>
         new(
             new ResendClient(new ResendOptionsSnapshot(), client),
-            new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions
+            new OptionsWrapper<DeliveryConfirmationOptions>(new DeliveryConfirmationOptions
             {
                 PublicWebBaseUrl = new Uri("https://example.test/base"),
                 SenderName = "Beatport2Rss",
                 SenderAddress = "noreply@example.test",
             }));
 
-    private static (User, EmailConfirmation) CreateConfirmation(string identifier, FixedClock clock, bool expired = false)
+    private static (User, EmailConfirmation) CreateConfirmation(EmailConfirmationId identifier, FixedClock clock, bool expired = false)
     {
         var user = User.Create(
             UserId.Create(Guid.NewGuid()),
@@ -163,9 +199,10 @@ public sealed class ConfirmationEmailDeliveryTests
             null);
         var expiresAt = clock.UtcNow.AddMinutes(expired ? -1 : 1);
         return (user, EmailConfirmation.Create(
-            EmailConfirmationId.Create(Guid.NewGuid()),
-            user,
-            EmailConfirmationIdentifier.Hash(identifier)!.Value,
+            identifier,
+            user.CreatedAt,
+            user.Id,
+            user.EmailAddress,
             expiresAt));
     }
 
@@ -177,8 +214,8 @@ public sealed class ConfirmationEmailDeliveryTests
 
     private sealed class ConfirmationRepository(EmailConfirmation? confirmation) : IEmailConfirmationQueryRepository
     {
-        public ValueTask<EmailConfirmation?> FindAsync(SecretHash hash, CancellationToken cancellationToken = default) =>
-            ValueTask.FromResult(confirmation?.SecretHash == hash ? confirmation : null);
+        public ValueTask<EmailConfirmation?> FindAsync(EmailConfirmationId id, CancellationToken cancellationToken = default) =>
+            ValueTask.FromResult(confirmation?.Id == id ? confirmation : null);
     }
 
     private sealed class ResendOptionsSnapshot : IOptionsSnapshot<ResendClientOptions>

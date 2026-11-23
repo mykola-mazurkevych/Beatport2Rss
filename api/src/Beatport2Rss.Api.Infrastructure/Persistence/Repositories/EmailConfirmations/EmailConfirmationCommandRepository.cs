@@ -19,12 +19,12 @@ internal sealed class EmailConfirmationCommandRepository(ApiDbContext dbContext)
         await AddAsync(confirmation, cancellationToken);
 
     public async Task<bool> ConfirmAsync(
-        SecretHash secretHash,
+        EmailConfirmationId id,
         IClock clock,
         CancellationToken cancellationToken)
     {
         var candidate = await dbContext.EmailConfirmations.AsNoTracking()
-            .SingleOrDefaultAsync(confirmation => confirmation.SecretHash == secretHash, cancellationToken);
+            .SingleOrDefaultAsync(confirmation => confirmation.Id == id, cancellationToken);
 
         if (candidate is null)
         {

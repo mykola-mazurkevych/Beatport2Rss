@@ -13,25 +13,28 @@ public sealed class EmailConfirmation :
     }
 
     public EmailConfirmationId Id { get; private set; }
-    public UserId UserId { get; private set; }
-    public EmailAddress EmailAddress { get; private set; }
-    public SecretHash SecretHash { get; private set; }
+
     public DateTimeOffset CreatedAt { get; private set; }
+
+    public UserId UserId { get; private set; }
+
+    public EmailAddress EmailAddress { get; private set; }
+    
     public DateTimeOffset ExpiresAt { get; private set; }
     public DateTimeOffset? ConfirmedAt { get; private set; }
 
     public static EmailConfirmation Create(
         EmailConfirmationId id,
-        User user,
-        SecretHash secretHash,
+        DateTimeOffset createdAt,
+        UserId userId,
+        EmailAddress emailAddress,
         DateTimeOffset expiresAt) =>
         new()
         {
             Id = id,
-            UserId = user.Id,
-            EmailAddress = user.EmailAddress,
-            SecretHash = secretHash,
-            CreatedAt = user.CreatedAt,
+            CreatedAt = createdAt,
+            UserId = userId,
+            EmailAddress = emailAddress,
             ExpiresAt = expiresAt,
         };
 

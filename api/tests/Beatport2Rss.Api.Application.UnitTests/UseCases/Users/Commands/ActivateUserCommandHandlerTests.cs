@@ -48,8 +48,9 @@ public sealed class ActivateUserCommandHandlerTests
             countryCode: null);
         var confirmation = EmailConfirmation.Create(
             EmailConfirmationId.Create(Guid.NewGuid()),
-            user,
-            SecretHash.Create(new string('A', SecretHash.MaxLength)),
+            user.CreatedAt,
+            user.Id,
+            user.EmailAddress,
             DateTimeOffset.UnixEpoch.AddDays(1));
         Assert.Null(confirmation.ConfirmedAt);
 

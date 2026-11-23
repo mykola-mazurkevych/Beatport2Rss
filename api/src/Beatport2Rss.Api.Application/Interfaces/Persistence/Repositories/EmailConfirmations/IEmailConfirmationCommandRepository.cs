@@ -6,5 +6,5 @@ namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.Email
 public interface IEmailConfirmationCommandRepository
 {
     Task AddAsync(EmailConfirmation confirmation, CancellationToken cancellationToken = default);
-    Task<bool> ConfirmAsync(SecretHash secretHash, IClock clock, CancellationToken cancellationToken = default);
+    Task<bool> ConfirmAsync(EmailConfirmationId id, IClock clock, CancellationToken cancellationToken = default);
 }

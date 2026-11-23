@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 
 using Microsoft.Extensions.Options;
@@ -13,6 +14,6 @@ internal sealed class WolverineConfirmationEmailOutbox(
     IOptions<EmailConfirmationOptions> options) :
     IConfirmationEmailOutbox
 {
-    public ValueTask EnqueueAsync(string identifier) =>
-        outbox.PublishAsync(new SendConfirmationEmail(identifier), new DeliveryOptions { DeliverWithin = options.Value.Lifetime });
+    public ValueTask EnqueueAsync(EmailConfirmationId id) =>
+        outbox.PublishAsync(new SendConfirmationEmail(id.ToString()), new DeliveryOptions { DeliverWithin = options.Value.Lifetime });
 }

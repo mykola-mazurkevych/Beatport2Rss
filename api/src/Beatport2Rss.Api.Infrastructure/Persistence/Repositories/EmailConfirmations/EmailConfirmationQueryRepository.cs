@@ -9,13 +9,13 @@ internal sealed class EmailConfirmationQueryRepository(ApiDbContext dbContext) :
     IEmailConfirmationQueryRepository
 {
     public async ValueTask<EmailConfirmation?> FindAsync(
-        SecretHash secretHash,
+        EmailConfirmationId id,
         CancellationToken cancellationToken = default)
     {
         var match = await (
             from confirmation in dbContext.EmailConfirmations.AsNoTracking()
             join user in dbContext.Users.AsNoTracking() on confirmation.UserId equals user.Id
-            where confirmation.SecretHash == secretHash
+            where confirmation.Id == id
             select new { Confirmation = confirmation, User = user })
             .SingleOrDefaultAsync(cancellationToken);
 

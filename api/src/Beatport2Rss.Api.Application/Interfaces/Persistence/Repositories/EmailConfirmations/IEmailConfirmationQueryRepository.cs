@@ -5,6 +5,6 @@ namespace Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.Email
 public interface IEmailConfirmationQueryRepository
 {
     ValueTask<EmailConfirmation?> FindAsync(
-        SecretHash secretHash,
+        EmailConfirmationId id,
         CancellationToken cancellationToken = default);
 }

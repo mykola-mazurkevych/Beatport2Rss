@@ -50,6 +50,9 @@ using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
+using ApplicationConfirmationOptions = Beatport2Rss.Api.Application.UseCases.EmailConfirmations.EmailConfirmationOptions;
+using DeliveryConfirmationOptions = Beatport2Rss.Api.Infrastructure.Options.EmailConfirmationOptions;
+
 namespace Beatport2Rss.Api.Infrastructure;
 
 public static class ServiceCollectionExtensions
@@ -204,19 +207,23 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<BeatportCredentials>(credentials => configuration.GetSection(nameof(BeatportCredentials)).Bind(credentials))
                 .Configure<JsonSerializerOptions>(static options => options.Configure())
                 .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
                 .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
 
         private IServiceCollection AddConfirmationEmailOptions(IConfiguration configuration)
         {
-            services.AddOptions<EmailConfirmationOptions>()
-                .Bind(configuration.GetSection(EmailConfirmationOptions.SectionName))
+            var section = configuration.GetSection(ApplicationConfirmationOptions.SectionName);
+            services.AddOptions<ApplicationConfirmationOptions>()
+                .Bind(section)
                 .Validate(options => options.Lifetime > TimeSpan.Zero && options.Lifetime <= TimeSpan.FromDays(365),
                     "EmailConfirmation:Lifetime must be positive and no longer than 365 days.")
                 .Validate(options => options.AdministratorUserId != Guid.Empty,
                     "EmailConfirmation:AdministratorUserId must not be the empty GUID.")
+                .ValidateOnStart();
+
+            services.AddOptions<DeliveryConfirmationOptions>()
+                .Bind(section)
                 .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.ApiKey),
                     "EmailConfirmation:ApiKey is required when confirmation emails are enabled.")
                 .Validate(options => !options.Enabled ||

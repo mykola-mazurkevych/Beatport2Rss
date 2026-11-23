@@ -37,7 +37,7 @@ internal static class EmailConfirmationEndpoints
 
     private static async Task<IResult> GetAsync(string id, IMediator mediator, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetEmailConfirmationQuery(EmailConfirmationIdentifier.Hash(id)), cancellationToken);
+        var result = await mediator.Send(new GetEmailConfirmationQuery(EmailConfirmationIdentifier.Parse(id)), cancellationToken);
         return result.IsSuccess ? Results.Ok(result.Value) : Invalid(result.Errors[0].Message);
     }
 
@@ -60,7 +60,7 @@ internal static class EmailConfirmationEndpoints
             }
         }
 
-        var result = await mediator.Send(new ConfirmEmailCommand(EmailConfirmationIdentifier.Hash(id), body?.Confirmed), cancellationToken);
+        var result = await mediator.Send(new ConfirmEmailCommand(EmailConfirmationIdentifier.Parse(id), body?.Confirmed), cancellationToken);
         return result.IsSuccess ? Results.NoContent() : Invalid(result.Errors[0].Message);
     }
 

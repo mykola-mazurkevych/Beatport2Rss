@@ -13,7 +13,7 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
 public sealed record EmailConfirmationState(bool Confirmed, DateTimeOffset ExpiresAt);
 
-public sealed record GetEmailConfirmationQuery(SecretHash? Hash) : IQuery<Result<EmailConfirmationState>>;
+public sealed record GetEmailConfirmationQuery(EmailConfirmationId? Id) : IQuery<Result<EmailConfirmationState>>;
 
 internal sealed class GetEmailConfirmationQueryHandler(
     IEmailConfirmationQueryRepository repository,
@@ -24,8 +24,8 @@ internal sealed class GetEmailConfirmationQueryHandler(
     public async ValueTask<Result<EmailConfirmationState>> Handle(
         GetEmailConfirmationQuery query, CancellationToken cancellationToken)
     {
-        var confirmation = options.Value.Enabled && query.Hash is { } hash
-            ? await repository.FindAsync(hash, cancellationToken)
+        var confirmation = options.Value.Enabled && query.Id is { } id
+            ? await repository.FindAsync(id, cancellationToken)
             : null;
 
         return confirmation is not null && confirmation.IsReadableAt(clock.UtcNow)

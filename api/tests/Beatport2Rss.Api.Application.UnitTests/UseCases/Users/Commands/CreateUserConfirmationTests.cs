@@ -1,17 +1,12 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.Users.Commands;
-using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
 using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
-
-using Microsoft.Extensions.Options;
 
 using Moq;
 
@@ -21,10 +16,8 @@ namespace Beatport2Rss.Api.Application.UnitTests.UseCases.Users.Commands;
 
 public sealed class CreateUserConfirmationTests
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task Register_StagesConfirmationAndExistingEventBeforeCommit(bool enabled)
+    [Fact]
+    public async Task Register_StagesUserCreatedBeforeCommit()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var now = new DateTimeOffset(2026, 11, 19, 12, 0, 0, TimeSpan.Zero);
@@ -34,27 +27,14 @@ public sealed class CreateUserConfirmationTests
         hasher.Setup(value => value.Hash(It.IsAny<Password>())).Returns(PasswordHash.Create("test-hash"));
         var users = new Mock<IUserCommandRepository>(MockBehavior.Strict);
         var events = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
-        var confirmations = new Mock<IEmailConfirmationCommandRepository>(MockBehavior.Strict);
-        var delivery = new Mock<IConfirmationEmailOutbox>(MockBehavior.Strict);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
-        var options = Options.Create(new EmailConfirmationOptions { Enabled = enabled });
 
         User? user = null;
-        EmailConfirmation? confirmation = null;
-        string? identifier = null;
         UserCreated? userCreated = null;
 
         users.Setup(value => value.ExistsAsync(It.IsAny<EmailAddress>(), cancellationToken)).ReturnsAsync(false);
         users.Setup(value => value.AddAsync(It.IsAny<User>(), cancellationToken))
             .Callback<User, CancellationToken>((value, _) => user = value).Returns(Task.CompletedTask);
-        if (enabled)
-        {
-            confirmations.Setup(value => value.AddAsync(It.IsAny<EmailConfirmation>(), cancellationToken))
-                .Callback<EmailConfirmation, CancellationToken>((value, _) => confirmation = value).Returns(Task.CompletedTask);
-            delivery.Setup(value => value.EnqueueAsync(It.IsAny<string>()))
-                .Callback<string>(value => identifier = value).Returns(ValueTask.CompletedTask);
-        }
-
         events.Setup(value => value.EnqueueAsync(It.IsAny<UserCreated>(), cancellationToken))
             .Callback<UserCreated, CancellationToken>((value, _) => userCreated = value).Returns(Task.CompletedTask);
         unit.Setup(value => value.SaveChangesAsync(cancellationToken)).Callback(() =>
@@ -63,20 +43,10 @@ public sealed class CreateUserConfirmationTests
             Assert.Equal(UserStatus.Pending, user.Status);
             Assert.NotNull(userCreated);
             Assert.Equal(user.Id.Value, userCreated.UserId);
-            if (enabled)
-            {
-                Assert.NotNull(confirmation);
-                Assert.NotNull(identifier);
-                Assert.Equal(user.Id, confirmation.UserId);
-                Assert.Equal(user.EmailAddress, confirmation.EmailAddress);
-                Assert.Equal(now.AddHours(24), confirmation.ExpiresAt);
-                Assert.Equal(EmailConfirmationIdentifier.Hash(identifier)!.Value, confirmation.SecretHash);
-                Assert.Null(confirmation.ConfirmedAt);
-            }
         }).Returns(Task.CompletedTask);
 
         var handler = new CreateUserCommandHandler(clock.Object, hasher.Object, users.Object, events.Object,
-            confirmations.Object, delivery.Object, options, unit.Object);
+            unit.Object);
         var result = await handler.Handle(new CreateUserCommand("new@example.test", "validpassword123", null, null, null),
             cancellationToken);
 

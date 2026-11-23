@@ -14,8 +14,6 @@ internal sealed class EmailConfirmationConfiguration : IEntityTypeConfiguration<
         builder.ToTable(nameof(ApiDbContext.EmailConfirmations));
         builder.HasKey(confirmation => confirmation.Id);
         builder.Property(confirmation => confirmation.EmailAddress).HasMaxLength(EmailAddress.MaxLength).IsRequired();
-        builder.Property(confirmation => confirmation.SecretHash).HasMaxLength(SecretHash.MaxLength).IsRequired();
-        builder.HasIndex(confirmation => confirmation.SecretHash).IsUnique();
         builder.HasOne<User>()
             .WithMany()
             .HasForeignKey(confirmation => confirmation.UserId)
