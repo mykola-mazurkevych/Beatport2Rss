@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Common.IntegrationEvents.EmailConfirmations;
 
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents;
 

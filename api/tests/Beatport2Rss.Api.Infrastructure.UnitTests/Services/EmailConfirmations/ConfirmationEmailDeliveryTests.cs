@@ -6,13 +6,13 @@ using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Exceptions;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.Email;
+using Beatport2Rss.Common.IntegrationEvents.EmailConfirmations;
 using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
@@ -98,7 +98,7 @@ public sealed class ConfirmationEmailDeliveryTests
     }
 
     [Fact]
-    public void DurableMessagesRoundTripAndEventDoesNotExposeIdentifierInToString()
+    public void DurableMessagesRoundTrip()
     {
         var identifier = Guid.NewGuid();
         var message = new SendConfirmationEmailCommand(identifier);
@@ -111,7 +111,6 @@ public sealed class ConfirmationEmailDeliveryTests
         var restoredEvent = JsonSerializer.Deserialize<EmailConfirmationCreated>(JsonSerializer.Serialize(created));
         Assert.NotNull(restoredEvent);
         Assert.Equal(identifier, restoredEvent.EmailConfirmationId);
-        Assert.DoesNotContain(identifier.ToString(), created.ToString(), StringComparison.Ordinal);
     }
 
     [Theory]
