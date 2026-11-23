@@ -190,6 +190,7 @@ services:
       - EmailConfirmation__ApiKey=${RESEND_API_KEY:-}
       - EmailConfirmation__SenderAddress=${EMAIL_CONFIRMATION_SENDER_ADDRESS:-}
       - EmailConfirmation__SenderName=${EMAIL_CONFIRMATION_SENDER_NAME:-Beatport2Rss}
+      - ResendOptions__ApiToken=${RESEND_API_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy

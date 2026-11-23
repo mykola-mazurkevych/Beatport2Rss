@@ -49,7 +49,7 @@ Set-Location docker
 Copy-Item .env.example .env
 ```
 
-Update `docker/.env` with your Beatport credentials and secure values for the database, RabbitMQ, and JWT settings. Do not commit this file; local `.env` files are ignored by Git.
+Update `docker/.env` with your Beatport credentials and secure values for the database, RabbitMQ, JWT, and Resend settings. Do not commit this file; local `.env` files are ignored by Git.
 
 Start the services in the same terminal:
 
@@ -110,6 +110,8 @@ Registration always creates a Pending account. To enable automatic delivery, set
 | `EmailConfirmation__SenderName` | `EMAIL_CONFIRMATION_SENDER_NAME` | Email display name, such as `Beatport2Rss`. |
 | `EmailConfirmation__PublicWebBaseUrl` | `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL` | Public, browser-reachable web URL used in links, not the API address. Use HTTPS in production. |
 | `EmailConfirmation__Lifetime` | `EMAIL_CONFIRMATION_LIFETIME` | Positive duration, default `1.00:00:00` (24 hours), maximum 365 days. |
+
+The separate shared email client uses `ResendOptions__ApiToken` (Compose: `RESEND_API_TOKEN`); it is not yet used for confirmation delivery.
 
 When delivery is disabled (the default), no new confirmation or delivery work is generated, and public confirmation links cannot be used. When enabling delivery, explicitly set `EmailConfirmation__PublicWebBaseUrl` (Compose: `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL`) to the browser-reachable URL of the web application; there is no localhost fallback. To allow manual activation, set `EmailConfirmation__AdministratorUserId` (Compose: `EMAIL_CONFIRMATION_ADMIN_USER_ID`) to the immutable database UUID of a trusted, operator-verified existing account. Obtain this ID through trusted database access, not an email address supplied by a registrant. That authenticated account can use `PUT /users/{id}/activation` with its bearer token to activate **another** user regardless of whether email delivery is enabled. Activation changes account status only; it does not create or confirm an email confirmation and is not proof of email ownership. Without a configured administrator, nobody can use this operation.
 
