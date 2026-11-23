@@ -183,6 +183,7 @@ services:
       - JwtOptions__SigningKey=${JWT_SIGNING_KEY}
       - JwtOptions__ExpiresIn=${JWT_EXPIRES_IN}
       - RefreshTokenOptions__ExpiresIn=${REFRESH_TOKEN_EXPIRES_IN}
+      - ResendOptions__ApiToken=${RESEND_API_TOKEN}
     depends_on:
       postgres:
         condition: service_healthy

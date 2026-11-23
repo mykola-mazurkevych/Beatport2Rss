@@ -21,6 +21,7 @@
     <Project Path="common/src/Beatport2Rss.Common.Beatport/Beatport2Rss.Common.Beatport.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Domain/Beatport2Rss.Common.Domain.csproj" />
+    <Project Path="common/src/Beatport2Rss.Common.Email/Beatport2Rss.Common.Email.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.Grpc/Beatport2Rss.Common.Grpc.csproj" />
     <Project Path="common/src/Beatport2Rss.Common.FluentResults/Beatport2Rss.Common.FluentResults.csproj" />

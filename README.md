@@ -49,7 +49,7 @@ Set-Location docker
 Copy-Item .env.example .env
 ```
 
-Update `docker/.env` with your Beatport credentials and secure values for the database, RabbitMQ, and JWT settings. Do not commit this file; local `.env` files are ignored by Git.
+Update `docker/.env` with your Beatport credentials and secure values for the database, RabbitMQ, JWT, and Resend settings. Do not commit this file; local `.env` files are ignored by Git.
 
 Start the services in the same terminal:
 
