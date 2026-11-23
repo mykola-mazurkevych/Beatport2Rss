@@ -187,9 +187,7 @@ services:
       - EmailConfirmation__Lifetime=${EMAIL_CONFIRMATION_LIFETIME:-1.00:00:00}
       - EmailConfirmation__PublicWebBaseUrl=${EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL:-}
       - EmailConfirmation__AdministratorUserId=${EMAIL_CONFIRMATION_ADMIN_USER_ID:-}
-      - EmailConfirmation__ApiKey=${RESEND_API_KEY:-}
-      - EmailConfirmation__SenderAddress=${EMAIL_CONFIRMATION_SENDER_ADDRESS:-}
-      - EmailConfirmation__SenderName=${EMAIL_CONFIRMATION_SENDER_NAME:-Beatport2Rss}
+      - EmailConfirmation__TemplateId=${EMAIL_CONFIRMATION_TEMPLATE_ID:-}
       - ResendOptions__ApiToken=${RESEND_API_TOKEN}
     depends_on:
       postgres:

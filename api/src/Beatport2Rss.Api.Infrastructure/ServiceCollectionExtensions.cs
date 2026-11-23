@@ -1,6 +1,5 @@
 #pragma warning disable CA1034 // Nested types should not be visible
 
-using System.Net.Mail;
 using System.Text;
 using System.Text.Json;
 
@@ -11,7 +10,6 @@ using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
@@ -28,6 +26,7 @@ using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
+using Beatport2Rss.Common.Email;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.Grpc;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
@@ -64,6 +63,7 @@ public static class ServiceCollectionExtensions
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
                 .AddConfirmationEmailOptions(configuration)
+                .AddEmailClient(configuration)
                 .AddConfirmationEmailDelivery()
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
@@ -224,14 +224,10 @@ public static class ServiceCollectionExtensions
 
             services.AddOptions<DeliveryConfirmationOptions>()
                 .Bind(section)
-                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.ApiKey),
-                    "EmailConfirmation:ApiKey is required when confirmation emails are enabled.")
-                .Validate(options => !options.Enabled ||
-                    (MailAddress.TryCreate(options.SenderAddress, out var address) &&
-                     address.Address == options.SenderAddress &&
-                     !string.IsNullOrWhiteSpace(options.SenderName) &&
-                     !options.SenderName.Any(char.IsControl)),
-                    "EmailConfirmation requires a valid SenderAddress and SenderName when enabled.")
+                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(configuration["ResendOptions:ApiToken"]),
+                    "ResendOptions:ApiToken is required when confirmation emails are enabled.")
+                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.TemplateId),
+                    "EmailConfirmation:TemplateId is required when confirmation emails are enabled.")
                 .Validate(options => !options.Enabled ||
                     (options.PublicWebBaseUrl is { IsAbsoluteUri: true } uri &&
                      uri.Scheme is "http" or "https" &&

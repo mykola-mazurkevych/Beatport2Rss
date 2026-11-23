@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Net;
-using System.Text.Encodings.Web;
 
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Options;
+using Beatport2Rss.Common.Email.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
 using Microsoft.Extensions.Options;
@@ -13,7 +13,7 @@ using Resend;
 namespace Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 
 internal sealed class ResendConfirmationEmail(
-    IResend resend,
+    IEmailClient emailClient,
     IOptions<EmailConfirmationOptions> options)
 {
     public async Task SendAsync(
@@ -25,27 +25,21 @@ internal sealed class ResendConfirmationEmail(
         var link = new Uri(baseUri, $"confirm-email?token={confirmation.Id}").AbsoluteUri;
         var expiresAt = confirmation.ExpiresAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss 'UTC'", CultureInfo.InvariantCulture);
         var hours = (confirmation.ExpiresAt - confirmation.CreatedAt).TotalHours.ToString("0.###########", CultureInfo.InvariantCulture);
-        var validity = $"This link is valid for {hours} hours from issuance. This link expires at {expiresAt}.";
-        var email = new EmailMessage
+        var variables = new Dictionary<string, object>
         {
-            From = new Resend.EmailAddress
-            {
-                Email = settings.SenderAddress,
-                DisplayName = string.IsNullOrWhiteSpace(settings.SenderName) ? null : settings.SenderName,
-            },
-            To = new Resend.EmailAddress { Email = confirmation.EmailAddress.Value },
-            Subject = "Confirm your Beatport2Rss email address",
-            TextBody = $"Confirm your Beatport2Rss email address:\n\n{link}\n\n{validity}\n\nIf you did not sign up, you can ignore this email.",
-            HtmlBody = $"""
-                <p><a href="{HtmlEncoder.Default.Encode(link)}">Confirm your Beatport2Rss email address</a></p>
-                <p>{validity}</p>
-                <p>If you did not sign up, you can ignore this email.</p>
-                """,
+            ["CONFIRMATION_URL"] = link,
+            ["EXPIRES_AT"] = expiresAt,
+            ["VALID_HOURS"] = hours,
         };
 
         try
         {
-            await resend.EmailSendAsync($"email-confirmation/{confirmation.Id:N}", email, cancellationToken);
+            await emailClient.SendAsync(
+                settings.TemplateId,
+                (confirmation.EmailAddress.Value, null),
+                variables,
+                $"email-confirmation/{confirmation.Id:N}",
+                cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

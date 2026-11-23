@@ -105,13 +105,12 @@ Registration always creates a Pending account. To enable automatic delivery, set
 
 | API setting | Compose variable | Purpose |
 | --- | --- | --- |
-| `EmailConfirmation__ApiKey` | `RESEND_API_KEY` | Valid Resend API key. Keep it in API user secrets, environment or a secret manager, never in the web container. |
-| `EmailConfirmation__SenderAddress` | `EMAIL_CONFIRMATION_SENDER_ADDRESS` | Resend sender address on an appropriately verified sender/domain. |
-| `EmailConfirmation__SenderName` | `EMAIL_CONFIRMATION_SENDER_NAME` | Email display name, such as `Beatport2Rss`. |
+| `ResendOptions__ApiToken` | `RESEND_API_TOKEN` | Valid Resend API key. Keep it in API user secrets, environment or a secret manager, never in the web container. |
+| `EmailConfirmation__TemplateId` | `EMAIL_CONFIRMATION_TEMPLATE_ID` | ID or alias of a published Resend confirmation template. |
 | `EmailConfirmation__PublicWebBaseUrl` | `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL` | Public, browser-reachable web URL used in links, not the API address. Use HTTPS in production. |
 | `EmailConfirmation__Lifetime` | `EMAIL_CONFIRMATION_LIFETIME` | Positive duration, default `1.00:00:00` (24 hours), maximum 365 days. |
 
-The separate shared email client uses `ResendOptions__ApiToken` (Compose: `RESEND_API_TOKEN`); it is not yet used for confirmation delivery.
+Configure the published template with a verified sender and subject, and use the variables `CONFIRMATION_URL`, `EXPIRES_AT` (UTC), and `VALID_HOURS` (hours from issuance). It should tell recipients to confirm their address and that they can ignore the message if they did not sign up. Resend supplies the rendered HTML and plain text. When upgrading from the inline sender, replace `RESEND_API_KEY` with `RESEND_API_TOKEN` and move the sender settings into the template.
 
 When delivery is disabled (the default), no new confirmation or delivery work is generated, and public confirmation links cannot be used. When enabling delivery, explicitly set `EmailConfirmation__PublicWebBaseUrl` (Compose: `EMAIL_CONFIRMATION_PUBLIC_WEB_BASE_URL`) to the browser-reachable URL of the web application; there is no localhost fallback. To allow manual activation, set `EmailConfirmation__AdministratorUserId` (Compose: `EMAIL_CONFIRMATION_ADMIN_USER_ID`) to the immutable database UUID of a trusted, operator-verified existing account. Obtain this ID through trusted database access, not an email address supplied by a registrant. That authenticated account can use `PUT /users/{id}/activation` with its bearer token to activate **another** user regardless of whether email delivery is enabled. Activation changes account status only; it does not create or confirm an email confirmation and is not proof of email ownership. Without a configured administrator, nobody can use this operation.
 

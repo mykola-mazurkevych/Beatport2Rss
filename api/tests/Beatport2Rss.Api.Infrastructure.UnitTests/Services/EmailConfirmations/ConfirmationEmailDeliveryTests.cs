@@ -9,11 +9,13 @@ using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Users;
+using Beatport2Rss.Common.Email;
 using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 using Beatport2Rss.Common.Wolverine.Extensions;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -126,14 +128,56 @@ public sealed class ConfirmationEmailDeliveryTests
         await SendConfirmationEmailHandler.DeliverAsync(message, services, TestContext.Current.CancellationToken);
     }
 
+    [Theory]
+    [InlineData(false, null, null, true)]
+    [InlineData(true, null, "confirmation", false)]
+    [InlineData(true, "test-key", null, false)]
+    [InlineData(true, "test-key", "confirmation", true)]
+    public void ConfirmationOptionsRequireTemplateAndTokenOnlyWhenEnabled(
+        bool enabled, string? apiToken, string? templateId, bool valid)
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["EmailConfirmation:Enabled"] = enabled.ToString(),
+            ["EmailConfirmation:TemplateId"] = templateId,
+            ["EmailConfirmation:PublicWebBaseUrl"] = "https://example.test",
+            ["ResendOptions:ApiToken"] = apiToken,
+            ["JwtOptions:Issuer"] = "test",
+            ["JwtOptions:Audience"] = "test",
+            ["JwtOptions:SigningKey"] = "test-signing-key",
+            ["GrpcOptions:BeatportTokenProvider:Address"] = "http://localhost:5000",
+            ["GrpcOptions:RssFeedDocumentGrpcClient:Address"] = "http://localhost:5001",
+            ["RabbitMQOptions:HostName"] = "localhost",
+            ["RabbitMQOptions:Port"] = "5672",
+            ["RabbitMQOptions:UserName"] = "test",
+            ["RabbitMQOptions:Password"] = "test",
+            ["RabbitMQOptions:VirtualHost"] = "/",
+            ["ConnectionStrings:ApiDbContext"] = "Host=localhost;Database=test;Username=test;Password=test",
+        }).Build();
+        using var services = new ServiceCollection()
+            .AddLogging()
+            .AddInfrastructure(configuration)
+            .BuildServiceProvider();
+        var options = services.GetRequiredService<IOptions<DeliveryConfirmationOptions>>();
+
+        if (valid)
+        {
+            Assert.Equal(enabled, options.Value.Enabled);
+        }
+        else
+        {
+            Assert.Throws<OptionsValidationException>(() => options.Value);
+        }
+    }
+
     [Fact]
-    public async Task SdkRequestHasStableIdempotencyKeyAndBothMessageFormats()
+    public async Task SdkRequestUsesTemplateVariablesAndStableIdempotencyKey()
     {
         var identifier = EmailConfirmationIdentifier.Generate();
         var (_, confirmation) = CreateConfirmation(identifier, new FixedClock());
         using var transport = new FakeResendTransport(HttpStatusCode.OK, """{"id":"c3dcb630-9e41-4f90-bccc-87267425c12e"}""");
-        using var client = new HttpClient(transport);
-        var sender = CreateSender(client);
+        using var services = CreateSenderServices(transport);
+        var sender = services.GetRequiredService<ResendConfirmationEmail>();
 
         await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
         await sender.SendAsync(confirmation, TestContext.Current.CancellationToken);
@@ -144,13 +188,12 @@ public sealed class ConfirmationEmailDeliveryTests
         using var payload = JsonDocument.Parse(transport.Body);
         var expectedLink = $"https://example.test/base/confirm-email?token={identifier}";
         Assert.Equal(confirmation.EmailAddress.Value, payload.RootElement.GetProperty("to")[0].GetString());
-        Assert.Equal("Beatport2Rss <noreply@example.test>", payload.RootElement.GetProperty("from").GetString());
-        var html = payload.RootElement.GetProperty("html").GetString();
-        var text = payload.RootElement.GetProperty("text").GetString();
-        Assert.Contains($"href=\"{expectedLink}\"", html, StringComparison.Ordinal);
-        Assert.Contains(expectedLink, text, StringComparison.Ordinal);
-        Assert.Contains("This link expires at 2026-11-19 12:01:00 UTC.", html, StringComparison.Ordinal);
-        Assert.Contains("This link expires at 2026-11-19 12:01:00 UTC.", text, StringComparison.Ordinal);
+        var template = payload.RootElement.GetProperty("template");
+        Assert.Equal("email-confirmation", template.GetProperty("id").GetString());
+        var variables = template.GetProperty("variables");
+        Assert.Equal(expectedLink, variables.GetProperty("CONFIRMATION_URL").GetString());
+        Assert.Equal("2026-11-19 12:01:00 UTC", variables.GetProperty("EXPIRES_AT").GetString());
+        Assert.Equal("0.05", variables.GetProperty("VALID_HOURS").GetString());
     }
 
     [Theory]
@@ -165,8 +208,8 @@ public sealed class ConfirmationEmailDeliveryTests
         var (_, confirmation) = CreateConfirmation(identifier, new FixedClock());
         using var transport = new FakeResendTransport(
             (HttpStatusCode)status, JsonSerializer.Serialize(new { statusCode = status, name = errorName, message = identifier.ToString() }));
-        using var client = new HttpClient(transport);
-        var sender = CreateSender(client);
+        using var services = CreateSenderServices(transport);
+        var sender = services.GetRequiredService<ResendConfirmationEmail>();
         var cancellationToken = TestContext.Current.CancellationToken;
 
         var expectedException = retry ? typeof(RetryableException) : typeof(PermanentConfirmationEmailException);
@@ -176,15 +219,26 @@ public sealed class ConfirmationEmailDeliveryTests
         Assert.Single(transport.Keys);
     }
 
-    private static ResendConfirmationEmail CreateSender(HttpClient client) =>
-        new(
-            new ResendClient(new ResendOptionsSnapshot(), client),
-            new OptionsWrapper<DeliveryConfirmationOptions>(new DeliveryConfirmationOptions
+    private static ServiceProvider CreateSenderServices(FakeResendTransport transport)
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ResendOptions:ApiToken"] = "test-key-not-sent",
+        }).Build();
+
+        var services = new ServiceCollection();
+        services.AddEmailClient(configuration);
+        services.AddHttpClient<IResend, ResendClient>()
+            .ConfigurePrimaryHttpMessageHandler(() => transport);
+        return services
+            .AddSingleton<IOptions<DeliveryConfirmationOptions>>(new OptionsWrapper<DeliveryConfirmationOptions>(new DeliveryConfirmationOptions
             {
+                TemplateId = "email-confirmation",
                 PublicWebBaseUrl = new Uri("https://example.test/base"),
-                SenderName = "Beatport2Rss",
-                SenderAddress = "noreply@example.test",
-            }));
+            }))
+            .AddTransient<ResendConfirmationEmail>()
+            .BuildServiceProvider();
+    }
 
     private static (User, EmailConfirmation) CreateConfirmation(EmailConfirmationId identifier, FixedClock clock, bool expired = false)
     {
@@ -216,13 +270,6 @@ public sealed class ConfirmationEmailDeliveryTests
     {
         public ValueTask<EmailConfirmation?> FindAsync(EmailConfirmationId id, CancellationToken cancellationToken = default) =>
             ValueTask.FromResult(confirmation?.Id == id ? confirmation : null);
-    }
-
-    private sealed class ResendOptionsSnapshot : IOptionsSnapshot<ResendClientOptions>
-    {
-        public ResendClientOptions Value { get; } = new() { ApiToken = "test-key-not-sent" };
-
-        public ResendClientOptions Get(string? name) => Value;
     }
 
     private sealed class FakeResendTransport(HttpStatusCode status, string response) : HttpMessageHandler
