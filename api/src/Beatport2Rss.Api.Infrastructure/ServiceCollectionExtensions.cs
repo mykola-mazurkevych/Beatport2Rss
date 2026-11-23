@@ -10,16 +10,19 @@ using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
-using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Feeds;
+using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
@@ -49,6 +52,9 @@ using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
+using Wolverine;
+using Wolverine.ErrorHandling;
+
 using ApplicationConfirmationOptions = Beatport2Rss.Api.Application.UseCases.EmailConfirmations.EmailConfirmationOptions;
 using DeliveryConfirmationOptions = Beatport2Rss.Api.Infrastructure.Options.EmailConfirmationOptions;
 
@@ -64,7 +70,10 @@ public static class ServiceCollectionExtensions
                 .ConfigureOptions(configuration)
                 .AddConfirmationEmailOptions(configuration)
                 .AddEmailClient(configuration)
-                .AddConfirmationEmailDelivery()
+                .AddTransient<IConfirmationEmailSender>(provider =>
+                    ActivatorUtilities.CreateInstance<ResendConfirmationEmail>(provider))
+                .AddTransient<Func<IConfirmationEmailSender>>(provider =>
+                    () => provider.GetRequiredService<IConfirmationEmailSender>())
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
@@ -76,23 +85,31 @@ public static class ServiceCollectionExtensions
                 .AddPersistence(configuration)
                 .AddWolverine<ApiDbContext, ApiApplication>(
                     configuration,
-                    configurePublisher: options => options
-                        .Publishes<FeedCreated>()
-                        .Publishes<FeedDeleted>()
-                        .Publishes<FeedSubscriptionCreated>()
-                        .Publishes<FeedSubscriptionDeleted>()
-                        .Publishes<FeedUpdated>()
-                        .Publishes<SubscriptionRequested>()
-                        .Publishes<SubscriptionTagCreated>()
-                        .Publishes<SubscriptionTagDeleted>()
-                        .Publishes<TagCreated>()
-                        .Publishes<TagDeleted>()
-                        .Publishes<TagUpdated>()
-                        .Publishes<UserCreated>()
-                        .Publishes<UserDeleted>(),
+                    configurePublisher: options =>
+                    {
+                        options
+                            .Publishes<FeedCreated>()
+                            .Publishes<FeedDeleted>()
+                            .Publishes<FeedSubscriptionCreated>()
+                            .Publishes<FeedSubscriptionDeleted>()
+                            .Publishes<FeedUpdated>()
+                            .Publishes<SubscriptionRequested>()
+                            .Publishes<SubscriptionTagCreated>()
+                            .Publishes<SubscriptionTagDeleted>()
+                            .Publishes<TagCreated>()
+                            .Publishes<TagDeleted>()
+                            .Publishes<TagUpdated>()
+                            .Publishes<UserCreated>()
+                            .Publishes<UserDeleted>();
+                        options.LocalQueue("user-created-confirmation").Sequential().UseDurableInbox();
+                        options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
+                        options.LocalQueueFor<CreateEmailConfirmationCommand>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
+                        options.OnException<PermanentConfirmationEmailException>().MoveToErrorQueue();
+                    },
                     configureListener: listener => listener
-                        .ListensTo<SubscriptionCreated>(),
-                    configureRetries: options => options.ConfigureConfirmationEmailDelivery())
+                        .ListensTo<SubscriptionCreated>())
                 .AddSecurityServices();
 
         public IServiceCollection AddMigrator(IConfiguration configuration) =>

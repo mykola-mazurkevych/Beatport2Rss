@@ -1,16 +1,19 @@
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents;
+using Beatport2Rss.Api.Application.UseCases.Users.IntegrationEvents;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories.EmailConfirmations;
-using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Interfaces;
+using Beatport2Rss.Common.IntegrationEvents;
 using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
@@ -61,10 +64,10 @@ public sealed class EmailConfirmationRepositoryTests
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Pending, null);
 
             var received = new TaskCompletionSource<EmailConfirmationId>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var query = new Mock<IEmailConfirmationQueryRepository>(MockBehavior.Strict);
-            query.Setup(value => value.FindAsync(It.IsAny<EmailConfirmationId>(), It.IsAny<CancellationToken>()))
-                .Callback<EmailConfirmationId, CancellationToken>((id, _) => received.TrySetResult(id))
-                .ReturnsAsync((EmailConfirmation?)null);
+            var sender = new Mock<IConfirmationEmailSender>(MockBehavior.Strict);
+            sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmation>(), It.IsAny<CancellationToken>()))
+                .Callback<EmailConfirmation, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
+                .Returns(Task.CompletedTask);
             using var host = Host.CreateDefaultBuilder()
                 .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
                 .ConfigureServices(services =>
@@ -75,10 +78,13 @@ public sealed class EmailConfirmationRepositoryTests
                     services.AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>();
                     services.AddSingleton<IClock>(new FixedClock(IssuedAt));
                     services.Configure<EmailConfirmationOptions>(options => options.Enabled = true);
-                    services.AddSingleton(query.Object);
+                    services.AddTransient<IEmailConfirmationQueryRepository, EmailConfirmationQueryRepository>();
+                    services.AddSingleton(sender.Object);
+                    services.AddSingleton<Func<IConfirmationEmailSender>>(() => sender.Object);
+                    services.AddScoped<IIntegrationEventOutbox>(provider =>
+                        new TestIntegrationEventOutbox(provider.GetRequiredService<IDbContextOutbox<ApiDbContext>>()));
                     services.AddScoped<IUnitOfWork>(provider =>
                         new TestWolverineUnitOfWork(provider.GetRequiredService<IDbContextOutbox<ApiDbContext>>()));
-                    services.AddConfirmationEmailDelivery();
                     services.AddWolverine(options =>
                     {
                         options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
@@ -86,7 +92,13 @@ public sealed class EmailConfirmationRepositoryTests
                             .OverrideAutoCreateResources(AutoCreate.All);
                         options.UseEntityFrameworkCoreTransactions();
                         options.Policies.AutoApplyTransactions();
-                        options.ConfigureConfirmationEmailDelivery();
+                        options.Discovery.IncludeAssembly(typeof(ApiApplication).Assembly);
+                        options.Policies.UseDurableLocalQueues();
+                        options.LocalQueue("user-created-confirmation").Sequential().UseDurableInbox();
+                        options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
+                        options.LocalQueueFor<CreateEmailConfirmationCommand>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
                     });
                 })
                 .Build();
@@ -135,10 +147,10 @@ public sealed class EmailConfirmationRepositoryTests
         await db.SaveChangesAsync(cancellationToken);
 
         var identifiers = new List<EmailConfirmationId>();
-        var delivery = new Mock<IConfirmationEmailOutbox>(MockBehavior.Strict);
-        delivery.Setup(value => value.EnqueueAsync(It.IsAny<EmailConfirmationId>()))
-            .Callback<EmailConfirmationId>(identifiers.Add)
-            .Returns(ValueTask.CompletedTask);
+        var delivery = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
+        delivery.Setup(value => value.EnqueueAsync(It.IsAny<EmailConfirmationCreated>(), It.IsAny<CancellationToken>()))
+            .Callback<EmailConfirmationCreated, CancellationToken>((message, _) => identifiers.Add(EmailConfirmationIdentifier.Parse(message.Identifier)!.Value))
+            .Returns(Task.CompletedTask);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
         unit.Setup(value => value.SaveChangesAsync(cancellationToken))
             .Returns((Func<CancellationToken, Task>)db.SaveChangesAsync);
@@ -169,7 +181,7 @@ public sealed class EmailConfirmationRepositoryTests
             Assert.Equal(user.EmailAddress, confirmation.EmailAddress);
             Assert.Equal(IssuedAt.AddHours(24), confirmation.ExpiresAt);
         });
-        delivery.Verify(value => value.EnqueueAsync(It.IsAny<EmailConfirmationId>()), Times.Exactly(2));
+        delivery.Verify(value => value.EnqueueAsync(It.IsAny<EmailConfirmationCreated>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         unit.Verify(value => value.SaveChangesAsync(cancellationToken), Times.Exactly(2));
     }
 
@@ -192,7 +204,7 @@ public sealed class EmailConfirmationRepositoryTests
             await db.SaveChangesAsync(cancellationToken);
         }
 
-        var delivery = new Mock<IConfirmationEmailOutbox>(MockBehavior.Strict);
+        var delivery = new Mock<IIntegrationEventOutbox>(MockBehavior.Strict);
         var unit = new Mock<IUnitOfWork>(MockBehavior.Strict);
         await using var services = new ServiceCollection()
             .AddLogging()
@@ -209,7 +221,7 @@ public sealed class EmailConfirmationRepositoryTests
         await HandleUserCreatedAsync(new UserCreated(Guid.NewGuid(), IssuedAt, user.Id.Value), services, cancellationToken);
 
         Assert.Empty(await db.EmailConfirmations.ToListAsync(cancellationToken));
-        delivery.Verify(value => value.EnqueueAsync(It.IsAny<EmailConfirmationId>()), Times.Never);
+        delivery.Verify(value => value.EnqueueAsync(It.IsAny<EmailConfirmationCreated>(), It.IsAny<CancellationToken>()), Times.Never);
         unit.Verify(value => value.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -285,7 +297,14 @@ public sealed class EmailConfirmationRepositoryTests
     }
 
     private static Task HandleUserCreatedAsync(UserCreated message, IServiceProvider services, CancellationToken cancellationToken) =>
-        ActivatorUtilities.CreateInstance<UserCreatedConfirmationHandler>(services).HandleAsync(message, cancellationToken);
+        ActivatorUtilities.CreateInstance<CreateEmailConfirmationCommandHandler>(services)
+            .HandleAsync(UserCreatedHandler.Handle(message), cancellationToken);
+
+    internal sealed class TestIntegrationEventOutbox(IDbContextOutbox<ApiDbContext> outbox) : IIntegrationEventOutbox
+    {
+        public async Task EnqueueAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken = default)
+            where TEvent : IIntegrationEvent => await outbox.PublishAsync(integrationEvent);
+    }
 
     internal sealed class TestWolverineUnitOfWork(IDbContextOutbox<ApiDbContext> outbox) : IUnitOfWork
     {

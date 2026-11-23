@@ -4,6 +4,8 @@ using System.Text.Json.Serialization;
 using Asp.Versioning.Builder;
 
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 
 using Mediator;
 

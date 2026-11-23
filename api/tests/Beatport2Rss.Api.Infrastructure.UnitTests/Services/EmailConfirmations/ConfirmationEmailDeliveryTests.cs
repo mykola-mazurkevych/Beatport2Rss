@@ -2,11 +2,13 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 
-using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.IntegrationEvents;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;
-using Beatport2Rss.Api.Infrastructure.Extensions.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Common.Email;
@@ -44,7 +46,9 @@ public sealed class ConfirmationEmailDeliveryTests
                 {
                     options.UseRabbitMq();
                     options.Publishes<UserCreated>();
-                    options.ConfigureConfirmationEmailDelivery();
+                    options.Discovery.IncludeAssembly(typeof(ApiApplication).Assembly);
+                    options.LocalQueue("user-created-confirmation").Sequential().UseDurableInbox();
+                    options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
                     options.StubAllExternalTransports();
                 });
             })
@@ -65,24 +69,29 @@ public sealed class ConfirmationEmailDeliveryTests
     }
 
     [Fact]
-    public async Task WolverineRoutesConfirmationToTheApiLocalQueueAndResolvesItsInternalHandler()
+    public async Task WolverineRoutesConfirmationMessagesToLocalQueues()
     {
         using var host = Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
                 services.AddOptions<EmailConfirmationOptions>();
-                services.AddConfirmationEmailDelivery();
-                services.AddWolverine(options => options.ConfigureConfirmationEmailDelivery());
+                services.AddWolverine(options =>
+                {
+                    options.Discovery.IncludeAssembly(typeof(ApiApplication).Assembly);
+                    options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                    options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
+                });
             })
             .Build();
         var cancellationToken = TestContext.Current.CancellationToken;
         await host.StartAsync(cancellationToken);
 
         var bus = host.Services.GetRequiredService<IMessageBus>();
-        var message = new SendConfirmationEmail(EmailConfirmationIdentifier.Generate().ToString());
-        var destination = Assert.Single(bus.PreviewSubscriptions(message)).Destination;
-        Assert.Equal("local://confirmation-email-delivery/", destination?.AbsoluteUri);
-        await bus.InvokeAsync(message, cancellationToken);
+        var identifier = EmailConfirmationIdentifier.Generate().ToString();
+        var created = new EmailConfirmationCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier);
+        var command = new SendConfirmationEmailCommand(identifier);
+        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(created)).Destination?.AbsoluteUri);
+        Assert.StartsWith("local:", Assert.Single(bus.PreviewSubscriptions(command)).Destination?.AbsoluteUri);
 
         await host.StopAsync(cancellationToken);
     }
@@ -91,13 +100,18 @@ public sealed class ConfirmationEmailDeliveryTests
     public void DurableMessageRoundTripsWithoutExposingIdentifierInToString()
     {
         var identifier = EmailConfirmationIdentifier.Generate().ToString();
-        var message = new SendConfirmationEmail(identifier);
+        var message = new SendConfirmationEmailCommand(identifier);
         var payload = JsonSerializer.SerializeToUtf8Bytes(message);
-        var restored = JsonSerializer.Deserialize<SendConfirmationEmail>(payload);
+        var restored = JsonSerializer.Deserialize<SendConfirmationEmailCommand>(payload);
 
         Assert.NotNull(restored);
         Assert.Equal(identifier, restored.Identifier);
         Assert.DoesNotContain(identifier, message.ToString(), StringComparison.Ordinal);
+        var created = new EmailConfirmationCreated(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier);
+        var restoredEvent = JsonSerializer.Deserialize<EmailConfirmationCreated>(JsonSerializer.Serialize(created));
+        Assert.NotNull(restoredEvent);
+        Assert.Equal(identifier, restoredEvent.Identifier);
+        Assert.DoesNotContain(identifier, created.ToString(), StringComparison.Ordinal);
     }
 
     [Theory]
@@ -122,10 +136,12 @@ public sealed class ConfirmationEmailDeliveryTests
             .AddSingleton<IOptions<EmailConfirmationOptions>>(
                 new OptionsWrapper<EmailConfirmationOptions>(new EmailConfirmationOptions { Enabled = scenario != "disabled" }))
             .AddSingleton<IEmailConfirmationQueryRepository>(new ConfirmationRepository(scenario == "missing" ? null : confirmation))
+            .AddSingleton<Func<IConfirmationEmailSender>>(() => throw new InvalidOperationException("The email sender must not be resolved."))
             .BuildServiceProvider();
 
-        var message = new SendConfirmationEmail(scenario == "invalid" ? "invalid" : identifier.ToString());
-        await SendConfirmationEmailHandler.DeliverAsync(message, services, TestContext.Current.CancellationToken);
+        var message = new SendConfirmationEmailCommand(scenario == "invalid" ? "invalid" : identifier.ToString());
+        await ActivatorUtilities.CreateInstance<SendConfirmationEmailCommandHandler>(services)
+            .HandleAsync(message, TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -163,6 +179,7 @@ public sealed class ConfirmationEmailDeliveryTests
         if (valid)
         {
             Assert.Equal(enabled, options.Value.Enabled);
+            Assert.NotNull(services.GetRequiredService<Func<IConfirmationEmailSender>>());
         }
         else
         {

@@ -9,7 +9,7 @@ using Mediator;
 
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 
 public sealed record EmailConfirmationState(bool Confirmed, DateTimeOffset ExpiresAt);
 

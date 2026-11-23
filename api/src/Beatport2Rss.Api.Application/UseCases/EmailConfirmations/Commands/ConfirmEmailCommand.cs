@@ -1,4 +1,5 @@
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
@@ -8,7 +9,7 @@ using Mediator;
 
 using Microsoft.Extensions.Options;
 
-namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 
 public sealed record ConfirmEmailCommand(EmailConfirmationId? Id, bool? Confirmed) : ICommand<Result>;
 

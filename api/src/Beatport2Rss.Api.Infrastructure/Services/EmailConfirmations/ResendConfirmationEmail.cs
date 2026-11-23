@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Net;
 
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
-using Beatport2Rss.Api.Infrastructure.Options;
 using Beatport2Rss.Common.Email.Interfaces;
 using Beatport2Rss.Common.Miscellaneous.Exceptions;
 
@@ -10,11 +10,13 @@ using Microsoft.Extensions.Options;
 
 using Resend;
 
+using DeliveryConfirmationOptions = Beatport2Rss.Api.Infrastructure.Options.EmailConfirmationOptions;
+
 namespace Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 
 internal sealed class ResendConfirmationEmail(
     IEmailClient emailClient,
-    IOptions<EmailConfirmationOptions> options)
+    IOptions<DeliveryConfirmationOptions> options) : IConfirmationEmailSender
 {
     public async Task SendAsync(
         EmailConfirmation confirmation,

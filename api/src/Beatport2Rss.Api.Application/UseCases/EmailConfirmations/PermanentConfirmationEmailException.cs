@@ -1,4 +1,4 @@
-namespace Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
+namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 
 public sealed class PermanentConfirmationEmailException : Exception
 {

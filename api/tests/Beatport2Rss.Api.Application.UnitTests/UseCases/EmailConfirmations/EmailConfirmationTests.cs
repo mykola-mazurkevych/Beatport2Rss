@@ -1,4 +1,6 @@
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories.EmailConfirmations;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Api.Domain.Users;

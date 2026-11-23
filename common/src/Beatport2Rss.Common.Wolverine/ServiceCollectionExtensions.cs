@@ -36,7 +36,8 @@ public static class ServiceCollectionExtensions
                 if (configurePublisher is not null)
                 {
                     services
-                        .AddTransient<IIntegrationEventOutbox, WolverineIntegrationEventOutbox<TDbContext>>()
+                        .AddTransient<IIntegrationEventOutbox>(provider =>
+                            new WolverineIntegrationEventOutbox<TDbContext>(provider.GetRequiredService<IDbContextOutbox<TDbContext>>()))
                         .AddTransient<IUnitOfWork>(provider =>
                             new WolverineUnitOfWork<TDbContext>(provider.GetRequiredService<IDbContextOutbox<TDbContext>>()));
                     configurePublisher(options);
