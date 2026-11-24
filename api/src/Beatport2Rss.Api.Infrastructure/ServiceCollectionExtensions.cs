@@ -194,7 +194,6 @@ public static class ServiceCollectionExtensions
 
         private IServiceCollection ConfigureOptions(IConfiguration configuration) =>
             services
-                .Configure<BeatportCredentials>(credentials => configuration.GetSection(nameof(BeatportCredentials)).Bind(credentials))
                 .Configure<JsonSerializerOptions>(static options => options.Configure())
                 .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
                 .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
