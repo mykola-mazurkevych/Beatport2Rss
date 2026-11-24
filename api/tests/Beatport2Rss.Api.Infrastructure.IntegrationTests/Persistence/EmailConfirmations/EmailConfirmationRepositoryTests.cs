@@ -1,4 +1,7 @@
+using System.Data.Common;
+
 using Beatport2Rss.Api.Application;
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
@@ -17,6 +20,7 @@ using Beatport2Rss.Common.IntegrationEvents.Users;
 using Beatport2Rss.Common.Miscellaneous.Interfaces;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -47,7 +51,7 @@ public sealed class EmailConfirmationRepositoryTests
     public static bool HasPostgres => !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ConnectionVariable));
 
     [Fact(Skip = "Set EMAIL_CONFIRMATION_TEST_POSTGRES to run against PostgreSQL.", SkipUnless = nameof(HasPostgres))]
-    public async Task UserCreated_CommitsConfirmationAndDeliversPrivateMessage()
+    public async Task Confirmation_ConcurrentRequestsAndEmailChanges_AreSerialized()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var connection = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable(ConnectionVariable))
@@ -66,6 +70,8 @@ public sealed class EmailConfirmationRepositoryTests
                 PasswordHash.Create("test-hash"), null, null, UserStatus.Pending, null);
 
             var received = new TaskCompletionSource<EmailConfirmationId>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var gate = new ConfirmationPublishGate();
+            var lockAttempts = new UserLockInterceptor();
             var sender = new Mock<IConfirmationEmailSender>(MockBehavior.Strict);
             sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmationReadModel>(), It.IsAny<CancellationToken>()))
                 .Callback<EmailConfirmationReadModel, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
@@ -75,7 +81,9 @@ public sealed class EmailConfirmationRepositoryTests
                 .ConfigureServices(services =>
                 {
                     services.AddApplication();
-                    services.AddDbContext<ApiDbContext>(options => options.UseNpgsql(connection.ConnectionString));
+                    services.AddDbContext<ApiDbContext>(options =>
+                        options.UseNpgsql(connection.ConnectionString).AddInterceptors(lockAttempts));
+                    services.AddTransient<ITransactionFactory, TransactionFactory>();
                     services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking());
                     services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users);
                     services.AddTransient<IUserCommandRepository, UserCommandRepository>();
@@ -86,7 +94,7 @@ public sealed class EmailConfirmationRepositoryTests
                     services.AddSingleton(sender.Object);
                     services.AddSingleton<Func<IConfirmationEmailSender>>(() => sender.Object);
                     services.AddScoped<IIntegrationEventOutbox>(provider =>
-                        new TestIntegrationEventOutbox(provider.GetRequiredService<IDbContextOutbox<ApiDbContext>>()));
+                        new TestIntegrationEventOutbox(provider.GetRequiredService<IDbContextOutbox<ApiDbContext>>(), gate));
                     services.AddScoped<IUnitOfWork>(provider =>
                         new TestWolverineUnitOfWork(provider.GetRequiredService<IDbContextOutbox<ApiDbContext>>()));
                     services.AddWolverine(options =>
@@ -125,11 +133,26 @@ public sealed class EmailConfirmationRepositoryTests
             Assert.Equal(confirmation.Id, deliveredId);
             Assert.NotEqual(message.Id, confirmation.Id.Value);
 
-            await using (var scope = host.Services.CreateAsyncScope())
+            await using (var firstScope = host.Services.CreateAsyncScope())
+            await using (var secondScope = host.Services.CreateAsyncScope())
             {
-                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                var result = await mediator.Send(new ConfirmEmailCommand(confirmation.Id, true), cancellationToken);
-                Assert.True(result.IsSuccess);
+                var command = new ConfirmEmailCommand(confirmation.Id, true);
+                var first = firstScope.ServiceProvider.GetRequiredService<IMediator>().Send(command, cancellationToken).AsTask();
+                try
+                {
+                    await gate.FirstStaged.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+                    var second = secondScope.ServiceProvider.GetRequiredService<IMediator>().Send(command, cancellationToken).AsTask();
+                    await lockAttempts.SecondAttempt.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+                    Assert.False(second.IsCompleted);
+                    gate.Release.TrySetResult();
+                    var results = await Task.WhenAll(first, second);
+                    Assert.All(results, result => Assert.True(result.IsSuccess));
+                    Assert.Equal(1, gate.EventCount);
+                }
+                finally
+                {
+                    gate.Release.TrySetResult();
+                }
             }
 
             var deadline = DateTimeOffset.UtcNow.AddSeconds(30);
@@ -149,11 +172,38 @@ public sealed class EmailConfirmationRepositoryTests
             db.ChangeTracker.Clear();
             Assert.NotNull((await db.EmailConfirmations.SingleAsync(cancellationToken)).ConfirmedAt);
 
+            var otherUser = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("other@example.test"),
+                PasswordHash.Create("test-hash"), null, null, UserStatus.Pending, null);
+            var otherConfirmation = EmailConfirmation.Create(
+                EmailConfirmationId.Create(Guid.NewGuid()), IssuedAt, otherUser.Id, otherUser.EmailAddress, IssuedAt.AddHours(24));
+            await db.Users.AddAsync(otherUser, cancellationToken);
+            await db.EmailConfirmations.AddAsync(otherConfirmation, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+
+            await using (var updateDb = new ApiDbContext(dbOptions))
+            await using (var updateTransaction = await updateDb.Database.BeginTransactionAsync(cancellationToken))
+            await using (var scope = host.Services.CreateAsyncScope())
+            {
+                var changingUser = await updateDb.Users.SingleAsync(item => item.Id == otherUser.Id, cancellationToken);
+                changingUser.UpdateEmailAddress(EmailAddress.Create("changed@example.test"));
+                await updateDb.SaveChangesAsync(cancellationToken);
+
+                var command = new ConfirmEmailCommand(otherConfirmation.Id, true);
+                var pending = scope.ServiceProvider.GetRequiredService<IMediator>().Send(command, cancellationToken).AsTask();
+                await lockAttempts.ThirdAttempt.Task.WaitAsync(TimeSpan.FromSeconds(30), cancellationToken);
+                Assert.False(pending.IsCompleted);
+                await updateTransaction.CommitAsync(cancellationToken);
+                Assert.False((await pending).IsSuccess);
+                Assert.Equal(1, gate.EventCount);
+            }
+            Assert.Null((await db.EmailConfirmations.SingleAsync(item => item.Id == otherConfirmation.Id, cancellationToken)).ConfirmedAt);
+
             await using (var scope = host.Services.CreateAsyncScope())
             {
                 await HandleUserCreatedAsync(message, scope.ServiceProvider, cancellationToken);
             }
-            Assert.Equal(2, await db.EmailConfirmations.CountAsync(cancellationToken));
+            Assert.Equal(3, await db.EmailConfirmations.CountAsync(cancellationToken));
             await host.StopAsync(cancellationToken);
         }
         finally
@@ -373,10 +423,56 @@ public sealed class EmailConfirmationRepositoryTests
         ActivatorUtilities.CreateInstance<CreateEmailConfirmationCommandHandler>(services)
             .HandleAsync(UserCreatedHandler.Handle(message), cancellationToken);
 
-    internal sealed class TestIntegrationEventOutbox(IDbContextOutbox<ApiDbContext> outbox) : IIntegrationEventOutbox
+    internal sealed class TestIntegrationEventOutbox(
+        IDbContextOutbox<ApiDbContext> outbox,
+        ConfirmationPublishGate gate) : IIntegrationEventOutbox
     {
         public async Task EnqueueAsync<TEvent>(TEvent integrationEvent, CancellationToken cancellationToken = default)
-            where TEvent : IIntegrationEvent => await outbox.PublishAsync(integrationEvent);
+            where TEvent : IIntegrationEvent
+        {
+            await outbox.PublishAsync(integrationEvent);
+            if (integrationEvent is EmailConfirmed && Interlocked.Increment(ref gate.EventCount) == 1)
+            {
+                gate.FirstStaged.TrySetResult();
+                await gate.Release.Task.WaitAsync(cancellationToken);
+            }
+        }
+    }
+
+    internal sealed class ConfirmationPublishGate
+    {
+        public int EventCount;
+        public TaskCompletionSource FirstStaged { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
+    private sealed class UserLockInterceptor : DbCommandInterceptor
+    {
+        private int _attempts;
+        public TaskCompletionSource SecondAttempt { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public TaskCompletionSource ThirdAttempt { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public override ValueTask<InterceptionResult<DbDataReader>> ReaderExecutingAsync(
+            DbCommand command,
+            CommandEventData eventData,
+            InterceptionResult<DbDataReader> result,
+            CancellationToken cancellationToken = default)
+        {
+            if (command.CommandText.Contains("FOR UPDATE", StringComparison.Ordinal))
+            {
+                var attempt = Interlocked.Increment(ref _attempts);
+                if (attempt == 2)
+                {
+                    SecondAttempt.TrySetResult();
+                }
+                else if (attempt == 3)
+                {
+                    ThirdAttempt.TrySetResult();
+                }
+            }
+
+            return base.ReaderExecutingAsync(command, eventData, result, cancellationToken);
+        }
     }
 
     internal sealed class TestWolverineUnitOfWork(IDbContextOutbox<ApiDbContext> outbox) : IUnitOfWork

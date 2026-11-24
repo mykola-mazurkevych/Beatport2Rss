@@ -1,3 +1,4 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
@@ -19,6 +20,7 @@ public sealed record ConfirmEmailCommand(EmailConfirmationId? Id, bool? Confirme
 internal sealed class ConfirmEmailCommandHandler(
     IEmailConfirmationCommandRepository repository,
     IUserCommandRepository users,
+    ITransactionFactory transactionFactory,
     IIntegrationEventOutbox integrationEventOutbox,
     IUnitOfWork unitOfWork,
     IClock clock,
@@ -37,14 +39,21 @@ internal sealed class ConfirmEmailCommandHandler(
             return EmailConfirmationErrors.InvalidLinkResult();
         }
 
-        var confirmation = await repository.FindAsync(id, cancellationToken);
-        if (confirmation is null)
+        await using var transaction = await transactionFactory.BeginAsync(cancellationToken);
+        var userId = await repository.FindUserIdAsync(id, cancellationToken);
+        if (userId is null)
         {
             return EmailConfirmationErrors.InvalidLinkResult();
         }
 
-        var user = await users.FindAsync(confirmation.UserId, cancellationToken);
+        var user = await users.FindForUpdateAsync(userId.Value, cancellationToken);
         if (user is null)
+        {
+            return EmailConfirmationErrors.InvalidLinkResult();
+        }
+
+        var confirmation = await repository.FindAsync(id, cancellationToken);
+        if (confirmation is null)
         {
             return EmailConfirmationErrors.InvalidLinkResult();
         }

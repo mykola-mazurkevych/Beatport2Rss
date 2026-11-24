@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
@@ -189,6 +190,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
+                .AddTransient<ITransactionFactory, TransactionFactory>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)

@@ -1,3 +1,4 @@
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
@@ -32,6 +33,8 @@ public sealed class EmailConfirmationTests
     private readonly Mock<IEmailConfirmationCommandRepository> _commandRepository = new(MockBehavior.Strict);
     private readonly Mock<IEmailConfirmationQueryRepository> _queryRepository = new(MockBehavior.Strict);
     private readonly Mock<IUserCommandRepository> _users = new(MockBehavior.Strict);
+    private readonly Mock<ITransactionFactory> _transactions = new(MockBehavior.Strict);
+    private readonly Mock<IAsyncDisposable> _transaction = new(MockBehavior.Strict);
     private readonly Mock<IIntegrationEventOutbox> _outbox = new(MockBehavior.Strict);
     private readonly Mock<IUnitOfWork> _unitOfWork = new(MockBehavior.Strict);
     private readonly Mock<IClock> _clock = new(MockBehavior.Strict);
@@ -84,8 +87,12 @@ public sealed class EmailConfirmationTests
 
         var now = scenario == "expired" ? confirmation.ExpiresAt : IssuedAt.AddHours(1);
         _clock.SetupGet(clock => clock.UtcNow).Returns(now);
-        _commandRepository.Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken)).ReturnsAsync(confirmation);
-        _users.Setup(repository => repository.FindAsync(user.Id, cancellationToken)).ReturnsAsync(user);
+        var sequence = new MockSequence();
+        _transactions.InSequence(sequence).Setup(factory => factory.BeginAsync(cancellationToken)).ReturnsAsync(_transaction.Object);
+        _transaction.Setup(transaction => transaction.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        _commandRepository.InSequence(sequence).Setup(repository => repository.FindUserIdAsync(confirmation.Id, cancellationToken)).ReturnsAsync(user.Id);
+        _users.InSequence(sequence).Setup(repository => repository.FindForUpdateAsync(user.Id, cancellationToken)).ReturnsAsync(user);
+        _commandRepository.InSequence(sequence).Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken)).ReturnsAsync(confirmation);
         if (scenario == "new")
         {
             _outbox.Setup(outbox => outbox.EnqueueAsync(
@@ -107,6 +114,46 @@ public sealed class EmailConfirmationTests
         _outbox.VerifyNoOtherCalls();
         _unitOfWork.VerifyAll();
         _unitOfWork.VerifyNoOtherCalls();
+        _transaction.Verify(transaction => transaction.DisposeAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task Put_UnknownConfirmationDisposesTransactionWithoutSaving()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var id = EmailConfirmationId.Create(Guid.NewGuid());
+        _transactions.Setup(factory => factory.BeginAsync(cancellationToken)).ReturnsAsync(_transaction.Object);
+        _transaction.Setup(transaction => transaction.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        _commandRepository.Setup(repository => repository.FindUserIdAsync(id, cancellationToken)).ReturnsAsync((UserId?)null);
+
+        var result = await CreateConfirmHandler().Handle(new ConfirmEmailCommand(id, true), cancellationToken);
+
+        Assert.False(result.IsSuccess);
+        _transaction.Verify(transaction => transaction.DisposeAsync(), Times.Once);
+        _users.VerifyNoOtherCalls();
+        _outbox.VerifyNoOtherCalls();
+        _unitOfWork.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Put_SaveFailureDisposesTransaction()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var (user, confirmation) = CreateConfirmation(UserStatus.Pending);
+        _transactions.Setup(factory => factory.BeginAsync(cancellationToken)).ReturnsAsync(_transaction.Object);
+        _transaction.Setup(transaction => transaction.DisposeAsync()).Returns(ValueTask.CompletedTask);
+        _commandRepository.Setup(repository => repository.FindUserIdAsync(confirmation.Id, cancellationToken)).ReturnsAsync(user.Id);
+        _users.Setup(repository => repository.FindForUpdateAsync(user.Id, cancellationToken)).ReturnsAsync(user);
+        _commandRepository.Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken)).ReturnsAsync(confirmation);
+        _clock.SetupGet(clock => clock.UtcNow).Returns(IssuedAt);
+        _outbox.Setup(outbox => outbox.EnqueueAsync(It.IsAny<EmailConfirmed>(), cancellationToken)).Returns(Task.CompletedTask);
+        _unitOfWork.Setup(unitOfWork => unitOfWork.SaveChangesAsync(cancellationToken))
+            .ThrowsAsync(new InvalidOperationException("Save failed."));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await CreateConfirmHandler().Handle(new ConfirmEmailCommand(confirmation.Id, true), cancellationToken));
+
+        _transaction.Verify(transaction => transaction.DisposeAsync(), Times.Once);
     }
 
     [Theory]
@@ -192,7 +239,7 @@ public sealed class EmailConfirmationTests
         new(confirmation.Id, confirmation.CreatedAt, confirmation.EmailAddress, confirmation.ExpiresAt, confirmation.ConfirmedAt);
 
     private ConfirmEmailCommandHandler CreateConfirmHandler() =>
-        new(_commandRepository.Object, _users.Object, _outbox.Object, _unitOfWork.Object, _clock.Object, _options);
+        new(_commandRepository.Object, _users.Object, _transactions.Object, _outbox.Object, _unitOfWork.Object, _clock.Object, _options);
 
     private static (User, EmailConfirmation) CreateConfirmation(UserStatus status)
     {

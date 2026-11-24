@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
@@ -190,6 +191,7 @@ public sealed class ConfirmationEmailDeliveryTests
         {
             Assert.Equal(enabled, options.Value.Enabled);
             Assert.NotNull(services.GetRequiredService<Func<IConfirmationEmailSender>>());
+            Assert.NotNull(services.GetRequiredService<ITransactionFactory>());
         }
         else
         {
