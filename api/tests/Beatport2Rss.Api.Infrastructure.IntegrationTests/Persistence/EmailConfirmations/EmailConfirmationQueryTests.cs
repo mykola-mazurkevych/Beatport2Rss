@@ -55,9 +55,9 @@ public sealed class EmailConfirmationQueryTests
             .Select(confirmation => new { confirmation.Id, confirmation.ExpiresAt, confirmation.ConfirmedAt })
             .ToQueryString();
 
-        Assert.Contains("FROM api.\"vwEmailConfirmations\"", sql);
-        Assert.Contains("WHERE", sql);
-        Assert.Contains("\"Id\" =", sql);
+        Assert.Contains("FROM api.\"vwEmailConfirmations\"", sql, StringComparison.Ordinal);
+        Assert.Contains("WHERE", sql, StringComparison.Ordinal);
+        Assert.Contains("\"Id\" =", sql, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -67,11 +67,11 @@ public sealed class EmailConfirmationQueryTests
         var up = Assert.IsType<SqlOperation>(Assert.Single(migration.UpOperations)).Sql;
         var down = Assert.IsType<SqlOperation>(Assert.Single(migration.DownOperations)).Sql;
 
-        Assert.Contains("CREATE VIEW \"api\".\"vwEmailConfirmations\"", up);
-        Assert.Contains("C.\"Id\"", up);
-        Assert.Contains("C.\"ExpiresAt\"", up);
-        Assert.Contains("C.\"ConfirmedAt\"", up);
-        Assert.Contains("FROM \"api\".\"EmailConfirmations\"", up);
-        Assert.Contains("DROP VIEW IF EXISTS \"api\".\"vwEmailConfirmations\"", down);
+        Assert.Contains("CREATE VIEW \"api\".\"vwEmailConfirmations\"", up, StringComparison.Ordinal);
+        Assert.Contains("C.\"Id\"", up, StringComparison.Ordinal);
+        Assert.Contains("C.\"ExpiresAt\"", up, StringComparison.Ordinal);
+        Assert.Contains("C.\"ConfirmedAt\"", up, StringComparison.Ordinal);
+        Assert.Contains("FROM \"api\".\"EmailConfirmations\"", up, StringComparison.Ordinal);
+        Assert.Contains("DROP VIEW IF EXISTS \"api\".\"vwEmailConfirmations\"", down, StringComparison.Ordinal);
     }
 }
