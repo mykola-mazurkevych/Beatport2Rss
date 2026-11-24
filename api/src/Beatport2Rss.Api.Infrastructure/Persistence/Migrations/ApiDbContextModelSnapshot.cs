@@ -42,6 +42,35 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("Countries", "api");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Api.Domain.EmailConfirmations.EmailConfirmation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmailConfirmations", "api");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Api.Domain.Feeds.Feed", b =>
                 {
                     b.Property<Guid>("Id")
@@ -472,6 +501,15 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.ToTable((string)null);
 
                     b.ToView("vwUsers", "api");
+                });
+
+            modelBuilder.Entity("Beatport2Rss.Api.Domain.EmailConfirmations.EmailConfirmation", b =>
+                {
+                    b.HasOne("Beatport2Rss.Api.Domain.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Beatport2Rss.Api.Domain.Feeds.Feed", b =>
