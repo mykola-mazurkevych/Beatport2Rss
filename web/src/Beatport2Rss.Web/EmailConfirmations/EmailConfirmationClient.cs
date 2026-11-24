@@ -12,7 +12,7 @@ internal sealed class EmailConfirmationClient(HttpClient httpClient)
 
     private async Task<ConfirmationState> SendAsync(HttpMethod method, string token)
     {
-        using var request = new HttpRequestMessage(method, $"api/email-confirmations/{Uri.EscapeDataString(token)}");
+        using var request = new HttpRequestMessage(method, $"email-confirmations/{Uri.EscapeDataString(token)}");
         request.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true, NoStore = true };
         if (method == HttpMethod.Put)
         {
@@ -22,7 +22,7 @@ internal sealed class EmailConfirmationClient(HttpClient httpClient)
         try
         {
             using var response = await httpClient.SendAsync(request);
-            if (response.StatusCode == HttpStatusCode.BadRequest)
+            if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.NotFound)
             {
                 return ConfirmationState.Invalid;
             }
@@ -35,11 +35,12 @@ internal sealed class EmailConfirmationClient(HttpClient httpClient)
             if (method == HttpMethod.Get && response.StatusCode == HttpStatusCode.OK)
             {
                 var resource = await response.Content.ReadFromJsonAsync<ConfirmationResource>();
-                return resource?.Confirmed switch
+                return (resource?.IsConfirmed, resource?.IsExpired) switch
                 {
-                    true => ConfirmationState.Confirmed,
-                    false => ConfirmationState.Ready,
-                    null => ConfirmationState.Unavailable
+                    (true, _) => ConfirmationState.Confirmed,
+                    (false, true) => ConfirmationState.Invalid,
+                    (false, false) => ConfirmationState.Ready,
+                    _ => ConfirmationState.Unavailable
                 };
             }
         }
@@ -51,5 +52,5 @@ internal sealed class EmailConfirmationClient(HttpClient httpClient)
         return ConfirmationState.Unavailable;
     }
 
-    private sealed record ConfirmationResource(bool? Confirmed);
+    private sealed record ConfirmationResource(bool? IsConfirmed, bool? IsExpired);
 }

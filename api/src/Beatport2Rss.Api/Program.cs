@@ -79,14 +79,14 @@ var versionSet = app.NewApiVersionSet()
     .Build();
 
 app
+    .BuildEmailConfirmationEndpoints(versionSet)
     .BuildFeedEndpoints(versionSet)
+    .BuildRssFeedEndpoints()
     .BuildSessionEndpoints(versionSet)
     .BuildSubscriptionEndpoints(versionSet)
     .BuildTagEndpoints(versionSet)
-    .BuildUserEndpoints(versionSet)
-    .BuildRssFeedEndpoints();
+    .BuildUserEndpoints(versionSet);
 
 app.MapGet("", () => "Hello, Beatport2Rss!");
-app.BuildEmailConfirmationEndpoints(versionSet);
 
 app.Run();

@@ -157,11 +157,10 @@ public sealed class EmailConfirmationTests
     }
 
     [Theory]
-    [InlineData("missing", false)]
     [InlineData("unknown", false)]
     [InlineData("unused", false)]
     [InlineData("confirmed", true)]
-    public async Task Get_ReadsOnlyMatchingResources_AndHonorsExpiry(string scenario, bool confirmed)
+    public async Task Get_ReadsOnlyMatchingResources_AndReturnsExpiry(string scenario, bool confirmed)
     {
         var (user, confirmation) = CreateConfirmation(UserStatus.Pending);
         if (confirmed)
@@ -172,28 +171,22 @@ public sealed class EmailConfirmationTests
         var now = confirmation.ExpiresAt;
         var cancellationToken = TestContext.Current.CancellationToken;
         _clock.SetupGet(clock => clock.UtcNow).Returns(now);
-        EmailConfirmationId? id = scenario switch
-        {
-            "missing" => null,
-            "unknown" => EmailConfirmationId.Create(Guid.NewGuid()),
-            _ => confirmation.Id,
-        };
-        if (scenario != "missing")
-        {
-            _queryRepository.Setup(repository => repository.FindAsync(id!.Value, cancellationToken))
-                .ReturnsAsync(scenario is "unused" or "confirmed" ? ToReadModel(confirmation) : null);
-        }
+        var id = scenario == "unknown" ? EmailConfirmationId.Create(Guid.NewGuid()) : confirmation.Id;
+        _queryRepository.Setup(repository => repository.FindAsync(id, cancellationToken))
+            .ReturnsAsync(scenario is "unused" or "confirmed" ? ToReadModel(confirmation) : null);
 
-        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
+        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object);
         var result = await handler.Handle(new GetEmailConfirmationQuery(id), cancellationToken);
 
-        if (confirmed)
+        if (scenario != "unknown")
         {
-            Assert.Equal(new EmailConfirmationState(true, confirmation.ExpiresAt), result.Value);
+            Assert.True(result.IsSuccess);
+            Assert.Equal(confirmed, result.Value.IsConfirmed);
+            Assert.True(result.Value.IsExpired);
         }
         else
         {
-            Assert.Equal(EmailConfirmationErrors.InvalidLink, Assert.Single(result.Errors).Message);
+            Assert.True(result.IsFailed);
             Assert.Equal(UserStatus.Pending, user.Status);
             Assert.Null(confirmation.ConfirmedAt);
         }
@@ -208,10 +201,11 @@ public sealed class EmailConfirmationTests
         _queryRepository.Setup(repository => repository.FindAsync(confirmation.Id, cancellationToken))
             .ReturnsAsync(ToReadModel(confirmation));
 
-        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object, _options);
+        var handler = new GetEmailConfirmationQueryHandler(_queryRepository.Object, _clock.Object);
         var result = await handler.Handle(new GetEmailConfirmationQuery(confirmation.Id), cancellationToken);
 
-        Assert.Equal(new EmailConfirmationState(false, confirmation.ExpiresAt), result.Value);
+        Assert.False(result.Value.IsConfirmed);
+        Assert.False(result.Value.IsExpired);
         Assert.Equal(UserStatus.Pending, user.Status);
         Assert.Null(confirmation.ConfirmedAt);
     }
@@ -236,7 +230,7 @@ public sealed class EmailConfirmationTests
     }
 
     private static EmailConfirmationReadModel ToReadModel(EmailConfirmation confirmation) =>
-        new(confirmation.Id, confirmation.CreatedAt, confirmation.EmailAddress, confirmation.ExpiresAt, confirmation.ConfirmedAt);
+        new(confirmation.Id, confirmation.ExpiresAt, confirmation.ConfirmedAt);
 
     private ConfirmEmailCommandHandler CreateConfirmHandler() =>
         new(_commandRepository.Object, _users.Object, _transactions.Object, _outbox.Object, _unitOfWork.Object, _clock.Object, _options);

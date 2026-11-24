@@ -10,7 +10,7 @@ namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 public sealed record SendConfirmationEmailCommand(Guid EmailConfirmationId);
 
 public sealed class SendConfirmationEmailCommandHandler(
-    IEmailConfirmationQueryRepository emailConfirmationQueryRepository,
+    IEmailConfirmationCommandRepository emailConfirmationCommandRepository,
     Func<IConfirmationEmailSender> delivery, // TOOD: WTF??
     IClock clock,
     IOptions<EmailConfirmationOptions> emailConfirmationOptions,
@@ -27,7 +27,7 @@ public sealed class SendConfirmationEmailCommandHandler(
         }
 
         var emailConfirmationId = EmailConfirmationId.Create(command.EmailConfirmationId);
-        var emailConfirmation = await emailConfirmationQueryRepository.FindAsync(emailConfirmationId, cancellationToken);
+        var emailConfirmation = await emailConfirmationCommandRepository.FindAsync(emailConfirmationId, cancellationToken);
         if (emailConfirmation is null)
         {
             SendConfirmationEmailCommandHandlerLoggerMessages.EmailConfirmationNotFound(logger, emailConfirmationId.Value);

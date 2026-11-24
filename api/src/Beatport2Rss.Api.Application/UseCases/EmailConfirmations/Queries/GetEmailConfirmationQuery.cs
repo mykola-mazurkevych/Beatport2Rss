@@ -1,3 +1,4 @@
+using Beatport2Rss.Api.Application.Dtos.EmailConfirmations;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Domain.EmailConfirmations;
 using Beatport2Rss.Common.FluentResults.Extensions;
@@ -7,30 +8,30 @@ using FluentResults;
 
 using Mediator;
 
-using Microsoft.Extensions.Options;
-
 namespace Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Queries;
 
-public sealed record EmailConfirmationState(bool Confirmed, DateTimeOffset ExpiresAt);
-
-public sealed record GetEmailConfirmationQuery(EmailConfirmationId? Id) : IQuery<Result<EmailConfirmationState>>;
+public sealed record GetEmailConfirmationQuery(EmailConfirmationId Id) :
+    IQuery<Result<EmailConfirmationDto>>;
 
 internal sealed class GetEmailConfirmationQueryHandler(
-    IEmailConfirmationQueryRepository repository,
-    IClock clock,
-    IOptions<EmailConfirmationOptions> options) :
-    IQueryHandler<GetEmailConfirmationQuery, Result<EmailConfirmationState>>
+    IEmailConfirmationQueryRepository emailConfirmationQueryRepository,
+    IClock clock) :
+    IQueryHandler<GetEmailConfirmationQuery, Result<EmailConfirmationDto>>
 {
-    public async ValueTask<Result<EmailConfirmationState>> Handle(
-        GetEmailConfirmationQuery query, CancellationToken cancellationToken)
+    public async ValueTask<Result<EmailConfirmationDto>> Handle(
+        GetEmailConfirmationQuery query,
+        CancellationToken cancellationToken)
     {
-        var confirmation = options.Value.Enabled && query.Id is { } id
-            ? await repository.FindAsync(id, cancellationToken)
-            : null;
+        var emailConfirmation = await emailConfirmationQueryRepository.FindAsync(query.Id, cancellationToken);
+        if (emailConfirmation is null)
+        {
+            return Result.NotFound("Email confirmation not found");
+        }
 
-        return confirmation is not null && (confirmation.ConfirmedAt is not null || clock.UtcNow < confirmation.ExpiresAt)
-            ? Result.Ok(new EmailConfirmationState(confirmation.ConfirmedAt is not null, confirmation.ExpiresAt))
-            : EmailConfirmationErrors.InvalidLinkResult().ToResult<EmailConfirmationState>();
+        return new EmailConfirmationDto(
+            emailConfirmation.Id,
+            IsExpired: emailConfirmation.ExpiresAt <= clock.UtcNow,
+            IsConfirmed: emailConfirmation.ConfirmedAt.HasValue);
     }
 }
 

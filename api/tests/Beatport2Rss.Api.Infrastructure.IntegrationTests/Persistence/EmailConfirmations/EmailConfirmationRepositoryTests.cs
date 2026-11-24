@@ -3,7 +3,6 @@ using System.Data.Common;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
-using Beatport2Rss.Api.Application.ReadModels.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
 using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Application.UseCases.Users.IntegrationEvents;
@@ -73,8 +72,8 @@ public sealed class EmailConfirmationRepositoryTests
             var gate = new ConfirmationPublishGate();
             var lockAttempts = new UserLockInterceptor();
             var sender = new Mock<IConfirmationEmailSender>(MockBehavior.Strict);
-            sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmationReadModel>(), It.IsAny<CancellationToken>()))
-                .Callback<EmailConfirmationReadModel, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
+            sender.Setup(value => value.SendAsync(It.IsAny<EmailConfirmation>(), It.IsAny<CancellationToken>()))
+                .Callback<EmailConfirmation, CancellationToken>((confirmation, _) => received.TrySetResult(confirmation.Id))
                 .Returns(Task.CompletedTask);
             using var host = Host.CreateDefaultBuilder()
                 .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
@@ -335,8 +334,6 @@ public sealed class EmailConfirmationRepositoryTests
             var readModel = await queryRepository.FindAsync(id, cancellationToken);
             Assert.NotNull(readModel);
             Assert.Equal(confirmation.Id, readModel.Id);
-            Assert.Equal(confirmation.CreatedAt, readModel.CreatedAt);
-            Assert.Equal(confirmation.EmailAddress.Value, readModel.EmailAddress.Value);
             Assert.Equal(confirmation.ExpiresAt, readModel.ExpiresAt);
             Assert.Null(readModel.ConfirmedAt);
             var changedUser = await db.Users.SingleAsync(cancellationToken);

@@ -203,6 +203,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Tags)
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().UserQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users)
+                .AddTransient<IEmailConfirmationQueryRepository, EmailConfirmationQueryRepository>()
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IFeedQueryRepository, FeedQueryRepository>()
                 .AddTransient<ISessionCommandRepository, SessionCommandRepository>()
@@ -213,7 +214,6 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
                 .AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>()
-                .AddTransient<IEmailConfirmationQueryRepository, EmailConfirmationQueryRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
         private IServiceCollection AddSecurityServices() =>

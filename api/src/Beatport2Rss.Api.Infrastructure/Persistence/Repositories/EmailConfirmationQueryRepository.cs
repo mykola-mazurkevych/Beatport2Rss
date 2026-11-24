@@ -6,21 +6,16 @@ using Beatport2Rss.Common.EntityFrameworkCore.Persistence.Repositories;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 
-internal sealed class EmailConfirmationQueryRepository(
-    IQueryable<EmailConfirmationQueryModel> emailConfirmationQueryModels) :
+internal sealed class EmailConfirmationQueryRepository(IQueryable<EmailConfirmationQueryModel> emailConfirmationQueryModels) :
     QueryRepository<EmailConfirmationQueryModel, EmailConfirmationId>(emailConfirmationQueryModels),
     IEmailConfirmationQueryRepository
 {
-    public Task<EmailConfirmationReadModel?> FindAsync(
-        EmailConfirmationId id,
-        CancellationToken cancellationToken = default) =>
+    public Task<EmailConfirmationReadModel?> FindAsync(EmailConfirmationId emailConfirmationId, CancellationToken cancellationToken = default) =>
         FindAsync(
-            confirmation => confirmation.Id == id,
-            confirmation => new EmailConfirmationReadModel(
-                confirmation.Id,
-                confirmation.CreatedAt,
-                confirmation.EmailAddress,
-                confirmation.ExpiresAt,
-                confirmation.ConfirmedAt),
+            emailConfirmation => emailConfirmation.Id == emailConfirmationId,
+            emailConfirmation => new EmailConfirmationReadModel(
+                emailConfirmation.Id,
+                emailConfirmation.ExpiresAt,
+                emailConfirmation.ConfirmedAt),
             cancellationToken);
 }
