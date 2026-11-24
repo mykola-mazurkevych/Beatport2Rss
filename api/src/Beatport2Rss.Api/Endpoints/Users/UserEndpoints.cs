@@ -81,8 +81,9 @@ internal static class UserEndpoints
 
             groupBuilder
                 .MapPut("/{id:guid}/activation", ActivateUserEndpointHandler.Handle)
+                .RequireAuthorization(policy => policy.RequireRole("admin"))
                 .WithName(UserEndpointNames.Activate)
-                .WithDescription("Activate another user by ID. Only the configured administrator can do this, regardless of email confirmation delivery settings. This only changes account status and does not verify the user's email address.")
+                .WithDescription("Activate another user by ID. Only an administrator can do this, regardless of email confirmation delivery settings. This only changes account status and does not verify the user's email address.")
                 .WithSummary("Activate User")
                 .Produces(StatusCodes.Status204NoContent)
                 .Produces<ProblemDetails>(StatusCodes.Status400BadRequest, MediaTypeNames.Application.Json)

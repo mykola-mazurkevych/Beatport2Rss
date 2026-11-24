@@ -53,7 +53,6 @@ public sealed class EmailConfirmation :
         if (ConfirmedAt is null)
         {
             ConfirmedAt = now;
-            user.UpdateStatus(isActive: true);
         }
 
         return true;

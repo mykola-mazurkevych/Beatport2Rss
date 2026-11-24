@@ -25,6 +25,8 @@ using Microsoft.Extensions.Options;
 using JasperFx;
 using JasperFx.CodeGeneration.Model;
 
+using Mediator;
+
 using Moq;
 
 using Npgsql;
@@ -72,6 +74,7 @@ public sealed class EmailConfirmationRepositoryTests
                 .ConfigureLogging(logging => logging.SetMinimumLevel(LogLevel.Warning))
                 .ConfigureServices(services =>
                 {
+                    services.AddApplication();
                     services.AddDbContext<ApiDbContext>(options => options.UseNpgsql(connection.ConnectionString));
                     services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking());
                     services.AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Users);
@@ -99,6 +102,7 @@ public sealed class EmailConfirmationRepositoryTests
                         options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
                         options.LocalQueueFor<CreateEmailConfirmationCommand>().Sequential().UseDurableInbox();
                         options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmed>().Sequential().UseDurableInbox();
                         options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
                     });
                 })
@@ -120,6 +124,30 @@ public sealed class EmailConfirmationRepositoryTests
             var confirmation = await db.EmailConfirmations.SingleAsync(cancellationToken);
             Assert.Equal(confirmation.Id, deliveredId);
             Assert.NotEqual(message.Id, confirmation.Id.Value);
+
+            await using (var scope = host.Services.CreateAsyncScope())
+            {
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                var result = await mediator.Send(new ConfirmEmailCommand(confirmation.Id, true), cancellationToken);
+                Assert.True(result.IsSuccess);
+            }
+
+            var deadline = DateTimeOffset.UtcNow.AddSeconds(30);
+            UserStatus status;
+            do
+            {
+                status = (await db.Users.AsNoTracking().SingleAsync(cancellationToken)).Status;
+                if (status == UserStatus.Active)
+                {
+                    break;
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(100), cancellationToken);
+            }
+            while (DateTimeOffset.UtcNow < deadline);
+            Assert.Equal(UserStatus.Active, status);
+            db.ChangeTracker.Clear();
+            Assert.NotNull((await db.EmailConfirmations.SingleAsync(cancellationToken)).ConfirmedAt);
 
             await using (var scope = host.Services.CreateAsyncScope())
             {
@@ -227,7 +255,7 @@ public sealed class EmailConfirmationRepositoryTests
     }
 
     [Fact(Skip = "Set EMAIL_CONFIRMATION_TEST_POSTGRES to run against PostgreSQL.", SkipUnless = nameof(HasPostgres))]
-    public async Task ConfirmAsync_ConcurrentCallsAndReplay_AreIdempotent()
+    public async Task Activation_RequiresPendingStatusAndExactEmail()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
         var connection = new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable(ConnectionVariable))
@@ -243,7 +271,7 @@ public sealed class EmailConfirmationRepositoryTests
         {
             await CreateEmailConfirmationsViewAsync(db, cancellationToken);
             var user = User.Create(UserId.Create(Guid.NewGuid()), IssuedAt, EmailAddress.Create("user@example.test"),
-                PasswordHash.Create("test-hash"), null, null, UserStatus.Inactive, null);
+                PasswordHash.Create("test-hash"), null, null, UserStatus.Pending, null);
             var id = EmailConfirmationId.Create(Guid.NewGuid());
             var confirmation = EmailConfirmation.Create(
                 id, user.CreatedAt, user.Id, user.EmailAddress, IssuedAt.AddHours(24));
@@ -252,7 +280,7 @@ public sealed class EmailConfirmationRepositoryTests
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
 
-            var commandRepository = new EmailConfirmationCommandRepository(db);
+            var userRepository = new UserCommandRepository(db.Users, db);
             var queryRepository = new EmailConfirmationQueryRepository(db.EmailConfirmationQueryModels.AsNoTracking());
             var readModel = await queryRepository.FindAsync(id, cancellationToken);
             Assert.NotNull(readModel);
@@ -261,48 +289,68 @@ public sealed class EmailConfirmationRepositoryTests
             Assert.Equal(confirmation.EmailAddress.Value, readModel.EmailAddress.Value);
             Assert.Equal(confirmation.ExpiresAt, readModel.ExpiresAt);
             Assert.Null(readModel.ConfirmedAt);
-            Assert.False(await commandRepository.ConfirmAsync(id, new FixedClock(confirmation.ExpiresAt), cancellationToken));
-            db.ChangeTracker.Clear();
-
-            var firstTime = new FixedClock(IssuedAt.AddHours(1));
-            var secondTime = new FixedClock(IssuedAt.AddHours(2));
-            await using var parallelDb = new ApiDbContext(options);
-            var parallelRepository = new EmailConfirmationCommandRepository(parallelDb);
-            var outcomes = await Task.WhenAll(commandRepository.ConfirmAsync(id, firstTime, cancellationToken),
-                parallelRepository.ConfirmAsync(id, secondTime, cancellationToken));
-            Assert.All(outcomes, Assert.True);
-
-            db.ChangeTracker.Clear();
-            var persisted = await db.Users.SingleAsync(cancellationToken);
-            Assert.Equal(UserStatus.Active, persisted.Status);
-            var confirmedAt = (await queryRepository.FindAsync(id, cancellationToken))!.ConfirmedAt;
-            Assert.Contains(confirmedAt, new DateTimeOffset?[] { firstTime.UtcNow, secondTime.UtcNow });
-
-            persisted.UpdateStatus(isActive: false);
-            await db.SaveChangesAsync(cancellationToken);
-            db.ChangeTracker.Clear();
-            Assert.True(await commandRepository.ConfirmAsync(id, new FixedClock(confirmation.ExpiresAt.AddHours(1)), cancellationToken));
-            Assert.Equal(confirmedAt, (await queryRepository.FindAsync(id, cancellationToken))!.ConfirmedAt);
-            Assert.Equal(UserStatus.Inactive, (await db.Users.SingleAsync(cancellationToken)).Status);
-
             var changedUser = await db.Users.SingleAsync(cancellationToken);
             changedUser.UpdateEmailAddress(EmailAddress.Create("USER@example.test"));
             db.Entry(changedUser).Property(value => value.EmailAddress).IsModified = true;
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
-            Assert.Null(await queryRepository.FindAsync(id, cancellationToken));
+            Assert.NotNull(await queryRepository.FindAsync(id, cancellationToken));
+            Assert.False(await userRepository.ActivatePendingAsync(user.Id, confirmation.EmailAddress, cancellationToken));
 
             changedUser = await db.Users.SingleAsync(cancellationToken);
-            changedUser.UpdateEmailAddress(EmailAddress.Create("new@example.test"));
+            changedUser.UpdateEmailAddress(confirmation.EmailAddress);
+            db.Entry(changedUser).Property(value => value.EmailAddress).IsModified = true;
             await db.SaveChangesAsync(cancellationToken);
             db.ChangeTracker.Clear();
-            Assert.Null(await queryRepository.FindAsync(id, cancellationToken));
-            Assert.False(await commandRepository.ConfirmAsync(id, firstTime, cancellationToken));
+            Assert.True(await userRepository.ActivatePendingAsync(user.Id, confirmation.EmailAddress, cancellationToken));
+            Assert.False(await userRepository.ActivatePendingAsync(user.Id, confirmation.EmailAddress, cancellationToken));
+
+            changedUser = await db.Users.SingleAsync(cancellationToken);
+            Assert.Equal(UserStatus.Active, changedUser.Status);
+            changedUser.UpdateStatus(isActive: false);
+            await db.SaveChangesAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+            Assert.False(await userRepository.ActivatePendingAsync(user.Id, confirmation.EmailAddress, cancellationToken));
+            Assert.Equal(UserStatus.Inactive, (await db.Users.SingleAsync(cancellationToken)).Status);
         }
         finally
         {
             await db.Database.EnsureDeletedAsync(CancellationToken.None);
         }
+    }
+
+    [Fact]
+    public async Task EmailConfirmedDispatchesStatusCommand()
+    {
+        var userId = UserId.Create(Guid.NewGuid());
+        var emailAddress = EmailAddress.Create("user@example.test");
+        var activated = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var users = new Mock<IUserCommandRepository>(MockBehavior.Strict);
+        users.Setup(repository => repository.ActivatePendingAsync(userId, emailAddress, It.IsAny<CancellationToken>()))
+            .Callback(() => activated.TrySetResult())
+            .ReturnsAsync(true);
+        using var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(services =>
+            {
+                services.AddApplication();
+                services.AddSingleton(users.Object);
+                services.AddSingleton(Mock.Of<IUnitOfWork>());
+                services.AddWolverine(options =>
+                {
+                    options.ServiceLocationPolicy = ServiceLocationPolicy.AllowedButWarn;
+                    options.Discovery.IncludeAssembly(typeof(ApiApplication).Assembly);
+                    options.LocalQueueFor<EmailConfirmed>().Sequential();
+                });
+            })
+            .Build();
+        var cancellationToken = TestContext.Current.CancellationToken;
+        await host.StartAsync(cancellationToken);
+
+        var bus = host.Services.GetRequiredService<IMessageBus>();
+        await bus.PublishAsync(new EmailConfirmed(Guid.NewGuid(), DateTimeOffset.UtcNow, userId.Value, emailAddress.Value));
+        await activated.Task.WaitAsync(TimeSpan.FromSeconds(10), cancellationToken);
+
+        await host.StopAsync(cancellationToken);
     }
 
     private static async Task CreateEmailConfirmationsViewAsync(ApiDbContext db, CancellationToken cancellationToken)

@@ -101,6 +101,7 @@ public static class ServiceCollectionExtensions
                         options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
                         options.LocalQueueFor<CreateEmailConfirmationCommand>().Sequential().UseDurableInbox();
                         options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmed>().Sequential().UseDurableInbox();
                         options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
                         options.OnException<PermanentConfirmationEmailException>().MoveToErrorQueue();
                     },
@@ -232,8 +233,6 @@ public static class ServiceCollectionExtensions
                 .Bind(section)
                 .Validate(options => options.Lifetime > TimeSpan.Zero && options.Lifetime <= TimeSpan.FromDays(365),
                     "EmailConfirmation:Lifetime must be positive and no longer than 365 days.")
-                .Validate(options => options.AdministratorUserId != Guid.Empty,
-                    "EmailConfirmation:AdministratorUserId must not be the empty GUID.")
                 .ValidateOnStart();
 
             services.AddOptions<DeliveryConfirmationOptions>()

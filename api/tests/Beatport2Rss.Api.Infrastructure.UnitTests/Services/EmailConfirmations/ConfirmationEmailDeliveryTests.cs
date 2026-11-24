@@ -112,6 +112,8 @@ public sealed class ConfirmationEmailDeliveryTests
         var restoredEvent = JsonSerializer.Deserialize<EmailConfirmationCreated>(JsonSerializer.Serialize(created));
         Assert.NotNull(restoredEvent);
         Assert.Equal(identifier, restoredEvent.EmailConfirmationId);
+        var confirmed = new EmailConfirmed(Guid.NewGuid(), DateTimeOffset.UtcNow, identifier, "user@example.test");
+        Assert.Equal(confirmed, JsonSerializer.Deserialize<EmailConfirmed>(JsonSerializer.Serialize(confirmed)));
     }
 
     [Theory]

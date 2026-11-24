@@ -6,5 +6,4 @@ public sealed class EmailConfirmationOptions
 
     public bool Enabled { get; set; }
     public TimeSpan Lifetime { get; set; } = TimeSpan.FromHours(24);
-    public Guid? AdministratorUserId { get; set; }
 }
