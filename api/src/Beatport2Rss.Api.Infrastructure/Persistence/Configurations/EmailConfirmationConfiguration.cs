@@ -18,10 +18,10 @@ internal sealed class EmailConfirmationConfiguration :
 
         builder.Property(emailConfirmation => emailConfirmation.Id)
             .IsRequired();
-        
+
         builder.Property(emailConfirmation => emailConfirmation.CreatedAt)
             .IsRequired();
-        
+
         builder.Property(emailConfirmation => emailConfirmation.UserId)
             .IsRequired();
 

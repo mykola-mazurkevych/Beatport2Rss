@@ -1,7 +1,7 @@
-using Beatport2Rss.Common.Domain.Interfaces;
-using Beatport2Rss.Common.Domain.Users;
 using Beatport2Rss.Api.Domain.Users;
 using Beatport2Rss.Common.Domain.Common;
+using Beatport2Rss.Common.Domain.Interfaces;
+using Beatport2Rss.Common.Domain.Users;
 
 namespace Beatport2Rss.Api.Domain.EmailConfirmations;
 
@@ -17,9 +17,8 @@ public sealed class EmailConfirmation :
     public DateTimeOffset CreatedAt { get; private set; }
 
     public UserId UserId { get; private set; }
-
     public EmailAddress EmailAddress { get; private set; }
-    
+
     public DateTimeOffset ExpiresAt { get; private set; }
     public DateTimeOffset? ConfirmedAt { get; private set; }
 
