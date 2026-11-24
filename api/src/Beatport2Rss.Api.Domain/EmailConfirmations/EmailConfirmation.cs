@@ -1,6 +1,7 @@
+using Beatport2Rss.Api.Domain.Users;
+using Beatport2Rss.Common.Domain.Common;
 using Beatport2Rss.Common.Domain.Interfaces;
 using Beatport2Rss.Common.Domain.Users;
-using Beatport2Rss.Common.Domain.Common;
 
 namespace Beatport2Rss.Api.Domain.EmailConfirmations;
 
@@ -36,6 +37,23 @@ public sealed class EmailConfirmation :
             ExpiresAt = expiresAt,
         };
 
-    public void Confirm(DateTimeOffset confirmedAt) =>
-        ConfirmedAt = confirmedAt;
+    public bool AppliesTo(User user) =>
+        UserId == user.Id && string.Equals(EmailAddress.Value, user.EmailAddress.Value, StringComparison.Ordinal);
+
+    public bool IsReadableAt(DateTimeOffset now) => ConfirmedAt is not null || now < ExpiresAt;
+
+    public bool TryConfirm(User user, DateTimeOffset now)
+    {
+        if (!AppliesTo(user) || !IsReadableAt(now))
+        {
+            return false;
+        }
+
+        if (ConfirmedAt is null)
+        {
+            ConfirmedAt = now;
+        }
+
+        return true;
+    }
 }

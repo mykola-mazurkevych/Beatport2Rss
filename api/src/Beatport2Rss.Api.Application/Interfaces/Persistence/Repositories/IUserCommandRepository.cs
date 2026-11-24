@@ -19,6 +19,19 @@ public interface IUserCommandRepository
         UserId userId,
         CancellationToken cancellationToken = default);
 
+    Task<User?> FindAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<User?> FindForUpdateAsync(
+        UserId userId,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ActivatePendingAsync(
+        UserId userId,
+        EmailAddress emailAddress,
+        CancellationToken cancellationToken = default);
+
     Task AddAsync(
         User user,
         CancellationToken cancellationToken = default);

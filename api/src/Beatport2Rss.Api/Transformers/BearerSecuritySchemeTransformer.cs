@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Beatport2Rss.Api.Endpoints.EmailConfirmations;
+
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
@@ -31,9 +33,9 @@ internal sealed class BearerSecuritySchemeTransformer(
 
         var securityRequirement = new OpenApiSecurityRequirement { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] };
 
-        var operations = document.Paths.Values
-            .Where(pathItem => pathItem.Operations is not null)
-            .SelectMany(pathItem => pathItem.Operations!.Values);
+        var operations = document.Paths
+            .Where(path => path.Key != EmailConfirmationEndpoints.ResourceRoute && path.Value.Operations is not null)
+            .SelectMany(path => path.Value.Operations!.Values);
         foreach (var operation in operations)
         {
             operation.Security ??= [];

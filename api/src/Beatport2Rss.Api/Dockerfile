@@ -18,6 +18,7 @@ COPY ["api/src/Beatport2Rss.Api.Jobs/Beatport2Rss.Api.Jobs.csproj", "api/src/Bea
 COPY ["common/src/Beatport2Rss.Common.Beatport/Beatport2Rss.Common.Beatport.csproj", "common/src/Beatport2Rss.Common.Beatport/"]
 COPY ["common/src/Beatport2Rss.Common.BeatportTokenProvider/Beatport2Rss.Common.BeatportTokenProvider.csproj", "common/src/Beatport2Rss.Common.BeatportTokenProvider/"]
 COPY ["common/src/Beatport2Rss.Common.Domain/Beatport2Rss.Common.Domain.csproj", "common/src/Beatport2Rss.Common.Domain/"]
+COPY ["common/src/Beatport2Rss.Common.Email/Beatport2Rss.Common.Email.csproj", "common/src/Beatport2Rss.Common.Email/"]
 COPY ["common/src/Beatport2Rss.Common.EntityFrameworkCore/Beatport2Rss.Common.EntityFrameworkCore.csproj", "common/src/Beatport2Rss.Common.EntityFrameworkCore/"]
 COPY ["common/src/Beatport2Rss.Common.FluentResults/Beatport2Rss.Common.FluentResults.csproj", "common/src/Beatport2Rss.Common.FluentResults/"]
 COPY ["common/src/Beatport2Rss.Common.IntegrationEvents/Beatport2Rss.Common.IntegrationEvents.csproj", "common/src/Beatport2Rss.Common.IntegrationEvents/"]

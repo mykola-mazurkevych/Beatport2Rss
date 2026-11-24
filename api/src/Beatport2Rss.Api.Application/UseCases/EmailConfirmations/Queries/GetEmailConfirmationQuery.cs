@@ -34,3 +34,12 @@ internal sealed class GetEmailConfirmationQueryHandler(
             IsConfirmed: emailConfirmation.ConfirmedAt.HasValue);
     }
 }
+
+public static class EmailConfirmationErrors
+{
+    public const string InvalidLink = "This confirmation link is invalid or has expired.";
+    public const string ConfirmationRequired = "The confirmed field must be true.";
+
+    internal static Result InvalidLinkResult() => Result.Validation(InvalidLink, []);
+    internal static Result ConfirmationRequiredResult() => Result.Validation(ConfirmationRequired, []);
+}

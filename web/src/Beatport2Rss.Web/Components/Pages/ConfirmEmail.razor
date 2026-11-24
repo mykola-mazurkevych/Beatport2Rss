@@ -1,0 +1,118 @@
+@page "/confirm-email"
+@rendermode InteractiveServer
+@using Beatport2Rss.Web.EmailConfirmations
+@inject EmailConfirmationClient Client
+
+<PageTitle>Confirm your email – Beatport2Rss</PageTitle>
+
+<main class="confirmation-shell">
+    <article class="confirmation-card" aria-labelledby="confirmation-heading">
+        <p class="brand">Beatport2Rss</p>
+        <h1 id="confirmation-heading">Confirm your email</h1>
+
+        <div role="status" aria-atomic="true">
+            @switch (_state)
+            {
+                case ConfirmationState.Loading:
+                    <p>Checking your confirmation link…</p>
+                    break;
+                case ConfirmationState.Invalid:
+                    <p>This confirmation link is missing, invalid, or expired. Check that you opened the full link from your email.</p>
+                    break;
+                case ConfirmationState.Ready:
+                    <p>Select <strong>Confirm email</strong> to verify your email address.</p>
+                    break;
+                case ConfirmationState.Submitting:
+                    <p>Confirming your email…</p>
+                    break;
+                case ConfirmationState.Confirmed:
+                    <p>Your email address is confirmed. You can close this page.</p>
+                    break;
+                case ConfirmationState.CheckAfterSubmit:
+                    <p>We couldn’t tell whether confirmation succeeded. Check the link status before trying again.</p>
+                    break;
+                case ConfirmationState.Unavailable:
+                    <p>We couldn’t check your confirmation link right now. Please try again.</p>
+                    break;
+            }
+        </div>
+
+        @if (_state is ConfirmationState.Ready or ConfirmationState.Submitting)
+        {
+            <button type="button" disabled="@(_state == ConfirmationState.Submitting)" @onclick="ConfirmAsync">Confirm email</button>
+        }
+        else if (_state is ConfirmationState.Unavailable or ConfirmationState.CheckAfterSubmit)
+        {
+            <button type="button" @onclick="CheckAsync">@(_state == ConfirmationState.CheckAfterSubmit ? "Check status" : "Retry")</button>
+        }
+
+        <noscript><p>JavaScript is required to check and confirm your email on this page.</p></noscript>
+    </article>
+</main>
+
+@code {
+    [SupplyParameterFromQuery(Name = "token")]
+    private string[]? Tokens { get; set; }
+
+    private string? _token;
+    private ConfirmationState _state = ConfirmationState.Loading;
+    private int _linkVersion;
+
+    protected override Task OnParametersSetAsync()
+    {
+        var token = Tokens is [var candidate] && IsValidToken(candidate) ? candidate : null;
+        if (token is null)
+        {
+            _linkVersion++;
+            _token = null;
+            _state = ConfirmationState.Invalid;
+            return Task.CompletedTask;
+        }
+
+        // The prerendered document contains no secret and does not fetch link state twice.
+        if (!RendererInfo.IsInteractive || string.Equals(token, _token, StringComparison.Ordinal))
+        {
+            return Task.CompletedTask;
+        }
+
+        _linkVersion++;
+        _token = token;
+        _state = ConfirmationState.Loading;
+        return CheckAsync();
+    }
+
+    private static bool IsValidToken(string token) =>
+        token.Length is > 0 and <= 512 && token.All(static value => char.IsAsciiLetterOrDigit(value) || value is '-' or '_');
+
+    private async Task CheckAsync()
+    {
+        if (_token is not { } token || _state == ConfirmationState.Submitting)
+        {
+            return;
+        }
+
+        var version = _linkVersion;
+        _state = ConfirmationState.Loading;
+        var result = await Client.GetStateAsync(token);
+        if (version == _linkVersion)
+        {
+            _state = result;
+        }
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (_state != ConfirmationState.Ready || _token is not { } token)
+        {
+            return;
+        }
+
+        var version = _linkVersion;
+        _state = ConfirmationState.Submitting;
+        var result = await Client.ConfirmAsync(token);
+        if (version == _linkVersion)
+        {
+            _state = result == ConfirmationState.Unavailable ? ConfirmationState.CheckAfterSubmit : result;
+        }
+    }
+}

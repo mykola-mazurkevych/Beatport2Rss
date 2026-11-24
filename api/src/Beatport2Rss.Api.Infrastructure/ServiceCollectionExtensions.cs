@@ -4,11 +4,14 @@ using System.Text;
 using System.Text.Json;
 
 using Beatport2Rss.Api.Application;
+using Beatport2Rss.Api.Application.Interfaces.Persistence;
 using Beatport2Rss.Api.Application.Interfaces.Persistence.Repositories;
 using Beatport2Rss.Api.Application.Interfaces.Querying.Paging;
 using Beatport2Rss.Api.Application.Interfaces.Services.Feeds;
 using Beatport2Rss.Api.Application.Interfaces.Services.Misc;
 using Beatport2Rss.Api.Application.Interfaces.Services.Security;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations;
+using Beatport2Rss.Api.Application.UseCases.EmailConfirmations.Commands;
 using Beatport2Rss.Api.Domain.Countries;
 using Beatport2Rss.Api.Infrastructure.Constants;
 using Beatport2Rss.Api.Infrastructure.Extensions;
@@ -17,14 +20,17 @@ using Beatport2Rss.Api.Infrastructure.Persistence;
 using Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 using Beatport2Rss.Api.Infrastructure.Persistence.Seeders;
 using Beatport2Rss.Api.Infrastructure.Services.Feeds;
+using Beatport2Rss.Api.Infrastructure.Services.EmailConfirmations;
 using Beatport2Rss.Api.Infrastructure.Services.Health;
 using Beatport2Rss.Api.Infrastructure.Services.Misc;
 using Beatport2Rss.Api.Infrastructure.Services.Querying.Paging;
 using Beatport2Rss.Api.Infrastructure.Services.Security;
 using Beatport2Rss.Common.Beatport;
 using Beatport2Rss.Common.BeatportTokenProvider;
+using Beatport2Rss.Common.Email;
 using Beatport2Rss.Common.EntityFrameworkCore.Extensions;
 using Beatport2Rss.Common.Grpc;
+using Beatport2Rss.Common.IntegrationEvents.EmailConfirmations;
 using Beatport2Rss.Common.IntegrationEvents.Feeds;
 using Beatport2Rss.Common.IntegrationEvents.Subscriptions;
 using Beatport2Rss.Common.IntegrationEvents.Tags;
@@ -45,6 +51,11 @@ using Microsoft.IdentityModel.Tokens;
 
 using Slugify;
 
+using Wolverine.ErrorHandling;
+
+using ApplicationConfirmationOptions = Beatport2Rss.Api.Application.UseCases.EmailConfirmations.EmailConfirmationOptions;
+using DeliveryConfirmationOptions = Beatport2Rss.Api.Infrastructure.Options.EmailConfirmationOptions;
+
 namespace Beatport2Rss.Api.Infrastructure;
 
 public static class ServiceCollectionExtensions
@@ -55,6 +66,11 @@ public static class ServiceCollectionExtensions
             services
                 .ConfigureHttpJsonOptions(static options => options.SerializerOptions.Configure())
                 .ConfigureOptions(configuration)
+                .AddConfirmationEmailOptions(configuration)
+                .AddEmailClient(configuration)
+                .AddTransient<IConfirmationEmailSender>(provider =>
+                    ActivatorUtilities.CreateInstance<ResendConfirmationEmail>(provider))
+                .AddTransient<Func<IConfirmationEmailSender>>(provider => provider.GetRequiredService<IConfirmationEmailSender>)
                 .AddBeatportServices(configuration)
                 .AddHealthServices()
                 .AddHttpClient()
@@ -66,20 +82,30 @@ public static class ServiceCollectionExtensions
                 .AddPersistence(configuration)
                 .AddWolverine<ApiDbContext, ApiApplication>(
                     configuration,
-                    configurePublisher: options => options
-                        .Publishes<FeedCreated>()
-                        .Publishes<FeedDeleted>()
-                        .Publishes<FeedSubscriptionCreated>()
-                        .Publishes<FeedSubscriptionDeleted>()
-                        .Publishes<FeedUpdated>()
-                        .Publishes<SubscriptionRequested>()
-                        .Publishes<SubscriptionTagCreated>()
-                        .Publishes<SubscriptionTagDeleted>()
-                        .Publishes<TagCreated>()
-                        .Publishes<TagDeleted>()
-                        .Publishes<TagUpdated>()
-                        .Publishes<UserCreated>()
-                        .Publishes<UserDeleted>(),
+                    configurePublisher: options =>
+                    {
+                        options
+                            .Publishes<FeedCreated>()
+                            .Publishes<FeedDeleted>()
+                            .Publishes<FeedSubscriptionCreated>()
+                            .Publishes<FeedSubscriptionDeleted>()
+                            .Publishes<FeedUpdated>()
+                            .Publishes<SubscriptionRequested>()
+                            .Publishes<SubscriptionTagCreated>()
+                            .Publishes<SubscriptionTagDeleted>()
+                            .Publishes<TagCreated>()
+                            .Publishes<TagDeleted>()
+                            .Publishes<TagUpdated>()
+                            .Publishes<UserCreated>()
+                            .Publishes<UserDeleted>();
+                        options.LocalQueue("user-created-confirmation").Sequential().UseDurableInbox();
+                        options.PublishMessage<UserCreated>().ToLocalQueue("user-created-confirmation").UseDurableInbox();
+                        options.LocalQueueFor<CreateEmailConfirmationCommand>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmationCreated>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<EmailConfirmed>().Sequential().UseDurableInbox();
+                        options.LocalQueueFor<SendConfirmationEmailCommand>().Sequential().UseDurableInbox();
+                        options.OnException<PermanentConfirmationEmailException>().MoveToErrorQueue();
+                    },
                     configureListener: listener => listener
                         .ListensTo<SubscriptionCreated>())
                 .AddSecurityServices();
@@ -164,6 +190,7 @@ public static class ServiceCollectionExtensions
         private IServiceCollection AddPersistence(IConfiguration configuration) =>
             services
                 .AddDbContext(configuration)
+                .AddTransient<ITransactionFactory, TransactionFactory>()
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().EmailConfirmationQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().FeedQueryModels.AsNoTracking())
                 .AddTransient(provider => provider.GetRequiredService<ApiDbContext>().Feeds)
@@ -186,6 +213,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
                 .AddTransient<ITagQueryRepository, TagQueryRepository>()
                 .AddTransient<IUserCommandRepository, UserCommandRepository>()
+                .AddTransient<IEmailConfirmationCommandRepository, EmailConfirmationCommandRepository>()
                 .AddTransient<IUserQueryRepository, UserQueryRepository>();
 
         private IServiceCollection AddSecurityServices() =>
@@ -199,5 +227,33 @@ public static class ServiceCollectionExtensions
                 .Configure<JsonSerializerOptions>(static options => options.Configure())
                 .Configure<JwtOptions>(options => configuration.GetSection(nameof(JwtOptions)).Bind(options))
                 .Configure<RefreshTokenOptions>(options => configuration.GetSection(nameof(RefreshTokenOptions)).Bind(options));
+
+        private IServiceCollection AddConfirmationEmailOptions(IConfiguration configuration)
+        {
+            var section = configuration.GetSection(ApplicationConfirmationOptions.SectionName);
+            services.AddOptions<ApplicationConfirmationOptions>()
+                .Bind(section)
+                .Validate(options => options.Lifetime > TimeSpan.Zero && options.Lifetime <= TimeSpan.FromDays(365),
+                    "EmailConfirmation:Lifetime must be positive and no longer than 365 days.")
+                .ValidateOnStart();
+
+            services.AddOptions<DeliveryConfirmationOptions>()
+                .Bind(section)
+                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(configuration["ResendOptions:ApiToken"]),
+                    "ResendOptions:ApiToken is required when confirmation emails are enabled.")
+                .Validate(options => !options.Enabled || !string.IsNullOrWhiteSpace(options.TemplateId),
+                    "EmailConfirmation:TemplateId is required when confirmation emails are enabled.")
+                .Validate(options => !options.Enabled ||
+                    (options.PublicWebBaseUrl is { IsAbsoluteUri: true } uri &&
+                     uri.Scheme is "http" or "https" &&
+                     uri.Host.Length > 0 &&
+                     uri.UserInfo.Length == 0 &&
+                     uri.Query.Length == 0 &&
+                     uri.Fragment.Length == 0),
+                    "EmailConfirmation:PublicWebBaseUrl must be an absolute HTTP(S) URL without credentials, query, or fragment.")
+                .ValidateOnStart();
+
+            return services;
+        }
     }
 }

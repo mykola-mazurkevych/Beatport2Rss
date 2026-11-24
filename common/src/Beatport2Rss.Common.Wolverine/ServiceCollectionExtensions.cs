@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Wolverine;
+using Wolverine.EntityFrameworkCore;
 using Wolverine.RabbitMQ;
 
 namespace Beatport2Rss.Common.Wolverine;
@@ -35,8 +36,10 @@ public static class ServiceCollectionExtensions
                 if (configurePublisher is not null)
                 {
                     services
-                        .AddTransient<IIntegrationEventOutbox, WolverineIntegrationEventOutbox<TDbContext>>()
-                        .AddTransient<IUnitOfWork, WolverineUnitOfWork<TDbContext>>();
+                        .AddTransient<IIntegrationEventOutbox>(provider =>
+                            new WolverineIntegrationEventOutbox<TDbContext>(provider.GetRequiredService<IDbContextOutbox<TDbContext>>()))
+                        .AddTransient<IUnitOfWork>(provider =>
+                            new WolverineUnitOfWork<TDbContext>(provider.GetRequiredService<IDbContextOutbox<TDbContext>>()));
                     configurePublisher(options);
                 }
 

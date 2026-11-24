@@ -50,6 +50,4 @@ public readonly record struct EmailConfirmationId :
     public bool Equals(EmailConfirmationId other) => Value == other.Value;
     public override int GetHashCode() => Value.GetHashCode();
     public override string ToString() => Value.ToString();
-
-    
 }

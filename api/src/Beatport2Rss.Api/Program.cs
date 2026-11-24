@@ -12,6 +12,7 @@ using Beatport2Rss.Api.Endpoints.Tags;
 using Beatport2Rss.Api.Endpoints.Users;
 using Beatport2Rss.Api.Infrastructure;
 using Beatport2Rss.Api.Middlewares;
+using Beatport2Rss.Api.Middlewares.EmailConfirmations;
 using Beatport2Rss.Api.Transformers;
 using Beatport2Rss.Api.Jobs;
 
@@ -20,6 +21,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Request start/finish diagnostics include the raw path, which can contain a confirmation capability.
+builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.None);
 
 builder.Services
     .AddApplication()
@@ -63,6 +67,7 @@ if (app.Environment.IsDevelopment())
 
 app
     .UseExceptionHandler()
+    .UseMiddleware<EmailConfirmationPrivacyMiddleware>()
     .UseHttpsRedirection()
     .UseTraceIdMiddleware()
     .UseHealthCheckMiddleware();

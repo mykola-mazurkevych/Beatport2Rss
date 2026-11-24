@@ -8,10 +8,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Beatport2Rss.Api.Infrastructure.Persistence.Repositories;
 
-internal sealed class UserCommandRepository(DbSet<User> users) :
+internal sealed class UserCommandRepository(DbSet<User> users, ApiDbContext dbContext) :
     CommandRepository<User, UserId>(users),
     IUserCommandRepository
 {
+    public async Task<User?> FindForUpdateAsync(UserId userId, CancellationToken cancellationToken = default)
+    {
+        if (dbContext.Database.CurrentTransaction is null)
+        {
+            throw new InvalidOperationException("A transaction is required to lock a user.");
+        }
+
+        var users = await dbContext.Users
+            .FromSql($"""SELECT * FROM api."Users" WHERE "Id" = {userId.Value} FOR UPDATE""")
+            .ToListAsync(cancellationToken);
+        return users.SingleOrDefault();
+    }
+
+    public async Task<bool> ActivatePendingAsync(
+        UserId userId,
+        EmailAddress emailAddress,
+        CancellationToken cancellationToken = default) =>
+        await dbContext.Database.ExecuteSqlInterpolatedAsync(
+            $"""UPDATE api."Users" SET "Status" = {UserStatus.Active.ToString()} WHERE "Id" = {userId.Value} AND "Status" = {UserStatus.Pending.ToString()} AND "EmailAddress" COLLATE "C" = {emailAddress.Value} COLLATE "C" """,
+            cancellationToken) > 0;
+
     public Task<bool> ExistsAsync(
         EmailAddress emailAddress,
         CancellationToken cancellationToken = default) =>
