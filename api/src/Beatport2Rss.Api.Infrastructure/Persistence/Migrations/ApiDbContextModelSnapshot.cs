@@ -288,6 +288,24 @@ namespace Beatport2Rss.Api.Infrastructure.Persistence.Migrations
                     b.ToTable("Users", "api");
                 });
 
+            modelBuilder.Entity("Beatport2Rss.Api.Infrastructure.Persistence.QueryModels.EmailConfirmationQueryModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vwEmailConfirmations", "api");
+                });
+
             modelBuilder.Entity("Beatport2Rss.Api.Infrastructure.Persistence.QueryModels.FeedQueryModel", b =>
                 {
                     b.Property<Guid>("Id")

@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Beatport2Rss.Api;
 using Beatport2Rss.Api.Application;
 using Beatport2Rss.Api.Constants;
+using Beatport2Rss.Api.Endpoints.EmailConfirmations;
 using Beatport2Rss.Api.Endpoints.Feeds;
 using Beatport2Rss.Api.Endpoints.Rss;
 using Beatport2Rss.Api.Endpoints.Sessions;
@@ -73,12 +74,13 @@ var versionSet = app.NewApiVersionSet()
     .Build();
 
 app
+    .BuildEmailConfirmationEndpoints(versionSet)
     .BuildFeedEndpoints(versionSet)
+    .BuildRssFeedEndpoints()
     .BuildSessionEndpoints(versionSet)
     .BuildSubscriptionEndpoints(versionSet)
     .BuildTagEndpoints(versionSet)
-    .BuildUserEndpoints(versionSet)
-    .BuildRssFeedEndpoints();
+    .BuildUserEndpoints(versionSet);
 
 app.MapGet("", () => "Hello, Beatport2Rss!");
 

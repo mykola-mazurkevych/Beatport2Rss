@@ -29,7 +29,7 @@ internal sealed class ApiDbContext(DbContextOptions<ApiDbContext> options) :
     public DbSet<Tag> Tags => Set<Tag>();
     public DbSet<User> Users => Set<User>();
 
-
+    public DbSet<EmailConfirmationQueryModel> EmailConfirmationQueryModels => Set<EmailConfirmationQueryModel>();
     public DbSet<FeedQueryModel> FeedQueryModels => Set<FeedQueryModel>();
     public DbSet<SessionQueryModel> SessionQueryModels => Set<SessionQueryModel>();
     public DbSet<SubscriptionQueryModel> SubscriptionQueryModels => Set<SubscriptionQueryModel>();
