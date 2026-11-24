@@ -84,6 +84,7 @@ public static class ServiceCollectionExtensions
                 .AddTransient<IFeedCommandRepository, FeedCommandRepository>()
                 .AddTransient<IGenreCommandRepository, GenreCommandRepository>()
                 .AddTransient<IReleaseCommandRepository, ReleaseCommandRepository>()
+                .AddTransient<IReleaseQueryRepository, ReleaseQueryRepository>()
                 .AddTransient<IRssFeedDocumentQueryRepository, RssFeedDocumentQueryRepository>()
                 .AddTransient<ISubscriptionCommandRepository, SubscriptionCommandRepository>()
                 .AddTransient<ITagCommandRepository, TagCommandRepository>()
